@@ -12,14 +12,21 @@
 //    Sacred Geometry :: Organic Systems :: Breathing Interfaces
 // HEADY_BRAND:END
 
-const express = require("express");
-const cors = require("cors");
-const Docker = require("dockerode");
-const crypto = require("crypto");
-const path = require("path");
-const fs = require("fs");
-const { spawn } = require("child_process");
-const { EventEmitter } = require("events");
+import express from "express";
+import cors from "cors";
+import Docker from "dockerode";
+import crypto from "crypto";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from 'url';
+import { PythonShell } from 'python-shell';
+import apiRouter from "./src/routes/api.js"; // HeadyBuddy v1 API
+import widgetRouter from "./src/routes/widgetRoutes.js"; // HeadyBuddy Widget CDN
+import { spawn } from "child_process";
+import { EventEmitter } from "events";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const fsp = fs.promises;
 
@@ -263,6 +270,8 @@ app.use(
 );
 app.use(express.json({ limit: "2mb" }));
 app.use("/api", rateLimitApi);
+app.use("/api/v1", apiRouter); // Mount HeadyBuddy Brain
+app.use("/widget", widgetRouter); // Mount Widget CDN
 app.use(express.static("public"));
 
 function timingSafeEqualString(a, b) {
@@ -990,7 +999,6 @@ app.post(
     let errors = [];
     if (targetPath.endsWith('.py')) {
       try {
-        const PythonShell = require('python-shell').PythonShell;
         await PythonShell.runString(content, { mode: 'json' });
       } catch (e) {
         errors = [e.message || 'Syntax error'];

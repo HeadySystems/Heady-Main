@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HeadyBuddy Chat</title>
+  <style>
+    :root {
+      --phi: 1.618;
+      --bg: #ffffff;
+      --text: #1a1a1a;
+      --accent: #3b82f6;
+      --radius: 12px;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    header {
+      padding: 16px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .message {
+      max-width: 80%;
+      padding: 8px 12px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    .message.user {
+      align-self: flex-end;
+      background: var(--accent);
+      color: white;
+      border-bottom-right-radius: 2px;
+    }
+    .message.bot {
+      align-self: flex-start;
+      background: #f3f4f6;
+      color: var(--text);
+      border-bottom-left-radius: 2px;
+    }
+    .message.overwhelm {
+      background: #fff1f2;
+      border: 1px solid #fecdd3;
+      color: #9f1239;
+    }
+    #input-area {
+      padding: 16px;
+      border-top: 1px solid #eee;
+      display: flex;
+      gap: 8px;
+    }
+    input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      outline: none;
+      font-size: 14px;
+    }
+    input:focus {
+      border-color: var(--accent);
+    }
+    button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 0 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>HeadyBuddy</h1>
+    <span style="font-size: 12px; color: #666;">v1.0</span>
+  </header>
+  
+  <div id="messages">
+    <div class="message bot">
+      Hello. I see you. What is the one small stone we are moving today?
+    </div>
+  </div>
+
+  <div id="input-area">
+    <input type="text" id="chat-input" placeholder="Type a message..." autocomplete="off">
+    <button id="send-btn">Send</button>
+  </div>
+
+  <script>
+    const messagesEl = document.getElementById('messages');
+    const inputEl = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+
+    // API Configuration
+    const urlParams = new URLSearchParams(window.location.search);
+    const API_URL = '/api/v1/chat'; // Relative to host since we serve from backend
+    
+    function appendMessage(text, role, meta = {}) {
+      const div = document.createElement('div');
+      div.className = `message ${role} ${meta.mode === 'overwhelm' ? 'overwhelm' : ''}`;
+      // Basic markdown-ish support
+      div.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const text = inputEl.value.trim();
+      if (!text) return;
+
+      appendMessage(text, 'user');
+      inputEl.value = '';
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text })
+        });
+        
+        const json = await res.json();
+        if (json.ok) {
+          appendMessage(json.data.content, 'bot', json.data.metadata);
+        } else {
+          appendMessage("Error: " + json.error, 'bot');
+        }
+      } catch (e) {
+        appendMessage("Connection error.", 'bot');
+      }
+    }
+
+    sendBtn.onclick = sendMessage;
+    inputEl.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
+  </script>
+</body>
+</html>
