@@ -6,7 +6,7 @@
  * primitive management, and system introspection.
  */
 
-const { imagination } = require('./hc_imagination');
+const { imagination } = require('../hc_imagination');
 const express = require('express');
 const router = express.Router();
 
