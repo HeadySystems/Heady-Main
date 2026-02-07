@@ -180,7 +180,9 @@ function runPythonConductor(args) {
     const conductorPath = path.join(__dirname, "HeadyAcademy", "HeadyConductor.py");
     const pythonBin = process.env.HEADY_PYTHON_BIN || "python";
     
-    const proc = spawn(pythonBin, [conductorPath, ...args]);
+    const proc = spawn(pythonBin, [conductorPath, ...args], {
+      env: { ...process.env, PYTHONIOENCODING: "utf-8" }
+    });
     let stdout = "";
     let stderr = "";
 
