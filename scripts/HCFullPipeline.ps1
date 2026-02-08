@@ -25,7 +25,7 @@ Write-Host "`n🚀 INITIALIZING HCFullPipeline FOR: $Domain" -ForegroundColor Cy
 Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
 
 # STEP 1: Recon & Brand Check
-Write-Host "`n🔍 STEP 1: Running Recon & Brand Validation..." -ForegroundColor Yellow
+Write-Host "`n🔍 STEP 1: Running Recon and Brand Validation..." -ForegroundColor Yellow
 node "$ScriptDir\brand_headers.js" --check
 node "$ScriptDir\recon.js" --target $Domain
 

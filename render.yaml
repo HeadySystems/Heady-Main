@@ -17,7 +17,7 @@ services:
     name: heady-manager
     runtime: node
     buildCommand: npm install && npm run build --prefix frontend
-    startCommand: node backend/index.js
+    startCommand: node heady-manager.js
     envVars:
       - key: PORT
         value: "3300"
@@ -28,7 +28,7 @@ services:
       - key: HEADY_API_KEY
         fromSecret: HEADY_API_KEY
       - key: PYTHON_WORKER_PATH
-        value: "backend/python_worker"
+        value: "src/python_worker"
       - key: HEADY_VERSION
         value: "v1.0.0-optimized"
       - key: ADMIN_TOKEN
