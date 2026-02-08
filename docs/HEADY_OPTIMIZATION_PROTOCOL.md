@@ -1,3 +1,17 @@
+<!-- HEADY_BRAND:BEGIN -->
+<!-- HEADY SYSTEMS :: SACRED GEOMETRY -->
+<!-- FILE: docs/HEADY_OPTIMIZATION_PROTOCOL.md -->
+<!-- LAYER: docs -->
+<!--  -->
+<!--         _   _  _____    _    ____   __   __ -->
+<!--        | | | || ____|  / \  |  _ \ \ \ / / -->
+<!--        | |_| ||  _|   / _ \ | | | | \ V /  -->
+<!--        |  _  || |___ / ___ \| |_| |  | |   -->
+<!--        |_| |_||_____/_/   \_\____/   |_|   -->
+<!--  -->
+<!--    Sacred Geometry :: Organic Systems :: Breathing Interfaces -->
+<!-- HEADY_BRAND:END -->
+
 # HEADY OPTIMIZATION PROTOCOL: The System That Knows Itself
 
 **Role:** Principal AI Architect

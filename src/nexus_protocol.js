@@ -1,7 +1,7 @@
 // HEADY_BRAND:BEGIN
 // HEADY SYSTEMS :: SACRED GEOMETRY
 // FILE: src/nexus_protocol.js
-// LAYER: orchestration
+// LAYER: backend/src
 // 
 //         _   _  _____    _    ____   __   __
 //        | | | || ____|  / \  |  _ \ \ \ / /

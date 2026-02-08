@@ -1,3 +1,17 @@
+<!-- HEADY_BRAND:BEGIN -->
+<!-- HEADY SYSTEMS :: SACRED GEOMETRY -->
+<!-- FILE: docs/PROTOCOLS/HCFP_03_OVERWHELM_PROTOCOL.md -->
+<!-- LAYER: docs -->
+<!--  -->
+<!--         _   _  _____    _    ____   __   __ -->
+<!--        | | | || ____|  / \  |  _ \ \ \ / / -->
+<!--        | |_| ||  _|   / _ \ | | | | \ V /  -->
+<!--        |  _  || |___ / ___ \| |_| |  | |   -->
+<!--        |_| |_||_____/_/   \_\____/   |_|   -->
+<!--  -->
+<!--    Sacred Geometry :: Organic Systems :: Breathing Interfaces -->
+<!-- HEADY_BRAND:END -->
+
 # OVERWHELM PROTOCOL (10 MILLION TASKS)
 ## HCFullPipeline Protocol 03
 

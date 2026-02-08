@@ -1,7 +1,7 @@
 # HEADY_BRAND:BEGIN
 # HEADY SYSTEMS :: SACRED GEOMETRY
 # FILE: scripts/HCFullPipeline.ps1
-# LAYER: scripts
+# LAYER: root
 # 
 #         _   _  _____    _    ____   __   __
 #        | | | || ____|  / \  |  _ \ \ \ / /

@@ -1,3 +1,17 @@
+<!-- HEADY_BRAND:BEGIN -->
+<!-- HEADY SYSTEMS :: SACRED GEOMETRY -->
+<!-- FILE: docs/PROTOCOLS/FEATURE_DECOMPOSITION_CHECKLIST.md -->
+<!-- LAYER: docs -->
+<!--  -->
+<!--         _   _  _____    _    ____   __   __ -->
+<!--        | | | || ____|  / \  |  _ \ \ \ / / -->
+<!--        | |_| ||  _|   / _ \ | | | | \ V /  -->
+<!--        |  _  || |___ / ___ \| |_| |  | |   -->
+<!--        |_| |_||_____/_/   \_\____/   |_|   -->
+<!--  -->
+<!--    Sacred Geometry :: Organic Systems :: Breathing Interfaces -->
+<!-- HEADY_BRAND:END -->
+
 # HEADY FEATURE DECOMPOSITION & EXECUTION CHECKLIST
 
 **Purpose:** A step-by-step guide to applying the Heady Optimization Protocol to any new feature or system build.
