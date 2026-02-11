@@ -13,7 +13,9 @@ $CloudEndpoints = @{
     HeadySystems    = 'https://api.headysystems.com'
     HeadyConnection = 'https://api.headyconnection.org'
     Brain           = 'https://brain.headysystems.com'
-    BrainFallback   = '52.32.178.8'
+    BrainFallback1  = '52.32.178.8'
+    BrainFallback2  = 'https://brain-backup.headysystems.com'
+    BrainLocal      = 'http://localhost:8081'
 }
 
 $GateScore = 0
@@ -172,30 +174,73 @@ Write-Host '--------------------' -ForegroundColor Yellow
 if ($SkipTrain) {
     Write-Host '  Skipping auto-train (flag set)' -ForegroundColor Gray
 } else {
-    $trainEndpoint = "$($CloudEndpoints.Brain)/api/v1/train"
-    $useEndpoint = $trainEndpoint
-    try {
-        $null = Invoke-WebRequest -Uri $CloudEndpoints.Brain -Method HEAD -TimeoutSec 5 -UseBasicParsing -ErrorAction Stop
-    } catch {
-        Write-Host '  Brain domain unreachable, using fallback...' -ForegroundColor Yellow
-        $useEndpoint = "https://$($CloudEndpoints.BrainFallback)/api/v1/train"
+    # AGGRESSIVE BRAIN RECOVERY - 100% FUNCTIONALITY REQUIRED
+    $brainEndpoints = @(
+        $CloudEndpoints.Brain,
+        "https://$($CloudEndpoints.BrainFallback1)/api/v1/train",
+        $CloudEndpoints.BrainFallback2,
+        "$($CloudEndpoints.BrainLocal)/api/v1/train"
+    )
+    
+    $useEndpoint = $null
+    $brainHealthy = $false
+    
+    foreach ($endpoint in $brainEndpoints) {
+        try {
+            Write-Host "  Testing brain endpoint: $endpoint" -ForegroundColor Blue
+            $testUri = $endpoint -replace '/api/v1/train', ''
+            $null = Invoke-WebRequest -Uri $testUri -Method HEAD -TimeoutSec 3 -UseBasicParsing -ErrorAction Stop
+            $useEndpoint = $endpoint
+            $brainHealthy = $true
+            Write-Host "  [OK] Brain endpoint responsive: $endpoint" -ForegroundColor Green
+            break
+        } catch {
+            Write-Host "  [FAIL] $endpoint unreachable" -ForegroundColor Red
+        }
+    }
+    
+    if (-not $brainHealthy) {
+        Write-Host '  [EMERGENCY] All brain endpoints down - ATTEMPTING RECOVERY' -ForegroundColor Red
+        # Try to restart local brain service
+        try {
+            Write-Host '  Starting local brain service...' -ForegroundColor Yellow
+            Start-Process powershell -ArgumentList '-Command', 'cd c:\Users\erich\Heady; npm run brain:dev' -WindowStyle Hidden
+            Start-Sleep -Seconds 5
+            $null = Invoke-WebRequest -Uri $CloudEndpoints.BrainLocal -Method HEAD -TimeoutSec 3 -UseBasicParsing -ErrorAction Stop
+            $useEndpoint = "$($CloudEndpoints.BrainLocal)/api/v1/train"
+            $brainHealthy = $true
+            Write-Host '  [OK] Local brain service recovered' -ForegroundColor Green
+        } catch {
+            Write-Host '  [CRITICAL] BRAIN UNREACHABLE - MANUAL INTERVENTION REQUIRED' -ForegroundColor Red
+            Write-Host '  System will continue but functionality is DEGRADED' -ForegroundColor Red
+        }
     }
 
-    try {
-        $body = @{
-            mode = 'auto'
-            nonInteractive = $true
-            dataSources = @('codebase', 'registry', 'patterns', 'metrics', 'history')
-            objectives = @('optimal_planning', 'prediction_accuracy', 'build_optimization', 'pattern_recognition')
-        } | ConvertTo-Json
+    if ($brainHealthy -and $useEndpoint) {
+        try {
+            $body = @{
+                mode = 'auto'
+                nonInteractive = $true
+                dataSources = @('codebase', 'registry', 'patterns', 'metrics', 'history')
+                objectives = @('optimal_planning', 'prediction_accuracy', 'build_optimization', 'pattern_recognition')
+                emergencyMode = (-not $useEndpoint.StartsWith('https://brain.headysystems.com'))
+            } | ConvertTo-Json
 
-        $headers = @{}
-        if ($env:HEADY_API_KEY) { $headers['Authorization'] = "Bearer $env:HEADY_API_KEY" }
+            $headers = @{}
+            if ($env:HEADY_API_KEY) { $headers['Authorization'] = "Bearer $env:HEADY_API_KEY" }
 
-        $response = Invoke-RestMethod -Uri $useEndpoint -Method POST -Body $body -ContentType 'application/json' -Headers $headers -TimeoutSec 30 -ErrorAction Stop
-        Write-Host "  [OK] Training started: Job $($response.jobId)" -ForegroundColor Green
-    } catch {
-        Write-Host '  [WARN] Auto-train unavailable (non-blocking)' -ForegroundColor Yellow
+            $response = Invoke-RestMethod -Uri $useEndpoint -Method POST -Body $body -ContentType 'application/json' -Headers $headers -TimeoutSec 30 -ErrorAction Stop
+            Write-Host "  [OK] Training started: Job $($response.jobId)" -ForegroundColor Green
+            if ($useEndpoint -ne "$($CloudEndpoints.Brain)/api/v1/train") {
+                Write-Host "  [INFO] Running on fallback endpoint: $useEndpoint" -ForegroundColor Yellow
+            }
+        } catch {
+            Write-Host '  [CRITICAL] TRAINING FAILED - BRAIN FUNCTIONALITY COMPROMISED' -ForegroundColor Red
+            Write-Host '  Immediate action required to restore 100% functionality' -ForegroundColor Red
+        }
+    } else {
+        Write-Host '  [CRITICAL] BRAIN COMPLETELY UNAVAILABLE - SYSTEM DEGRADED' -ForegroundColor Red
+        Write-Host '  This violates 100% functionality requirement!' -ForegroundColor Red
     }
 }
 Write-Host ''

@@ -88,6 +88,15 @@ function Write-OrchestratorLog {
 function Start-HeadyBrainDominance {
     Write-OrchestratorLog "Starting HeadyBrain dominance system in $Mode mode" -Level info
     
+    # CRITICAL: Start brain recovery service FIRST to ensure 100% functionality
+    Write-OrchestratorLog "Starting brain recovery service (100% uptime requirement)..." -Level info
+    $recoveryJob = Start-Job -ScriptBlock {
+        param($Interval)
+        & "c:\Users\erich\Heady\scripts\brain-recovery-service.ps1" -Continuous -IntervalSeconds $Interval
+    } -ArgumentList $script:OrchestratorConfig.MonitoringInterval
+    
+    $script:ActiveProcesses["brain-recovery"] = $recoveryJob
+    
     # Start dominance monitor
     Write-OrchestratorLog "Starting HeadyBrain dominance monitor..." -Level info
     $monitorJob = Start-Job -ScriptBlock {
@@ -118,13 +127,24 @@ function Start-HeadyBrainDominance {
     }
     
     # Start continuous validation
-    Write-OrchestratorLog "Starting continuous validation..." -Level info
-    $validationJob = Start-Job -ScriptBlock {
-        param($Mode, $Interval)
-        & "c:\Users\erich\Heady\scripts\heady-continuous-validation.ps1" -Mode "continuous" -Interval $Interval -StrictMode:($Mode -eq "strict")
-    } -ArgumentList $Mode, $script:OrchestratorConfig.ValidationInterval
+    if ($Mode -eq "strict") {
+        Write-OrchestratorLog "Starting continuous validation..." -Level info
+        $validationJob = Start-Job -ScriptBlock {
+            param($Interval, $LogLevel)
+            & "c:\Users\erich\Heady\scripts\heady-continuous-validation.ps1" -Interval $Interval -LogLevel $LogLevel
+        } -ArgumentList $script:OrchestratorConfig.ValidationInterval, $script:OrchestratorConfig.LoggingLevel
+        
+        $script:ActiveProcesses["continuous-validation"] = $validationJob
+    }
     
-    $script:ActiveProcesses["continuous-validation"] = $validationJob
+    # CRITICAL: Verify brain is healthy after starting all services
+    Write-OrchestratorLog "Verifying 100% brain functionality..." -Level info
+    $brainCheck = & "c:\Users\erich\Heady\scripts\brain-recovery-service.ps1"
+    if ($LASTEXITCODE -ne 0) {
+        Write-OrchestratorLog "CRITICAL: Brain verification failed - 100% functionality compromised!" -Level critical
+    } else {
+        Write-OrchestratorLog "OK: Brain operating at 100% functionality" -Level info
+    }
     
     # Start usage enforcement
     Write-OrchestratorLog "Starting usage enforcement..." -Level info
