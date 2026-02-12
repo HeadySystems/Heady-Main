@@ -7,58 +7,6 @@
     "status": "ongoing",
     "timeline": [
       {
-        "id": "4d20ee2d-810d-42c1-97f9-78a9fae274a7",
-        "timestamp": "2026-02-12T00:12:59.929Z",
-        "type": "RESOURCE_CRITICAL",
-        "description": "Resources critical: RAM at 96%. pending.",
-        "refs": {
-          "resourceType": "RAM",
-          "percent": 96,
-          "mitigation": "pending"
-        },
-        "severity": "notable",
-        "source": "resource_manager"
-      },
-      {
-        "id": "101035f3-b6cd-431c-b14e-a3050ff4b927",
-        "timestamp": "2026-02-12T00:13:05.969Z",
-        "type": "RESOURCE_CRITICAL",
-        "description": "Resources critical: RAM at 94%. pending.",
-        "refs": {
-          "resourceType": "RAM",
-          "percent": 94,
-          "mitigation": "pending"
-        },
-        "severity": "notable",
-        "source": "resource_manager"
-      },
-      {
-        "id": "e0b9e084-ecde-4105-8a56-59821446cf7e",
-        "timestamp": "2026-02-12T00:13:11.836Z",
-        "type": "RESOURCE_CRITICAL",
-        "description": "Resources critical: RAM at 94%. pending.",
-        "refs": {
-          "resourceType": "RAM",
-          "percent": 94,
-          "mitigation": "pending"
-        },
-        "severity": "notable",
-        "source": "resource_manager"
-      },
-      {
-        "id": "b8e6131d-d8d3-4659-aea3-43579581b60c",
-        "timestamp": "2026-02-12T00:13:17.745Z",
-        "type": "RESOURCE_CRITICAL",
-        "description": "Resources critical: RAM at 94%. pending.",
-        "refs": {
-          "resourceType": "RAM",
-          "percent": 94,
-          "mitigation": "pending"
-        },
-        "severity": "notable",
-        "source": "resource_manager"
-      },
-      {
         "id": "abeea0fa-7905-465e-8843-d7139b60cdb6",
         "timestamp": "2026-02-12T00:13:23.743Z",
         "type": "RESOURCE_CRITICAL",
@@ -6505,12 +6453,64 @@
         },
         "severity": "notable",
         "source": "resource_manager"
+      },
+      {
+        "id": "d635cd1a-bc7c-4f26-aaef-b048dc7442a4",
+        "timestamp": "2026-02-12T01:21:04.952Z",
+        "type": "RESOURCE_CRITICAL",
+        "description": "Resources critical: RAM at 98%. pending.",
+        "refs": {
+          "resourceType": "RAM",
+          "percent": 98,
+          "mitigation": "pending"
+        },
+        "severity": "notable",
+        "source": "resource_manager"
+      },
+      {
+        "id": "36369903-eb32-4dcd-a250-a574e61b5bdb",
+        "timestamp": "2026-02-12T01:21:12.230Z",
+        "type": "RESOURCE_CRITICAL",
+        "description": "Resources critical: RAM at 98%. pending.",
+        "refs": {
+          "resourceType": "RAM",
+          "percent": 98,
+          "mitigation": "pending"
+        },
+        "severity": "notable",
+        "source": "resource_manager"
+      },
+      {
+        "id": "2a774c77-7018-4c6d-bbb3-281c8446fd5d",
+        "timestamp": "2026-02-12T01:21:19.665Z",
+        "type": "RESOURCE_CRITICAL",
+        "description": "Resources critical: RAM at 98%. pending.",
+        "refs": {
+          "resourceType": "RAM",
+          "percent": 98,
+          "mitigation": "pending"
+        },
+        "severity": "notable",
+        "source": "resource_manager"
+      },
+      {
+        "id": "f3469d4d-593a-49cd-9425-965e41b46a90",
+        "timestamp": "2026-02-12T01:21:26.534Z",
+        "type": "RESOURCE_CRITICAL",
+        "description": "Resources critical: RAM at 98%. pending.",
+        "refs": {
+          "resourceType": "RAM",
+          "percent": 98,
+          "mitigation": "pending"
+        },
+        "severity": "notable",
+        "source": "resource_manager"
       }
     ],
     "links": {},
     "pinnedEvents": [],
     "createdAt": "2026-02-11T22:33:04.440Z",
-    "updatedAt": "2026-02-12T01:20:58.415Z"
+    "updatedAt": "2026-02-12T01:21:26.534Z"
   },
   "934e25a6-b531-41b9-b602-5fbc6b3621fc": {
     "id": "934e25a6-b531-41b9-b602-5fbc6b3621fc",
