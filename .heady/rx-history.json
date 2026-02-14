@@ -1,5 +1,13 @@
 {
-  "patterns": [],
+  "patterns": [
+    {
+      "match": "finish incomplete tasks and when ready auto-deploy",
+      "fix": "node scripts/auto-deploy.js",
+      "hits": 0,
+      "created": "2026-02-14T17:13:48.057Z",
+      "lastUsed": null
+    }
+  ],
   "shortcuts": {},
   "unmatched": [
     {
