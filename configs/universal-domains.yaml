@@ -1,0 +1,672 @@
+# HEADY_BRAND:BEGIN
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║  ██╗  ██╗███████╗ █████╗ ██████╗ ██╗   ██╗                     ║
+# ║  ██║  ██║██╔════╝██╔══██╗██╔══██╗╚██╗ ██╔╝                     ║
+# ║  ███████║█████╗  ███████║██║  ██║ ╚████╔╝                      ║
+# ║  ██╔══██║██╔══╝  ██╔══██║██║  ██║  ╚██╔╝                       ║
+# ║  ██║  ██║███████╗██║  ██║██████╔╝   ██║                        ║
+# ║  ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝    ╚═╝                        ║
+# ║                                                                  ║
+# ║  ∞ SACRED GEOMETRY ∞  Organic Systems · Breathing Interfaces    ║
+# ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+# ║  FILE: configs/universal-domains.yaml                                                    ║
+# ║  LAYER: config                                                  ║
+# ╚══════════════════════════════════════════════════════════════════╝
+# HEADY_BRAND:END
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  HEADY SYSTEMS — UNIVERSAL DOMAIN ARCHITECTURE                                ║
+# ║  EVERY Component Has Its Own Custom Branded Domain                           ║
+# ║  ∞ Sacred Geometry ∞ Organic Systems ∞ Breathing Interfaces                  ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CORE ORCHESTRATION LAYER
+# ═══════════════════════════════════════════════════════════════════════════════
+orchestration:
+  heady-manager:
+    domain: api.manager.headysystems.com
+    alt_domains:
+      - manager.headysystems.com
+      - orchestrator.headysystems.com
+      - gateway.headysystems.com
+    port: 3300
+    branding: "🎛️ Sacred Gateway"
+    
+  heady-buddy:
+    domain: buddy.headysystems.com
+    alt_domains:
+      - companion.headysystems.com
+      - assistant.headysystems.com
+      - copilot.headysystems.com
+    port: 5174
+    branding: "💜 Perfect Day AI"
+    
+  heady-conductor:
+    domain: conductor.headysystems.com
+    alt_domains:
+      - maestro.headysystems.com
+      - director.headysystems.com
+    port: 3305
+    branding: "🎼 Task Maestro"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# AI NODES — Each Has Custom Domain
+# ═══════════════════════════════════════════════════════════════════════════════
+ai_nodes:
+  jules:
+    domain: jules.headysystems.com
+    alt_domains:
+      - surgeon.headysystems.com
+      - optimizer.headysystems.com
+      - hyper.headysystems.com
+    port: 8001
+    role: "The Hyper-Surgeon"
+    branding: "🔪 Code Surgeon"
+    color: "#FF6B6B"
+    
+  observer:
+    domain: observer.headysystems.com
+    alt_domains:
+      - watcher.headysystems.com
+      - sentinel.headysystems.com
+      - monitor.headysystems.com
+    port: 8002
+    role: "The Natural Observer"
+    branding: "👁️ All-Seeing Eye"
+    color: "#4ECDC4"
+    
+  builder:
+    domain: builder.headysystems.com
+    alt_domains:
+      - constructor.headysystems.com
+      - architect.headysystems.com
+      - creator.headysystems.com
+    port: 8003
+    role: "The Constructor"
+    branding: "🏗️ Master Builder"
+    color: "#45B7D1"
+    
+  atlas:
+    domain: atlas.headysystems.com
+    alt_domains:
+      - archivist.headysystems.com
+      - librarian.headysystems.com
+      - memory.headysystems.com
+    port: 8004
+    role: "The Auto-Archivist"
+    branding: "📚 Living Archive"
+    color: "#96CEB4"
+    
+  pythia:
+    domain: pythia.headysystems.com
+    alt_domains:
+      - oracle.headysystems.com
+      - prophet.headysystems.com
+      - diviner.headysystems.com
+    port: 8005
+    role: "The Oracle"
+    branding: "🔮 Sacred Oracle"
+    color: "#DDA0DD"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# INTELLIGENCE SYSTEMS
+# ═══════════════════════════════════════════════════════════════════════════════
+intelligence:
+  monte-carlo:
+    domain: mc.headysystems.com
+    alt_domains:
+      - montecarlo.headysystems.com
+      - optimizer.headysystems.com
+      - planner.headysystems.com
+    port: 8006
+    branding: "🎲 Probability Master"
+    
+  pattern-engine:
+    domain: patterns.headysystems.com
+    alt_domains:
+      - recognition.headysystems.com
+      - insight.headysystems.com
+      - discovery.headysystems.com
+    port: 8007
+    branding: "🧩 Pattern Weaver"
+    
+  self-critique:
+    domain: critique.headysystems.com
+    alt_domains:
+      - reflection.headysystems.com
+      - improvement.headysystems.com
+      - growth.headysystems.com
+    port: 8008
+    branding: "🪞 Mirror of Truth"
+    
+  imagination:
+    domain: imagine.headysystems.com
+    alt_domains:
+      - creativity.headysystems.com
+      - dream.headysystems.com
+      - vision.headysystems.com
+    port: 8009
+    branding: "🌈 Dream Weaver"
+    
+  story-driver:
+    domain: stories.headysystems.com
+    alt_domains:
+      - narrative.headysystems.com
+      - chronicle.headysystems.com
+      - saga.headysystems.com
+    port: 8010
+    branding: "📖 Living Chronicles"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# INFRASTRUCTURE & DATA
+# ═══════════════════════════════════════════════════════════════════════════════
+infrastructure:
+  postgres:
+    domain: db.postgres.headysystems.com
+    alt_domains:
+      - database.headysystems.com
+      - postgres.headysystems.com
+      - sql.headysystems.com
+    port: 5432
+    branding: "🐘 Sacred Elephant"
+    
+  redis:
+    domain: cache.redis.headysystems.com
+    alt_domains:
+      - redis.headysystems.com
+      - cache.headysystems.com
+      - memory.headysystems.com
+    port: 6379
+    branding: "⚡ Lightning Memory"
+    
+  redis-pubsub:
+    domain: pubsub.redis.headysystems.com
+    alt_domains:
+      - events.headysystems.com
+      - messages.headysystems.com
+      - bus.headysystems.com
+    port: 6380
+    branding: "📡 Event Horizon"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# OBSERVABILITY & MONITORING
+# ═══════════════════════════════════════════════════════════════════════════════
+observability:
+  heady-lens:
+    domain: lens.headysystems.com
+    alt_domains:
+      - observatory.headysystems.com
+      - scope.headysystems.com
+      - vision.headysystems.com
+    port: 9090
+    branding: "🔭 Cosmic Observatory"
+    
+  metrics:
+    domain: metrics.headysystems.com
+    alt_domains:
+      - prometheus.headysystems.com
+      - stats.headysystems.com
+    port: 9091
+    branding: "📊 Sacred Metrics"
+    
+  logs:
+    domain: logs.headysystems.com
+    alt_domains:
+      - loki.headysystems.com
+      - chronicle.headysystems.com
+      - history.headysystems.com
+    port: 9200
+    branding: "📜 Eternal Scroll"
+    
+  traces:
+    domain: traces.headysystems.com
+    alt_domains:
+      - jaeger.headysystems.com
+      - journey.headysystems.com
+    port: 9411
+    branding: "🛤️ Path Finder"
+    
+  alerts:
+    domain: alerts.headysystems.com
+    alt_domains:
+      - alertmanager.headysystems.com
+      - notify.headysystems.com
+      - watchtower.headysystems.com
+    port: 9093
+    branding: "🚨 Watchtower"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FRONTEND & UI
+# ═══════════════════════════════════════════════════════════════════════════════
+frontend:
+  web-app:
+    domain: app.headysystems.com
+    alt_domains:
+      - web.headysystems.com
+      - portal.headysystems.com
+      - ui.headysystems.com
+    port: 5173
+    branding: "🌐 Sacred Portal"
+    
+  desktop:
+    domain: desktop.headysystems.com
+    alt_domains:
+      - electron.headysystems.com
+      - native.headysystems.com
+    port: 5175
+    branding: "💻 Desktop Companion"
+    
+  mobile:
+    domain: mobile.headysystems.com
+    alt_domains:
+      - phone.headysystems.com
+      - handheld.headysystems.com
+    port: 5176
+    branding: "📱 Mobile Oracle"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# BROWSER & EXTENSIONS
+# ═══════════════════════════════════════════════════════════════════════════════
+browser:
+  chrome:
+    domain: chrome.headysystems.com
+    alt_domains:
+      - googlechrome.headysystems.com
+    port: 3302
+    branding: "🌟 Chrome Companion"
+    
+  firefox:
+    domain: firefox.headysystems.com
+    alt_domains:
+      - mozilla.headysystems.com
+    port: 3303
+    branding: "🦊 Firefox Friend"
+    
+  edge:
+    domain: edge.headysystems.com
+    alt_domains:
+      - microsoft.headysystems.com
+    port: 3304
+    branding: "🌊 Edge Explorer"
+    
+  safari:
+    domain: safari.headysystems.com
+    alt_domains:
+      - apple.headysystems.com
+    port: 3305
+    branding: "🧭 Safari Guide"
+    
+  browser-bridge:
+    domain: bridge.browser.headysystems.com
+    alt_domains:
+      - extension.headysystems.com
+      - addon.headysystems.com
+    port: 3306
+    branding: "🌉 Extension Bridge"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# IDE INTEGRATIONS
+# ═══════════════════════════════════════════════════════════════════════════════
+ides:
+  vscode:
+    domain: vscode.headysystems.com
+    alt_domains:
+      - code.headysystems.com
+      - visualstudio.headysystems.com
+    port: 3307
+    branding: "💙 VS Code Soul"
+    
+  jetbrains:
+    domain: jetbrains.headysystems.com
+    alt_domains:
+      - intellij.headysystems.com
+      - pycharm.headysystems.com
+      - webstorm.headysystems.com
+    port: 3308
+    branding: "🧠 JetBrains Genius"
+    
+  neovim:
+    domain: neovim.headysystems.com
+    alt_domains:
+      - vim.headysystems.com
+      - nvim.headysystems.com
+    port: 3309
+    branding: "🌙 Vim Visionary"
+    
+  sublime:
+    domain: sublime.headysystems.com
+    alt_domains:
+      - textmate.headysystems.com
+    port: 3310
+    branding: "✨ Sublime Spirit"
+    
+  emacs:
+    domain: emacs.headysystems.com
+    alt_domains:
+      - gnu.headysystems.com
+    port: 3311
+    branding: "🐂 Emacs Elder"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# INTEGRATIONS & CONNECTORS
+# ═══════════════════════════════════════════════════════════════════════════════
+integrations:
+  slack:
+    domain: slack.headysystems.com
+    alt_domains:
+      - chat.headysystems.com
+      - team.headysystems.com
+    port: 3312
+    branding: "💬 Slack Sage"
+    
+  discord:
+    domain: discord.headysystems.com
+    alt_domains:
+      - community.headysystems.com
+      - guild.headysystems.com
+    port: 3313
+    branding: "🎮 Discord Druid"
+    
+  teams:
+    domain: teams.headysystems.com
+    alt_domains:
+      - microsoft.headysystems.com
+    port: 3314
+    branding: "🏢 Teams Titan"
+    
+  email:
+    domain: mail.headysystems.com
+    alt_domains:
+      - email.headysystems.com
+      - post.headysystems.com
+    port: 3315
+    branding: "📧 Email Emissary"
+    
+  calendar:
+    domain: calendar.headysystems.com
+    alt_domains:
+      - schedule.headysystems.com
+      - time.headysystems.com
+    port: 3316
+    branding: "📅 Time Keeper"
+    
+  github:
+    domain: github.headysystems.com
+    alt_domains:
+      - git.headysystems.com
+      - vcs.headysystems.com
+    port: 3317
+    branding: "🐙 GitHub Guardian"
+    
+  notion:
+    domain: notion.headysystems.com
+    alt_domains:
+      - wiki.headysystems.com
+      - docs.headysystems.com
+    port: 3318
+    branding: "📝 Notion Navigator"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# MCP TOOL SERVERS
+# ═══════════════════════════════════════════════════════════════════════════════
+mcp_servers:
+  mcp-gateway:
+    domain: mcp.headysystems.com
+    alt_domains:
+      - tools.headysystems.com
+      - gateway.headysystems.com
+    port: 3001
+    branding: "🔌 MCP Nexus"
+    
+  filesystem:
+    domain: fs.headysystems.com
+    alt_domains:
+      - files.headysystems.com
+      - storage.headysystems.com
+    port: 3002
+    branding: "📁 File Keeper"
+    
+  terminal:
+    domain: shell.headysystems.com
+    alt_domains:
+      - terminal.headysystems.com
+      - bash.headysystems.com
+    port: 3003
+    branding: "💻 Terminal Titan"
+    
+  browser-mcp:
+    domain: browser.mcp.headysystems.com
+    alt_domains:
+      - web.mcp.headysystems.com
+    port: 3004
+    branding: "🌍 Web Wanderer"
+    
+  search:
+    domain: search.headysystems.com
+    alt_domains:
+      - find.headysystems.com
+      - query.headysystems.com
+    port: 3005
+    branding: "🔍 Search Seer"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DISTRIBUTION & PAYMENTS
+# ═══════════════════════════════════════════════════════════════════════════════
+distribution:
+  billing:
+    domain: billing.headysystems.com
+    alt_domains:
+      - payments.headysystems.com
+      - stripe.headysystems.com
+    port: 3319
+    branding: "💰 Sacred Treasury"
+    
+  telemetry:
+    domain: telemetry.headysystems.com
+    alt_domains:
+      - analytics.headysystems.com
+      - tracking.headysystems.com
+    port: 3320
+    branding: "📈 Insight Beacon"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# HEADY OS FORMS
+# ═══════════════════════════════════════════════════════════════════════════════
+headyos:
+  docker:
+    domain: docker.headysystems.com
+    alt_domains:
+      - container.headysystems.com
+      - podman.headysystems.com
+    port: 3321
+    branding: "🐳 Docker Domain"
+    
+  bare-metal:
+    domain: metal.headysystems.com
+    alt_domains:
+      - kernel.headysystems.com
+      - os.headysystems.com
+    port: 3322
+    branding: "⚙️ Iron Core"
+    
+  linux-distro:
+    domain: linux.headysystems.com
+    alt_domains:
+      - distro.headysystems.com
+      - buildroot.headysystems.com
+    port: 3323
+    branding: "🐧 Linux Legacy"
+    
+  android:
+    domain: android.headysystems.com
+    alt_domains:
+      - aosp.headysystems.com
+      - mobile-os.headysystems.com
+    port: 3324
+    branding: "🤖 Android Avatar"
+    
+  embedded:
+    domain: embedded.headysystems.com
+    alt_domains:
+      - iot.headysystems.com
+      - rpi.headysystems.com
+      - yocto.headysystems.com
+    port: 3325
+    branding: "🔌 Embedded Entity"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECURITY & SECRETS
+# ═══════════════════════════════════════════════════════════════════════════════
+security:
+  secrets:
+    domain: secrets.headysystems.com
+    alt_domains:
+      - vault.headysystems.com
+      - keys.headysystems.com
+      - passwords.headysystems.com
+    port: 3326
+    branding: "🔐 Secret Sanctuary"
+    
+  cloudflare:
+    domain: cloudflare.headysystems.com
+    alt_domains:
+      - cdn.headysystems.com
+      - dns.headysystems.com
+    port: 3327
+    branding: "☁️ Cloud Guardian"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DISCOVERY & REGISTRY
+# ═══════════════════════════════════════════════════════════════════════════════
+discovery:
+  service-registry:
+    domain: registry.headysystems.com
+    alt_domains:
+      - catalog.headysystems.com
+      - directory.headysystems.com
+    port: 8600
+    branding: "📋 Service Catalog"
+    
+  dns-internal:
+    domain: dns.headysystems.com
+    alt_domains:
+      - nameserver.headysystems.com
+      - resolver.headysystems.com
+    port: 53
+    branding: "🌐 Name Weaver"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CLOUD DEPLOYMENTS
+# ═══════════════════════════════════════════════════════════════════════════════
+cloud:
+  render-me:
+    domain: me.heady.io
+    alt_domains:
+      - app.headysystems.com
+    port: 443
+    branding: "🌟 HeadyMe Cloud"
+    
+  render-sys:
+    domain: sys.heady.io
+    alt_domains:
+      - app.headysystems.com
+    port: 443
+    branding: "💜 HeadySystems Cloud"
+    
+  render-conn:
+    domain: conn.heady.io
+    alt_domains:
+      - app.headysystems.com
+    port: 443
+    branding: "💛 HeadyConnection Cloud"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DNS HOSTS FILE ENTRIES (Add to /etc/hosts or C:\Windows\System32\drivers\etc\hosts)
+# ═══════════════════════════════════════════════════════════════════════════════
+hosts_entries: |
+  # HEADY SYSTEMS — Universal Domain Architecture
+  # Add these to your hosts file for local resolution
+  
+  api.headysystems.com api.manager.headysystems.com
+  api.headysystems.com buddy.headysystems.com
+  api.headysystems.com conductor.headysystems.com
+  
+  # AI Nodes
+  api.headysystems.com jules.headysystems.com
+  api.headysystems.com observer.headysystems.com
+  api.headysystems.com builder.headysystems.com
+  api.headysystems.com atlas.headysystems.com
+  api.headysystems.com pythia.headysystems.com
+  
+  # Intelligence Systems
+  api.headysystems.com mc.headysystems.com
+  api.headysystems.com patterns.headysystems.com
+  api.headysystems.com critique.headysystems.com
+  api.headysystems.com imagine.headysystems.com
+  api.headysystems.com stories.headysystems.com
+  
+  # Infrastructure
+  api.headysystems.com db.postgres.headysystems.com
+  api.headysystems.com cache.redis.headysystems.com
+  api.headysystems.com pubsub.redis.headysystems.com
+  
+  # Observability
+  api.headysystems.com lens.headysystems.com
+  api.headysystems.com metrics.headysystems.com
+  api.headysystems.com logs.headysystems.com
+  api.headysystems.com traces.headysystems.com
+  api.headysystems.com alerts.headysystems.com
+  
+  # Frontend
+  api.headysystems.com app.headysystems.com
+  api.headysystems.com desktop.headysystems.com
+  api.headysystems.com mobile.headysystems.com
+  
+  # Browsers
+  api.headysystems.com chrome.headysystems.com
+  api.headysystems.com firefox.headysystems.com
+  api.headysystems.com edge.headysystems.com
+  api.headysystems.com safari.headysystems.com
+  api.headysystems.com bridge.browser.headysystems.com
+  
+  # IDEs
+  api.headysystems.com vscode.headysystems.com
+  api.headysystems.com jetbrains.headysystems.com
+  api.headysystems.com neovim.headysystems.com
+  api.headysystems.com sublime.headysystems.com
+  api.headysystems.com emacs.headysystems.com
+  
+  # Integrations
+  api.headysystems.com slack.headysystems.com
+  api.headysystems.com discord.headysystems.com
+  api.headysystems.com teams.headysystems.com
+  api.headysystems.com mail.headysystems.com
+  api.headysystems.com calendar.headysystems.com
+  api.headysystems.com github.headysystems.com
+  api.headysystems.com notion.headysystems.com
+  
+  # MCP Servers
+  api.headysystems.com mcp.headysystems.com
+  api.headysystems.com fs.headysystems.com
+  api.headysystems.com shell.headysystems.com
+  api.headysystems.com browser.mcp.headysystems.com
+  api.headysystems.com search.headysystems.com
+  
+  # Distribution
+  api.headysystems.com billing.headysystems.com
+  api.headysystems.com telemetry.headysystems.com
+  
+  # HeadyOS
+  api.headysystems.com docker.headysystems.com
+  api.headysystems.com metal.headysystems.com
+  api.headysystems.com linux.headysystems.com
+  api.headysystems.com android.headysystems.com
+  api.headysystems.com embedded.headysystems.com
+  
+  # Security
+  api.headysystems.com secrets.headysystems.com
+  api.headysystems.com cloudflare.headysystems.com
+  
+  # Discovery
+  api.headysystems.com registry.headysystems.com
+  api.headysystems.com dns.headysystems.com
