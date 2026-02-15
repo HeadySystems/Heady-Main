@@ -205,8 +205,8 @@ HCAUTOBUILD_FUNCTIONALITY_THRESHOLD=95
     "pass_rate": 100
   },
   "services": {
-    "api": "http://localhost:3300",
-    "frontend": "http://localhost:3000"
+    "api": "http://internal.headyio.com:3300",
+    "frontend": "http://internal.headyio.com:3000"
   }
 }
 ```

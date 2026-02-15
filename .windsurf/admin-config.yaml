@@ -416,7 +416,7 @@ security:
   # Network
   tls_verify: true
   proxy_url: "${HTTP_PROXY}"
-  no_proxy: "localhost,127.0.0.1,.local"
+  no_proxy: "internal.headyio.com,internal.headyio.com,.local"
 
 # Backup and Recovery
 backup:

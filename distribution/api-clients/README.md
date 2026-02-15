@@ -61,7 +61,7 @@ heady status
 All SDKs use the same authentication:
 - **API Key:** Set `HEADY_API_KEY` environment variable
 - **OAuth:** For user-scoped access (web/mobile apps)
-- **Local:** No auth needed when hitting localhost
+- **Local:** No auth needed when hitting internal.headyio.com
 
 ## API Base URLs
 

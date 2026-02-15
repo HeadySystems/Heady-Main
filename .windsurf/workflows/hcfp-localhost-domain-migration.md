@@ -1,5 +1,5 @@
 ---
-description: HCFP Localhost-to-Domain Migration - Systematically replace all localhost references with proper internal domains
+description: HCFP Localhost-to-Domain Migration - Systematically replace all internal.headyio.com references with proper internal domains
 ---
 
 # HCFP Localhost-to-Domain Migration Workflow
@@ -49,7 +49,7 @@ localhost:9090    → debug-manager.dev.local.heady.internal:9090
 1. **Verify Current State**
    ```bash
    # Count localhost references
-   grep -r "localhost\|127.0.0.1\|0.0.0.0" --include="*.js" --include="*.json" --include="*.yaml" . | wc -l
+   grep -r "localhost\|internal.headyio.com\|0.0.0.0" --include="*.js" --include="*.json" --include="*.yaml" . | wc -l
    
    # List files with localhost
    grep -r "localhost" --include="*.js" --include="*.json" --include="*.yaml" . | cut -d: -f1 | sort -u
@@ -57,7 +57,7 @@ localhost:9090    → debug-manager.dev.local.heady.internal:9090
 
 2. **Create Feature Branch**
    ```bash
-   git checkout -b feat/localhost-to-domains
+   git checkout -b feat/internal.headyio.com-to-domains
    ```
 
 3. **Backup Current State**
@@ -69,18 +69,18 @@ localhost:9090    → debug-manager.dev.local.heady.internal:9090
 
 4. **Run Migration Script (Dry-Run)**
    ```bash
-   node scripts/migrate-localhost-to-domains.js --dry-run
+   node scripts/migrate-internal.headyio.com-to-domains.js --dry-run
    ```
    Review the output to verify replacements are correct.
 
 5. **Execute Migration**
    ```bash
-   node scripts/migrate-localhost-to-domains.js
+   node scripts/migrate-internal.headyio.com-to-domains.js
    ```
 
 6. **Verify Migration**
    ```bash
-   node scripts/migrate-localhost-to-domains.js --verify-only
+   node scripts/migrate-internal.headyio.com-to-domains.js --verify-only
    ```
    Should report: "✅ No localhost references found!"
 
@@ -130,10 +130,10 @@ localhost:9090    → debug-manager.dev.local.heady.internal:9090
     ```bash
     # On Windows (add to hosts file)
     # C:\Windows\System32\drivers\etc\hosts
-    127.0.0.1 manager.dev.local.heady.internal
-    127.0.0.1 app-web.dev.local.heady.internal
-    127.0.0.1 db-postgres.dev.local.heady.internal
-    127.0.0.1 db-redis.dev.local.heady.internal
+    internal.headyio.com manager.dev.local.heady.internal
+    internal.headyio.com app-web.dev.local.heady.internal
+    internal.headyio.com db-postgres.dev.local.heady.internal
+    internal.headyio.com db-redis.dev.local.heady.internal
     
     # Test resolution
     nslookup manager.dev.local.heady.internal
@@ -156,7 +156,7 @@ localhost:9090    → debug-manager.dev.local.heady.internal:9090
     ```bash
     # Update heady-registry.json
     # - Update all endpoint references
-    # - Add localhost-to-domain migration entry
+    # - Add internal.headyio.com-to-domain migration entry
     # - Update service discovery config reference
     ```
 
@@ -184,12 +184,12 @@ localhost:9090    → debug-manager.dev.local.heady.internal:9090
 
 16. **Create Pull Request**
     ```bash
-    git push origin feat/localhost-to-domains
+    git push origin feat/internal.headyio.com-to-domains
     # Create PR with description of changes
     ```
 
 17. **CI/CD Pipeline**
-    - Pre-flight checks verify no localhost in production configs
+    - Pre-flight checks verify no internal.headyio.com in production configs
     - Clean build validates all services start correctly
     - Integration tests verify service-to-service communication
     - Security scan checks for exposed internal domains
@@ -275,7 +275,7 @@ If issues arise:
 ## References
 
 - **Service Discovery Config**: `configs/service-discovery.yaml`
-- **Migration Script**: `scripts/migrate-localhost-to-domains.js`
+- **Migration Script**: `scripts/migrate-internal.headyio.com-to-domains.js`
 - **Clean Build Workflow**: `.github/workflows/clean-build.yml`
 - **Error Recovery**: `.windsurf/workflows/hcfp-error-recovery.md`
 - **Infrastructure Setup**: `docs/INFRASTRUCTURE_SETUP.md`

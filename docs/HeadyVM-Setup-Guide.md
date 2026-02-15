@@ -285,10 +285,10 @@ curl http://headyvm.local:3301/api/resources/health
 ## 🌐 Access Points
 
 ### Local Development URLs
-- **Heady Manager**: `http://localhost:3301`
-- **Heady Manager API**: `http://localhost:3301/api/health`
-- **Brain API**: `http://localhost:3301/api/brain/health`
-- **Resources**: `http://localhost:3301/api/resources/health`
+- **Heady Manager**: `http://internal.headyio.com:3301`
+- **Heady Manager API**: `http://internal.headyio.com:3301/api/health`
+- **Brain API**: `http://internal.headyio.com:3301/api/brain/health`
+- **Resources**: `http://internal.headyio.com:3301/api/resources/health`
 
 ### HeadyVM URLs
 - **Heady Manager**: `http://headyvm.local:3301`

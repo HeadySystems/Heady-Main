@@ -49,7 +49,7 @@ HeadySync (hs) is the unified synchronization system that coordinates all Heady 
 Get-Process | Where-Object {$_.ProcessName -like "*heady*"}
 
 # Verify HeadyLens monitoring
-curl http://localhost:3300/status
+curl http://internal.headyio.com:3300/status
 ```
 
 ### 2. Initialize Core Services
@@ -161,10 +161,10 @@ git submodule sync --recursive
 ### 1. Service Health Check
 ```powershell
 # Verify orchestrator
-curl http://localhost:3300/status
+curl http://internal.headyio.com:3300/status
 
 # Check all layers
-curl http://localhost:3300/layers/status
+curl http://internal.headyio.com:3300/layers/status
 ```
 
 ### 2. Repository Sync Status
@@ -177,10 +177,10 @@ git status -uno
 ### 3. Layer Integration Test
 ```powershell
 # Test HeadyBuddy + HeadyLens integration
-curl http://localhost:3300/test/base-layer
+curl http://internal.headyio.com:3300/test/base-layer
 
 # Verify full stack
-curl http://localhost:3300/test/full-stack
+curl http://internal.headyio.com:3300/test/full-stack
 ```
 
 ## Success Criteria

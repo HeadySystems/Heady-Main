@@ -52,7 +52,7 @@ docker-compose up -d
 ### 4. Verify
 
 ```bash
-curl http://localhost:3300/api/health
+curl http://internal.headyio.com:3300/api/health
 # Expected: {"ok":true,"service":"heady-manager","ts":"..."}
 ```
 
@@ -108,7 +108,7 @@ volumes:
 >
 > Attached: sample `.env` file and `docker-compose.yml` for multi-service setup.
 >
-> Verify with: `curl http://localhost:3300/api/health`
+> Verify with: `curl http://internal.headyio.com:3300/api/health`
 >
 > Let me know if you need help with configuration.
 >

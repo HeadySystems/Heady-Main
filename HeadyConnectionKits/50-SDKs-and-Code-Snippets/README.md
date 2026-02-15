@@ -37,7 +37,7 @@
 const { HeadyClient } = require('heady-sdk');
 
 const client = new HeadyClient({
-  endpoint: 'http://localhost:3300',
+  endpoint: 'http://internal.headyio.com:3300',
   apiKey: process.env.HEADY_API_KEY
 });
 
@@ -59,7 +59,7 @@ from heady_sdk import HeadyClient
 import os
 
 client = HeadyClient(
-    endpoint="http://localhost:3300",
+    endpoint="http://internal.headyio.com:3300",
     api_key=os.environ["HEADY_API_KEY"]
 )
 
@@ -83,7 +83,7 @@ import (
 
 func main() {
     client := heady.NewClient(
-        "http://localhost:3300",
+        "http://internal.headyio.com:3300",
         os.Getenv("HEADY_API_KEY"),
     )
 

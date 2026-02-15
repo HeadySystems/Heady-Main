@@ -216,11 +216,11 @@ credentials-file: /etc/cloudflared/heady-vm-tunnel.json
 
 ingress:
   - hostname: vm.headysystems.com
-    service: http://localhost:3300
+    service: http://internal.headyio.com:3300
   - hostname: vm-buddy.headysystems.com
-    service: http://localhost:3301
+    service: http://internal.headyio.com:3301
   - hostname: vm-web.headysystems.com
-    service: http://localhost:3000
+    service: http://internal.headyio.com:3000
   - service: http_status:404
 
 originRequest:
@@ -469,7 +469,7 @@ sudo ufw status                  # active
 test -d ~/Heady/.git && echo OK  # repo cloned
 test -f ~/Heady/.env && echo OK  # env exists
 test -d ~/Heady/node_modules && echo OK
-curl -s http://localhost:3300/api/health | jq .
+curl -s http://internal.headyio.com:3300/api/health | jq .
 ```
 
 ---
@@ -558,5 +558,5 @@ cd ~/Heady && bash scripts/run-auto-deploy.sh
 # Or from Windows: pwsh scripts/run-auto-deploy.ps1
 
 # 7. Health check
-curl http://localhost:3300/api/health
+curl http://internal.headyio.com:3300/api/health
 ```

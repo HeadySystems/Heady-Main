@@ -140,7 +140,7 @@ ALLOWED_HOSTS=staging.headysystems.com,*.heady.local
 DATABASE_URL=sqlite:///./db.sqlite3
 SECRET_KEY=local-dev-secret-key
 DEBUG=True
-ALLOWED_HOSTS=*.heady.local,localhost,127.0.0.1
+ALLOWED_HOSTS=*.heady.local,internal.headyio.com,internal.headyio.com
 ```
 
 ## Performance Optimization

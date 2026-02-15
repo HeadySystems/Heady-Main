@@ -19,7 +19,7 @@
 ## Network Security
 
 - Run behind a reverse proxy (NGINX/Caddy) with TLS
-- Restrict container ports to localhost in production
+- Restrict container ports to internal.headyio.com in production
 - Use Docker networks to isolate services
 - Enable CORS only for known origins
 

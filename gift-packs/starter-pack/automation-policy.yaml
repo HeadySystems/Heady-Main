@@ -28,7 +28,7 @@ control_plane:
 
 intent_routing:
   patterns:
-    "fix localhost references": "hcfp-localhost-migration"
+    "fix internal.headyio.com references": "hcfp-localhost-migration"
     "run full clean build": "hcfp-clean-build"
     "standardize naming": ["naming-audit", "naming-migration"]
 

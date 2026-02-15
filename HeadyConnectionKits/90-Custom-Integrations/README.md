@@ -33,7 +33,7 @@ Connect HeadySystems to browser-based environments:
 // Inject Heady telemetry into a browser extension
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === 'HEADY_LOG') {
-    fetch('http://localhost:3300/api/patterns/observe', {
+    fetch('http://internal.headyio.com:3300/api/patterns/observe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -54,7 +54,7 @@ Connect HeadySystems experiment tracking to ML pipelines:
 import requests
 import os
 
-HEADY_ENDPOINT = os.environ.get("HEADY_ENDPOINT", "http://localhost:3300")
+HEADY_ENDPOINT = os.environ.get("HEADY_ENDPOINT", "http://internal.headyio.com:3300")
 
 def log_experiment(task_type, metrics):
     """Log ML experiment results to Heady Monte Carlo."""

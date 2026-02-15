@@ -116,8 +116,8 @@ configs:
     target: "/home/heady/Heady/.env"
     variables:
       HEADY_API_KEY: "auto-generated"
-      DATABASE_URL: "postgresql://heady:password@localhost:5432/heady"
-      REDIS_URL: "redis://localhost:6379"
+      DATABASE_URL: "postgresql://heady:password@internal.headyio.com:5432/heady"
+      REDIS_URL: "redis://internal.headyio.com:6379"
       NODE_ENV: "production"
       
   render:
@@ -142,7 +142,7 @@ windsurf:
   version: "latest"
   workspace:
     settings:
-      "heady.modelEndpoint": "http://localhost:3300/api/brain"
+      "heady.modelEndpoint": "http://internal.headyio.com:3300/api/brain"
       "heady.mcpServersOnly": true
       "heady.useHeadyServices": true
     mcp_config:
@@ -193,7 +193,7 @@ startup:
 health:
   endpoints:
     - name: "heady-manager"
-      url: "http://localhost:3300/health"
+      url: "http://internal.headyio.com:3300/health"
       expected_status: 200
       
     - name: "postgres"
@@ -205,7 +205,7 @@ health:
       expected_output: "PONG"
       
     - name: "mcp-server"
-      url: "http://localhost:3001/health"
+      url: "http://internal.headyio.com:3001/health"
       expected_status: 200
 
 # Security Configuration

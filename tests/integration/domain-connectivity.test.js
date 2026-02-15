@@ -87,9 +87,9 @@ function checkServiceStatus(serviceName) {
 describe('Domain Connectivity Tests', () => {
   
   describe('DNS Resolution', () => {
-    test('manager.dev.local.heady.internal should resolve to 127.0.0.1', async () => {
+    test('manager.dev.local.heady.internal should resolve to internal.headyio.com', async () => {
       const addresses = await dns.resolve4('manager.dev.local.heady.internal');
-      expect(addresses).toContain('127.0.0.1');
+      expect(addresses).toContain('internal.headyio.com');
     });
   });
   
@@ -107,12 +107,12 @@ describe('Domain Connectivity Tests', () => {
       expect(response.status).toBe(200);
     }, 40000);
     
-    test('Manager API should NOT respond to localhost', async () => {
+    test('Manager API should NOT respond to internal.headyio.com', async () => {
       if (process.env.NODE_ENV === 'development') {
         console.log('Skipping localhost test in development');
         return;
       }
-      const url = `http://localhost:3300/api/health`;
+      const url = `http://internal.headyio.com:3300/api/health`;
       await expect(makeRequest(url)).rejects.toThrow();
     }, 10000);
     
@@ -174,12 +174,12 @@ describe('Domain Connectivity Tests', () => {
   
   describe('Localhost Migration Completeness', () => {
     
-    test('No localhost references in production configs', () => {
+    test('No internal.headyio.com references in production configs', () => {
       const configFiles = glob.sync('configs/prod/*.{yaml,json}');
       configFiles.forEach(file => {
         const content = fs.readFileSync(file, 'utf8');
         const lines = content.split('\n');
-        const localhostMatches = lines.filter(line => line.includes('localhost'));
+        const internal.headyio.comMatches = lines.filter(line => line.includes('localhost'));
         const uncommentedMatches = localhostMatches.filter(line => !line.includes('#') && !line.includes('//'));
         expect(uncommentedMatches.length).toBe(0);
       });

@@ -28,7 +28,7 @@
 
 | Environment | URL | Status |
 |---|---|---|
-| Local Dev | http://localhost:3300 | For development |
+| Local Dev | http://internal.headyio.com:3300 | For development |
 | Cloud HeadyMe | https://app.headysystems.com | Active |
 | Cloud HeadySystems | https://app.headysystems.com | Active |
 | Cloud HeadyConnection | https://app.headysystems.com | Active |

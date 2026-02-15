@@ -127,8 +127,8 @@ Install with: bash install-all-android.sh
 - Health:      http://manager.dev.local.heady.internal:3300/api/health
 - API:         http://manager.dev.local.heady.internal:3300/api/
 - Web App:     http://app-web.dev.local.heady.internal:3000
-- IDE:         http://localhost:8443 (code-server)
-- MCP Gateway: http://localhost:4000
+- IDE:         http://internal.headyio.com:8443 (code-server)
+- MCP Gateway: http://internal.headyio.com:4000
 
 # 📝 Documentation
 

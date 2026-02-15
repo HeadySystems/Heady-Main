@@ -42,8 +42,8 @@ This workflow ensures that **every change triggers a full clean build** with **s
 
 ### 1. Pre-flight Checks (Always Run)
 ```bash
-# Check for forbidden localhost references
-grep -r "http://localhost\|127.0.0.1" --include="*.js" --include="*.json" --include="*.yaml"
+# Check for forbidden internal.headyio.com references
+grep -r "http://internal.headyio.com\|internal.headyio.com" --include="*.js" --include="*.json" --include="*.yaml"
 
 # Verify service discovery config is valid
 node scripts/validate-domains.js
@@ -167,7 +167,7 @@ exit 1
 # Run clean build locally
 npm run clean-build
 
-# Verify no localhost references
+# Verify no internal.headyio.com references
 npm run check:domains
 
 # Run full test suite
@@ -201,7 +201,7 @@ npm run format
 
 ### Dashboard
 ```
-Build Status Dashboard (http://localhost:3300/api/build-status)
+Build Status Dashboard (http://internal.headyio.com:3300/api/build-status)
 ├── Last 24 hours: 47 builds, 44 passed (93.6%)
 ├── Error breakdown:
 │   ├── Transient (retried): 2

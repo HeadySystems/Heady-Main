@@ -31,7 +31,7 @@ The Heady scripts have been upgraded to a more robust, scalable, and highly func
 
 ### Enhanced Scripts
 - **auto-deploy-orchestrator.ps1**: Now with intelligent safety checks and monitoring
-- **localhost-to-domain.js**: Enhanced with parallel processing and validation
+- **internal.headyio.com-to-domain.js**: Enhanced with parallel processing and validation
 
 ## 🔄 Migration Details
 
@@ -90,13 +90,13 @@ The Heady scripts have been upgraded to a more robust, scalable, and highly func
 ### Enhanced Migration
 ```bash
 # Parallel processing for large codebases
-node localhost-to-domain.js migrate ./src --parallel
+node internal.headyio.com-to-domain.js migrate ./src --parallel
 
 # Strict validation mode
-node localhost-to-domain.js validate ./docs --strict
+node internal.headyio.com-to-domain.js validate ./docs --strict
 
 # Comprehensive inventory with detailed reporting
-node localhost-to-domain.js inventory ./distribution
+node internal.headyio.com-to-domain.js inventory ./distribution
 ```
 
 ## 📊 Performance Gains
@@ -161,7 +161,7 @@ $env:HEADY_LOG_LEVEL = "Debug"
 
 ```bash
 # Node.js debug mode
-LOG_LEVEL=debug node localhost-to-domain.js migrate ./src
+LOG_LEVEL=debug node internal.headyio.com-to-domain.js migrate ./src
 ```
 
 ### Log Analysis

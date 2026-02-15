@@ -42,7 +42,7 @@ npm link
 ### 1. Login
 
 ```bash
-heady login --key YOUR_API_KEY --endpoint http://localhost:3300
+heady login --key YOUR_API_KEY --endpoint http://internal.headyio.com:3300
 ```
 
 ### 2. Check Health

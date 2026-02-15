@@ -303,7 +303,7 @@ package.json            — Extension manifest
 ### 32.4 Windsurf / Cursor Compatibility
 
 The `.vsix` installs in VS Code, Windsurf, and Cursor (all VS Code–compatible). Point all three at the same Heady endpoint. Disable their native AI:
-- Windsurf: Settings → disable Cascade, or point "custom model" at `localhost:3300/api/chat`
+- Windsurf: Settings → disable Cascade, or point "custom model" at `internal.headyio.com:3300/api/chat`
 - Cursor: Settings → disable Cursor AI, configure custom API endpoint to Heady
 - VS Code: Disable GitHub Copilot extension
 
@@ -365,9 +365,9 @@ services:
 
 ### 34.2 Access
 
-- Local: `http://localhost:3400`
+- Local: `http://internal.headyio.com:3400`
 - From phone (same network): `http://<COMPUTER_IP>:3400`
-- From phone via SSH tunnel: `ssh -L 3400:localhost:3400 user@<COMPUTER_IP>`
+- From phone via SSH tunnel: `ssh -L 3400:internal.headyio.com:3400 user@<COMPUTER_IP>`
 
 ### 34.3 Result
 
@@ -574,7 +574,7 @@ For any new app or vertical produced by Arena Mode, automatically propose update
 
 **Stream F: Browser IDE Live (parallel)**
 1. `docker-compose -f docker-compose.ide.yml up --build` (5 min)
-2. Verify Theia on `localhost:3400` (5 min)
+2. Verify Theia on `internal.headyio.com:3400` (5 min)
 3. Access from phone (5 min)
 4. Install `.vsix` in code-server (5 min)
 5. Test same behavior (10 min)

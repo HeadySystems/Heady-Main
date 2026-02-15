@@ -73,7 +73,7 @@ npm run dev
 ```powershell
 npm install -g code-server
 code-server --bind-addr 0.0.0.0:8443
-# Access at http://localhost:8443
+# Access at http://internal.headyio.com:8443
 ```
 
 ### VS Code Extension
@@ -116,7 +116,7 @@ systemctl --user enable --now heady-buddy
 ```bash
 curl -fsSL https://code-server.dev/install.sh | sh
 sudo systemctl enable --now code-server@$USER
-# Access at http://localhost:8443
+# Access at http://internal.headyio.com:8443
 ```
 
 ---

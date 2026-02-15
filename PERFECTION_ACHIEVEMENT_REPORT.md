@@ -12,7 +12,7 @@
 #### 2. **Domain References Corrected**
 - Fixed restricted domain references in scripts
 - Replaced `api.headysystems.com` with approved `api.headyio.com`
-- Updated `enhanced-localhost-to-domain.js` and `localhost-to-domain.js`
+- Updated `enhanced-internal.headyio.com-to-domain.js` and `localhost-to-domain.js`
 
 #### 3. **File Cleanup & Organization**
 - Reset unnecessary file modifications (README.md, docs, configs)
