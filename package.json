@@ -45,8 +45,15 @@
     "jsonwebtoken": "^9.0.3",
     "node-cron": "^3.0.2",
     "pg": "^8.18.0",
+<<<<<<< HEAD
     "replace-in-file": "^8.4.0",
     "swagger-ui-express": "^5.0.1",
+=======
+    "render-cli": "^0.3.2",
+    "replace-in-file": "^8.4.0",
+    "swagger-ui-express": "^5.0.1",
+    "tinyliquid": "^0.2.34",
+>>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
     "yaml": "^2.8.2",
     "yamljs": "^0.3.0"
   },
@@ -69,4 +76,7 @@
     "pythonPackagesPath": "./offline-packages/python-libs"
   }
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea

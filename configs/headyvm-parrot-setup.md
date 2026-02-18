@@ -216,11 +216,19 @@ credentials-file: /etc/cloudflared/heady-vm-tunnel.json
 
 ingress:
   - hostname: vm.headysystems.com
+<<<<<<< HEAD
     service: http://internal.headyio.com:3300
   - hostname: vm-buddy.headysystems.com
     service: http://internal.headyio.com:3301
   - hostname: vm-web.headysystems.com
     service: http://internal.headyio.com:3000
+=======
+    service: http://localhost:3300
+  - hostname: vm-buddy.headysystems.com
+    service: http://localhost:3301
+  - hostname: vm-web.headysystems.com
+    service: http://localhost:3000
+>>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
   - service: http_status:404
 
 originRequest:
@@ -469,7 +477,11 @@ sudo ufw status                  # active
 test -d ~/Heady/.git && echo OK  # repo cloned
 test -f ~/Heady/.env && echo OK  # env exists
 test -d ~/Heady/node_modules && echo OK
+<<<<<<< HEAD
 curl -s http://internal.headyio.com:3300/api/health | jq .
+=======
+curl -s http://localhost:3300/api/health | jq .
+>>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
 ```
 
 ---
@@ -558,5 +570,9 @@ cd ~/Heady && bash scripts/run-auto-deploy.sh
 # Or from Windows: pwsh scripts/run-auto-deploy.ps1
 
 # 7. Health check
+<<<<<<< HEAD
 curl http://internal.headyio.com:3300/api/health
+=======
+curl http://localhost:3300/api/health
+>>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
 ```
