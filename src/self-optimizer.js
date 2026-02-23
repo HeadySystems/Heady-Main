@@ -14,6 +14,7 @@
  */
 
 const fs = require("fs");
+const { PHI_INTERVALS } = require("./vector-pipeline");
 const path = require("path");
 
 const OPT_FILE = path.join(__dirname, "..", "data", "optimization-state.json");
@@ -247,18 +248,18 @@ function registerRoutes(app, vectorMem) {
         res.json({ ok: true, weights: optState.routingWeights, scores: optState.providerScores });
     });
 
-    // Continuous optimization loop (every 60s)
+    // Continuous optimization loop (φ⁵ = 11,090ms)
     setInterval(async () => {
         try { await runOptimizationCycle(vectorMem); } catch { }
-    }, 60000);
+    }, PHI_INTERVALS.long); // φ⁵ = 11,090ms
 
     // Run first cycle immediately
-    setTimeout(async () => {
+    setTimeout(async () => { // Start after φ³ = 4,236ms
         try {
             const result = await runOptimizationCycle(vectorMem);
             console.log(`  ∞ First optimization: ${result.skills.active} skills, ${result.connectors.ready} connectors, ${result.tunings.length} tunings`);
         } catch { }
-    }, 5000);
+    }, PHI_INTERVALS.medium); // φ³ = 4,236ms
 
     console.log("  ∞ SelfOptimizer: LOADED (60s cycle → benchmark + tune + skill discovery + vector learn)");
 }

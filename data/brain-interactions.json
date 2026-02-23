@@ -684,5 +684,12 @@
     "input": "Voice UX design patterns for mobile AI companions",
     "output": "[embedding generated]",
     "timestamp": "2026-02-23T14:50:36.327Z"
+  },
+  {
+    "id": "4568f0d1-f81f-4b59-a576-772175623c4e",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: 3D vector storage schema optimization and indexing\n---\nEmbedding request: 3D vector storage schema optimization and indexing\n---\nEmbedding request: 3D vector storage schema optimization and indexing\n[End Context]\n\n3D vector storage schema optimization and indexing",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T14:55:50.893Z"
   }
 ]

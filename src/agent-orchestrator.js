@@ -25,10 +25,11 @@ const fs = require("fs");
 const path = require("path");
 
 const AUDIT_PATH = path.join(__dirname, "..", "data", "agent-orchestrator-audit.jsonl");
+const PHI = 1.6180339887;
 const MAX_CONCURRENT = 50;  // Liquid: high ceiling for parallel nodes
-const IDLE_RECLAIM_MS = 30000; // Reclaim idle agents after 30s
+const IDLE_RECLAIM_MS = Math.round(PHI ** 6 * 1000); // φ⁶ = 17,944ms
 const SCALE_THRESHOLD = 3;  // Queue depth that triggers auto-scale
-const SCALE_CHECK_MS = 5000; // Check scaling every 5s
+const SCALE_CHECK_MS = Math.round(PHI ** 4 * 1000);  // φ⁴ = 6,854ms
 
 class HeadyAgent {
     constructor(id, serviceGroup, client) {
