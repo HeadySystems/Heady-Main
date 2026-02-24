@@ -1671,6 +1671,20 @@ try {
 }
 
 // ─── SSE Text Streaming Engine ───────────────────────────────────────
+// ─── HeadyQA — Live Quality Assurance Engine ─────────────────────────
+let qaEngine = null;
+try {
+  const { HeadyQA, registerQARoutes } = require("./src/hc_qa");
+  qaEngine = new HeadyQA({ projectRoot: __dirname, managerPort: PORT });
+  registerQARoutes(app, qaEngine);
+  qaEngine.startContinuousLoop();
+  console.log("  ✅ HeadyQA: LOADED (endpoint probes + schema validation + integration smoke tests)");
+  console.log("    → Endpoints: /api/qa/status, /run, /reports, /latest");
+} catch (err) {
+  console.warn(`  ⚠ HeadyQA not loaded: ${err.message}`);
+}
+
+// ─── SSE Text Streaming Engine ───────────────────────────────────────
 const sseClients = new Set();
 
 app.get("/api/stream/connect", (req, res) => {

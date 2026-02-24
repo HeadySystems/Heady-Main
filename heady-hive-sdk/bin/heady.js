@@ -17,7 +17,7 @@ const pkg = require("../package.json");
 
 // Initialize client
 const heady = new HeadyClient({
-    url: process.env.HEADY_URL || "http://localhost:3301",
+    url: process.env.HEADY_URL || "https://headyme.com",
     apiKey: process.env.HEADY_API_KEY || "",
     budget: {
         daily: parseFloat(process.env.HEADY_BUDGET_DAILY || "10"),
@@ -225,7 +225,7 @@ FLAGS
   --version, -v                Show version
 
 ENVIRONMENT
-  HEADY_URL                    Heady Manager URL (default: http://localhost:3301)
+  HEADY_URL                    Heady Manager URL (default: https://headyme.com)
   HEADY_API_KEY                API authentication key
   HEADY_BUDGET_DAILY           Daily budget cap in USD (default: 10)
   HEADY_BUDGET_MONTHLY         Monthly budget cap in USD (default: 100)
