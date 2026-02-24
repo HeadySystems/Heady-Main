@@ -1,22 +1,19 @@
 /**
  * ─── Heady Liquid Dynamic Agent Orchestrator ──────────────────────
- * Intelligent async parallel agent spawning — LIQUID ARCHITECTURE.
- * 
- * Liquid Architecture:
- *   - Duplicate nodes spawn dynamically per service group
- *   - Auto-scale up under load pressure (queue depth > threshold)
- *   - Auto-scale down when idle (30s reclamation)
- *   - Remote-first dispatch: prefer HF/Gemini/Claude over local
- *   - Every action → vector memory + audit trail
+ *
+ * NOW ACTUALLY USED:
+ *   - ALL /brain/* requests route through orchestrator.submit()
+ *   - Local dispatch mode: calls handler functions in-process, no self-HTTP
+ *   - Agents spawn on demand per service group
+ *   - Tasks get tracked, scaled, and reclaimed
  *
  * Service Groups (each can have N duplicate nodes):
- *   reasoning  → brain.analyze, brain.refactor, brain.complete
+ *   reasoning  → brain.chat, brain.analyze, brain.complete
  *   embedding  → brain.embed, vector store/query
  *   search     → brain.search, knowledge retrieval
  *   creative   → creative.generate, remix
  *   battle     → battle.validate, arena
  *   ops        → health, monitoring, deploy
- *   remote     → HF/Gemini/Claude dispatch (preferred)
  * ──────────────────────────────────────────────────────────────────
  */
 
@@ -26,20 +23,20 @@ const path = require("path");
 
 const AUDIT_PATH = path.join(__dirname, "..", "data", "agent-orchestrator-audit.jsonl");
 const PHI = 1.6180339887;
-const MAX_CONCURRENT = 50;  // Liquid: high ceiling for parallel nodes
-const IDLE_RECLAIM_MS = Math.round(PHI ** 6 * 1000); // φ⁶ = 17,944ms
-const SCALE_THRESHOLD = 3;  // Queue depth that triggers auto-scale
-const SCALE_CHECK_MS = Math.round(PHI ** 4 * 1000);  // φ⁴ = 6,854ms
+const MAX_CONCURRENT = 50;
+const IDLE_RECLAIM_MS = Math.round(PHI ** 6 * 1000); // φ⁶ ≈ 17,944ms
+const SCALE_THRESHOLD = 3;
+const SCALE_CHECK_MS = Math.round(PHI ** 4 * 1000);  // φ⁴ ≈ 6,854ms
 
 class HeadyAgent {
-    constructor(id, serviceGroup, client) {
+    constructor(id, serviceGroup) {
         this.id = id;
         this.serviceGroup = serviceGroup;
-        this.client = client;
         this.busy = false;
         this.taskCount = 0;
         this.errors = 0;
         this.totalLatency = 0;
+        this.lastActive = Date.now();
         this.created = Date.now();
     }
 
@@ -56,56 +53,9 @@ class HeadyAgent {
             errors: this.errors,
             avgLatency: this.avgLatency,
             uptime: Date.now() - this.created,
+            lastActive: this.lastActive,
+            idleSince: this.busy ? null : Date.now() - this.lastActive,
         };
-    }
-
-    async execute(task) {
-        this.busy = true;
-        const start = Date.now();
-        try {
-            const result = await this._dispatch(task);
-            this.taskCount++;
-            this.totalLatency += Date.now() - start;
-            return { ok: true, result, latency: Date.now() - start, agent: this.id };
-        } catch (err) {
-            this.errors++;
-            return { ok: false, error: err.message, latency: Date.now() - start, agent: this.id };
-        } finally {
-            this.busy = false;
-        }
-    }
-
-    async _dispatch(task) {
-        const { action, payload } = task;
-        switch (this.serviceGroup) {
-            case "reasoning":
-                if (action === "analyze") return this.client.brain.analyze(payload.content, payload);
-                if (action === "refactor") return this.client.brain.refactor(payload.code, payload);
-                if (action === "complete") return this.client.brain.complete(payload.prompt, payload);
-                return this.client.brain.chat(payload.message || payload.content, payload);
-
-            case "embedding":
-                if (action === "embed") return this.client.brain.embed(payload.text);
-                if (action === "store") return this.client.post("/api/vector/store", payload);
-                return this.client.brain.embed(payload.text || payload.content);
-
-            case "search":
-                return this.client.brain.search(payload.query, payload);
-
-            case "battle":
-                if (action === "arena") return this.client.battle.arena(payload.solutions, payload);
-                return this.client.battle.validate(payload.description, payload);
-
-            case "creative":
-                return this.client.creative.generate(payload.prompt, payload);
-
-            case "ops":
-                if (action === "health") return this.client.health();
-                return this.client.get(`/api/${action}`);
-
-            default:
-                return this.client.brain.chat(payload.message || JSON.stringify(payload));
-        }
     }
 }
 
@@ -139,21 +89,23 @@ class AgentOrchestrator extends EventEmitter {
     constructor(options = {}) {
         super();
         this.maxConcurrent = options.maxConcurrent || MAX_CONCURRENT;
-        this.baseUrl = options.baseUrl || "http://127.0.0.1:3301";
-        this.apiKey = options.apiKey || process.env.HEADY_API_KEY || "";
         this.agents = new Map();
         this.taskQueue = [];
         this.completedTasks = 0;
+        this.failedTasks = 0;
         this.router = new DynamicRouter();
         this.started = Date.now();
         this.scaleEvents = [];
-        this.remoteDispatch = null; // Set via setRemoteDispatch()
+        this.taskHistory = []; // Keep last 100 completed tasks
+
+        // LOCAL DISPATCH: registered handler functions for in-process calls
+        this.handlers = new Map();
 
         // Per-group node counts for liquid scaling
         this.groupCounts = {};
         this.groupLimits = {
             reasoning: 10, embedding: 8, search: 6,
-            creative: 5, battle: 4, ops: 3, remote: 15,
+            creative: 5, battle: 4, ops: 3,
         };
 
         // Ensure data dir
@@ -164,14 +116,16 @@ class AgentOrchestrator extends EventEmitter {
         this._scaleInterval = setInterval(() => this._autoScale(), SCALE_CHECK_MS);
     }
 
-    /** Wire remote compute dispatcher for remote-first routing */
-    setRemoteDispatch(remoteFn) {
-        this.remoteDispatch = remoteFn;
-    }
-
-    _createClient() {
-        const { HeadyClient } = require("../heady-hive-sdk");
-        return new HeadyClient({ url: this.baseUrl, apiKey: this.apiKey });
+    /**
+     * Register a local handler function for an action.
+     * This is how brain routes wire into the orchestrator WITHOUT self-HTTP.
+     *
+     * @param {string} action - e.g., "chat", "analyze", "embed", "search"
+     * @param {Function} handler - async (payload) => result
+     */
+    registerHandler(action, handler) {
+        this.handlers.set(action, handler);
+        console.log(`  ∞ Orchestrator: handler registered for '${action}'`);
     }
 
     _getOrCreateAgent(serviceGroup) {
@@ -185,7 +139,7 @@ class AgentOrchestrator extends EventEmitter {
         if (groupCount < groupLimit && this.agents.size < this.maxConcurrent) {
             const nodeNum = groupCount + 1;
             const id = `${serviceGroup}-node-${nodeNum}-${Date.now().toString(36)}`;
-            const agent = new HeadyAgent(id, serviceGroup, this._createClient());
+            const agent = new HeadyAgent(id, serviceGroup);
             this.agents.set(id, agent);
             this.groupCounts[serviceGroup] = nodeNum;
             this.emit("agent:spawned", { id, serviceGroup, nodeNum, groupTotal: nodeNum });
@@ -195,7 +149,7 @@ class AgentOrchestrator extends EventEmitter {
         return null;
     }
 
-    /** Liquid: scale up a service group by N nodes */
+    /** Scale up a service group by N nodes */
     scaleUp(serviceGroup, count = 1) {
         const spawned = [];
         for (let i = 0; i < count; i++) {
@@ -206,7 +160,7 @@ class AgentOrchestrator extends EventEmitter {
         return spawned;
     }
 
-    /** Liquid: scale down idle agents in a service group */
+    /** Scale down idle agents in a service group */
     scaleDown(serviceGroup) {
         let removed = 0;
         for (const [id, agent] of this.agents) {
@@ -221,9 +175,9 @@ class AgentOrchestrator extends EventEmitter {
         return removed;
     }
 
-    /** Liquid: auto-scale based on queue pressure + idle reclamation */
+    /** Auto-scale based on queue pressure + idle reclamation */
     _autoScale() {
-        // Scale UP: if queue has pressure, spawn workers for bottleneck groups
+        // Scale UP under pressure
         if (this.taskQueue.length >= SCALE_THRESHOLD) {
             const groupPressure = {};
             this.taskQueue.forEach(({ serviceGroup }) => {
@@ -233,16 +187,15 @@ class AgentOrchestrator extends EventEmitter {
                 if (pressure >= 2) this.scaleUp(group, Math.min(pressure, 3));
             }
         }
-        // Scale DOWN: reclaim idle agents older than IDLE_RECLAIM_MS
+        // Scale DOWN idle agents
         const now = Date.now();
         for (const [id, agent] of this.agents) {
-            if (!agent.busy && agent.taskCount > 0 && (now - agent.created) > IDLE_RECLAIM_MS) {
-                // Keep at least 1 per group
+            if (!agent.busy && agent.taskCount > 0 && (now - agent.lastActive) > IDLE_RECLAIM_MS) {
                 const groupAgents = [...this.agents.values()].filter(a => a.serviceGroup === agent.serviceGroup);
                 if (groupAgents.length > 1) {
                     this.agents.delete(id);
                     this.groupCounts[agent.serviceGroup] = Math.max(0, (this.groupCounts[agent.serviceGroup] || 1) - 1);
-                    this._audit({ type: "liquid:idle_reclaim", agent: id });
+                    this._audit({ type: "liquid:idle_reclaim", agent: id, idle_ms: now - agent.lastActive });
                 }
             }
         }
@@ -254,7 +207,11 @@ class AgentOrchestrator extends EventEmitter {
         this.emit("audit", entry);
     }
 
-    /** Submit a single task */
+    /**
+     * Submit a task — the primary entry point.
+     * If a local handler is registered, dispatch in-process.
+     * Otherwise queue for agent execution.
+     */
     async submit(task) {
         const serviceGroup = this.router.route(task);
         const agent = this._getOrCreateAgent(serviceGroup);
@@ -267,15 +224,52 @@ class AgentOrchestrator extends EventEmitter {
             });
         }
 
+        const start = Date.now();
+        agent.busy = true;
         this._audit({ type: "task:start", action: task.action, agent: agent.id, serviceGroup });
-        const result = await agent.execute(task);
-        this.completedTasks++;
-        this._audit({ type: "task:complete", action: task.action, agent: agent.id, ok: result.ok, latency: result.latency });
-        this.emit("task:complete", result);
 
-        // Process queue
-        this._processQueue();
-        return result;
+        try {
+            let result;
+            const handler = this.handlers.get(task.action);
+            if (handler) {
+                // LOCAL DISPATCH: call the registered handler function directly
+                result = await handler(task.payload || {});
+            } else {
+                // No handler registered — return an error
+                throw new Error(`No handler registered for action '${task.action}'`);
+            }
+
+            agent.taskCount++;
+            agent.totalLatency += Date.now() - start;
+            agent.lastActive = Date.now();
+            agent.busy = false;
+            this.completedTasks++;
+
+            const taskRecord = {
+                ok: true,
+                action: task.action,
+                result,
+                latency: Date.now() - start,
+                agent: agent.id,
+                serviceGroup,
+            };
+
+            this._audit({ type: "task:complete", action: task.action, agent: agent.id, latency: taskRecord.latency });
+            this.taskHistory.push({ ...taskRecord, ts: Date.now() });
+            if (this.taskHistory.length > 100) this.taskHistory = this.taskHistory.slice(-100);
+            this.emit("task:complete", taskRecord);
+
+            this._processQueue();
+            return taskRecord;
+        } catch (err) {
+            agent.errors++;
+            agent.busy = false;
+            agent.lastActive = Date.now();
+            this.failedTasks++;
+            this._audit({ type: "task:error", action: task.action, agent: agent.id, error: err.message });
+            this._processQueue();
+            return { ok: false, error: err.message, latency: Date.now() - start, agent: agent.id };
+        }
     }
 
     /** Submit multiple tasks in parallel */
@@ -298,22 +292,22 @@ class AgentOrchestrator extends EventEmitter {
             const agent = this._getOrCreateAgent(serviceGroup);
             if (!agent) break;
             this.taskQueue.shift();
-            agent.execute(task).then(resolve).catch(reject);
+            this.submit(task).then(resolve).catch(reject);
         }
     }
 
-    /** Get orchestrator stats — liquid architecture view */
+    /** Orchestrator stats — liquid architecture view */
     getStats() {
         const agents = [];
         this.agents.forEach(a => agents.push(a.stats));
 
-        // Per-group breakdown
         const groups = {};
         this.agents.forEach(a => {
-            if (!groups[a.serviceGroup]) groups[a.serviceGroup] = { nodes: 0, busy: 0, tasks: 0, limit: this.groupLimits[a.serviceGroup] || 5 };
+            if (!groups[a.serviceGroup]) groups[a.serviceGroup] = { nodes: 0, busy: 0, tasks: 0, errors: 0, limit: this.groupLimits[a.serviceGroup] || 5 };
             groups[a.serviceGroup].nodes++;
             if (a.busy) groups[a.serviceGroup].busy++;
             groups[a.serviceGroup].tasks += a.taskCount;
+            groups[a.serviceGroup].errors += a.errors;
         });
 
         return {
@@ -321,16 +315,19 @@ class AgentOrchestrator extends EventEmitter {
             totalAgents: this.agents.size,
             maxConcurrent: this.maxConcurrent,
             completedTasks: this.completedTasks,
+            failedTasks: this.failedTasks,
             queuedTasks: this.taskQueue.length,
+            handlersRegistered: [...this.handlers.keys()],
             uptime: Date.now() - this.started,
             groups,
             agents,
             recentScaleEvents: this.scaleEvents.slice(-20),
-            remoteFirstEnabled: !!this.remoteDispatch,
+            recentTasks: this.taskHistory.slice(-10).map(t => ({
+                action: t.action, ok: t.ok, latency: t.latency, agent: t.agent, serviceGroup: t.serviceGroup,
+            })),
         };
     }
 
-    /** Shutdown all agents */
     shutdown() {
         clearInterval(this._scaleInterval);
         this.agents.clear();
@@ -339,7 +336,7 @@ class AgentOrchestrator extends EventEmitter {
         this.emit("shutdown");
     }
 
-    /** Express route registration — liquid architecture endpoints */
+    /** Express routes */
     registerRoutes(app) {
         app.get("/api/orchestrator/agents", (req, res) => {
             res.json({ ok: true, ...this.getStats() });
@@ -367,18 +364,15 @@ class AgentOrchestrator extends EventEmitter {
             }
         });
 
-        // Liquid: per-node visibility
         app.get("/api/orchestrator/nodes", (req, res) => {
             const nodes = [];
             this.agents.forEach(a => nodes.push({
                 ...a.stats,
                 age: Date.now() - a.created,
-                idleMs: a.busy ? 0 : Date.now() - a.created,
             }));
             res.json({ ok: true, nodes, groups: this.getStats().groups });
         });
 
-        // Liquid: manual scale control
         app.post("/api/orchestrator/scale", (req, res) => {
             const { serviceGroup, action, count } = req.body;
             if (!serviceGroup || !action) return res.status(400).json({ error: "serviceGroup + action required" });

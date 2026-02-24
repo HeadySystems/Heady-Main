@@ -705,5 +705,334 @@
     "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Service mesh orchestration and load balancing\n---\nEmbedding request: Service mesh orchestration and load balancing\n---\nEmbedding request: Service mesh orchestration and load balancing\n[End Context]\n\nService mesh orchestration and load balancing",
     "output": "[embedding generated]",
     "timestamp": "2026-02-23T15:05:58.569Z"
+  },
+  {
+    "id": "8ea3c1b0-f180-43e0-9d0c-281727e8038b",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Real-time streaming and WebSocket patterns\n---\nEmbedding request: Real-time streaming and WebSocket patterns\n---\nEmbedding request: Real-time streaming and WebSocket patterns\n[End Context]\n\nReal-time streaming and WebSocket patterns",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T15:11:02.167Z"
+  },
+  {
+    "id": "ae96388d-3b4f-4bd2-b2a1-2f635433ee1c",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Code generation and refactoring best practices\n---\nEmbedding request: Code generation and refactoring best practices\n---\nEmbedding request: Code generation and refactoring best practices\n[End Context]\n\nCode generation and refactoring best practices",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T15:16:08.954Z"
+  },
+  {
+    "id": "8f8addae-72b8-40e3-a39d-1fe74cc6c5a2",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Heady system architecture patterns and optimization\n---\nEmbedding request: Heady system architecture patterns and optimization\n---\nEmbedding request: Heady system architecture patterns and optimization\n[End Context]\n\nHeady system architecture patterns and optimization",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T15:21:24.075Z"
+  },
+  {
+    "id": "6200ff2f-59d2-4f51-bf66-0d288cce7c8d",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: AI response psychology and conflict avoidance\n---\nEmbedding request: AI response psychology and conflict avoidance\n---\nEmbedding request: AI response psychology and conflict avoidance\n[End Context]\n\nAI response psychology and conflict avoidance",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T15:26:52.647Z"
+  },
+  {
+    "id": "8875a119-9eee-40c0-bb56-4c9160898939",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Behavior analysis for HeadyCorrections vertical\n---\nEmbedding request: Behavior analysis for HeadyCorrections vertical\n---\nEmbedding request: Behavior analysis for HeadyCorrections vertical\n[End Context]\n\nBehavior analysis for HeadyCorrections vertical",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T15:31:53.194Z"
+  },
+  {
+    "id": "82a62813-6cda-4fe4-8f56-5074fbc8ab37",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Cross-device authentication and permission management\n---\nEmbedding request: Cross-device authentication and permission management\n---\nEmbedding request: Cross-device authentication and permission management\n[End Context]\n\nCross-device authentication and permission management",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T15:37:05.618Z"
+  },
+  {
+    "id": "eea086ce-c5ab-41da-817d-6d09de9a0341",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Voice UX design patterns for mobile AI companions\n---\nEmbedding request: Voice UX design patterns for mobile AI companions\n---\nEmbedding request: Voice UX design patterns for mobile AI companions\n[End Context]\n\nVoice UX design patterns for mobile AI companions",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T15:42:06.243Z"
+  },
+  {
+    "id": "440c7cc0-cbe3-4d88-9e2e-3cfc9dabc276",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: 3D vector storage schema optimization and indexing\n---\nEmbedding request: 3D vector storage schema optimization and indexing\n---\nEmbedding request: 3D vector storage schema optimization and indexing\n[End Context]\n\n3D vector storage schema optimization and indexing",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T15:47:12.986Z"
+  },
+  {
+    "id": "b528149a-5f1a-4ce0-a5ca-87769148d988",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Audit trail completeness and regulatory compliance\n---\nEmbedding request: Audit trail completeness and regulatory compliance\n---\nEmbedding request: Audit trail completeness and regulatory compliance\n[End Context]\n\nAudit trail completeness and regulatory compliance",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T15:52:13.622Z"
+  },
+  {
+    "id": "f3e3de8a-6d09-4311-9fcb-006da54b0e24",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Service mesh orchestration and load balancing\n---\nEmbedding request: Service mesh orchestration and load balancing\n---\nEmbedding request: Service mesh orchestration and load balancing\n[End Context]\n\nService mesh orchestration and load balancing",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T15:57:14.181Z"
+  },
+  {
+    "id": "9d0f90e7-afcd-413f-852a-832af6080861",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Real-time streaming and WebSocket patterns\n---\nEmbedding request: Real-time streaming and WebSocket patterns\n---\nEmbedding request: Real-time streaming and WebSocket patterns\n[End Context]\n\nReal-time streaming and WebSocket patterns",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T16:02:14.941Z"
+  },
+  {
+    "id": "6708f314-dd84-402d-a881-b53e07400cbf",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Code generation and refactoring best practices\n---\nEmbedding request: Code generation and refactoring best practices\n---\nEmbedding request: Code generation and refactoring best practices\n[End Context]\n\nCode generation and refactoring best practices",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T16:07:15.426Z"
+  },
+  {
+    "id": "1b484f77-eb2e-4b75-a0fe-4001b0a04e0e",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Heady system architecture patterns and optimization\n---\nEmbedding request: Heady system architecture patterns and optimization\n---\nEmbedding request: Heady system architecture patterns and optimization\n[End Context]\n\nHeady system architecture patterns and optimization",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T16:12:16.038Z"
+  },
+  {
+    "id": "f833f173-f1e3-4e5d-88d9-00aac23d7a7e",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: AI response psychology and conflict avoidance\n---\nEmbedding request: AI response psychology and conflict avoidance\n---\nEmbedding request: AI response psychology and conflict avoidance\n[End Context]\n\nAI response psychology and conflict avoidance",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T16:17:16.630Z"
+  },
+  {
+    "id": "d1c4bd99-4596-4498-bfe3-f64a6eb34bb7",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Behavior analysis for HeadyCorrections vertical\n---\nEmbedding request: Behavior analysis for HeadyCorrections vertical\n---\nEmbedding request: Behavior analysis for HeadyCorrections vertical\n[End Context]\n\nBehavior analysis for HeadyCorrections vertical",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T16:22:19.682Z"
+  },
+  {
+    "id": "f4730a65-14b4-4308-8983-b91adeb948a7",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Cross-device authentication and permission management\n---\nEmbedding request: Cross-device authentication and permission management\n---\nEmbedding request: Cross-device authentication and permission management\n[End Context]\n\nCross-device authentication and permission management",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T16:27:26.109Z"
+  },
+  {
+    "id": "31cfab39-0f60-4aba-beef-a0caa6559e3b",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Voice UX design patterns for mobile AI companions\n---\nEmbedding request: Voice UX design patterns for mobile AI companions\n---\nEmbedding request: Voice UX design patterns for mobile AI companions\n[End Context]\n\nVoice UX design patterns for mobile AI companions",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T16:32:26.674Z"
+  },
+  {
+    "id": "b1a09e8a-4b49-43ed-b6f8-502808b56014",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: 3D vector storage schema optimization and indexing\n---\nEmbedding request: 3D vector storage schema optimization and indexing\n---\nEmbedding request: 3D vector storage schema optimization and indexing\n[End Context]\n\n3D vector storage schema optimization and indexing",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T16:37:29.339Z"
+  },
+  {
+    "id": "821b7421-5a42-4e29-89e9-51f97146e271",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Audit trail completeness and regulatory compliance\n---\nEmbedding request: Audit trail completeness and regulatory compliance\n---\nEmbedding request: Audit trail completeness and regulatory compliance\n[End Context]\n\nAudit trail completeness and regulatory compliance",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T16:42:37.975Z"
+  },
+  {
+    "id": "05fcb5ee-0afb-46b2-aace-ca8f6b33f5a6",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Service mesh orchestration and load balancing\n---\nEmbedding request: Service mesh orchestration and load balancing\n---\nEmbedding request: Service mesh orchestration and load balancing\n[End Context]\n\nService mesh orchestration and load balancing",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T16:47:38.499Z"
+  },
+  {
+    "id": "8287e009-1170-4844-8b38-caf083c166e1",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Real-time streaming and WebSocket patterns\n---\nEmbedding request: Real-time streaming and WebSocket patterns\n---\nEmbedding request: Real-time streaming and WebSocket patterns\n[End Context]\n\nReal-time streaming and WebSocket patterns",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T16:52:39.020Z"
+  },
+  {
+    "id": "165a9bc9-b5ab-4fe6-a47e-475b70ae0308",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Code generation and refactoring best practices\n---\nEmbedding request: Code generation and refactoring best practices\n---\nEmbedding request: Code generation and refactoring best practices\n[End Context]\n\nCode generation and refactoring best practices",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T16:57:39.916Z"
+  },
+  {
+    "id": "dc8b0665-5269-49fb-8b14-6237ef6be86c",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Heady system architecture patterns and optimization\n---\nEmbedding request: Heady system architecture patterns and optimization\n---\nEmbedding request: Heady system architecture patterns and optimization\n[End Context]\n\nHeady system architecture patterns and optimization",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T17:02:40.866Z"
+  },
+  {
+    "id": "6b58024a-b88e-4bf7-b7fb-8867e42c190a",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: AI response psychology and conflict avoidance\n---\nEmbedding request: AI response psychology and conflict avoidance\n---\nEmbedding request: AI response psychology and conflict avoidance\n[End Context]\n\nAI response psychology and conflict avoidance",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T17:07:41.469Z"
+  },
+  {
+    "id": "e0b1cfef-6694-45c2-841f-950819662b41",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Behavior analysis for HeadyCorrections vertical\n---\nEmbedding request: Behavior analysis for HeadyCorrections vertical\n---\nEmbedding request: Behavior analysis for HeadyCorrections vertical\n[End Context]\n\nBehavior analysis for HeadyCorrections vertical",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T17:12:42.280Z"
+  },
+  {
+    "id": "36697d4a-3781-44a6-a813-e5f4986e4944",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Cross-device authentication and permission management\n---\nEmbedding request: Cross-device authentication and permission management\n---\nEmbedding request: Cross-device authentication and permission management\n[End Context]\n\nCross-device authentication and permission management",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T17:17:42.852Z"
+  },
+  {
+    "id": "990e197d-ec3f-49eb-a2cb-f0e1927a541a",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Voice UX design patterns for mobile AI companions\n---\nEmbedding request: Voice UX design patterns for mobile AI companions\n---\nEmbedding request: Voice UX design patterns for mobile AI companions\n[End Context]\n\nVoice UX design patterns for mobile AI companions",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T17:22:55.238Z"
+  },
+  {
+    "id": "858c98b1-5a53-467c-8559-af98c78956b9",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: 3D vector storage schema optimization and indexing\n---\nEmbedding request: 3D vector storage schema optimization and indexing\n---\nEmbedding request: 3D vector storage schema optimization and indexing\n[End Context]\n\n3D vector storage schema optimization and indexing",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T17:27:58.442Z"
+  },
+  {
+    "id": "c1c3cf9b-ac24-4d0c-943e-8f434ae9e5bf",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Audit trail completeness and regulatory compliance\n---\nEmbedding request: Audit trail completeness and regulatory compliance\n---\nEmbedding request: Audit trail completeness and regulatory compliance\n[End Context]\n\nAudit trail completeness and regulatory compliance",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T17:32:58.986Z"
+  },
+  {
+    "id": "8f3a4bfd-5d3f-47d5-bc60-296478a3f108",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Service mesh orchestration and load balancing\n---\nEmbedding request: Service mesh orchestration and load balancing\n---\nEmbedding request: Service mesh orchestration and load balancing\n[End Context]\n\nService mesh orchestration and load balancing",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T17:38:10.076Z"
+  },
+  {
+    "id": "2b65172d-cb22-4be4-a198-55e18184a92c",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Real-time streaming and WebSocket patterns\n---\nEmbedding request: Real-time streaming and WebSocket patterns\n---\nEmbedding request: Real-time streaming and WebSocket patterns\n[End Context]\n\nReal-time streaming and WebSocket patterns",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T17:43:10.887Z"
+  },
+  {
+    "id": "91e08fc3-6dab-4a67-bb56-9fa72edfbdd1",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Code generation and refactoring best practices\n---\nEmbedding request: Code generation and refactoring best practices\n---\nEmbedding request: Code generation and refactoring best practices\n[End Context]\n\nCode generation and refactoring best practices",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T17:48:11.451Z"
+  },
+  {
+    "id": "225c065c-110f-45f5-b0ac-4fc7134f9873",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Heady system architecture patterns and optimization\n---\nEmbedding request: Heady system architecture patterns and optimization\n---\nEmbedding request: Heady system architecture patterns and optimization\n[End Context]\n\nHeady system architecture patterns and optimization",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T17:53:12.070Z"
+  },
+  {
+    "id": "3969ddaa-e553-4999-88c6-161ccbeaeb0e",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: AI response psychology and conflict avoidance\n---\nEmbedding request: AI response psychology and conflict avoidance\n---\nEmbedding request: AI response psychology and conflict avoidance\n[End Context]\n\nAI response psychology and conflict avoidance",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T17:58:12.714Z"
+  },
+  {
+    "id": "d9ed168e-649c-491b-a576-51d95179304b",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Behavior analysis for HeadyCorrections vertical\n---\nEmbedding request: Behavior analysis for HeadyCorrections vertical\n---\nEmbedding request: Behavior analysis for HeadyCorrections vertical\n[End Context]\n\nBehavior analysis for HeadyCorrections vertical",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T18:03:13.194Z"
+  },
+  {
+    "id": "9b846ec1-6e42-4831-bd60-332ae69c76f9",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Cross-device authentication and permission management\n---\nEmbedding request: Cross-device authentication and permission management\n---\nEmbedding request: Cross-device authentication and permission management\n[End Context]\n\nCross-device authentication and permission management",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T18:08:13.827Z"
+  },
+  {
+    "id": "d417486e-47bf-45ae-b9b3-47ef7f4b1846",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Voice UX design patterns for mobile AI companions\n---\nEmbedding request: Voice UX design patterns for mobile AI companions\n---\nEmbedding request: Voice UX design patterns for mobile AI companions\n[End Context]\n\nVoice UX design patterns for mobile AI companions",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T18:13:14.416Z"
+  },
+  {
+    "id": "47f167f5-d853-4b76-9b3f-2f42e1d82614",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: 3D vector storage schema optimization and indexing\n---\nEmbedding request: 3D vector storage schema optimization and indexing\n---\nEmbedding request: 3D vector storage schema optimization and indexing\n[End Context]\n\n3D vector storage schema optimization and indexing",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T18:18:16.599Z"
+  },
+  {
+    "id": "70346737-9fb8-43b9-ae73-bda375673327",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Audit trail completeness and regulatory compliance\n---\nEmbedding request: Audit trail completeness and regulatory compliance\n---\nEmbedding request: Audit trail completeness and regulatory compliance\n[End Context]\n\nAudit trail completeness and regulatory compliance",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T18:23:17.229Z"
+  },
+  {
+    "id": "6a25e7e8-516b-4b4a-8690-5f59631f8d18",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Service mesh orchestration and load balancing\n---\nEmbedding request: Service mesh orchestration and load balancing\n---\nEmbedding request: Service mesh orchestration and load balancing\n[End Context]\n\nService mesh orchestration and load balancing",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T18:28:27.673Z"
+  },
+  {
+    "id": "c364c5a6-d802-4a32-8f1d-baa9f4a8009f",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Real-time streaming and WebSocket patterns\n---\nEmbedding request: Real-time streaming and WebSocket patterns\n---\nEmbedding request: Real-time streaming and WebSocket patterns\n[End Context]\n\nReal-time streaming and WebSocket patterns",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T18:33:31.240Z"
+  },
+  {
+    "id": "e9a2f9ef-c160-4ee5-89fc-61e17e6f91a0",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Code generation and refactoring best practices\n---\nEmbedding request: Code generation and refactoring best practices\n---\nEmbedding request: Code generation and refactoring best practices\n[End Context]\n\nCode generation and refactoring best practices",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T18:38:31.834Z"
+  },
+  {
+    "id": "ef13c070-e006-4400-a5ac-01e3eadf20fd",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Heady system architecture patterns and optimization\n---\nEmbedding request: Heady system architecture patterns and optimization\n---\nEmbedding request: Heady system architecture patterns and optimization\n[End Context]\n\nHeady system architecture patterns and optimization",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T18:43:32.359Z"
+  },
+  {
+    "id": "c83b2599-388a-46e9-a8f0-fafed620b985",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: AI response psychology and conflict avoidance\n---\nEmbedding request: AI response psychology and conflict avoidance\n---\nEmbedding request: AI response psychology and conflict avoidance\n[End Context]\n\nAI response psychology and conflict avoidance",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T18:48:33.398Z"
+  },
+  {
+    "id": "ca7b4d7e-c0d2-4bb0-805b-8dc74af64a8d",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Behavior analysis for HeadyCorrections vertical\n---\nEmbedding request: Behavior analysis for HeadyCorrections vertical\n---\nEmbedding request: Behavior analysis for HeadyCorrections vertical\n[End Context]\n\nBehavior analysis for HeadyCorrections vertical",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T18:53:33.997Z"
+  },
+  {
+    "id": "0a38a44d-f6a3-4483-8456-3f8b3852df91",
+    "type": "embed",
+    "input": "[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Cross-device authentication and permission management\n---\nEmbedding request: Cross-device authentication and permission management\n---\nEmbedding request: Cross-device authentication and permission management\n[End Context]\n\nCross-device authentication and permission management",
+    "output": "[embedding generated]",
+    "timestamp": "2026-02-23T18:58:34.459Z"
+  },
+  {
+    "id": "e8709bb9-6477-491e-9f74-5ce125b0c018",
+    "type": "analyze",
+    "input": "function add(a,b) { return a+b; }",
+    "output": "[analysis of code]",
+    "timestamp": "2026-02-24T07:12:30.513Z"
   }
 ]

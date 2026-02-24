@@ -1231,5 +1231,842 @@
     "fallbackUsed": true,
     "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
     "ts": "2026-02-23T15:05:58.791Z"
+  },
+  {
+    "id": "84e49af2-144a-40ed-afbc-c5f8410ea2f0",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Real-time streaming and WebSocket...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T15:11:05.849Z"
+  },
+  {
+    "id": "3f0f1cc1-40f4-4cd4-b1b8-c8b27f3ee8ab",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Real-time st...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (300 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T15:11:05.851Z"
+  },
+  {
+    "id": "265ec631-ac7c-4f2b-9dbd-26eca900d46a",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Code generation and refactoring b...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T15:16:12.435Z"
+  },
+  {
+    "id": "e6dccd6a-b5d8-4da2-83c6-e7db348e4602",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Code generat...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (316 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T15:16:12.437Z"
+  },
+  {
+    "id": "05b14e2c-a4ef-4b13-9532-f94f945951f5",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Heady system architecture pattern...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T15:21:42.731Z"
+  },
+  {
+    "id": "797d9a5f-a540-4272-a4c4-7e6b725e6724",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Heady system...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (336 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T15:21:42.734Z"
+  },
+  {
+    "id": "fdb54d4a-c42e-41c5-be63-3ad01633e6c1",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: AI response psychology and confli...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T15:26:52.831Z"
+  },
+  {
+    "id": "81712d90-9ed6-4def-b6b1-918a9ecc9a3f",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: AI response ...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (312 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T15:26:52.833Z"
+  },
+  {
+    "id": "c0954fe8-cc04-4918-83b7-4f01d5e095ca",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Behavior analysis for HeadyCorrec...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T15:31:53.614Z"
+  },
+  {
+    "id": "1717a9bd-e7c3-4e6f-b424-a1c9ac67fb61",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Behavior ana...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (320 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T15:31:53.617Z"
+  },
+  {
+    "id": "8152726c-e712-4f72-a915-9a1648dbeda1",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Cross-device authentication and p...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T15:37:05.770Z"
+  },
+  {
+    "id": "5c3320a2-b931-4b5b-9a5a-db621b82beae",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Cross-device...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (344 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T15:37:05.773Z"
+  },
+  {
+    "id": "3299e4f3-e8c4-44c4-89ae-f922163083b4",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Voice UX design patterns for mobi...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T15:42:12.550Z"
+  },
+  {
+    "id": "62d687e2-5546-4725-809f-8bc99a70dae0",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Voice UX des...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (328 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T15:42:12.553Z"
+  },
+  {
+    "id": "bdbe1e35-c24a-4c23-bbc3-e95f5a57d0d1",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: 3D vector storage schema optimiza...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T15:47:13.182Z"
+  },
+  {
+    "id": "13d1be9c-6d72-4d2c-a660-f78eed657294",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: 3D vector st...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (332 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T15:47:13.186Z"
+  },
+  {
+    "id": "346f464b-9c57-4082-970b-287fd5cbf6f6",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Audit trail completeness and regu...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T15:52:13.801Z"
+  },
+  {
+    "id": "226579c5-8f5e-41a0-b60a-ade181f9d0b4",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Audit trail ...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (332 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T15:52:13.804Z"
+  },
+  {
+    "id": "31e90942-e0b9-4d45-bb15-bf6563c73037",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Service mesh orchestration and lo...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T15:57:14.550Z"
+  },
+  {
+    "id": "563c8bf2-9875-45f8-8114-6c3a1ce12ea0",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Service mesh...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (312 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T15:57:14.553Z"
+  },
+  {
+    "id": "d23dc8f3-df66-4487-a694-153002f7f6b6",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Real-time streaming and WebSocket...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T16:02:15.093Z"
+  },
+  {
+    "id": "4f5b6aae-99e9-4e0a-babf-93cdb46a6136",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Real-time st...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (300 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T16:02:15.095Z"
+  },
+  {
+    "id": "2dca0228-69f3-49e4-a9e6-cf0627e93095",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Code generation and refactoring b...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T16:07:15.593Z"
+  },
+  {
+    "id": "ad143319-5ed1-4671-999e-75d3976f0e93",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Code generat...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (316 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T16:07:15.596Z"
+  },
+  {
+    "id": "f90b130b-e5c0-4cc4-a14c-3e55c2e65849",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Heady system architecture pattern...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T16:12:16.211Z"
+  },
+  {
+    "id": "ace562ab-b607-4e74-851d-9a1e61b6471f",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Heady system...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (336 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T16:12:16.213Z"
+  },
+  {
+    "id": "fe6767f3-cec4-40db-9129-26e57ae05987",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: AI response psychology and confli...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T16:17:16.764Z"
+  },
+  {
+    "id": "5d9c5c4d-7715-44df-85d8-3d33bc8f6b6b",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: AI response ...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (312 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T16:17:16.767Z"
+  },
+  {
+    "id": "f9726c37-ce78-4b4a-8785-8646f864fc22",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Behavior analysis for HeadyCorrec...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T16:22:19.884Z"
+  },
+  {
+    "id": "4196328b-9e4a-4406-8067-1202a202372f",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Behavior ana...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (320 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T16:22:19.887Z"
+  },
+  {
+    "id": "d2fd1f24-96c5-4504-9698-8e2724a5b406",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Cross-device authentication and p...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T16:27:26.277Z"
+  },
+  {
+    "id": "ed0c9aa0-56f3-48ed-a598-749475715626",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Cross-device...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (344 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T16:27:26.280Z"
+  },
+  {
+    "id": "c64ad6ca-8460-4d93-9a73-4e69b2cba6b4",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Voice UX design patterns for mobi...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T16:32:26.820Z"
+  },
+  {
+    "id": "ab0799fb-f8a2-4e9a-b028-6e6d4bdbefad",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Voice UX des...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (328 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T16:32:26.823Z"
+  },
+  {
+    "id": "8bcce69a-b078-40f5-8b09-d122b349e129",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: 3D vector storage schema optimiza...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T16:37:29.483Z"
+  },
+  {
+    "id": "baa80400-338f-4f11-96e0-1c3387d2eee0",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: 3D vector st...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (332 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T16:37:29.486Z"
+  },
+  {
+    "id": "6df2d962-ba4e-4d46-9652-0b869636ad31",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Audit trail completeness and regu...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T16:42:38.109Z"
+  },
+  {
+    "id": "830dbfb1-0675-4379-95f9-977a769ad705",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Audit trail ...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (332 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T16:42:38.111Z"
+  },
+  {
+    "id": "e9c2e641-9d76-40fd-a9db-6a097d336755",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Service mesh orchestration and lo...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T16:47:38.644Z"
+  },
+  {
+    "id": "c146c6f3-e169-4d6a-a4cd-bb5539623a32",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Service mesh...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (312 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T16:47:38.646Z"
+  },
+  {
+    "id": "6e68a537-4d07-410e-a815-1a0578440ad6",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Real-time streaming and WebSocket...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T16:52:39.250Z"
+  },
+  {
+    "id": "9898fd11-9fd0-4669-bab0-5b7ba02fc5bd",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Real-time st...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (300 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T16:52:39.253Z"
+  },
+  {
+    "id": "6c68ddd5-6836-4226-815e-534d72815606",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Code generation and refactoring b...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T16:57:40.177Z"
+  },
+  {
+    "id": "d5d570a4-f54e-4527-91dc-08b32dbf2158",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Code generat...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (316 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T16:57:40.180Z"
+  },
+  {
+    "id": "0b246c8a-02cb-40ac-9890-ac0c021af583",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Heady system architecture pattern...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T17:02:41.133Z"
+  },
+  {
+    "id": "c5e77d1d-e6bd-4160-94f3-a3c0b3440d3a",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Heady system...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (336 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T17:02:41.137Z"
+  },
+  {
+    "id": "49974098-b119-4ca3-9cc9-2837880defba",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: AI response psychology and confli...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T17:07:41.653Z"
+  },
+  {
+    "id": "a7b9c85c-145a-4820-a70b-c220699dafdd",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: AI response ...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (312 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T17:07:41.656Z"
+  },
+  {
+    "id": "84fb255f-11d0-4e31-84ba-c3200770cae6",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Behavior analysis for HeadyCorrec...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T17:12:42.479Z"
+  },
+  {
+    "id": "6b224fb2-c894-4fc4-912b-c75ec14c59e7",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Behavior ana...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (320 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T17:12:42.481Z"
+  },
+  {
+    "id": "a24309ab-b116-4607-946d-c9b6f46e97c0",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Cross-device authentication and p...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T17:17:43.012Z"
+  },
+  {
+    "id": "de2a74dd-c5e7-4135-aba1-3b707ab6b918",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Cross-device...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (344 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T17:17:43.015Z"
+  },
+  {
+    "id": "cf9f9db9-31f1-4368-8696-5bfc73b8cd83",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Voice UX design patterns for mobi...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T17:22:55.366Z"
+  },
+  {
+    "id": "6e633e74-b3e0-4c16-881b-2b07ff07850f",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Voice UX des...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (328 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T17:22:55.369Z"
+  },
+  {
+    "id": "a55a0040-c7da-4708-a8ba-89214c8dcf71",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: 3D vector storage schema optimiza...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T17:27:58.633Z"
+  },
+  {
+    "id": "e810f936-b16c-4c07-8e22-170ab6373d8c",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: 3D vector st...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (332 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T17:27:58.635Z"
+  },
+  {
+    "id": "594d2277-761a-4407-be9c-d7792116220b",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Audit trail completeness and regu...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T17:32:59.107Z"
+  },
+  {
+    "id": "39544ee7-37c9-4f72-8f70-306eb4c2ba97",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Audit trail ...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (332 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T17:32:59.111Z"
+  },
+  {
+    "id": "08013586-9b60-4f69-9906-0a526d70e97b",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Service mesh orchestration and lo...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T17:38:10.193Z"
+  },
+  {
+    "id": "11b39562-16dd-4bcf-819d-afbc82b44057",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Service mesh...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (312 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T17:38:10.195Z"
+  },
+  {
+    "id": "6b6c6ad0-8d1a-4bfa-8e65-ea14be985bfd",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Real-time streaming and WebSocket...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T17:43:11.019Z"
+  },
+  {
+    "id": "ab99119c-ccb9-4692-abc4-c07db2584f13",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Real-time st...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (300 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T17:43:11.023Z"
+  },
+  {
+    "id": "06a31dd7-f562-4bdd-9d29-b35d7626e997",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Code generation and refactoring b...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T17:48:11.618Z"
+  },
+  {
+    "id": "45357ecd-a4f0-4989-8a15-bd7726f26f1b",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Code generat...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (316 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T17:48:11.621Z"
+  },
+  {
+    "id": "5764606f-9473-406a-8cfa-88cf30fcd9cb",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Heady system architecture pattern...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T17:53:12.279Z"
+  },
+  {
+    "id": "06b1b4ac-5857-47c9-be84-b46586e9c31e",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Heady system...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (336 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T17:53:12.281Z"
+  },
+  {
+    "id": "176ec603-2cc4-4590-a679-0359c7b37da2",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: AI response psychology and confli...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T17:58:12.865Z"
+  },
+  {
+    "id": "39396721-bba5-4e2e-a727-535f4ae3f22a",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: AI response ...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (312 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T17:58:12.868Z"
+  },
+  {
+    "id": "aad3595c-679f-4a0a-9315-f71c0ea4999e",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Behavior analysis for HeadyCorrec...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T18:03:13.399Z"
+  },
+  {
+    "id": "d7804e91-a16f-4688-92a8-3fdcd4851e82",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Behavior ana...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (320 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T18:03:13.403Z"
+  },
+  {
+    "id": "6c31c6d7-283e-474c-a2a6-0277864d50a5",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Cross-device authentication and p...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T18:08:14.005Z"
+  },
+  {
+    "id": "365b27f5-37f0-49af-9736-0e43f893a1c1",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Cross-device...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (344 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T18:08:14.009Z"
+  },
+  {
+    "id": "734e8cf6-83f1-4fc9-bc63-00319a51ce72",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Voice UX design patterns for mobi...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T18:13:14.583Z"
+  },
+  {
+    "id": "0693e7b6-5b1b-4436-86c8-8d9b234f3a2e",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Voice UX des...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (328 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T18:13:14.585Z"
+  },
+  {
+    "id": "fe3eb261-0f90-4174-b085-971bfe4f8c19",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: 3D vector storage schema optimiza...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T18:18:16.771Z"
+  },
+  {
+    "id": "225eeb49-61c3-4e28-b505-bf5ccd620344",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: 3D vector st...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (332 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T18:18:16.774Z"
+  },
+  {
+    "id": "f5a604b2-cb44-49d9-aeab-2f8aa9b9606e",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Audit trail completeness and regu...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T18:23:17.419Z"
+  },
+  {
+    "id": "81d7b2de-716b-4628-9712-2fc994f24ae3",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Audit trail ...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (332 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T18:23:17.421Z"
+  },
+  {
+    "id": "793310a1-15a3-40cf-ad08-0e27ea3e225f",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Service mesh orchestration and lo...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T18:28:27.852Z"
+  },
+  {
+    "id": "51e032a8-18d3-44a3-8add-0286cae3d5b5",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Service mesh...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (312 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T18:28:27.856Z"
+  },
+  {
+    "id": "0a700147-5962-4114-8c75-0ffa5c17bf73",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Real-time streaming and WebSocket...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T18:33:31.431Z"
+  },
+  {
+    "id": "23a46984-3058-4d8a-8653-063ee31fce31",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Real-time st...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (300 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T18:33:31.433Z"
+  },
+  {
+    "id": "734a96de-157e-40b0-ab49-632d0b95618e",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Code generation and refactoring b...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T18:38:32.019Z"
+  },
+  {
+    "id": "2e2311bf-4e72-4a66-a621-f9c03fccb0b1",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Code generat...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (316 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T18:38:32.022Z"
+  },
+  {
+    "id": "9c5b415f-f3d0-4c9a-932e-232b2810e147",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Heady system architecture pattern...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T18:43:32.479Z"
+  },
+  {
+    "id": "fe033e77-888c-4cb4-849c-e87f5601d192",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Heady system...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (336 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T18:43:32.481Z"
+  },
+  {
+    "id": "6a51ff83-4b03-4b00-b607-fdbf84de3a1f",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: AI response psychology and confli...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T18:48:33.565Z"
+  },
+  {
+    "id": "67256219-676d-4cb0-8087-3baad63562be",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: AI response ...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (312 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T18:48:33.569Z"
+  },
+  {
+    "id": "ed3b950f-ee70-4e8c-9317-075b748ef8e7",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Behavior analysis for HeadyCorrec...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T18:53:34.134Z"
+  },
+  {
+    "id": "ff3f90ca-ed9a-4aa6-818a-117a2373500b",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Behavior ana...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (320 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T18:53:34.138Z"
+  },
+  {
+    "id": "88312954-86ec-414a-8970-4b69af6b7465",
+    "stored": "Stored in vector DB: \"Embedding request: [HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Cross-device authentication and p...\" (219 chars, type: brain_embed)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-23T18:58:34.646Z"
+  },
+  {
+    "id": "e1508335-1685-4d8c-b5cf-c13255197db2",
+    "stored": "Hash-based pseudo-embedding (32 dims) — structural match only, NOT semantic: \"[HeadyBrain Context — 3 relevant memories found]\nEmbedding request: Cross-device...\"",
+    "notStored": "Semantic meaning NOT captured — real nomic-embed-text embedding failed (connect ECONNREFUSED 127.0.0.1:11434). Full text (344 chars) has no 3D vector representation.",
+    "method": "hash-fallback",
+    "fallbackUsed": true,
+    "priorityFix": "⚠ VECTOR DB FALLBACK — hash-based pseudo-embedding used instead of 3D vector storage. Fix priority: HIGH.",
+    "ts": "2026-02-23T18:58:34.649Z"
+  },
+  {
+    "id": "119294a8-361c-4b3e-84fc-c487c136b5be",
+    "stored": "Stored in vector DB: \"Code analysis (code): function add(a,b) { return a+b; }...\" (55 chars, type: brain_analyze)",
+    "notStored": "Full content stored — nothing omitted",
+    "method": "vector-db",
+    "fallbackUsed": false,
+    "priorityFix": null,
+    "ts": "2026-02-24T07:12:30.631Z"
   }
 ]

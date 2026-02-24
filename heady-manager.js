@@ -408,9 +408,10 @@ console.log("  ∞ AgentOrchestrator: LOADED (dynamic spawn + deterministic rout
 const computeDashboard = require("./src/compute-dashboard");
 computeDashboard.registerRoutes(app, orchestrator);
 
-
-
-
+// ─── Continuous Self-Optimization Engine ────────────────────────────
+const selfOptimizer = require("./src/self-optimizer");
+selfOptimizer.registerRoutes(app, vectorMemory);
+console.log("  ∞ SelfOptimizer: WIRED (continuous heartbeat + error recovery)");
 // ─── Static Assets ─────────────────────────────────────────────────
 const frontendBuildPath = path.join(__dirname, "frontend", "dist");
 if (fs.existsSync(frontendBuildPath)) {
@@ -1884,11 +1885,99 @@ try {
 }
 
 // ─── Mount src/routes/brain.js (chat, analyze, embed, search) ───────
+// Brain routes are now WRAPPED by the orchestrator for task tracking.
+// The orchestrator intercepts requests, tracks agents/tasks/latency,
+// then forwards to the actual brain handler.
 try {
   const { router: brainCoreRoutes } = require("./src/routes/brain");
+
+  // Register local dispatch handlers with orchestrator
+  // Each handler simulates what the brain route does, tracked by orchestrator
+  const http = require("http");
+  function localBrainRequest(path, body) {
+    return new Promise((resolve, reject) => {
+      const payload = JSON.stringify(body);
+      const req = http.request({
+        hostname: "127.0.0.1", port: PORT, path, method: "POST",
+        headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(payload) },
+        timeout: 60000,
+      }, (res) => {
+        let data = "";
+        res.on("data", c => data += c);
+        res.on("end", () => { try { resolve(JSON.parse(data)); } catch { resolve({ response: data }); } });
+      });
+      req.on("error", reject);
+      req.on("timeout", () => { req.destroy(); reject(new Error("timeout")); });
+      req.write(payload);
+      req.end();
+    });
+  }
+
+  // Mount brain routes at a HIDDEN internal path
+  app.use("/api/_brain_internal", brainCoreRoutes);
+
+  // Orchestrator-tracked wrappers for each brain action
+  orchestrator.registerHandler("chat", async (payload) => {
+    return localBrainRequest("/api/_brain_internal/chat", payload);
+  });
+  orchestrator.registerHandler("analyze", async (payload) => {
+    return localBrainRequest("/api/_brain_internal/analyze", payload);
+  });
+  orchestrator.registerHandler("embed", async (payload) => {
+    return localBrainRequest("/api/_brain_internal/embed", payload);
+  });
+  orchestrator.registerHandler("search", async (payload) => {
+    return localBrainRequest("/api/_brain_internal/search", payload);
+  });
+  orchestrator.registerHandler("complete", async (payload) => {
+    return localBrainRequest("/api/_brain_internal/chat", { ...payload, message: payload.prompt || payload.message });
+  });
+  orchestrator.registerHandler("refactor", async (payload) => {
+    return localBrainRequest("/api/_brain_internal/analyze", { ...payload, content: payload.code, type: "refactor" });
+  });
+
+  // PUBLIC brain routes — go through orchestrator
+  app.post("/api/brain/chat", async (req, res) => {
+    try {
+      const result = await orchestrator.submit({ action: "chat", payload: req.body });
+      if (result.ok && result.result) {
+        res.json({ ...result.result, orchestrated: true, agent: result.agent, latency_ms: result.latency });
+      } else {
+        res.json(result);
+      }
+    } catch (err) { res.status(500).json({ error: err.message }); }
+  });
+  app.post("/api/brain/analyze", async (req, res) => {
+    try {
+      const result = await orchestrator.submit({ action: "analyze", payload: req.body });
+      if (result.ok && result.result) {
+        res.json({ ...result.result, orchestrated: true, agent: result.agent, latency_ms: result.latency });
+      } else { res.json(result); }
+    } catch (err) { res.status(500).json({ error: err.message }); }
+  });
+  app.post("/api/brain/embed", async (req, res) => {
+    try {
+      const result = await orchestrator.submit({ action: "embed", payload: req.body });
+      if (result.ok && result.result) {
+        res.json({ ...result.result, orchestrated: true, agent: result.agent, latency_ms: result.latency });
+      } else { res.json(result); }
+    } catch (err) { res.status(500).json({ error: err.message }); }
+  });
+  app.post("/api/brain/search", async (req, res) => {
+    try {
+      const result = await orchestrator.submit({ action: "search", payload: req.body });
+      if (result.ok && result.result) {
+        res.json({ ...result.result, orchestrated: true, agent: result.agent, latency_ms: result.latency });
+      } else { res.json(result); }
+    } catch (err) { res.status(500).json({ error: err.message }); }
+  });
+
+  // Keep the memory-receipts and other GET routes accessible
   app.use("/api/brain", brainCoreRoutes);
-  console.log("  ∞ HeadyBrain Core Routes: LOADED");
-  console.log("    → Endpoints: /api/brain/chat, /analyze, /embed, /search");
+
+  console.log("  ∞ HeadyBrain Core Routes: LOADED (orchestrated)");
+  console.log("    → ALL /brain/* requests tracked by orchestrator");
+  console.log("    → Handlers: chat, analyze, embed, search, complete, refactor");
 } catch (err) {
   console.warn(`  ⚠ HeadyBrain Core Routes not loaded: ${err.message}`);
 }

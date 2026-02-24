@@ -1,0 +1,80 @@
+{
+  "totalDiscovered": 12,
+  "active": 10,
+  "missing": 2,
+  "skills": [
+    {
+      "name": "vector-search",
+      "type": "core",
+      "available": true,
+      "status": "active"
+    },
+    {
+      "name": "behavior-analysis",
+      "type": "core",
+      "available": true,
+      "status": "active"
+    },
+    {
+      "name": "remote-dispatch",
+      "type": "compute",
+      "available": true,
+      "status": "active"
+    },
+    {
+      "name": "provider-benchmark",
+      "type": "perf",
+      "available": true,
+      "status": "active"
+    },
+    {
+      "name": "edge-proxy",
+      "type": "infra",
+      "available": true,
+      "status": "active"
+    },
+    {
+      "name": "hf-embeddings",
+      "type": "ai",
+      "available": true,
+      "status": "active"
+    },
+    {
+      "name": "gemini-multimodal",
+      "type": "ai",
+      "available": true,
+      "status": "active"
+    },
+    {
+      "name": "claude-reasoning",
+      "type": "ai",
+      "available": true,
+      "status": "active"
+    },
+    {
+      "name": "openai-enterprise",
+      "type": "ai",
+      "available": true,
+      "status": "active"
+    },
+    {
+      "name": "groq-fast",
+      "type": "ai",
+      "available": false,
+      "status": "missing"
+    },
+    {
+      "name": "perplexity-research",
+      "type": "ai",
+      "available": true,
+      "status": "active"
+    },
+    {
+      "name": "notion-sync",
+      "type": "integration",
+      "available": false,
+      "status": "missing"
+    }
+  ],
+  "lastScan": "2026-02-24T07:12:58.159Z"
+}
