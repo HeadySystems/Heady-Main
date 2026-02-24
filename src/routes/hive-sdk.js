@@ -35,7 +35,7 @@ function brainChat(message, system, options = {}) {
             temperature: options.temperature || 0.7,
             max_tokens: options.max_tokens || 2048,
         });
-        const req = http.request("http://localhost:3301/api/brain/chat", {
+        const req = http.request("http://127.0.0.1:3301/api/brain/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body) },
             timeout: 30000,

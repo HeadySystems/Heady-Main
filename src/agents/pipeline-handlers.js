@@ -303,7 +303,7 @@ async function sendCheckpointEmail(context) {
     const http = require("http");
     const payload = JSON.stringify({ type: "checkpoint", input: JSON.stringify(summary), output: "checkpoint_logged" });
     const req = http.request({
-      hostname: "localhost", port: 3301, path: "/api/brain/log", method: "POST",
+      hostname: "127.0.0.1", port: 3301, path: "/api/brain/log", method: "POST",
       headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(payload) }
     });
     req.write(payload);

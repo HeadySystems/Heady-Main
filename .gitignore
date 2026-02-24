@@ -47,3 +47,24 @@ coverage/
 
 # Runtime data (written continuously by HCFP pipeline)
 data/
+
+# Secrets prevention — never commit these patterns
+.env
+.env.*
+*.pem
+*.key
+*.crt
+!configs/nginx/ssl/*.crt
+!configs/nginx/ssl/*.pem
+!configs/nginx/ssl/*.key
+**/credentials.json
+**/service-account.json
+**/*-credentials.json
+**/*secret*
+!**/self-awareness.js
+
+# Runtime / ephemeral state
+data/
+*.pid
+*.log
+audit_logs.jsonl

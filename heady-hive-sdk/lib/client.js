@@ -18,12 +18,12 @@ const { createProviders } = require("./providers");
 class HeadyClient {
     /**
      * @param {Object} opts
-     * @param {string} opts.url - Heady Manager URL (e.g., "https://headyme.com" or "http://localhost:3301")
+     * @param {string} opts.url - Heady Manager URL (e.g., "https://headyme.com" or "http://127.0.0.1:3301" for local dev)
      * @param {string} [opts.apiKey] - API key for authentication
      * @param {number} [opts.timeout=30000] - Request timeout in ms
      */
     constructor(opts = {}) {
-        this.baseUrl = (opts.url || "http://localhost:3301").replace(/\/$/, "");
+        this.baseUrl = (opts.url || process.env.HEADY_URL || "https://headyme.com").replace(/\/$/, "");
         this.apiKey = opts.apiKey || process.env.HEADY_API_KEY || "";
         this.timeout = opts.timeout || 30000;
         this.version = require("../package.json").version;

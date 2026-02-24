@@ -11,15 +11,19 @@
 
 | Item | Status | Details |
 |------|--------|---------|
-| Rotate all committed credentials | In progress | Previous sessions addressed partial; complete audit needed |
-| Secret scanning in CI | Not started | GitHub Actions + pre-commit hooks |
+| Rotate all committed credentials | ✅ Done | 7 files with exposed PATs/1Password tokens purged from repo |
+| Secret scanning in CI | ✅ Done | Trufflehog + Gitleaks dual scanning workflow (`.github/workflows/secret-scanning.yml`) |
+| GitHub push protection | ✅ Active | Blocked 4 pushes with exposed secrets — working as intended |
+| .gitignore secret prevention | ✅ Done | Hardened patterns for `.env`, `*.pem`, `*credentials*`, `*secret*` |
+| npm vulnerability remediation | ✅ Done | 70 → 0 vulnerabilities (jest upgrade, targeted overrides, render-cli removed) |
+| Git history purge (BFG) | Pending | Secrets removed from files but still in old commits — need `git-filter-repo` installed |
 | Log sanitization | Not started | Mask tokens/keys in all HeadyManager output |
 | Port/route canonical manifest | Not started | Generate from registry — resolve 3300 vs 3301 drift |
 | Circuit breakers for external APIs | Not started | HeadyManager → external AI node calls |
 | STANDING_DIRECTIVE compliance audit | Not started | Verify all surfaces use custom domains, never localhost |
-| File governance enforcement | Active | `configs/file-governance.yaml` + pre-commit hooks |
-| Anti-template policy enforcement | Active | 14 banned patterns in `heady-intelligence.yaml` |
-| HeadyBattle gate on all changes | Active | `socratic-service.js` interrogation |
+| File governance enforcement | ✅ Active | `configs/file-governance.yaml` + pre-commit hooks |
+| Anti-template policy enforcement | ✅ Active | 14 banned patterns in `heady-intelligence.yaml` |
+| HeadyBattle gate on all changes | ✅ Active | `socratic-service.js` interrogation |
 
 ---
 
@@ -35,7 +39,18 @@ Display receipts (models, tools, costs, scores, risks) into a readable, shareabl
 - **Data source:** Existing receipt system from routes
 - **Work:** Frontend component + REST endpoint from existing `memory.js` / `hcfp.js`
 
-### 1B — Policy Ladder (L0–L3)
+### 1B — Budget Router (FinOps Cost-Governance Engine)
+
+> ✅ **Implemented:** `src/routes/budget-router.js` — wired at `/api/budget`
+
+Dynamically routes AI requests to the cheapest model meeting quality thresholds. Exposes cost data in Proof View receipts.
+
+- **13 models** across 4 tiers: free-local (Ollama), edge (Cloudflare Workers AI), mid-tier (GPT-4o-mini, Gemini Flash), premium (Claude Opus 4.6, GPT-5.3 Codex)
+- **10 task types** with quality thresholds: simple-chat (0.60) → security-audit (0.95)
+- **Session cost tracking** with per-request breakdown and savings rate
+- **Proof View receipts** showing model selection reasoning and cost savings percentage
+
+### 1C — Policy Ladder (L0–L3)
 
 Permission system with escalating approval requirements (read → suggest → write → destructive).
 
@@ -43,7 +58,7 @@ Permission system with escalating approval requirements (read → suggest → wr
 - **Data source:** `heady-intelligence.yaml` + `automation-policy.yaml`
 - **Work:** Middleware layer + HeadyBattle score-based auto-approval
 
-### 1C — Connector Trust Model (MCP)
+### 1D — Connector Trust Model (MCP)
 
 Verified, governed MCP connectors with quality scores, usage telemetry, and install UX.
 
@@ -51,7 +66,7 @@ Verified, governed MCP connectors with quality scores, usage telemetry, and inst
 - **Data source:** `configs/headymcp.json` (22KB)
 - **Work:** Registry UI + connector governance pipeline
 
-### 1D — Arena Mode Productization
+### 1E — Arena Mode Productization
 
 Package Arena Mode (7 strategies, HeadySims scoring, HeadyBattle validation) as a named, sellable capability.
 
@@ -116,15 +131,16 @@ Package Arena Mode (7 strategies, HeadySims scoring, HeadyBattle validation) as 
 | mTLS | Service-to-service mutual TLS |
 | SLA framework | Uptime guarantees, support tiers |
 | On-premise deployment | Dockerized deployment for regulated industries |
+| Zero-Trust Policy Plane | HeadyValidator → customer-facing signed Proof View receipts for compliance |
 
 ---
 
 ## Dependency Graph
 
-```
-Phase 0 (Trust)
+```text
+Phase 0 (Trust) ← 8/13 items complete
     ↓ unlocks
-Phase 1 (Factory) ← builds primitives
+Phase 1 (Factory) ← Budget Router ✅, 4 primitives remaining
     ↓ feeds
 Phase 2 (Flood) ← launches on primitives
     ↓ generates revenue + signal

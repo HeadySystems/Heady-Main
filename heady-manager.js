@@ -519,7 +519,7 @@ app.get("/api/cloud/status", (req, res) => {
       "headydata.com": { tunnel: false, role: "data-analytics", status: "active", subdomains: ["ingest", "analyze", "visualize", "export"] },
       "headyapi.com": { tunnel: false, role: "public-api", status: "active", subdomains: ["docs", "keys", "playground", "sdk"] },
     },
-    localGateway: "http://localhost:3301",
+    localGateway: "http://127.0.0.1:3301",
     ts: new Date().toISOString(),
   });
 });
@@ -3004,6 +3004,14 @@ try {
   console.log("  \u221e Auth Routes: LOADED");
 } catch (err) {
   console.warn(`  \u26a0 Auth routes not loaded: ${err.message}`);
+}
+
+try {
+  const budgetRouter = require('./src/routes/budget-router');
+  app.use('/api/budget', budgetRouter);
+  console.log("  \u221e Budget Router (FinOps): LOADED — /api/budget/route, /api/budget/models");
+} catch (err) {
+  console.warn(`  \u26a0 Budget Router not loaded: ${err.message}`);
 }
 
 // (Layer management routes already registered above at /api/layer)
