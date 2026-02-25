@@ -19,8 +19,10 @@
 const express = require("express");
 const router = express.Router();
 const http = require("http");
+const https = require("https");
 
-const MANAGER_URL = process.env.HEADY_MANAGER_URL || "http://127.0.0.1:3301";
+const MANAGER_URL = process.env.HEADY_MANAGER_URL || "https://127.0.0.1:3301";
+const LENS_SOURCE_OF_TRUTH_ENDPOINT = "/api/lens/source-of-truth?refresh=1";
 const conductorLog = [];
 const systemModel = {
     services: {},
@@ -62,15 +64,43 @@ router.post("/poll", async (req, res) => {
     const results = {};
     let healthy = 0;
     let total = 0;
+    let sourceOfTruth = "direct-polling";
 
-    for (const [name, endpoint] of Object.entries(SERVICE_ENDPOINTS)) {
-        total++;
-        try {
-            const data = await fetchLocal(endpoint);
-            results[name] = { status: data.status || "OK", healthy: true, latencyMs: data._latency };
-            healthy++;
-        } catch (err) {
-            results[name] = { status: "DOWN", healthy: false, error: err.message };
+    // Prefer HeadyLens as canonical realtime monitoring source.
+    try {
+        const lensTruth = await fetchLocal(LENS_SOURCE_OF_TRUTH_ENDPOINT);
+        const services = lensTruth?.realtime?.services;
+        if (Array.isArray(services) && services.length > 0) {
+            sourceOfTruth = "heady-lens";
+            for (const svc of services) {
+                const serviceName = String(svc.service || "").replace(/^heady-/, "");
+                if (!serviceName) continue;
+                results[serviceName] = {
+                    status: svc.status || (svc.healthy ? "OK" : "DEGRADED"),
+                    healthy: !!svc.healthy,
+                    latencyMs: svc.latencyMs ?? null,
+                    error: svc.error || null,
+                    source: "heady-lens",
+                };
+            }
+            total = Object.keys(results).length;
+            healthy = Object.values(results).filter(s => s.healthy).length;
+        }
+    } catch {
+        sourceOfTruth = "direct-polling-fallback";
+    }
+
+    // Fallback path: direct service polling only if Lens truth is unavailable.
+    if (total === 0) {
+        for (const [name, endpoint] of Object.entries(SERVICE_ENDPOINTS)) {
+            total++;
+            try {
+                const data = await fetchLocal(endpoint);
+                results[name] = { status: data.status || "OK", healthy: true, latencyMs: data._latency, source: "conductor-direct" };
+                healthy++;
+            } catch (err) {
+                results[name] = { status: "DOWN", healthy: false, error: err.message, source: "conductor-direct" };
+            }
         }
     }
 
@@ -83,7 +113,9 @@ router.post("/poll", async (req, res) => {
     const entry = {
         id: `conductor-${Date.now()}`, action: "poll",
         healthy, total, health: systemModel.overallHealth,
-        perspective: systemModel.perspective, ts: systemModel.lastPoll,
+        perspective: systemModel.perspective,
+        sourceOfTruth,
+        ts: systemModel.lastPoll,
     };
     conductorLog.push(entry);
     if (conductorLog.length > 200) conductorLog.splice(0, conductorLog.length - 200);
@@ -111,9 +143,16 @@ router.post("/orchestrate", (req, res) => {
 // Compare Conductor perspective vs Lens differentials
 router.get("/compare-lens", async (req, res) => {
     let lensData = null;
+    let lensTruth = null;
     try {
         lensData = await fetchLocal("/api/lens/memory");
     } catch { lensData = { error: "Lens unreachable" }; }
+
+    try {
+        lensTruth = await fetchLocal("/api/lens/source-of-truth");
+    } catch {
+        lensTruth = { error: "Lens source-of-truth unavailable" };
+    }
 
     const comparison = {
         conductor: {
@@ -123,10 +162,13 @@ router.get("/compare-lens", async (req, res) => {
             healthyServices: Object.values(systemModel.services).filter(s => s.healthy).length,
             lastPoll: systemModel.lastPoll,
         },
-        lens: lensData,
+        lens: {
+            sourceOfTruth: lensTruth,
+            memory: lensData,
+        },
         synthesis: {
-            agreement: lensData?.memory ? "both-active" : "lens-unavailable",
-            blindSpots: identifyBlindSpots(systemModel, lensData),
+            agreement: lensTruth?.realtime ? "lens-is-source-of-truth" : "lens-unavailable",
+            blindSpots: identifyBlindSpots(systemModel, lensTruth),
             recommendation: systemModel.overallHealth >= 0.9 ? "nominal — continue auto-success" : "investigate degraded services",
         },
         ts: new Date().toISOString(),
@@ -183,7 +225,15 @@ function fetchLocal(endpoint) {
     return new Promise((resolve, reject) => {
         const start = Date.now();
         const url = new URL(endpoint, MANAGER_URL);
-        http.get(url.href, { timeout: 3000 }, (resp) => {
+        const client = url.protocol === "https:" ? https : http;
+        const req = client.request({
+            hostname: url.hostname,
+            port: url.port || (url.protocol === "https:" ? 443 : 80),
+            path: `${url.pathname}${url.search}`,
+            method: "GET",
+            timeout: 3000,
+            rejectUnauthorized: false,
+        }, (resp) => {
             let data = "";
             resp.on("data", (c) => { data += c; });
             resp.on("end", () => {
@@ -193,7 +243,14 @@ function fetchLocal(endpoint) {
                     resolve(parsed);
                 } catch { reject(new Error("Invalid JSON")); }
             });
-        }).on("error", reject).on("timeout", function () { this.destroy(); reject(new Error("Timeout")); });
+        });
+
+        req.on("error", reject);
+        req.on("timeout", () => {
+            req.destroy();
+            reject(new Error("Timeout"));
+        });
+        req.end();
     });
 }
 

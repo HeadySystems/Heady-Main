@@ -7,9 +7,8 @@
  * src/routes/nodes.js — Node Management & System Status API routes
  * Extracted from heady-manager.js monolith
  *
- * Handles: /api/nodes, /api/nodes/:nodeId/activate,
- * /api/nodes/:nodeId/deactivate, /api/system/status,
- * /api/system/production
+ * Handles: /api/nodes, /api/nodes/:nodeId, /api/nodes/:nodeId/activate,
+ * /api/nodes/:nodeId/deactivate
  */
 
 const express = require("express");
@@ -25,11 +24,24 @@ const router = express.Router();
  */
 router.get("/", (req, res) => {
     const reg = loadRegistry();
-    const nodeList = Object.entries(reg.nodes || {}).map(([name, node]) => ({
-        id: name,
+    const nodeList = Object.entries(reg.nodes || {}).map(([id, node]) => ({
+        id,
         ...node,
     }));
-    res.json({ nodes: nodeList, total: nodeList.length, ts: new Date().toISOString() });
+    res.json({ total: nodeList.length, active: nodeList.filter(n => n.status === "active").length, nodes: nodeList, ts: new Date().toISOString() });
+});
+
+/**
+ * @swagger
+ * /api/nodes/{nodeId}:
+ *   get:
+ *     summary: Get node data
+ */
+router.get("/:nodeId", (req, res) => {
+    const reg = loadRegistry();
+    const node = reg.nodes[req.params.nodeId.toUpperCase()];
+    if (!node) return res.status(404).json({ error: `Node '${req.params.nodeId}' not found` });
+    res.json({ id: req.params.nodeId.toUpperCase(), ...node });
 });
 
 /**
@@ -43,9 +55,9 @@ router.post("/:nodeId/activate", (req, res) => {
     const id = req.params.nodeId.toUpperCase();
     if (!reg.nodes[id]) return res.status(404).json({ error: `Node '${id}' not found` });
     reg.nodes[id].status = "active";
-    reg.nodes[id].activatedAt = new Date().toISOString();
+    reg.nodes[id].last_invoked = new Date().toISOString();
     saveRegistry(reg);
-    res.json({ ok: true, node: id, status: "active", ts: new Date().toISOString() });
+    res.json({ success: true, node: id, status: "active" });
 });
 
 /**
@@ -58,10 +70,9 @@ router.post("/:nodeId/deactivate", (req, res) => {
     const reg = loadRegistry();
     const id = req.params.nodeId.toUpperCase();
     if (!reg.nodes[id]) return res.status(404).json({ error: `Node '${id}' not found` });
-    reg.nodes[id].status = "inactive";
-    reg.nodes[id].deactivatedAt = new Date().toISOString();
+    reg.nodes[id].status = "available";
     saveRegistry(reg);
-    res.json({ ok: true, node: id, status: "inactive", ts: new Date().toISOString() });
+    res.json({ success: true, node: id, status: "available" });
 });
 
 module.exports = router;

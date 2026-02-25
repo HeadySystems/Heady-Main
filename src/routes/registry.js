@@ -3,14 +3,6 @@
  * PROPRIETARY AND CONFIDENTIAL.
  * Unauthorized copying, modification, or distribution is strictly prohibited.
  */
-/**
- * src/routes/registry.js — Registry API routes
- * Extracted from heady-manager.js monolith
- *
- * Handles: /api/registry, /api/registry/component/:id,
- * /api/registry/environments, /api/registry/docs,
- * /api/registry/notebooks, /api/registry/patterns
- */
 
 const express = require("express");
 const fs = require("fs");
@@ -27,11 +19,12 @@ const HEADY_DIR = path.join(__dirname, "..", "..");
 const REGISTRY_PATH = path.join(HEADY_DIR, ".heady", "registry.json");
 
 function loadRegistry() {
-    return readJsonSafe(REGISTRY_PATH) || { nodes: {}, tools: [], workflows: [], services: [] };
+    return readJsonSafe(REGISTRY_PATH) || { nodes: {}, tools: {}, workflows: {}, services: {}, skills: {}, metadata: {} };
 }
 
 function saveRegistry(data) {
-    fs.writeFileSync(REGISTRY_PATH, JSON.stringify(data, null, 2));
+    fs.mkdirSync(path.dirname(REGISTRY_PATH), { recursive: true });
+    fs.writeFileSync(REGISTRY_PATH, JSON.stringify(data, null, 2), "utf8");
 }
 
 /**
@@ -41,9 +34,10 @@ function saveRegistry(data) {
  *     summary: Get registry data
  */
 router.get("/", (req, res) => {
-    const registry = readJsonSafe(path.join(HEADY_DIR, "heady-registry.json"));
+    const registryPath = path.join(HEADY_DIR, "heady-registry.json");
+    const registry = readJsonSafe(registryPath);
     if (!registry) return res.status(404).json({ error: "Registry not found" });
-    res.json({ ok: true, ...registry, ts: new Date().toISOString() });
+    res.json(registry);
 });
 
 /**
@@ -106,6 +100,18 @@ router.get("/patterns", (req, res) => {
     const registry = readJsonSafe(path.join(HEADY_DIR, "heady-registry.json"));
     if (!registry) return res.status(404).json({ error: "Registry not found" });
     res.json({ patterns: registry.patterns || [], ts: new Date().toISOString() });
+});
+
+/**
+ * @swagger
+ * /api/registry/workflows:
+ *   get:
+ *     summary: Get workflows data
+ */
+router.get("/workflows", (req, res) => {
+    const registry = readJsonSafe(path.join(HEADY_DIR, "heady-registry.json"));
+    if (!registry) return res.status(404).json({ error: "Registry not found" });
+    res.json({ workflows: registry.workflows || [], ts: new Date().toISOString() });
 });
 
 /**

@@ -16,6 +16,8 @@ const express = require("express");
 const router = express.Router();
 const fs = require("fs");
 const path = require("path");
+const http = require("http");
+const https = require("https");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 // ── Vision Provider Setup (lazy — reads env at request time) ──
@@ -26,28 +28,295 @@ function getGenAI() {
     if (!_genAI) _genAI = new GoogleGenerativeAI(key);
     return _genAI;
 }
+
+function normalizeServiceKey(source) {
+    if (!source) return null;
+    if (serviceTruth.has(source)) return source;
+    const prefixed = source.startsWith("heady-") ? source : `heady-${source}`;
+    if (serviceTruth.has(prefixed)) return prefixed;
+    return null;
+}
+
+function persistSourceOfTruthState() {
+    try {
+        if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+        fs.writeFileSync(LENS_STATE_FILE, JSON.stringify({
+            lastRealtimePoll,
+            services: Array.from(serviceTruth.values()),
+            updatedAt: new Date().toISOString(),
+        }, null, 2));
+    } catch {
+        // non-critical persistence path
+    }
+}
+
+function hydrateSourceOfTruthState() {
+    try {
+        if (!fs.existsSync(LENS_STATE_FILE)) return;
+        const saved = JSON.parse(fs.readFileSync(LENS_STATE_FILE, "utf8"));
+        if (Array.isArray(saved?.services)) {
+            for (const svc of saved.services) {
+                if (!svc?.service) continue;
+                const existing = serviceTruth.get(svc.service) || {};
+                serviceTruth.set(svc.service, { ...existing, ...svc });
+                snapshots.set(svc.service, {
+                    value: svc.healthy ? 1 : 0,
+                    metric: "health",
+                    status: svc.status || (svc.healthy ? "healthy" : "degraded"),
+                    ts: svc.ts || saved.updatedAt || null,
+                });
+            }
+        }
+        lastRealtimePoll = saved?.lastRealtimePoll || saved?.updatedAt || null;
+    } catch {
+        // non-critical hydration path
+    }
+}
 function getOpenAIKey() { return process.env.OPENAI_API_KEY || ""; }
 
 const DATA_DIR = path.join(__dirname, "..", "..", "data");
 const LENS_STATE_FILE = path.join(DATA_DIR, "lens-state.json");
+const INTERNAL_MANAGER_URL = process.env.HEADY_MANAGER_URL || "https://127.0.0.1:3301";
+const LENS_POLL_INTERVAL_MS = parseInt(process.env.LENS_POLL_INTERVAL_MS || "15000", 10);
 
 // System-wide differential store
 const differentials = [];
 const snapshots = new Map(); // service → last snapshot
 const MAX_DIFFERENTIALS = 1000;
+const serviceTruth = new Map(); // service → canonical realtime status
+let lastRealtimePoll = null;
+let realtimePollInFlight = false;
+
+const MONITORED_ENDPOINTS = {
+    "heady-brain": "/api/brain/health",
+    "heady-soul": "/api/soul/health",
+    "heady-battle": "/api/battle/health",
+    "heady-hcfp": "/api/hcfp/health",
+    "heady-patterns": "/api/patterns/health",
+    "heady-ops": "/api/ops/health",
+    "heady-maintenance": "/api/maintenance/health",
+    "heady-vinci": "/api/vinci/health",
+    "heady-notion": "/api/notion/health",
+    "heady-auto-success": "/api/auto-success/health",
+    "heady-conductor": "/api/conductor/health",
+    "heady-lens": "/api/lens/health",
+};
 
 // Services HeadyLens monitors
 const MONITORED_SERVICES = [
     "heady-brain", "heady-soul", "heady-battle", "heady-hcfp",
     "heady-patterns", "heady-ops", "heady-maintenance", "heady-vinci",
-    "heady-notion", "heady-lens", "heady-conductor",
+    "heady-notion", "heady-auto-success", "heady-lens", "heady-conductor",
 ];
 
+for (const service of Object.keys(MONITORED_ENDPOINTS)) {
+    serviceTruth.set(service, {
+        service,
+        endpoint: MONITORED_ENDPOINTS[service],
+        status: "unknown",
+        healthy: false,
+        latencyMs: null,
+        error: "not-yet-polled",
+        source: "heady-lens",
+        ts: null,
+    });
+}
+
+function serviceIsHealthy(payload, statusCode) {
+    if (statusCode && statusCode >= 500) return false;
+    if (payload?.ok === false) return false;
+    if (payload?.status) {
+        const normalized = String(payload.status).toLowerCase();
+        if (["error", "down", "critical", "unhealthy", "not_ready"].includes(normalized)) return false;
+        if (["ok", "active", "ready", "healthy", "nominal"].includes(normalized)) return true;
+    }
+    return statusCode ? statusCode < 500 : true;
+}
+
+function fetchManagerJson(endpoint, timeoutMs = 5000) {
+    return new Promise((resolve, reject) => {
+        const start = Date.now();
+        const base = new URL(INTERNAL_MANAGER_URL);
+        const url = new URL(endpoint, base);
+        const client = url.protocol === "https:" ? https : http;
+
+        const req = client.request({
+            hostname: url.hostname,
+            port: url.port || (url.protocol === "https:" ? 443 : 80),
+            path: `${url.pathname}${url.search}`,
+            method: "GET",
+            timeout: timeoutMs,
+            rejectUnauthorized: false,
+        }, (resp) => {
+            let data = "";
+            resp.on("data", (chunk) => { data += chunk; });
+            resp.on("end", () => {
+                try {
+                    const parsed = data ? JSON.parse(data) : {};
+                    resolve({ payload: parsed, statusCode: resp.statusCode, latencyMs: Date.now() - start });
+                } catch {
+                    reject(new Error(`Invalid JSON from ${endpoint}`));
+                }
+            });
+        });
+
+        req.on("error", reject);
+        req.on("timeout", () => {
+            req.destroy(new Error("Timeout"));
+        });
+        req.end();
+    });
+}
+
+function pushDifferential(entry) {
+    differentials.push(entry);
+    if (differentials.length > MAX_DIFFERENTIALS) {
+        differentials.splice(0, differentials.length - MAX_DIFFERENTIALS);
+    }
+    if (entry.significance > 0.5) persistObservation(entry);
+}
+
+function buildSourceOfTruthResponse(includeRawData = false) {
+    const services = Array.from(serviceTruth.values()).map((svc) => ({
+        service: svc.service,
+        endpoint: svc.endpoint,
+        status: svc.status,
+        healthy: !!svc.healthy,
+        latencyMs: svc.latencyMs,
+        error: svc.error || null,
+        ts: svc.ts,
+        ...(includeRawData ? { data: svc.data || null } : {}),
+    }));
+
+    const healthyServices = services.filter((s) => s.healthy).length;
+    const downServices = services.filter((s) => s.status === "down").length;
+    const degradedServices = services.filter((s) => !s.healthy && s.status !== "down").length;
+
+    return {
+        ok: true,
+        service: "heady-lens",
+        sourceOfTruth: "heady-lens",
+        mode: "realtime-monitoring-source-of-truth",
+        realtime: {
+            lastPoll: lastRealtimePoll,
+            pollIntervalMs: LENS_POLL_INTERVAL_MS,
+            services,
+            summary: {
+                totalServices: services.length,
+                healthyServices,
+                degradedServices,
+                downServices,
+                healthScore: services.length > 0 ? Number((healthyServices / services.length).toFixed(3)) : 0,
+            },
+        },
+        ts: new Date().toISOString(),
+    };
+}
+
+async function pollRealtimeSourceOfTruth(reason = "interval") {
+    if (realtimePollInFlight) return buildSourceOfTruthResponse();
+    realtimePollInFlight = true;
+
+    try {
+        const entries = Object.entries(MONITORED_ENDPOINTS);
+
+        for (const [service, endpoint] of entries) {
+            const previous = serviceTruth.get(service);
+            const nowIso = new Date().toISOString();
+
+            try {
+                const { payload, statusCode, latencyMs } = await fetchManagerJson(endpoint);
+                const healthy = serviceIsHealthy(payload, statusCode);
+                const status = healthy ? "healthy" : "degraded";
+
+                serviceTruth.set(service, {
+                    service,
+                    endpoint,
+                    status,
+                    healthy,
+                    latencyMs,
+                    error: null,
+                    data: payload,
+                    source: "heady-lens",
+                    ts: nowIso,
+                });
+
+                snapshots.set(service, { value: healthy ? 1 : 0, metric: "health", status, ts: nowIso });
+
+                const prevValue = previous?.healthy ? 1 : 0;
+                const nextValue = healthy ? 1 : 0;
+                if (!previous || prevValue !== nextValue || previous.status !== status) {
+                    pushDifferential({
+                        id: `lens-rt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+                        source: service,
+                        metric: "health",
+                        value: nextValue,
+                        previous: prevValue,
+                        delta: nextValue - prevValue,
+                        context: `realtime:${reason} ${previous?.status || "unknown"} -> ${status}`,
+                        significance: healthy ? 0.65 : 0.95,
+                        ts: nowIso,
+                    });
+                }
+            } catch (err) {
+                serviceTruth.set(service, {
+                    service,
+                    endpoint,
+                    status: "down",
+                    healthy: false,
+                    latencyMs: null,
+                    error: err.message,
+                    source: "heady-lens",
+                    ts: nowIso,
+                });
+
+                snapshots.set(service, { value: 0, metric: "health", status: "down", ts: nowIso });
+
+                if (!previous || previous.status !== "down") {
+                    pushDifferential({
+                        id: `lens-rt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+                        source: service,
+                        metric: "health",
+                        value: 0,
+                        previous: previous?.healthy ? 1 : 0,
+                        delta: previous?.healthy ? -1 : 0,
+                        context: `realtime:${reason} ${previous?.status || "unknown"} -> down (${err.message})`,
+                        significance: 0.98,
+                        ts: nowIso,
+                    });
+                }
+            }
+        }
+
+        lastRealtimePoll = new Date().toISOString();
+        persistSourceOfTruthState();
+        return buildSourceOfTruthResponse();
+    } finally {
+        realtimePollInFlight = false;
+    }
+}
+
+hydrateSourceOfTruthState();
+
+const startupPollTimer = setTimeout(() => {
+    pollRealtimeSourceOfTruth("startup").catch(() => { /* no-op */ });
+}, 1200);
+if (typeof startupPollTimer.unref === "function") startupPollTimer.unref();
+
+const realtimePollTimer = setInterval(() => {
+    pollRealtimeSourceOfTruth("interval").catch(() => { /* no-op */ });
+}, LENS_POLL_INTERVAL_MS);
+if (typeof realtimePollTimer.unref === "function") realtimePollTimer.unref();
+
 router.get("/health", (req, res) => {
+    const realtime = buildSourceOfTruthResponse().realtime;
     res.json({
         status: "ACTIVE",
         service: "heady-lens",
-        mode: "system-wide-differential-observer",
+        mode: "realtime-monitoring-source-of-truth",
+        sourceOfTruth: true,
+        lastRealtimePoll,
+        realtimeHealthScore: realtime.summary.healthScore,
         monitoredServices: MONITORED_SERVICES.length,
         differentials: differentials.length,
         snapshots: snapshots.size,
@@ -55,6 +324,33 @@ router.get("/health", (req, res) => {
         memoryDiscarded: differentials.filter(d => d.significance <= 0.5).length,
         ts: new Date().toISOString(),
     });
+});
+
+router.get("/source-of-truth", async (req, res) => {
+    const refresh = req.query.refresh === "1" || req.query.refresh === "true";
+    const includeRawData = req.query.raw === "1" || req.query.raw === "true";
+
+    if (refresh || !lastRealtimePoll) {
+        await pollRealtimeSourceOfTruth(refresh ? "manual-refresh" : "first-read");
+    }
+
+    res.json(buildSourceOfTruthResponse(includeRawData));
+});
+
+router.get("/realtime", async (req, res) => {
+    const refresh = req.query.refresh === "1" || req.query.refresh === "true";
+    const includeRawData = req.query.raw === "1" || req.query.raw === "true";
+
+    if (refresh || !lastRealtimePoll) {
+        await pollRealtimeSourceOfTruth(refresh ? "manual-realtime-refresh" : "first-realtime-read");
+    }
+
+    res.json(buildSourceOfTruthResponse(includeRawData));
+});
+
+router.post("/realtime/poll", async (req, res) => {
+    const response = await pollRealtimeSourceOfTruth("manual-api");
+    res.json({ ...response, action: "realtime-poll" });
 });
 
 // Capture a differential from any system component
@@ -72,15 +368,31 @@ router.post("/observe", (req, res) => {
         ts: new Date().toISOString(),
     };
 
-    differentials.push(entry);
-    if (differentials.length > MAX_DIFFERENTIALS) differentials.splice(0, differentials.length - MAX_DIFFERENTIALS);
+    pushDifferential(entry);
 
     // Update snapshot for this source
     snapshots.set(source || "unknown", { value, metric, ts: entry.ts });
 
-    // Persist significant observations
-    if (entry.significance > 0.5) {
-        persistObservation(entry);
+    const truthKey = normalizeServiceKey(source || "");
+    if (truthKey && (metric === "health" || metric === "status" || metric === "state-change")) {
+        const numeric = typeof value === "number" ? value : null;
+        const asString = typeof value === "string" ? value.toLowerCase() : "";
+        const healthy = numeric !== null
+            ? numeric > 0
+            : !["down", "error", "critical", "unhealthy", "failed"].includes(asString);
+        const status = healthy ? "healthy" : "degraded";
+        const prev = serviceTruth.get(truthKey) || { endpoint: MONITORED_ENDPOINTS[truthKey] };
+        serviceTruth.set(truthKey, {
+            ...prev,
+            service: truthKey,
+            status,
+            healthy,
+            error: healthy ? null : (asString || "observed-unhealthy"),
+            source: "heady-lens-observe",
+            ts: entry.ts,
+        });
+        lastRealtimePoll = entry.ts;
+        persistSourceOfTruthState();
     }
 
     res.json({ ok: true, service: "heady-lens", observation: entry });
@@ -245,9 +557,7 @@ async function handleImageAnalysis(req, res, actionType) {
             significance: 0.8,
             ts: new Date().toISOString(),
         };
-        differentials.push(observation);
-        if (differentials.length > MAX_DIFFERENTIALS) differentials.splice(0, differentials.length - MAX_DIFFERENTIALS);
-        persistObservation(observation);
+        pushDifferential(observation);
 
         res.json({
             ok: true,

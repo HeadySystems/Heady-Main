@@ -138,16 +138,17 @@ const COMMANDS = {
 
         console.log(`\ud83d\udd0d HeadyLens — ${action}: ${input}`);
         try {
-            const http = require("http");
+            const https = require("https");
             const body = JSON.stringify({ action, image_url: input, prompt: input });
             const url = new URL(heady.baseUrl);
-            const req = http.request({
+            const req = https.request({
                 hostname: url.hostname === "headyme.com" ? "127.0.0.1" : url.hostname,
                 port: url.port || 3301,
                 path: "/api/lens/" + action,
                 method: "POST",
                 headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body) },
                 timeout: 30000,
+                rejectUnauthorized: false,
             }, (res) => {
                 let data = "";
                 res.on("data", c => data += c);
