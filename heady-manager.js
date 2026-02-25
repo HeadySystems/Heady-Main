@@ -1758,6 +1758,15 @@ try {
   logger.logNodeActivity("CONDUCTOR", `  ⚠ HeadyVinci Canvas not loaded: ${err.message}`);
 }
 
+// ─── System Pulse & Proof UI API ─────────────────────────────────────
+try {
+  const pulseApiRouter = require("./src/routes/pulse-api");
+  app.use("/api", pulseApiRouter);
+  logger.logNodeActivity("CONDUCTOR", "  📈 Heady Pulse API: LOADED → /api/pulse, /api/arena/consensus, /api/receipt/*");
+} catch (err) {
+  logger.logNodeActivity("CONDUCTOR", `  ⚠ Heady Pulse API not loaded: ${err.message}`);
+}
+
 // ─── Service Stubs + Connectivity (Pillar Module) ───────────────────
 require("./src/routes/service-stubs")(app, Handshake);
 

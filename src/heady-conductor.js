@@ -345,6 +345,28 @@ function getConductor() {
         } catch (e) {
             console.warn(`  ⚠️ [Conductor] Secret rotation audit skipped: ${e.message}`);
         }
+
+        // ═══ AUTO-WIRE: DAG Engine & MLOps ═══
+        try {
+            const { getDAGEngine } = require('./ops/dag-engine');
+            const { getMLOpsLogger } = require('./ops/mlops-logger');
+            _conductor.dagEngine = getDAGEngine();
+            _conductor.mlops = getMLOpsLogger();
+            console.log("  🔗 [Conductor] DAG Engine and MLOps Telemetry auto-wired.");
+        } catch (e) {
+            console.warn(`  ⚠️ [Conductor] DAG framework deferred: ${e.message}`);
+        }
+
+        // ═══ AUTO-WIRE: Governance (RBAC & Approval Gates) ═══
+        try {
+            const { getRBACVendor } = require('./security/rbac-vendor');
+            const { getApprovalGates } = require('./governance/approval-gates');
+            _conductor.rbac = getRBACVendor();
+            _conductor.gates = getApprovalGates();
+            console.log("  🛑 [Conductor] Governance Layer (RBAC + HITL Gates) auto-wired.");
+        } catch (e) {
+            console.warn(`  ⚠️ [Conductor] Governance framework deferred: ${e.message}`);
+        }
     }
     return _conductor;
 }

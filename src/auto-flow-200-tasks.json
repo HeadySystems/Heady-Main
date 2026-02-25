@@ -1,5 +1,221 @@
 [
   {
+    "id": "strategic-001",
+    "name": "Implement Lookahead Routing",
+    "cat": "intelligence",
+    "pool": "hot",
+    "w": 5,
+    "desc": "Implement Speculative Execution and high-speed predictive router for the DAG scheduler to pre-warm contexts and reduce TTFT latency."
+  },
+  {
+    "id": "strategic-002",
+    "name": "Fractal GraphRAG & Golden Ratio Context Decay",
+    "cat": "duckdb-memory",
+    "pool": "hot",
+    "w": 5,
+    "desc": "Layer Knowledge Graph over Vector Embeddings. Implement logarithmic token-shedding algorithm based on the Golden Ratio (1.618)."
+  },
+  {
+    "id": "strategic-003",
+    "name": "Real-Time Constitutional Interception",
+    "cat": "governance",
+    "pool": "warm",
+    "w": 4,
+    "desc": "Run SOUL module as an isolated TEE intercepting output stream token-by-token and triggering dynamic fine-tuning on drift."
+  },
+  {
+    "id": "strategic-004",
+    "name": "WASM Local-First SLMs",
+    "cat": "edge-routing",
+    "pool": "warm",
+    "w": 4,
+    "desc": "Compile quantized Small Language Models to WebAssembly/WebGPU within HeadyOS for offline, local-first execution."
+  },
+  {
+    "id": "strategic-005",
+    "name": "Cryptographically Verifiable Impact Ledger",
+    "cat": "mission",
+    "pool": "warm",
+    "w": 4,
+    "desc": "Build an immutable cryptographic log (Merkle-tree PostgreSQL/Amazon QLDB) API tracking compute/revenue routed to non-profits."
+  },
+  {
+    "id": "strategic-006",
+    "name": "Compute for Good Decentralization",
+    "cat": "liquid-federation",
+    "pool": "cold",
+    "w": 3,
+    "desc": "Develop opt-in distributed computing feature in HeadyOS, orchestrating idle GPUs for non-profit data processing."
+  },
+  {
+    "id": "strategic-007",
+    "name": "Continuous Chaos Engineering",
+    "cat": "mesh-resiliency",
+    "pool": "warm",
+    "w": 4,
+    "desc": "Implement chaos testing to randomly terminate nodes or inject latency to mathematically guarantee automated rerouting."
+  },
+  {
+    "id": "strategic-008",
+    "name": "Open-Source HeadyMCP Plugins",
+    "cat": "integration",
+    "pool": "cold",
+    "w": 3,
+    "desc": "Open-source the HeadyMCP repository to encourage third-party developers to build plugins for external tools."
+  },
+  {
+    "id": "strategic-009",
+    "name": "3D WebGL Topology Visualization",
+    "cat": "telemetry",
+    "pool": "warm",
+    "w": 3,
+    "desc": "Implement a real-time WebGL/Three.js node visualizer in HeadyMe Admin Center using a Golden Spiral layout."
+  },
+  {
+    "id": "strategic-010",
+    "name": "Semantic Arena Merge",
+    "cat": "development",
+    "pool": "hot",
+    "w": 4,
+    "desc": "Upgrade Arena Merge to use the BRAIN for Semantic Merging to intelligently resolve Git syntax collisions based on intent."
+  },
+  {
+    "id": "deepscan-001",
+    "name": "Architectural Integrity Scan",
+    "cat": "architecture",
+    "pool": "hot",
+    "w": 5,
+    "desc": "Scan repository structure for god classes, tight coupling, and outdated dependencies. Review state management and enforce DRY modules."
+  },
+  {
+    "id": "deepscan-002",
+    "name": "Performance & Scalability Optimization",
+    "cat": "optimization",
+    "pool": "warm",
+    "w": 4,
+    "desc": "Analyze code for O(N^2) loops, missing caching (Redis), excessive API calls, resource leaks, and unoptimized assets."
+  },
+  {
+    "id": "deepscan-003",
+    "name": "Security Hardening (Zero-Trust)",
+    "cat": "security",
+    "pool": "hot",
+    "w": 5,
+    "desc": "Identify attack vectors based on OWASP Top 10. Check input validation, missing RBAC, hardcoded secrets, and PII exposure."
+  },
+  {
+    "id": "deepscan-004",
+    "name": "Database & Data Layer Review",
+    "cat": "database",
+    "pool": "warm",
+    "w": 4,
+    "desc": "Scan all ORM calls and raw SQL to fix N+1 query problems. Analyze schema for missing indexes and evaluate connection pooling."
+  },
+  {
+    "id": "deepscan-005",
+    "name": "Code Quality & Maintainability Audit",
+    "cat": "quality",
+    "pool": "cold",
+    "w": 3,
+    "desc": "Assess error handling coverage, strict typing, linting rules, naming conventions, and eliminate magic numbers."
+  },
+  {
+    "id": "deepscan-006",
+    "name": "DevOps, CI/CD, & Observability Setup",
+    "cat": "ops",
+    "pool": "warm",
+    "w": 4,
+    "desc": "Review Dockerfiles for multi-stage builds and security. Enhance CI/CD pipelines with SAST, linting, tests, and APM telemetry."
+  },
+  {
+    "id": "urgent-001",
+    "name": "Scrub Git History of Secrets",
+    "cat": "security",
+    "pool": "hot",
+    "w": 5,
+    "desc": "Use git filter-repo or BFG Repo-Cleaner to completely scrub .env.hybrid and heady-manager.js.bak from Git history."
+  },
+  {
+    "id": "urgent-002",
+    "name": "Consolidate Build Workflows",
+    "cat": "ops",
+    "pool": "warm",
+    "w": 4,
+    "desc": "Deprecate four hcautobuild scripts into a single parameterized GitHub Action or Taskfile/Makefile."
+  },
+  {
+    "id": "urgent-003",
+    "name": "Add Automated Secret Scanning",
+    "cat": "security",
+    "pool": "hot",
+    "w": 5,
+    "desc": "Add TruffleHog or GitHub Advanced Security to instantly fail builds if secrets are pushed."
+  },
+  {
+    "id": "urgent-004",
+    "name": "Implementation of SAST Scanning",
+    "cat": "security",
+    "pool": "warm",
+    "w": 4,
+    "desc": "Add CodeQL or Semgrep to ci.yml for cross-language vulnerability detection."
+  },
+  {
+    "id": "urgent-005",
+    "name": "Post-Deploy Smoke Testing Node",
+    "cat": "ops",
+    "pool": "warm",
+    "w": 4,
+    "desc": "Add automated health check step in deploy-render.yml to verify orchestrator boot."
+  },
+  {
+    "id": "urgent-006",
+    "name": "Modularize Orchestration Logic",
+    "cat": "architecture",
+    "pool": "hot",
+    "w": 5,
+    "desc": "Replace simple JS promises with LangGraph.js or XState to prevent race conditions and manage state."
+  },
+  {
+    "id": "urgent-007",
+    "name": "Implement OpenTelemetry",
+    "cat": "telemetry",
+    "pool": "warm",
+    "w": 3,
+    "desc": "Add OpenTelemetry Node for real-time visualization of agent-to-tool traces."
+  },
+  {
+    "id": "urgent-008",
+    "name": "Add AST Parser MCP Skill",
+    "cat": "intelligence",
+    "pool": "hot",
+    "w": 5,
+    "desc": "Equip agents with Tree-sitter AST parsing skill to safely refactor monolithic 90KB files like heady-manager.js."
+  },
+  {
+    "id": "urgent-009",
+    "name": "Add Headless Browser MCP Skill",
+    "cat": "intelligence",
+    "pool": "warm",
+    "w": 4,
+    "desc": "Add Playwright or Puppeteer MCP server for visual QA and DOM reading of generated sites."
+  },
+  {
+    "id": "urgent-010",
+    "name": "Add Semantic Graph Memory MCP",
+    "cat": "intelligence",
+    "pool": "hot",
+    "w": 5,
+    "desc": "Equip the orchestrator with Neo4j, Memgraph, or pgvector/ChromaDB for spatial relationship mapping."
+  },
+  {
+    "id": "urgent-011",
+    "name": "Refactor heady-manager.js and Test Directory",
+    "cat": "architecture",
+    "pool": "hot",
+    "w": 5,
+    "desc": "Break down heady-manager.js into smaller modules and move root-level tests into tests/ directory."
+  },
+  {
     "id": "hfidel-001",
     "name": "Rotate Quantum Keys [Zone 6]",
     "cat": "pqc-security",
