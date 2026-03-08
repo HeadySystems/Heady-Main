@@ -1,6 +1,6 @@
 {
   "name": "@heady-ai/sdk",
-  "version": "3.2.2",
+  "version": "4.0.0",
   "description": "TypeScript client SDK for the Heady AI Platform — MCP tool calls, vector memory operations, and health checks.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

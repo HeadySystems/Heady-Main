@@ -1,11 +1,15 @@
 {
   "name": "@heady-ai/sacred-geometry-sdk",
-  "version": "3.2.2",
+  "version": "4.0.0",
   "description": "Sacred Geometry framework for autonomous multi-agent orchestration — Golden Ratio (φ) capacity allocation, Base-13 tier classification, Octree-indexed 3D vector memory, and Fibonacci-weighted template selection.",
   "main": "index.js",
   "types": "index.d.ts",
   "license": "UNLICENSED",
-  "author": "HeadySystems Inc.",
+  "author": {
+    "name": "HeadySystems Inc.",
+    "email": "dev@heady.ai",
+    "url": "https://heady.ai"
+  },
   "homepage": "https://headyme.com",
   "repository": {
     "type": "git",

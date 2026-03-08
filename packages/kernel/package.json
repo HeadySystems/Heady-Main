@@ -1,6 +1,6 @@
 {
   "name": "@heady-ai/kernel",
-  "version": "0.1.0",
+  "version": "4.0.0",
   "description": "Unified latent runtime kernel for lifecycle, orchestration, and execution loops.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,5 +24,18 @@
   },
   "engines": {
     "node": ">=20.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": {
+    "name": "HeadySystems Inc.",
+    "email": "dev@heady.ai",
+    "url": "https://heady.ai"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HeadyMe/Heady.git",
+    "directory": "packages/kernel"
   }
 }

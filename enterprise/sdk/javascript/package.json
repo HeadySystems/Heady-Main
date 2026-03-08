@@ -1,6 +1,6 @@
 {
   "name": "@heady-ai/sdk",
-  "version": "1.0.0",
+  "version": "4.0.0",
   "description": "Official JavaScript/TypeScript SDK for the HeadyOS Platform and HeadyMe AI",
   "author": "HeadySystems Inc. <sdk@headyme.com>",
   "license": "MIT",
@@ -98,8 +98,13 @@
     }
   },
   "tsup": {
-    "entry": ["src/index.ts"],
-    "format": ["cjs", "esm"],
+    "entry": [
+      "src/index.ts"
+    ],
+    "format": [
+      "cjs",
+      "esm"
+    ],
     "dts": true,
     "splitting": false,
     "sourcemap": true,

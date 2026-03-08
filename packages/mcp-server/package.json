@@ -1,6 +1,6 @@
 {
   "name": "@heady-ai/mcp-server",
-  "version": "3.2.2",
+  "version": "4.0.0",
   "description": "Model Context Protocol (MCP) server implementation for the Heady AI Platform — tool registration, memory operations, and JSON-RPC handling.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

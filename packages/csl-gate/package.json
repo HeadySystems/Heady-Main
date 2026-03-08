@@ -1,6 +1,6 @@
 {
   "name": "@heady-ai/csl-gate",
-  "version": "0.1.0",
+  "version": "4.0.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -13,5 +13,25 @@
   "dependencies": {
     "@heady-ai/phi-math-foundation": "workspace:*",
     "@heady-ai/phi-math": "workspace:*"
-  }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "HeadySystems Inc.",
+    "email": "dev@heady.ai",
+    "url": "https://heady.ai"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HeadyMe/Heady.git",
+    "directory": "packages/csl-gate"
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ]
 }

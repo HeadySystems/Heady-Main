@@ -1,6 +1,6 @@
 {
   "name": "@heady-ai/core",
-  "version": "3.2.2",
+  "version": "4.0.0",
   "description": "Core utilities, config, and shared primitives for the Heady AI Platform — zero-dependency foundation module.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

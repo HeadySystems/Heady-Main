@@ -1,28 +1,24 @@
 #!/usr/bin/env node
 /**
- * Heady CLI — Unified command-line interface for the Heady™ Latent OS
+ * Heady CLI v3.0 — Production Terminal Interface for the Heady™ Latent OS
  *
- * Default behavior: Intelligent processing of natural language input.
+ * Claude Code-style interactive terminal with rich ANSI branding,
+ * OAuth authentication, parallel agent visualization, and system dashboards.
  *
  * Usage:
- *   heady "your question or task"         — Intelligent processing (default)
- *   heady init                            — Initialize workspace
- *   heady start                           — Start all services
- *   heady dev                             — Dev mode with hot reload
- *   heady build                           — Build all packages
- *   heady deploy                          — Deploy to Cloud Run + Cloudflare
- *   heady test                            — Run full test suite
- *   heady doctor                          — Health check all services
- *   heady rotate-keys                     — Rotate credentials
- *   heady migrate                         — Run database migrations
- *   heady projection [list|deploy|teardown] — Manage projections
- *   heady status                          — System status
- *   heady validate                        — Validate content kit
- *   heady scaffold <domain> <id> <brand>  — Scaffold a new domain
- *   heady help                            — Show this help
+ *   heady                                 — Interactive REPL mode
+ *   heady "your question or task"         — Intelligent processing
+ *   heady login                           — Authenticate (OAuth/API key)
+ *   heady logout                          — Clear credentials
+ *   heady whoami                          — Authentication status
+ *   heady status                          — Visual system dashboard
+ *   heady battle "prompt"                 — Provider battle with agent tracker
+ *   heady council "prompt"                — Multi-model council
+ *   heady doctor                          — Health check
+ *   heady help                            — Show all commands
  *
  * @module bin/heady-cli
- * @version 2.0.0
+ * @version 3.0.0
  * @author HeadySystems™
  * @license Proprietary — HeadySystems™ & HeadyConnection™
  *
@@ -60,20 +56,20 @@ const SCRIPTS = path.join(ROOT, 'scripts');
 const INFRA = path.join(ROOT, 'infra');
 const MIGRATIONS = path.join(ROOT, 'migrations');
 
-const VERSION = '2.0.0';
+const theme = require('./cli-theme');
+const auth = require('./cli-auth');
 
-const BANNER = `
-╔═══════════════════════════════════════════════════╗
-║  🧠 Heady™ Latent Operating System CLI v${VERSION}   ║
-║  Sacred Geometry :: Organic Systems               ║
-╚═══════════════════════════════════════════════════╝
-`;
+const VERSION = '3.0.0';
+
+// Inject stored credentials into process.env on startup
+const _injectedKeys = auth.injectCredentials();
 
 const KNOWN_COMMANDS = [
     'init', 'start', 'dev', 'build', 'deploy', 'test',
     'doctor', 'rotate-keys', 'migrate', 'projection',
     'status', 'help', 'validate', 'scaffold',
     'council', 'battle', 'determinism', 'learn', 'context',
+    'login', 'logout', 'whoami',
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────
@@ -98,21 +94,40 @@ function runCapture(cmd, opts = {}) {
     }
 }
 
-function heading(text) {
-    console.log(`\n  ◆ ${text}`);
-    console.log('  ' + '─'.repeat(text.length + 2));
+// ─── Shared Gateway Factory (auto-wraps with AutoContext) ─────────
+let _sharedAutoContext = null;
+
+function createGateway() {
+    const { InferenceGateway } = require(path.join(SRC, 'services', 'inference-gateway.js'));
+    const gateway = new InferenceGateway();
+
+    // Auto-wrap with always-on AutoContext
+    try {
+        const { getHeadyAutoContext } = require(path.join(SRC, 'services', 'heady-auto-context.js'));
+        if (!_sharedAutoContext) {
+            _sharedAutoContext = getHeadyAutoContext({
+                workspaceRoot: ROOT,
+                gateway,
+                autoWrap: true,
+            });
+            _sharedAutoContext.start().catch(() => { });
+        } else {
+            _sharedAutoContext.wrapGateway(gateway);
+        }
+    } catch (_) { } // Graceful fallback if AutoContext fails to load
+
+    return gateway;
 }
 
-function success(msg) { console.log(`  ✓ ${msg}`); }
-function info(msg) { console.log(`  ℹ ${msg}`); }
-function warn(msg) { console.log(`  ⚠ ${msg}`); }
-function errorMsg(msg) { console.error(`  ✗ ${msg}`); }
+
+// ─── Themed Output Helpers (delegated to cli-theme) ──────────────
+const { heading, success, info, warn, errorMsg } = theme;
 
 // ─── Intelligent Processing (Default Mode) ────────────────────────
 
 async function processIntelligently(input) {
     heading('Heady™ Intelligent Processing');
-    console.log(`  Input: "${input}"\n`);
+    console.log(`  ${theme.dim('Input:')} "${theme.purple(input.slice(0, 100))}"\n`);
 
     // Classify the input intent
     const intent = classifyIntent(input);
@@ -319,8 +334,7 @@ async function handleGeneralQuery(input) {
     // Attempt AI inference through the real InferenceGateway
     let gateway;
     try {
-        const { InferenceGateway } = require(path.join(SRC, 'services', 'inference-gateway.js'));
-        gateway = new InferenceGateway();
+        gateway = createGateway();
     } catch (err) {
         // Fallback: gateway module unavailable
         gateway = null;
@@ -348,15 +362,15 @@ async function handleGeneralQuery(input) {
         const available = gateway.getAvailable();
         if (available.length > 0) {
             heading('Heady™ AI Response');
-            info(`Provider: ${available[0]} (${available.length} available)`);
+            info(`Provider: ${theme.teal(available[0])} ${theme.dim(`(${available.length} available)`)}`);
             console.log('');
             try {
                 const result = await gateway.complete(messages, { temperature: 0.7 });
                 const text = result.text || result.content || result.choices?.[0]?.message?.content || JSON.stringify(result);
-                // Print the response with word wrapping
-                printWrapped(text, 80);
+                // Render AI response with markdown formatting
+                console.log(theme.renderMarkdown(text));
                 console.log('');
-                info(`Latency: ${result.gatewayLatencyMs || '?'}ms | Provider: ${result.provider || available[0]}`);
+                info(`Latency: ${theme.gold((result.gatewayLatencyMs || '?') + 'ms')} ${theme.dim('|')} Provider: ${theme.teal(result.provider || available[0])}`);
                 return;
             } catch (err) {
                 warn(`AI inference failed: ${err.message}`);
@@ -650,8 +664,7 @@ const commands = {
         info(`Council prompt: "${prompt.slice(0, 100)}"`);
 
         try {
-            const { InferenceGateway } = require(path.join(SRC, 'services', 'inference-gateway.js'));
-            const gateway = new InferenceGateway();
+            const gateway = createGateway();
             const available = gateway.getAvailable();
 
             if (available.length === 0) {
@@ -718,9 +731,8 @@ const commands = {
         }
 
         try {
-            const { InferenceGateway } = require(path.join(SRC, 'services', 'inference-gateway.js'));
             const { HeadyBattleService } = require(path.join(SRC, 'services', 'HeadyBattle-service.js'));
-            const gateway = new InferenceGateway();
+            const gateway = createGateway();
             const battle = new HeadyBattleService({ gateway });
 
             info(`Battle prompt: "${prompt.slice(0, 100)}"`);
@@ -761,9 +773,8 @@ const commands = {
         }
 
         try {
-            const { InferenceGateway } = require(path.join(SRC, 'services', 'inference-gateway.js'));
             const { HeadyBattleService } = require(path.join(SRC, 'services', 'HeadyBattle-service.js'));
-            const gateway = new InferenceGateway();
+            const gateway = createGateway();
             const battle = new HeadyBattleService({ gateway });
 
             info(`Determinism prompt: "${prompt.slice(0, 100)}"`);
@@ -812,9 +823,8 @@ const commands = {
         // Check for --report flag
         if (args.includes('--report') || args.includes('-r')) {
             try {
-                const { InferenceGateway } = require(path.join(SRC, 'services', 'inference-gateway.js'));
                 const { BuildLearningEngine } = require(path.join(SRC, 'orchestration', 'build-learning-engine.js'));
-                const gateway = new InferenceGateway();
+                const gateway = createGateway();
                 const engine = new BuildLearningEngine({ gateway, dataDir: path.join(ROOT, '.heady', 'build-learning') });
                 const report = engine.getReport();
 
@@ -858,9 +868,8 @@ const commands = {
         }
 
         try {
-            const { InferenceGateway } = require(path.join(SRC, 'services', 'inference-gateway.js'));
             const { BuildLearningEngine } = require(path.join(SRC, 'orchestration', 'build-learning-engine.js'));
-            const gateway = new InferenceGateway();
+            const gateway = createGateway();
             const engine = new BuildLearningEngine({ gateway, dataDir: path.join(ROOT, '.heady', 'build-learning') });
 
             info(`Build spec: "${spec.slice(0, 100)}"`);
