@@ -1,5 +1,5 @@
 {
-    "name": "@heady/template-mcp-server",
+    "name": "@heady-ai/template-mcp-server",
     "version": "1.0.0",
     "description": "Heady™ Model Context Protocol Server Template",
     "private": true,

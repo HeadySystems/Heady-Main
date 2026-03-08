@@ -14,8 +14,8 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@heady-ai/phi-math": "../phi-math",
-    "@heady-ai/csl-router": "../csl-router"
+    "@heady-ai/phi-math": "workspace:*",
+    "@heady-ai/csl-router": "workspace:*"
   },
   "engines": {
     "node": ">=20.0.0"

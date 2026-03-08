@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { TaskOrchestrator } from '../orchestrator';
-import { validateRequest, HeadyLogger } from '@headysystems/core';
+import { validateRequest, HeadyLogger } from '@heady-ai/core';
 import { z } from 'zod';
 
 const logger = new HeadyLogger('tasks-router');

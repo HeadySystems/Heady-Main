@@ -43,7 +43,7 @@
 
 const EventEmitter = require('events');
 const crypto = require('crypto');
-const logger = require('../utils/logger');
+let logger = null; try { logger = require('../utils/logger'); } catch(e) { /* graceful */ }
 
 const PHI = (1 + Math.sqrt(5)) / 2;
 const DEFAULT_LOCK_TTL_MS = Math.round(PHI * 30000);    // ~48.5s

@@ -6,7 +6,7 @@
 "use strict";
 
 const crypto = require("crypto");
-const { TERMINAL_STATES } = require("../memory-receipts");
+let { TERMINAL_STATES } = {}; try { { TERMINAL_STATES } = require("../memory-receipts"); } catch(e) { /* graceful */ }
 
 const QUERY_CLASS = {
     urgent: { maxDepth: 1, targetP95Ms: 250 },

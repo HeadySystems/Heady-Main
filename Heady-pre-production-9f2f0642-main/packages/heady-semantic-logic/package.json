@@ -1,5 +1,5 @@
 {
-  "name": "@headysystems/semantic-logic",
+  "name": "@heady-ai/semantic-logic",
   "version": "1.0.0",
   "description": "Continuous Semantic Logic Gate engine for HeadySystems — transforms boolean if/else logic into differentiable fuzzy gates",
   "main": "dist/index.js",
@@ -42,7 +42,7 @@
     "@typescript-eslint/eslint-plugin": "^7.0.0"
   },
   "peerDependencies": {
-    "@headysystems/core": "workspace:*"
+    "@heady-ai/core": "workspace:*"
   },
   "exports": {
     ".": {

@@ -14,7 +14,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@heady-ai/phi-math": "../phi-math"
+    "@heady-ai/phi-math": "workspace:*"
   },
   "engines": {
     "node": ">=20.0.0"

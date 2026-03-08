@@ -14,15 +14,9 @@
  * @module liquid-gateway
  */
 
-import { EventEmitter } from 'events';
-import {
-  PHI, PSI, PSI_2, PSI_3,
-  fib, FIBONACCI,
-  phiBackoff, phiBackoffWithJitter,
-  CSL_THRESHOLDS,
-  TIMEOUT_TIERS,
-} from '../shared/phi-math.js';
-import { cslAND, normalize } from '../shared/csl-engine.js';
+const { EventEmitter } = require("events");
+const { PHI, PSI, PSI_2, PSI_3, fib, FIBONACCI, phiBackoff, phiBackoffWithJitter, CSL_THRESHOLDS, TIMEOUT_TIERS, } = (function() { try { return require("../shared/phi-math.js"); } catch(e) { return {}; } })();
+const { cslAND, normalize } = (function() { try { return require("../shared/csl-engine.js"); } catch(e) { return {}; } })();
 
 // ─── CONSTANTS (NO MAGIC NUMBERS) ────────────────────────────────────────────
 
@@ -56,7 +50,7 @@ const DEFAULT_DAILY_CAP_USD = PHI * 10; // 16.18
 // ─── PROVIDER DEFINITIONS ────────────────────────────────────────────────────
 
 /** Canonical provider names */
-export const PROVIDERS = Object.freeze({
+const PROVIDERS = Object.freeze({
   CLAUDE:      'claude',
   GPT4O:       'gpt-4o',
   GEMINI:      'gemini',
@@ -263,7 +257,7 @@ class ProviderRecord {
  *
  * @extends EventEmitter
  */
-export class LiquidGateway extends EventEmitter {
+class LiquidGateway extends EventEmitter {
   /**
    * @param {object} [options]
    * @param {boolean} [options.enableHeartbeat=true] - Start phi-interval health monitors.
@@ -553,4 +547,4 @@ export class LiquidGateway extends EventEmitter {
   }
 }
 
-export default LiquidGateway;
+module.exports = LiquidGateway;

@@ -1,5 +1,5 @@
 {
-    "name": "@heady/template-swarm-bee",
+    "name": "@heady-ai/template-swarm-bee",
     "version": "1.0.0",
     "description": "Heady™ Ephemeral Swarm Bee Agent Template",
     "private": true,

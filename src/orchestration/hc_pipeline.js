@@ -874,7 +874,7 @@ class HCFullPipeline extends EventEmitter {
 
     // ── Auto-commit + push after pipeline run ──────────────────────────
     try {
-      const { autoCommitEngine } = require("./engines/auto-commit-engine");
+      let { autoCommitEngine } = {}; try { { autoCommitEngine } = require("./engines/auto-commit-engine"); } catch(e) { /* graceful */ }
       const commitResult = await autoCommitEngine.autoCommitAndPush({
         context: `pipeline_run:${this.state.runId}`,
       });

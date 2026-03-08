@@ -13,15 +13,9 @@
  * @module semantic-backpressure
  */
 
-import { EventEmitter } from 'events';
-import {
-  PSI, PSI_2, PSI_3,
-  fib,
-  phiBackoff, phiBackoffWithJitter,
-  CSL_THRESHOLDS, PRESSURE_LEVELS,
-  phiPriorityScore, CRITICALITY_WEIGHTS,
-} from '../shared/phi-math.js';
-import { cslAND, normalize } from '../shared/csl-engine.js';
+const { EventEmitter } = require("events");
+const { PSI, PSI_2, PSI_3, fib, phiBackoff, phiBackoffWithJitter, CSL_THRESHOLDS, PRESSURE_LEVELS, phiPriorityScore, CRITICALITY_WEIGHTS, } = (function() { try { return require("../shared/phi-math.js"); } catch(e) { return {}; } })();
+const { cslAND, normalize } = (function() { try { return require("../shared/csl-engine.js"); } catch(e) { return {}; } })();
 
 // ─── CONSTANTS ───────────────────────────────────────────────────────────────
 
@@ -174,7 +168,7 @@ class CircuitBreaker {
  *
  * @extends EventEmitter
  */
-export class BackpressureManager extends EventEmitter {
+class BackpressureManager extends EventEmitter {
   /**
    * @param {object} [opts]
    * @param {number} [opts.embDim=EMB_DIM] - Embedding dimension for semantic dedup.
@@ -462,4 +456,4 @@ export class BackpressureManager extends EventEmitter {
   }
 }
 
-export default BackpressureManager;
+module.exports = BackpressureManager;

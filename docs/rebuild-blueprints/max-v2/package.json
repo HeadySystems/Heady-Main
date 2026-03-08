@@ -1,5 +1,5 @@
 {
-  "name": "@heady/monorepo",
+  "name": "@heady-ai/monorepo",
   "private": true,
   "version": "4.0.0-alpha.1",
   "description": "Heady rebuilt as a cloud-first monorepo with layered domains, thin orchestration, projected verticals, and durable memory services.",

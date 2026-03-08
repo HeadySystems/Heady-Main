@@ -48,7 +48,7 @@
 const EventEmitter = require('events');
 const fs = require('fs');
 const path = require('path');
-const logger = require('../utils/logger');
+let logger = null; try { logger = require('../utils/logger'); } catch(e) { /* graceful */ }
 
 // ── Constants ──────────────────────────────────────────────────────
 

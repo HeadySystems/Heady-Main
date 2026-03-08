@@ -34,8 +34,8 @@
   "author": "Heady AI Team",
   "license": "MIT",
   "dependencies": {
-    "@heady-ai/phi-math-foundation": "1.0.0",
-    "@heady-ai/csl-engine": "1.0.0"
+    "@heady-ai/phi-math-foundation": "workspace:*",
+    "@heady-ai/csl-engine": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

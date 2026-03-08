@@ -26,7 +26,7 @@ const {
   cosineSimilarity,
   phiFusionWeights,
   phiPriorityScore,
-} = require('../../shared/phi-math-v2');
+} = require('../shared/phi-math.js');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CSLGateEngine

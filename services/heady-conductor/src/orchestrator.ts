@@ -1,6 +1,6 @@
-import { HeadyLogger } from '@headysystems/core';
-import { Task, TaskAssignment, Agent } from '@headysystems/types';
-import { HeadyRedisPool } from '@headysystems/redis';
+import { HeadyLogger } from '@heady-ai/core';
+import { Task, TaskAssignment, Agent } from '@heady-ai/types';
+import { HeadyRedisPool } from '@heady-ai/redis';
 
 export class TaskOrchestrator {
   private logger: HeadyLogger;

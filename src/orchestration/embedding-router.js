@@ -14,15 +14,9 @@
  * @module embedding-router
  */
 
-import { EventEmitter } from 'events';
-import {
-  PHI, PSI, PSI_10,
-  fib, FIBONACCI,
-  phiBackoff, phiBackoffWithJitter,
-  CSL_THRESHOLDS,
-  TIMEOUT_TIERS,
-} from '../shared/phi-math.js';
-import { cslAND, normalize } from '../shared/csl-engine.js';
+const { EventEmitter } = require("events");
+const { PHI, PSI, PSI_10, fib, FIBONACCI, phiBackoff, phiBackoffWithJitter, CSL_THRESHOLDS, TIMEOUT_TIERS, } = (function() { try { return require("../shared/phi-math.js"); } catch(e) { return {}; } })();
+const { cslAND, normalize } = (function() { try { return require("../shared/csl-engine.js"); } catch(e) { return {}; } })();
 
 // ─── CONSTANTS ───────────────────────────────────────────────────────────────
 
@@ -58,7 +52,7 @@ const DEFAULT_BATCH_SIZE = fib(7); // 13
  * Canonical embedding provider configurations.
  * Dimensions are true production dimensions for each model.
  */
-export const EMBEDDING_PROVIDERS = Object.freeze({
+const EMBEDDING_PROVIDERS = Object.freeze({
   NOMIC:    'nomic',
   JINA:     'jina',
   COHERE:   'cohere',
@@ -227,7 +221,7 @@ function _seededVec(seed, dim) {
  * @param {Float64Array|number[]} vec - Input embedding.
  * @returns {Float64Array} 384-d normalized vector.
  */
-export function mrlTruncate(vec) {
+function mrlTruncate(vec) {
   if (vec.length <= MRL_TARGET_DIM) return normalize(new Float64Array(vec));
   const truncated = new Float64Array(MRL_TARGET_DIM);
   for (let i = 0; i < MRL_TARGET_DIM; i++) truncated[i] = vec[i];
@@ -245,7 +239,7 @@ export function mrlTruncate(vec) {
  *
  * @extends EventEmitter
  */
-export class EmbeddingRouter extends EventEmitter {
+class EmbeddingRouter extends EventEmitter {
   /**
    * @param {object} [opts]
    * @param {boolean} [opts.enableMRL=false]     - Auto-truncate all outputs to 384-d.
@@ -479,4 +473,4 @@ export class EmbeddingRouter extends EventEmitter {
   get totalCostUsd() { return +this._totalCostUsd.toFixed(8); }
 }
 
-export default EmbeddingRouter;
+module.exports = EmbeddingRouter;

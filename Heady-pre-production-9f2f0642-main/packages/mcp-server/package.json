@@ -20,8 +20,8 @@
     "prepublishOnly": "npm run clean && npm run build"
   },
   "dependencies": {
-    "@heady-ai/core": "^3.2.2",
-    "@heady-ai/vector-memory": "^3.2.2"
+    "@heady-ai/core": "workspace:*",
+    "@heady-ai/vector-memory": "workspace:*"
   },
   "license": "UNLICENSED",
   "author": {

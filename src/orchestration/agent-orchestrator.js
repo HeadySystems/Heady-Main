@@ -25,7 +25,7 @@
 const EventEmitter = require("events");
 const fs = require("fs");
 const path = require("path");
-const logger = require("./utils/logger");
+let logger = null; try { logger = require("./utils/logger"); } catch(e) { /* graceful */ }
 
 const AUDIT_PATH = path.join(__dirname, "..", "data", "agent-orchestrator-audit.jsonl");
 const PHI = 1.6180339887;
@@ -78,7 +78,7 @@ class HeadySupervisor {
 }
 
 // ─── HeadyConductor (federated routing) ────────────────────────────
-const { getConductor } = require("./heady-conductor");
+let { getConductor } = {}; try { { getConductor } = require("./heady-conductor"); } catch(e) { /* graceful */ }
 
 class AgentOrchestrator extends EventEmitter {
     constructor(options = {}) {

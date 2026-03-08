@@ -1,5 +1,5 @@
 {
-  "name": "@headysystems/vsa-core",
+  "name": "@heady-ai/vsa-core",
   "version": "1.0.0",
   "description": "Vector Symbolic Architecture integration for HeadySystems continuous semantic logic",
   "main": "src/vsa/index.js",

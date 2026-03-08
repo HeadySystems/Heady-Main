@@ -23,7 +23,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const logger = require("./utils/logger");
+let logger = null; try { logger = require("./utils/logger"); } catch(e) { /* graceful */ }
 
 const CORRECTIONS_LOG = path.join(__dirname, "..", "data", "corrections-audit.jsonl");
 const BEHAVIOR_STORE = path.join(__dirname, "..", "data", "behavior-patterns.json");

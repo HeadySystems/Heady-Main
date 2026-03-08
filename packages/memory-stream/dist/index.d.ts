@@ -47,4 +47,3 @@ export declare class MemoryStream {
     reflect(agentId: string, maxItems?: number): ReflectionResult;
     all(): MemoryRecord[];
 }
-//# sourceMappingURL=index.d.ts.map

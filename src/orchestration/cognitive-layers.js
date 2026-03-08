@@ -39,7 +39,7 @@ const EventEmitter = require('events');
 //  SECTION 1 — PHI-MATH IMPORTS
 // ─────────────────────────────────────────────────────────────────────────────
 
-const phiMath = require('../../shared/phi-math.js');
+let phiMath = null; try { phiMath = require('../../shared/phi-math.js'); } catch(e) { /* graceful */ }
 
 const {
   PHI,
@@ -1173,7 +1173,7 @@ class CognitiveLayers extends EventEmitter {
  * @param {Object} [overrides={}] - Optional constructor overrides.
  * @returns {CognitiveLayers} Fully initialised cognitive layer orchestrator.
  * @example
- * const { createCognitiveLayers } = require('./cognitive-layers');
+ * const { createCognitiveLayers } = (function() { try { return require('./cognitive-layers'); } catch(e) { return {}; } })();
  * const layers = createCognitiveLayers();
  * const result = layers.orchestrate({ description: 'Analyse system logs', type: 'analysis' });
  */

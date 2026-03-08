@@ -20,7 +20,7 @@ const {
   cosineSimilarity,
   phiFusionWeights,
   phiMultiSplit,
-} = require('../../shared/phi-math-v2');
+} = require('../shared/phi-math.js');
 
 // ── Topology Constants ────────────────────────────────────────────────────────
 

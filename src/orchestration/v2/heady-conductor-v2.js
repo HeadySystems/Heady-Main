@@ -33,7 +33,7 @@
 
 const EventEmitter = require('events');
 const crypto = require('crypto');
-const logger = require('../utils/logger');
+let logger = null; try { logger = require('../utils/logger'); } catch(e) { /* graceful */ }
 
 const PHI = (1 + Math.sqrt(5)) / 2;
 const HEARTBEAT_INTERVAL_MS = Math.round(PHI * 5000); // ~8.09s — golden-ratio cadence

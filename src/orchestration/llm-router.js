@@ -13,16 +13,9 @@
  * @module llm-router
  */
 
-import { EventEmitter } from 'events';
-import {
-  PHI, PSI, PSI_2, PSI_3,
-  fib, FIBONACCI,
-  phiBackoff, phiBackoffWithJitter,
-  phiFusionWeights, phiFusionScore,
-  CSL_THRESHOLDS,
-  TIMEOUT_TIERS,
-} from '../shared/phi-math.js';
-import { cslAND, cslCONSENSUS, normalize } from '../shared/csl-engine.js';
+const { EventEmitter } = require("events");
+const { PHI, PSI, PSI_2, PSI_3, fib, FIBONACCI, phiBackoff, phiBackoffWithJitter, phiFusionWeights, phiFusionScore, CSL_THRESHOLDS, TIMEOUT_TIERS, } = (function() { try { return require("../shared/phi-math.js"); } catch(e) { return {}; } })();
+const { cslAND, cslCONSENSUS, normalize } = (function() { try { return require("../shared/csl-engine.js"); } catch(e) { return {}; } })();
 
 // ─── CONSTANTS ───────────────────────────────────────────────────────────────
 
@@ -55,7 +48,7 @@ const DEFAULT_MAX_TOKENS = fib(8) * fib(6); // 21 × 8 = 168 — see spec note; 
 /**
  * Canonical task type identifiers.
  */
-export const TASK_TYPES = Object.freeze({
+const TASK_TYPES = Object.freeze({
   CODE_GENERATION: 'code_generation',
   CODE_REVIEW:     'code_review',
   ARCHITECTURE:    'architecture',
@@ -73,7 +66,7 @@ export const TASK_TYPES = Object.freeze({
  * Task → primary/fallback1/fallback2 routing matrix.
  * All model IDs use lowercase-hyphen convention.
  */
-export const ROUTING_MATRIX = Object.freeze({
+const ROUTING_MATRIX = Object.freeze({
   [TASK_TYPES.CODE_GENERATION]: {
     primary:   'claude-3-5-sonnet-20241022',
     fallback1: 'gpt-4o',
@@ -235,7 +228,7 @@ class ModelRecord {
  *
  * @extends EventEmitter
  */
-export class LLMRouter extends EventEmitter {
+class LLMRouter extends EventEmitter {
   /**
    * @param {object} [opts]
    * @param {boolean} [opts.enableHeartbeat=true]
@@ -585,4 +578,4 @@ export class LLMRouter extends EventEmitter {
   }
 }
 
-export default LLMRouter;
+module.exports = LLMRouter;

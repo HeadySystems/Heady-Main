@@ -4,7 +4,7 @@
  * © 2026 HeadySystems Inc. — Proprietary
  */
 
-import { EventEmitter } from 'events';
+const { EventEmitter } = require("events");
 
 /**
  * @typedef {object} EventRecord
@@ -26,7 +26,7 @@ import { EventEmitter } from 'events';
  * - Middleware pipeline for event interception
  * - Namespace-scoped sub-bus creation
  */
-export class HeadyEventBus extends EventEmitter {
+class HeadyEventBus extends EventEmitter {
   /**
    * @param {object} [options]
    * @param {number} [options.historySize=500] - Max events in ring buffer
@@ -305,6 +305,6 @@ export class HeadyEventBus extends EventEmitter {
 }
 
 /** Singleton global event bus */
-export const globalEventBus = new HeadyEventBus({ historySize: 1000 });
+const globalEventBus = new HeadyEventBus({ historySize: 1000 });
 
-export default HeadyEventBus;
+module.exports = HeadyEventBus;

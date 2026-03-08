@@ -26,24 +26,9 @@
  *   See shared/phi-math.js for derivations.
  */
 
-import { EventEmitter } from 'events';
-import { createHash, randomUUID } from 'crypto';
-import {
-  PHI,
-  PSI,
-  CSL_THRESHOLDS,
-  DEDUP_THRESHOLD,
-  phiResourceWeights,
-  phiBackoff,
-  phiFusionWeights,
-  cslGate,
-  cslBlend,
-  PRESSURE_LEVELS,
-  classifyPressure,
-  phiAdaptiveInterval,
-  fib,
-  fibSequence,
-} from '../../shared/phi-math.js';
+const { EventEmitter } = require("events");
+const { createHash, randomUUID } = require("crypto");
+const { PHI, PSI, CSL_THRESHOLDS, DEDUP_THRESHOLD, phiResourceWeights, phiBackoff, phiFusionWeights, cslGate, cslBlend, PRESSURE_LEVELS, classifyPressure, phiAdaptiveInterval, fib, fibSequence, } = (function() { try { return require("../../shared/phi-math.js"); } catch(e) { return {}; } })();
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -1205,4 +1190,4 @@ export {
   fibWeight,
 };
 
-export default SwarmCoordinator;
+module.exports = SwarmCoordinator;

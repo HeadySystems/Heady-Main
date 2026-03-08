@@ -1,5 +1,5 @@
 {
-  "name": "@heady/shared-types",
+  "name": "@heady-ai/shared-types",
   "version": "1.0.0",
   "private": false,
   "description": "Heady™ AI Platform — Shared TypeScript types and constants",

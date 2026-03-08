@@ -1,5 +1,5 @@
 {
-  "name": "@heady/vector-explorer",
+  "name": "@heady-ai/vector-explorer",
   "version": "3.1.0",
   "description": "Heady Vector Explorer — Semantic vector memory exploration",
   "private": true,

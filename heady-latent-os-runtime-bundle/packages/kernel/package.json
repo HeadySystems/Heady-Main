@@ -14,13 +14,13 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@heady-ai/phi-math": "../phi-math",
-    "@heady-ai/csl-router": "../csl-router",
-    "@heady-ai/agent-identity": "../agent-identity",
-    "@heady-ai/memory-stream": "../memory-stream",
-    "@heady-ai/spatial-events": "../spatial-events",
-    "@heady-ai/observability-kernel": "../observability-kernel",
-    "@heady-ai/latent-boundary": "../latent-boundary"
+    "@heady-ai/phi-math": "workspace:*",
+    "@heady-ai/csl-router": "workspace:*",
+    "@heady-ai/agent-identity": "workspace:*",
+    "@heady-ai/memory-stream": "workspace:*",
+    "@heady-ai/spatial-events": "workspace:*",
+    "@heady-ai/observability-kernel": "workspace:*",
+    "@heady-ai/latent-boundary": "workspace:*"
   },
   "engines": {
     "node": ">=20.0.0"

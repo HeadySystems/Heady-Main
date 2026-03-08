@@ -30,7 +30,7 @@ const {
   phiFusionWeights,
   cosineSimilarity,
   cslGate,
-} = require('../../shared/phi-math-v2');
+} = require('../shared/phi-math.js');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PHI-DERIVED CONSTANTS (no magic numbers)

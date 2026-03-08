@@ -41,4 +41,3 @@ export declare class ObservabilityKernel {
         averageLatencyMs: number;
     };
 }
-//# sourceMappingURL=index.d.ts.map

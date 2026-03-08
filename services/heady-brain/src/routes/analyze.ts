@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { HeadyLogger, validateRequest } from '@headysystems/core';
+import { HeadyLogger, validateRequest } from '@heady-ai/core';
 import { z } from 'zod';
 
 export const analyzeRouter = Router();

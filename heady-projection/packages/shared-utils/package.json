@@ -1,5 +1,5 @@
 {
-  "name": "@heady/shared-utils",
+  "name": "@heady-ai/shared-utils",
   "version": "1.0.0",
   "private": false,
   "description": "Heady™ AI Platform — Shared utility functions",
@@ -18,7 +18,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@heady/shared-types": "workspace:*"
+    "@heady-ai/shared-types": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.4.0"

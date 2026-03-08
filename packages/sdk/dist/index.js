@@ -5,7 +5,7 @@ const core_1 = require("@heady-ai/core");
 class HeadyClient {
     apiKey;
     baseUrl;
-    constructor(apiKey, baseUrl = 'https://mcp.headymcp.com') {
+    constructor(apiKey, baseUrl = 'https://headyapi.com') {
         this.apiKey = apiKey;
         this.baseUrl = baseUrl;
     }

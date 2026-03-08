@@ -42,7 +42,7 @@ const EventEmitter = require("events");
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
-const logger = require("./utils/logger");
+let logger = null; try { logger = require("./utils/logger"); } catch(e) { /* graceful */ }
 
 const HISTORY_PATH = path.join(__dirname, "..", "data", "auto-success-tasks.json");
 const AUDIT_PATH = path.join(__dirname, "..", "data", "auto-success-audit.json");
@@ -120,6 +120,8 @@ let orchProtocolTasks = [];
 try { orchProtocolTasks = require('./orchestration-protocol-tasks.json'); } catch (e) { }
 let phase5Tasks = [];
 try { phase5Tasks = require('./phase5-hardening-tasks.json'); } catch (e) { }
+let downloadsTasks = [];
+try { downloadsTasks = require('./downloads-extracted-tasks.json').tasks || []; } catch (e) { }
 const TASK_CATALOG = [
     ...extraTasks,
     ...nonprofitTasks,
@@ -128,6 +130,7 @@ const TASK_CATALOG = [
     ...headyosTasks,
     ...orchProtocolTasks,
     ...phase5Tasks,
+    ...downloadsTasks,
     // ═══ LEARNING (20) — Targeted system learning ═══════════════════════════
     {
         id: "learn-001", name: "Analyze config drift patterns", cat: "learning", pool: "warm", w: 3,
@@ -852,7 +855,7 @@ class AutoSuccessEngine extends EventEmitter {
 
         // ═══ AUTO-COMMIT/PUSH/DEPLOY — Permanent pipeline automation ════════
         try {
-            const autoCommitDeploy = require("./auto-commit-deploy");
+            let autoCommitDeploy = null; try { autoCommitDeploy = require("./auto-commit-deploy"); } catch(e) { /* graceful */ }
             autoCommitDeploy.start();
             logger.logSystem("  ∞ AutoCommitDeploy: WIRED — event-driven auto-commit/push/deploy");
         } catch (e) {

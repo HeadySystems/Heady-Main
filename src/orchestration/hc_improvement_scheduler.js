@@ -7,7 +7,7 @@
  * pattern engine and self-critique for continuous improvement.
  */
 
-const logger = require('./utils/logger');
+let logger = null; try { logger = require('./utils/logger'); } catch(e) { /* graceful */ }
 
 class ImprovementScheduler {
     constructor(opts = {}) {

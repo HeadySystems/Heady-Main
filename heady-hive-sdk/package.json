@@ -1,5 +1,5 @@
 {
-  "name": "@headysystems/heady-hive-sdk",
+  "name": "@heady-ai/heady-hive-sdk",
   "version": "3.0.1",
   "description": "HeadyStack Client SDK — programmatic access to all HeadyStack API endpoints",
   "main": "lib/gateway.js",

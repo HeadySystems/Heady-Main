@@ -14,10 +14,10 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@heady-ai/phi-math": "../phi-math",
-    "@heady-ai/csl-router": "../csl-router",
-    "@heady-ai/agent-identity": "../agent-identity",
-    "@heady-ai/memory-stream": "../memory-stream"
+    "@heady-ai/phi-math": "workspace:*",
+    "@heady-ai/csl-router": "workspace:*",
+    "@heady-ai/agent-identity": "workspace:*",
+    "@heady-ai/memory-stream": "workspace:*"
   },
   "engines": {
     "node": ">=20.0.0"

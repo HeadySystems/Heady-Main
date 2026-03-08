@@ -53,7 +53,6 @@ const {
   PSI,
   fib,
   PIPELINE_STAGES,
-  PIPELINE_PATHS,
   STAGE_TIMEOUTS,
   CSL_THRESHOLDS,
   phiBackoff,
@@ -68,9 +67,9 @@ const {
 } = require('../../shared/phi-math');
 
 // ── Module imports ────────────────────────────────────────────────────────────
-const { judgeArenaResults }    = require('../scoring/csl-judge-scorer');
-const { KeyRotationManager }   = require('../crypto/ed25519-receipt-signer');
-const { CognitiveFusion }      = require('../cognitive/cognitive-layer-integration');
+const { judgeArenaResults } = require('../scoring/csl-judge-scorer');
+const { KeyRotationManager } = require('../crypto/ed25519-receipt-signer');
+const { CognitiveFusion } = require('../cognitive/cognitive-layer-integration');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // STATUS enum — pipeline and stage execution statuses
@@ -78,29 +77,32 @@ const { CognitiveFusion }      = require('../cognitive/cognitive-layer-integrati
 
 const STATUS = Object.freeze({
   // Pipeline lifecycle
-  IDLE:       'IDLE',
-  RUNNING:    'RUNNING',
-  PAUSED:     'PAUSED',
-  COMPLETED:  'COMPLETED',
-  FAILED:     'FAILED',
-  ABORTED:    'ABORTED',
+  IDLE: 'IDLE',
+  RUNNING: 'RUNNING',
+  PAUSED: 'PAUSED',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED',
+  ABORTED: 'ABORTED',
 
   // Stage outcomes
-  STAGE_PENDING:   'STAGE_PENDING',
-  STAGE_RUNNING:   'STAGE_RUNNING',
-  STAGE_PASSED:    'STAGE_PASSED',
-  STAGE_FAILED:    'STAGE_FAILED',
-  STAGE_SKIPPED:   'STAGE_SKIPPED',
-  STAGE_BLOCKED:   'STAGE_BLOCKED',
+  STAGE_PENDING: 'STAGE_PENDING',
+  STAGE_RUNNING: 'STAGE_RUNNING',
+  STAGE_PASSED: 'STAGE_PASSED',
+  STAGE_FAILED: 'STAGE_FAILED',
+  STAGE_SKIPPED: 'STAGE_SKIPPED',
+  STAGE_BLOCKED: 'STAGE_BLOCKED',
 
   // Approval gate
   AWAITING_APPROVAL: 'AWAITING_APPROVAL',
-  APPROVED:          'APPROVED',
-  REJECTED:          'REJECTED',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
 });
 
 // Re-export STAGES for consumers
 const STAGES = PIPELINE_STAGES;
+
+// ALL tasks run through ALL 21 stages — no shortcuts, no variants
+const ALL_STAGES = Object.freeze([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Mulberry32 — seeded PRNG for deterministic pipeline execution (Arena, MC)
@@ -121,9 +123,9 @@ function mulberry32(seed) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const PRIORITY = Object.freeze({
-  LOW:      'LOW',
-  MEDIUM:   'MEDIUM',
-  HIGH:     'HIGH',
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
   CRITICAL: 'CRITICAL',
 });
 
@@ -147,14 +149,14 @@ class HCFullPipeline extends EventEmitter {
   constructor(opts = {}) {
     super();
 
-    this.monteCarlo        = opts.monteCarlo        || null;
-    this.policyEngine      = opts.policyEngine       || null;
-    this.incidentManager   = opts.incidentManager    || null;
-    this.errorInterceptor  = opts.errorInterceptor   || null;
-    this.vectorMemory      = opts.vectorMemory        || null;
-    this.selfAwareness     = opts.selfAwareness       || null;
+    this.monteCarlo = opts.monteCarlo || null;
+    this.policyEngine = opts.policyEngine || null;
+    this.incidentManager = opts.incidentManager || null;
+    this.errorInterceptor = opts.errorInterceptor || null;
+    this.vectorMemory = opts.vectorMemory || null;
+    this.selfAwareness = opts.selfAwareness || null;
     this.buddyMetacognition = opts.buddyMetacognition || null;
-    this.receiptSigner     = opts.receiptSigner       || new KeyRotationManager();
+    this.receiptSigner = opts.receiptSigner || new KeyRotationManager();
 
     // Cognitive fusion — accept provided instance or create a default
     this.cognitiveFusion = opts.cognitiveFusion instanceof CognitiveFusion
@@ -162,9 +164,9 @@ class HCFullPipeline extends EventEmitter {
       : new CognitiveFusion({ minConfidence: CSL_THRESHOLDS.LOW });
 
     // Pipeline state
-    this.status   = STATUS.IDLE;
-    this.runId    = null;
-    this.path     = null;   // Active PIPELINE_PATH key
+    this.status = STATUS.IDLE;
+    this.runId = null;
+    this.path = null;   // Active PIPELINE_PATH key
     this.runState = null;   // Full run state object for this execution
 
     // Self-healing: last known good vector memory snapshot key
@@ -188,36 +190,34 @@ class HCFullPipeline extends EventEmitter {
    * @returns {Promise<object>} Final pipeline result
    */
   async run(taskContext, options = {}) {
-    const pathKey = options.path || 'FULL';
-    const stageIndices = PIPELINE_PATHS[pathKey];
-    if (!stageIndices) {
-      throw new Error(`Unknown pipeline path: "${pathKey}". Valid: ${Object.keys(PIPELINE_PATHS).join(', ')}`);
-    }
+    // ENFORCED: Always run ALL 21 stages — no shortcuts, no variants
+    const pathKey = 'FULL';
+    const stageIndices = ALL_STAGES;
 
-    this.runId    = this._generateRunId();
-    this.path     = pathKey;
-    this.status   = STATUS.RUNNING;
+    this.runId = this._generateRunId();
+    this.path = pathKey;
+    this.status = STATUS.RUNNING;
 
     // Seeded PRNG for deterministic execution
     const seed = options.seed != null ? options.seed : this._deriveRunSeed(taskContext);
-    const rng  = mulberry32(seed);
+    const rng = mulberry32(seed);
 
     // Build run state — carried through all stages
     this.runState = {
-      runId:        this.runId,
-      path:         pathKey,
+      runId: this.runId,
+      path: pathKey,
       seed,
-      startedAt:    new Date().toISOString(),
+      startedAt: new Date().toISOString(),
       stageIndices,
       stageResults: {},
-      task:         taskContext,
-      identity:     null,
-      context:      {},
-      priority:     PRIORITY.MEDIUM,
-      candidates:   [],
-      winner:       null,
-      auditTrail:   [],
-      confidence:   0.5,
+      task: taskContext,
+      identity: null,
+      context: {},
+      priority: PRIORITY.MEDIUM,
+      candidates: [],
+      winner: null,
+      auditTrail: [],
+      confidence: 0.5,
       rng,
     };
 
@@ -239,8 +239,8 @@ class HCFullPipeline extends EventEmitter {
       }
 
       this.emit('pipeline:complete', {
-        runId:    this.runId,
-        status:   this.status,
+        runId: this.runId,
+        status: this.status,
         duration: Date.now() - new Date(this.runState.startedAt).getTime(),
       });
 
@@ -253,9 +253,9 @@ class HCFullPipeline extends EventEmitter {
       if (this.incidentManager) {
         await this._safeCall(() => this.incidentManager.raise({
           severity: 'CRITICAL',
-          source:   'HCFullPipeline',
-          runId:    this.runId,
-          error:    err,
+          source: 'HCFullPipeline',
+          runId: this.runId,
+          error: err,
         }));
       }
       throw err;
@@ -267,7 +267,7 @@ class HCFullPipeline extends EventEmitter {
   // ─────────────────────────────────────────────────────────────────────────
 
   async _runStage(stageIdx, stageName, state) {
-    const timeout   = STAGE_TIMEOUTS[stageName] || 30000;
+    const timeout = STAGE_TIMEOUTS[stageName] || 30000;
     const maxRetries = 3;  // max phi-backoff retries
 
     this.emit('stage:start', { runId: this.runId, stage: stageIdx, stageName });
@@ -278,7 +278,7 @@ class HCFullPipeline extends EventEmitter {
     try {
       cognitiveContext = await this.cognitiveFusion.process(stageName, state.task, {
         vectorMemory: this.vectorMemory,
-        runState:     state,
+        runState: state,
       });
     } catch (cogErr) {
       // Cognitive layer failure is non-fatal — log and continue
@@ -296,10 +296,10 @@ class HCFullPipeline extends EventEmitter {
 
         // Stage succeeded
         state.stageResults[stageName] = {
-          status:      STATUS.STAGE_PASSED,
-          startedAt:   state.stageResults[stageName].startedAt,
+          status: STATUS.STAGE_PASSED,
+          startedAt: state.stageResults[stageName].startedAt,
           completedAt: Date.now(),
-          durationMs:  Date.now() - state.stageResults[stageName].startedAt,
+          durationMs: Date.now() - state.stageResults[stageName].startedAt,
           result,
           attempt,
         };
@@ -322,11 +322,11 @@ class HCFullPipeline extends EventEmitter {
 
     // All retries exhausted
     state.stageResults[stageName] = {
-      status:    STATUS.STAGE_FAILED,
+      status: STATUS.STAGE_FAILED,
       startedAt: state.stageResults[stageName].startedAt,
-      failedAt:  Date.now(),
-      error:     lastError?.message,
-      attempts:  maxRetries + 1,
+      failedAt: Date.now(),
+      error: lastError?.message,
+      attempts: maxRetries + 1,
     };
 
     this._recordAuditEvent(`stage:${stageName}:failed`, { error: lastError?.message });
@@ -350,27 +350,27 @@ class HCFullPipeline extends EventEmitter {
 
   async _dispatchStage(stageIdx, stageName, state, cognitive) {
     switch (stageName) {
-      case 'CHANNEL_ENTRY':    return this._stageChannelEntry(state, cognitive);
-      case 'RECON':            return this._stageRecon(state, cognitive);
-      case 'INTAKE':           return this._stageIntake(state, cognitive);
-      case 'CLASSIFY':         return this._stageClassify(state, cognitive);
-      case 'TRIAGE':           return this._stageTriage(state, cognitive);
-      case 'DECOMPOSE':        return this._stageDecompose(state, cognitive);
-      case 'TRIAL_AND_ERROR':  return this._stageTrialAndError(state, cognitive);
-      case 'ORCHESTRATE':      return this._stageOrchestrate(state, cognitive);
-      case 'MONTE_CARLO':      return this._stageMonteCarlo(state, cognitive);
-      case 'ARENA':            return this._stageArena(state, cognitive);
-      case 'JUDGE':            return this._stageJudge(state, cognitive);
-      case 'APPROVE':          return this._stageApprove(state, cognitive);
-      case 'EXECUTE':          return this._stageExecute(state, cognitive);
-      case 'VERIFY':           return this._stageVerify(state, cognitive);
-      case 'SELF_AWARENESS':   return this._stageSelfAwareness(state, cognitive);
-      case 'SELF_CRITIQUE':    return this._stageSelfCritique(state, cognitive);
+      case 'CHANNEL_ENTRY': return this._stageChannelEntry(state, cognitive);
+      case 'RECON': return this._stageRecon(state, cognitive);
+      case 'INTAKE': return this._stageIntake(state, cognitive);
+      case 'CLASSIFY': return this._stageClassify(state, cognitive);
+      case 'TRIAGE': return this._stageTriage(state, cognitive);
+      case 'DECOMPOSE': return this._stageDecompose(state, cognitive);
+      case 'TRIAL_AND_ERROR': return this._stageTrialAndError(state, cognitive);
+      case 'ORCHESTRATE': return this._stageOrchestrate(state, cognitive);
+      case 'MONTE_CARLO': return this._stageMonteCarlo(state, cognitive);
+      case 'ARENA': return this._stageArena(state, cognitive);
+      case 'JUDGE': return this._stageJudge(state, cognitive);
+      case 'APPROVE': return this._stageApprove(state, cognitive);
+      case 'EXECUTE': return this._stageExecute(state, cognitive);
+      case 'VERIFY': return this._stageVerify(state, cognitive);
+      case 'SELF_AWARENESS': return this._stageSelfAwareness(state, cognitive);
+      case 'SELF_CRITIQUE': return this._stageSelfCritique(state, cognitive);
       case 'MISTAKE_ANALYSIS': return this._stageMistakeAnalysis(state, cognitive);
       case 'OPTIMIZATION_OPS': return this._stageOptimizationOps(state, cognitive);
-      case 'CONTINUOUS_SEARCH':return this._stageContinuousSearch(state, cognitive);
-      case 'EVOLUTION':        return this._stageEvolution(state, cognitive);
-      case 'RECEIPT':          return this._stageReceipt(state, cognitive);
+      case 'CONTINUOUS_SEARCH': return this._stageContinuousSearch(state, cognitive);
+      case 'EVOLUTION': return this._stageEvolution(state, cognitive);
+      case 'RECEIPT': return this._stageReceipt(state, cognitive);
       default:
         throw new Error(`Unknown stage: "${stageName}" (index ${stageIdx})`);
     }
@@ -384,10 +384,10 @@ class HCFullPipeline extends EventEmitter {
   async _stageChannelEntry(state, cognitive) {
     // Resolve caller identity
     const identity = {
-      userId:    state.task.userId    || 'anonymous',
+      userId: state.task.userId || 'anonymous',
       sessionId: state.task.sessionId || state.runId,
-      channel:   state.task.channel   || 'api',
-      deviceId:  state.task.deviceId  || 'unknown',
+      channel: state.task.channel || 'api',
+      deviceId: state.task.deviceId || 'unknown',
       resolvedAt: new Date().toISOString(),
     };
 
@@ -412,8 +412,8 @@ class HCFullPipeline extends EventEmitter {
     // Route to appropriate pipeline branch based on task type
     const routeHint = this._resolveRoute(state.task);
 
-    state.identity          = identity;
-    state.context           = { ...crossDeviceContext, ...state.task.context };
+    state.identity = identity;
+    state.context = { ...crossDeviceContext, ...state.task.context };
     state.context.routeHint = routeHint;
 
     return { identity, crossDeviceContext, routeHint };
@@ -426,12 +426,12 @@ class HCFullPipeline extends EventEmitter {
 
   async _stageRecon(state, cognitive) {
     const envMap = {
-      nodeVersion:  process.version,
-      platform:     process.platform,
-      memoryMB:     Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
-      uptime:       Math.round(process.uptime()),
-      environment:  process.env.NODE_ENV || 'development',
-      scannedAt:    new Date().toISOString(),
+      nodeVersion: process.version,
+      platform: process.platform,
+      memoryMB: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+      uptime: Math.round(process.uptime()),
+      environment: process.env.NODE_ENV || 'development',
+      scannedAt: new Date().toISOString(),
     };
 
     // Service health checks
@@ -441,11 +441,11 @@ class HCFullPipeline extends EventEmitter {
     const cogRisks = cognitive?.fused?.risks || [];
     const attackSurface = {
       exposedEndpoints: state.task.endpoints || [],
-      cognitiveRisks:   cogRisks,
-      riskLevel:        cogRisks.length > 0 ? 'ELEVATED' : 'NOMINAL',
+      cognitiveRisks: cogRisks,
+      riskLevel: cogRisks.length > 0 ? 'ELEVATED' : 'NOMINAL',
     };
 
-    state.context.envMap        = envMap;
+    state.context.envMap = envMap;
     state.context.serviceHealth = serviceHealth;
     state.context.attackSurface = attackSurface;
 
@@ -471,18 +471,18 @@ class HCFullPipeline extends EventEmitter {
       try {
         // Retrieve relevant memories for this task — AWAIT is mandatory here
         const [episodic, semantic, procedural] = await Promise.all([
-          this.vectorMemory.queryMemory(taskText, fib(4), { type: 'episodic'   }).catch(() => []),
-          this.vectorMemory.queryMemory(taskText, fib(3), { type: 'semantic'   }).catch(() => []),
+          this.vectorMemory.queryMemory(taskText, fib(4), { type: 'episodic' }).catch(() => []),
+          this.vectorMemory.queryMemory(taskText, fib(3), { type: 'semantic' }).catch(() => []),
           this.vectorMemory.queryMemory(taskText, fib(3), { type: 'procedural' }).catch(() => []),
         ]);
 
         vectorContext = {
-          memories:     [...episodic, ...semantic, ...procedural],
+          memories: [...episodic, ...semantic, ...procedural],
           episodic,
           semantic,
           procedural,
           semanticScore: episodic.length > 0 ? (episodic[0].score || 0) : 0,
-          retrievedAt:  new Date().toISOString(),
+          retrievedAt: new Date().toISOString(),
         };
 
         // Save last-known-good vector key for self-healing
@@ -492,7 +492,7 @@ class HCFullPipeline extends EventEmitter {
 
         this.emit('intake:semantic-barrier-passed', {
           memoriesLoaded: vectorContext.memories.length,
-          topScore:       vectorContext.semanticScore,
+          topScore: vectorContext.semanticScore,
         });
 
       } catch (err) {
@@ -506,7 +506,7 @@ class HCFullPipeline extends EventEmitter {
     // ── End Async Semantic Barrier ─────────────────────────────────────────
 
     state.context.vectorContext = vectorContext;
-    state.context.taskText      = taskText;
+    state.context.taskText = taskText;
 
     return { taskText, vectorContext, semanticBarrierPassed: true };
   }
@@ -530,18 +530,18 @@ class HCFullPipeline extends EventEmitter {
 
     // Weighted softmax using sigmoid gating (phi-temperature)
     const gatedScores = similarities.map(sim => sigmoid((sim - CSL_THRESHOLDS.MINIMUM) / 0.236));
-    const totalGated  = gatedScores.reduce((a, b) => a + b, 0) || 1;
-    const normalized  = gatedScores.map(s => s / totalGated);
+    const totalGated = gatedScores.reduce((a, b) => a + b, 0) || 1;
+    const normalized = gatedScores.map(s => s / totalGated);
 
     // Best intent
-    const topIdx       = normalized.indexOf(Math.max(...normalized));
-    const intent       = intentCategories[topIdx];
-    const confidence   = normalized[topIdx];
+    const topIdx = normalized.indexOf(Math.max(...normalized));
+    const intent = intentCategories[topIdx];
+    const confidence = normalized[topIdx];
 
     // Classify into action type
     const actionType = this._classifyActionType(intent, state.task);
 
-    state.context.intent     = intent;
+    state.context.intent = intent;
     state.context.actionType = actionType;
     state.context.classificationConfidence = confidence;
 
@@ -563,24 +563,24 @@ class HCFullPipeline extends EventEmitter {
     const { attackSurface, classificationConfidence } = state.context;
 
     // Priority scoring — phi-weighted combination of signals
-    const urgencyScore    = state.task.urgency    || 0.3;
-    const impactScore     = state.task.impact     || 0.3;
+    const urgencyScore = state.task.urgency || 0.3;
+    const impactScore = state.task.impact || 0.3;
     const complexityScore = state.task.complexity || 0.3;
-    const riskScore       = (attackSurface?.cognitiveRisks?.length || 0) > 2 ? 0.8 : 0.3;
+    const riskScore = (attackSurface?.cognitiveRisks?.length || 0) > 2 ? 0.8 : 0.3;
 
     const priorityScore = phiPriorityScore(urgencyScore, impactScore, complexityScore, riskScore);
 
     let priority;
-    if      (priorityScore >= CSL_THRESHOLDS.HIGH)     priority = PRIORITY.CRITICAL;
-    else if (priorityScore >= CSL_THRESHOLDS.MEDIUM)   priority = PRIORITY.HIGH;
-    else if (priorityScore >= CSL_THRESHOLDS.LOW)      priority = PRIORITY.MEDIUM;
-    else                                                priority = PRIORITY.LOW;
+    if (priorityScore >= CSL_THRESHOLDS.HIGH) priority = PRIORITY.CRITICAL;
+    else if (priorityScore >= CSL_THRESHOLDS.MEDIUM) priority = PRIORITY.HIGH;
+    else if (priorityScore >= CSL_THRESHOLDS.LOW) priority = PRIORITY.MEDIUM;
+    else priority = PRIORITY.LOW;
 
     // Swarm assignment — number of bees = fib(priority_index + 4)
-    const priorityIndex   = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'].indexOf(priority);
-    const swarmSize       = fib(priorityIndex + 4);  // 3, 5, 8, or 13
+    const priorityIndex = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'].indexOf(priority);
+    const swarmSize = fib(priorityIndex + 4);  // 3, 5, 8, or 13
 
-    state.priority          = priority;
+    state.priority = priority;
     state.context.swarmSize = swarmSize;
     state.context.priorityScore = priorityScore;
 
@@ -601,18 +601,18 @@ class HCFullPipeline extends EventEmitter {
     // Assign cognitive layer emphasis to each subtask
     const enrichedSubtasks = subtasks.map((subtask, idx) => ({
       ...subtask,
-      id:           `${state.runId}-subtask-${idx}`,
-      weight:       phiFusionWeights(subtasks.length)[idx],
+      id: `${state.runId}-subtask-${idx}`,
+      weight: phiFusionWeights(subtasks.length)[idx],
       cognitiveHints: cognitive?.fused?.insights?.slice(0, 2) || [],
     }));
 
     state.context.subtasks = enrichedSubtasks;
-    state.context.dag      = this._buildDAG(enrichedSubtasks);
+    state.context.dag = this._buildDAG(enrichedSubtasks);
 
     return {
       subtaskCount: enrichedSubtasks.length,
-      dag:          state.context.dag,
-      subtasks:     enrichedSubtasks,
+      dag: state.context.dag,
+      subtasks: enrichedSubtasks,
     };
   }
 
@@ -632,13 +632,13 @@ class HCFullPipeline extends EventEmitter {
       const variation = state.rng();
       const candidate = await this._sandboxedExecution(state.task, i, variation, state.context);
       candidates.push({
-        id:           `trial-${i}`,
-        index:        i,
+        id: `trial-${i}`,
+        index: i,
         variation,
-        output:       candidate.output,
-        metrics:      candidate.metrics,
-        score:        candidate.score,
-        error:        candidate.error || null,
+        output: candidate.output,
+        metrics: candidate.metrics,
+        score: candidate.score,
+        error: candidate.error || null,
       });
     }
 
@@ -652,17 +652,17 @@ class HCFullPipeline extends EventEmitter {
       this.emit('trial:threshold-miss', {
         threshold: winnerThreshold,
         bestScore: best.score,
-        fallback:  true,
+        fallback: true,
       });
     }
 
     state.candidates = qualifiedCandidates;
 
     return {
-      trialsRun:    candidateCount,
-      qualified:    qualifiedCandidates.length,
-      threshold:    winnerThreshold,
-      candidates:   qualifiedCandidates,
+      trialsRun: candidateCount,
+      qualified: qualifiedCandidates.length,
+      threshold: winnerThreshold,
+      candidates: qualifiedCandidates,
     };
   }
 
@@ -676,27 +676,27 @@ class HCFullPipeline extends EventEmitter {
 
     // Resource allocation using phi-geometric split
     const totalTokenBudget = 8192;
-    const phiWeights       = phiFusionWeights(swarmSize || fib(5));
+    const phiWeights = phiFusionWeights(swarmSize || fib(5));
     const tokenAllocations = phiWeights.map(w => Math.round(totalTokenBudget * w));
 
     // Spawn bees (workers) and wire dependencies from DAG
     const bees = (subtasks || []).slice(0, swarmSize || fib(5)).map((subtask, idx) => ({
-      beeId:         `bee-${state.runId}-${idx}`,
-      subtaskId:     subtask.id,
-      tokenBudget:   tokenAllocations[idx] || 512,
-      dependencies:  (dag?.edges || []).filter(e => e.target === subtask.id).map(e => e.source),
+      beeId: `bee-${state.runId}-${idx}`,
+      subtaskId: subtask.id,
+      tokenBudget: tokenAllocations[idx] || 512,
+      dependencies: (dag?.edges || []).filter(e => e.target === subtask.id).map(e => e.source),
       cognitiveHints: subtask.cognitiveHints,
-      status:        'SPAWNED',
+      status: 'SPAWNED',
     }));
 
     state.context.bees = bees;
     state.context.orchestratedAt = new Date().toISOString();
 
     return {
-      beesSpawned:      bees.length,
+      beesSpawned: bees.length,
       tokenAllocations,
       bees,
-      orchestratedAt:   state.context.orchestratedAt,
+      orchestratedAt: state.context.orchestratedAt,
     };
   }
 
@@ -706,21 +706,21 @@ class HCFullPipeline extends EventEmitter {
   // ═══════════════════════════════════════════════════════════════════════════
 
   async _stageMonteCarlo(state, cognitive) {
-    const SCENARIO_COUNT  = 1000;
-    const REQUIRED_PASS   = 0.80;
+    const SCENARIO_COUNT = 1000;
+    const REQUIRED_PASS = 0.80;
 
     let passCount = 0;
-    const rng     = state.rng; // Use seeded PRNG for determinism
+    const rng = state.rng; // Use seeded PRNG for determinism
 
     // Use external Monte Carlo engine if available
     if (this.monteCarlo) {
       try {
         const mcResult = await this.monteCarlo.simulate({
-          task:          state.task,
-          candidates:    state.candidates,
-          scenarios:     SCENARIO_COUNT,
-          seed:          state.seed,
-          constraints:   state.context.attackSurface,
+          task: state.task,
+          candidates: state.candidates,
+          scenarios: SCENARIO_COUNT,
+          seed: state.seed,
+          constraints: state.context.attackSurface,
         });
         const passRate = mcResult.passRate || (mcResult.passCount / SCENARIO_COUNT);
         state.context.monteCarloResult = mcResult;
@@ -742,7 +742,7 @@ class HCFullPipeline extends EventEmitter {
     const scenarios = [];
     for (let i = 0; i < SCENARIO_COUNT; i++) {
       const outcomeScore = rng();
-      const passes       = outcomeScore > (1 - REQUIRED_PASS);
+      const passes = outcomeScore > (1 - REQUIRED_PASS);
       if (passes) passCount++;
       // Store a sampled summary (every 100th scenario)
       if (i % 100 === 0) {
@@ -761,12 +761,12 @@ class HCFullPipeline extends EventEmitter {
     state.context.monteCarloPassRate = passRate;
 
     return {
-      scenarios:   SCENARIO_COUNT,
+      scenarios: SCENARIO_COUNT,
       passCount,
       passRate,
       passRatePct: `${(passRate * 100).toFixed(2)}%`,
-      sampleLog:   scenarios,
-      source:      'internal-seeded-prng',
+      sampleLog: scenarios,
+      source: 'internal-seeded-prng',
     };
   }
 
@@ -788,16 +788,16 @@ class HCFullPipeline extends EventEmitter {
       const perturbation = rng() * PSI - (PSI / 2);  // ±0.309 max
 
       return {
-        id:       candidate.id,
-        index:    idx,
-        node:     `arena-node-${idx}`,
-        output:   candidate.output,
+        id: candidate.id,
+        index: idx,
+        node: `arena-node-${idx}`,
+        output: candidate.output,
         metrics: {
-          latencyMs:  Math.round((candidate.metrics?.latencyMs || 200) * (1 + perturbation)),
-          memoryMB:   Math.round((candidate.metrics?.memoryMB  || 32)  * (1 + perturbation * PSI)),
+          latencyMs: Math.round((candidate.metrics?.latencyMs || 200) * (1 + perturbation)),
+          memoryMB: Math.round((candidate.metrics?.memoryMB || 32) * (1 + perturbation * PSI)),
           throughput: (candidate.metrics?.throughput || 100) * (1 - perturbation * PSI),
         },
-        score:    Math.min(1, Math.max(0, (candidate.score || 0.5) + perturbation * 0.1)),
+        score: Math.min(1, Math.max(0, (candidate.score || 0.5) + perturbation * 0.1)),
         prngSeed: state.seed,
       };
     });
@@ -808,7 +808,7 @@ class HCFullPipeline extends EventEmitter {
       candidatesEntered: arenaResults.length,
       arenaResults,
       deterministic: true,
-      seed:          state.seed,
+      seed: state.seed,
     };
   }
 
@@ -827,11 +827,11 @@ class HCFullPipeline extends EventEmitter {
 
     // Build evaluation context for the CSL scorer
     const evaluationContext = {
-      expectedOutput:      state.task.expectedOutput      || null,
-      securityChecks:      state.context.attackSurface    || {},
+      expectedOutput: state.task.expectedOutput || null,
+      securityChecks: state.context.attackSurface || {},
       performanceBaseline: state.context.performanceBaseline || null,
-      qualityChecks:       state.context.qualityChecks    || null,
-      complexityMetrics:   state.context.complexityMetrics || null,
+      qualityChecks: state.context.qualityChecks || null,
+      complexityMetrics: state.context.complexityMetrics || null,
     };
 
     // Use judgeArenaResults() — NOT random scores (Fix #8)
@@ -841,26 +841,26 @@ class HCFullPipeline extends EventEmitter {
       // No clear winner — use top ranked candidate
       judgeResult.winner = judgeResult.rankings[0];
       this.emit('judge:no-clear-winner', {
-        margin:    judgeResult.margin,
-        topScore:  judgeResult.rankings[0]?.composite,
-        runId:     this.runId,
+        margin: judgeResult.margin,
+        topScore: judgeResult.rankings[0]?.composite,
+        runId: this.runId,
       });
     }
 
-    state.winner           = judgeResult.winner;
-    state.judgeResult      = judgeResult;
-    state.confidence       = judgeResult.winner?.composite || state.confidence;
+    state.winner = judgeResult.winner;
+    state.judgeResult = judgeResult;
+    state.confidence = judgeResult.winner?.composite || state.confidence;
 
     return {
-      winner:           judgeResult.winner,
-      rankings:         judgeResult.rankings,
-      margin:           judgeResult.margin,
-      clearWinner:      judgeResult.clearWinner,
-      totalCandidates:  judgeResult.totalCandidates,
-      passCount:        judgeResult.passCount,
+      winner: judgeResult.winner,
+      rankings: judgeResult.rankings,
+      margin: judgeResult.margin,
+      clearWinner: judgeResult.clearWinner,
+      totalCandidates: judgeResult.totalCandidates,
+      passCount: judgeResult.passCount,
       averageComposite: judgeResult.averageComposite,
-      criteria:         JUDGE_WEIGHTS,
-      deterministic:    true,
+      criteria: JUDGE_WEIGHTS,
+      deterministic: true,
     };
   }
 
@@ -881,18 +881,18 @@ class HCFullPipeline extends EventEmitter {
     if (this.policyEngine) {
       try {
         const policy = await this.policyEngine.evaluate({
-          task:      state.task,
+          task: state.task,
           priority,
-          winner:    state.winner,
+          winner: state.winner,
           confidence: state.confidence,
         });
 
         if (policy.autoApprove) {
           return {
-            required:    true,
-            status:      STATUS.APPROVED,
+            required: true,
+            status: STATUS.APPROVED,
             autoApproved: true,
-            policyRule:  policy.rule,
+            policyRule: policy.rule,
             priority,
           };
         }
@@ -909,10 +909,10 @@ class HCFullPipeline extends EventEmitter {
 
     // Emit event for external systems to pick up and resolve
     this.emit('approve:human-gate', {
-      runId:      this.runId,
+      runId: this.runId,
       priority,
       confidence: state.confidence,
-      winner:     state.winner,
+      winner: state.winner,
     });
 
     // Await approval with timeout
@@ -931,11 +931,11 @@ class HCFullPipeline extends EventEmitter {
     }
 
     return {
-      required:    true,
-      status:      STATUS.APPROVED,
+      required: true,
+      status: STATUS.APPROVED,
       autoApproved: false,
-      approvedBy:  approval.approver,
-      approvedAt:  new Date().toISOString(),
+      approvedBy: approval.approver,
+      approvedAt: new Date().toISOString(),
       priority,
     };
   }
@@ -959,10 +959,10 @@ class HCFullPipeline extends EventEmitter {
     if (this.buddyMetacognition) {
       try {
         const metacogCheck = await this.buddyMetacognition.checkReadiness({
-          task:      state.task,
-          winner:    state.winner,
+          task: state.task,
+          winner: state.winner,
           confidence: state.confidence,
-          context:   state.context,
+          context: state.context,
         });
 
         if (!metacogCheck.ready) {
@@ -977,19 +977,19 @@ class HCFullPipeline extends EventEmitter {
     // ── End Metacognitive Gate ────────────────────────────────────────────
 
     // Execute the winning candidate output
-    const winner      = state.winner;
+    const winner = state.winner;
     const executionId = `${state.runId}-exec`;
 
     const execResult = await this._performExecution(winner, state.task, state.context);
 
     state.context.executionResult = execResult;
-    state.context.executionId     = executionId;
+    state.context.executionId = executionId;
 
     return {
       executionId,
-      success:    execResult.success,
-      output:     execResult.output,
-      metrics:    execResult.metrics,
+      success: execResult.success,
+      output: execResult.output,
+      metrics: execResult.metrics,
       confidence: state.confidence,
       metacogPassed: true,
     };
@@ -1003,19 +1003,19 @@ class HCFullPipeline extends EventEmitter {
   async _stageVerify(state, cognitive) {
     const VERIFY_MIN_CONFIDENCE = CSL_THRESHOLDS.LOW;  // ≈ 0.691 per phi-math
 
-    const execResult  = state.context.executionResult;
+    const execResult = state.context.executionResult;
     const validations = [];
 
     // Validate output integrity
     if (execResult?.output) {
       validations.push({
-        check:   'output_integrity',
-        passed:  true,
+        check: 'output_integrity',
+        passed: true,
         details: 'Output is non-null and structurally valid',
       });
     } else {
       validations.push({
-        check:  'output_integrity',
+        check: 'output_integrity',
         passed: false,
         details: 'Execution produced no output',
       });
@@ -1025,8 +1025,8 @@ class HCFullPipeline extends EventEmitter {
     if (state.task.expectedOutput) {
       const matched = JSON.stringify(execResult?.output) === JSON.stringify(state.task.expectedOutput);
       validations.push({
-        check:   'expected_output_match',
-        passed:  matched,
+        check: 'expected_output_match',
+        passed: matched,
         details: matched ? 'Output matches expected' : 'Output differs from expected',
       });
     }
@@ -1045,9 +1045,9 @@ class HCFullPipeline extends EventEmitter {
     const verifyScore = passedCount / validations.length;
 
     return {
-      passed:      verifyScore >= PSI,  // ≥ 61.8% checks must pass
+      passed: verifyScore >= PSI,  // ≥ 61.8% checks must pass
       verifyScore,
-      confidence:  verifyConfidence,
+      confidence: verifyConfidence,
       validations,
       totalChecks: validations.length,
       passedChecks: passedCount,
@@ -1068,9 +1068,9 @@ class HCFullPipeline extends EventEmitter {
 
     if (calibrationDelta > 0.2) {
       blindSpots.push({
-        type:   'confidence_miscalibration',
-        delta:  calibrationDelta,
-        note:   `Stated confidence (${state.confidence.toFixed(3)}) vs actual performance (${state.judgeResult?.averageComposite?.toFixed(3)})`,
+        type: 'confidence_miscalibration',
+        delta: calibrationDelta,
+        note: `Stated confidence (${state.confidence.toFixed(3)}) vs actual performance (${state.judgeResult?.averageComposite?.toFixed(3)})`,
       });
     }
 
@@ -1082,9 +1082,9 @@ class HCFullPipeline extends EventEmitter {
     const slowStages = stageTimings.filter(s => s.ms > (STAGE_TIMEOUTS[s.name] || 30000) * PSI);
     if (slowStages.length > 0) {
       biasChecks.push({
-        type:   'timing_skew',
+        type: 'timing_skew',
         stages: slowStages,
-        note:   'These stages consumed disproportionate time',
+        note: 'These stages consumed disproportionate time',
       });
     }
 
@@ -1092,8 +1092,8 @@ class HCFullPipeline extends EventEmitter {
     if (this.selfAwareness) {
       try {
         const awareness = await this.selfAwareness.calibrate({
-          runId:       state.runId,
-          confidence:  state.confidence,
+          runId: state.runId,
+          confidence: state.confidence,
           stageResults: state.stageResults,
           judgeResult: state.judgeResult,
         });
@@ -1107,7 +1107,7 @@ class HCFullPipeline extends EventEmitter {
       calibrationDelta,
       blindSpots,
       biasChecks,
-      calibrated:   calibrationDelta < 0.1,
+      calibrated: calibrationDelta < 0.1,
       stageTimings,
     };
   }
@@ -1118,9 +1118,9 @@ class HCFullPipeline extends EventEmitter {
   // ═══════════════════════════════════════════════════════════════════════════
 
   async _stageSelfCritique(state, cognitive) {
-    const bottlenecks  = [];
-    const weaknesses   = [];
-    const gaps         = [];
+    const bottlenecks = [];
+    const weaknesses = [];
+    const gaps = [];
 
     // Find bottleneck stages (slowest relative to timeout)
     for (const [name, result] of Object.entries(state.stageResults)) {
@@ -1140,8 +1140,8 @@ class HCFullPipeline extends EventEmitter {
 
     // Detect gaps — stages that were skipped in a non-FULL path
     const executedStages = Object.keys(state.stageResults);
-    const allStageNames  = Array.from(STAGES);
-    const skippedStages  = allStageNames.filter(s => !executedStages.includes(s));
+    const allStageNames = Array.from(STAGES);
+    const skippedStages = allStageNames.filter(s => !executedStages.includes(s));
     if (skippedStages.length > 0 && state.path !== 'FULL') {
       gaps.push({ type: 'path_skip', skippedStages, path: state.path });
     }
@@ -1151,7 +1151,7 @@ class HCFullPipeline extends EventEmitter {
       weaknesses,
       gaps,
       critiqueSummary: `${bottlenecks.length} bottlenecks, ${weaknesses.length} weaknesses, ${gaps.length} gaps`,
-      recommendation:  bottlenecks.length > 2 ? 'Consider FAST path for latency-critical tasks' : 'Run profile looks nominal',
+      recommendation: bottlenecks.length > 2 ? 'Consider FAST path for latency-critical tasks' : 'Run profile looks nominal',
     };
   }
 
@@ -1162,7 +1162,7 @@ class HCFullPipeline extends EventEmitter {
 
   async _stageMistakeAnalysis(state, cognitive) {
     const mistakes = [];
-    const rules    = [];
+    const rules = [];
 
     // Collect all stage failures as mistakes
     for (const [name, result] of Object.entries(state.stageResults)) {
@@ -1173,9 +1173,9 @@ class HCFullPipeline extends EventEmitter {
           MISTAKE_COST_WEIGHTS.quality,
         );
         mistakes.push({
-          stage:     name,
-          error:     result.error,
-          attempts:  result.attempts,
+          stage: name,
+          error: result.error,
+          attempts: result.attempts,
           costScore: costWeight,
           rootCause: this._inferRootCause(result.error),
         });
@@ -1185,11 +1185,11 @@ class HCFullPipeline extends EventEmitter {
     // Generate prevention rules
     for (const mistake of mistakes) {
       rules.push({
-        id:         `rule-${state.runId}-${mistake.stage.toLowerCase()}`,
-        trigger:    mistake.stage,
-        rootCause:  mistake.rootCause,
+        id: `rule-${state.runId}-${mistake.stage.toLowerCase()}`,
+        trigger: mistake.stage,
+        rootCause: mistake.rootCause,
         prevention: `If ${mistake.stage} fails with "${mistake.rootCause}", apply phi-backoff and increase timeout by ${Math.round(PHI * 100)}%`,
-        severity:   'MEDIUM',
+        severity: 'MEDIUM',
       });
     }
 
@@ -1206,10 +1206,10 @@ class HCFullPipeline extends EventEmitter {
     }
 
     return {
-      mistakesFound:    mistakes.length,
+      mistakesFound: mistakes.length,
       mistakes,
-      preventionRules:  rules,
-      rulesGenerated:   rules.length,
+      preventionRules: rules,
+      rulesGenerated: rules.length,
     };
   }
 
@@ -1236,11 +1236,11 @@ class HCFullPipeline extends EventEmitter {
         ) * wasteScore;
 
         optimizations.push({
-          target:       stageName,
-          type:         'latency_reduction',
+          target: stageName,
+          type: 'latency_reduction',
           wasteScore,
           cslRank,
-          suggestion:   `Parallelize or cache ${stageName} — consuming ${(wasteScore * 100).toFixed(1)}% of timeout budget`,
+          suggestion: `Parallelize or cache ${stageName} — consuming ${(wasteScore * 100).toFixed(1)}% of timeout budget`,
           estimatedSavingMs: Math.round(result.durationMs * PSI),
         });
       }
@@ -1251,8 +1251,8 @@ class HCFullPipeline extends EventEmitter {
 
     return {
       optimizationsFound: optimizations.length,
-      topOptimizations:   optimizations.slice(0, fib(4)),  // top 3
-      allOptimizations:   optimizations,
+      topOptimizations: optimizations.slice(0, fib(4)),  // top 3
+      allOptimizations: optimizations,
     };
   }
 
@@ -1271,10 +1271,10 @@ class HCFullPipeline extends EventEmitter {
     for (const insight of cogInsights) {
       if (insight.type === 'pattern_match' && insight.topScore > CSL_THRESHOLDS.MEDIUM) {
         findings.push({
-          source:    'cognitive_pattern_match',
-          value:     insight.topScore,
-          content:   insight.description,
-          absorbed:  true,
+          source: 'cognitive_pattern_match',
+          value: insight.topScore,
+          content: insight.description,
+          absorbed: true,
         });
       }
     }
@@ -1310,21 +1310,21 @@ class HCFullPipeline extends EventEmitter {
   async _stageEvolution(state, cognitive) {
     const MAX_MUTATION_MAGNITUDE = 0.13;  // MASTER_DIRECTIVES §7.2 Stage 19
 
-    const mutations    = [];
-    const rng          = state.rng;
+    const mutations = [];
+    const rng = state.rng;
 
     // Candidate parameters to mutate (from winner or current config)
     const params = {
-      confidence:     state.confidence,
-      swarmSize:      state.context.swarmSize || fib(5),
+      confidence: state.confidence,
+      swarmSize: state.context.swarmSize || fib(5),
       trialThreshold: PSI,
     };
 
     // Generate controlled mutations — each within ≤ 13% magnitude
     for (const [param, value] of Object.entries(params)) {
       const mutationMagnitude = rng() * MAX_MUTATION_MAGNITUDE;
-      const direction         = rng() > 0.5 ? 1 : -1;
-      const mutatedValue      = value * (1 + direction * mutationMagnitude);
+      const direction = rng() > 0.5 ? 1 : -1;
+      const mutatedValue = value * (1 + direction * mutationMagnitude);
 
       // Score mutation fitness using EVOLUTION_FITNESS_WEIGHTS
       const fitnessScore = phiPriorityScore(
@@ -1336,12 +1336,12 @@ class HCFullPipeline extends EventEmitter {
       ) * (1 - mutationMagnitude);
 
       mutations.push({
-        parameter:       param,
-        originalValue:   value,
-        mutatedValue:    Math.round(mutatedValue * 1000) / 1000,
-        magnitude:       mutationMagnitude,
+        parameter: param,
+        originalValue: value,
+        mutatedValue: Math.round(mutatedValue * 1000) / 1000,
+        magnitude: mutationMagnitude,
         fitnessScore,
-        accepted:        fitnessScore > CSL_THRESHOLDS.MINIMUM,
+        accepted: fitnessScore > CSL_THRESHOLDS.MINIMUM,
       });
     }
 
@@ -1351,8 +1351,8 @@ class HCFullPipeline extends EventEmitter {
 
     return {
       mutationsGenerated: mutations.length,
-      mutationsAccepted:  acceptedMutations.length,
-      maxMagnitude:       MAX_MUTATION_MAGNITUDE,
+      mutationsAccepted: acceptedMutations.length,
+      maxMagnitude: MAX_MUTATION_MAGNITUDE,
       mutations,
       acceptedMutations,
     };
@@ -1372,29 +1372,29 @@ class HCFullPipeline extends EventEmitter {
     // Build the trust receipt
     const receiptData = {
       // Run identification
-      runId:       state.runId,
+      runId: state.runId,
       pipelineVersion: '3.0.0',
-      path:        state.path,
-      seed:        state.seed,
+      path: state.path,
+      seed: state.seed,
 
       // Execution summary
-      startedAt:   state.startedAt,
+      startedAt: state.startedAt,
       completedAt: new Date().toISOString(),
-      stageCount:  STAGES.length,  // 21 — fib(8)
-      stagesRun:   state.stageIndices.length,
+      stageCount: STAGES.length,  // 21 — fib(8)
+      stagesRun: state.stageIndices.length,
 
       // Identity and context
-      userId:      state.identity?.userId,
-      channel:     state.identity?.channel,
-      priority:    state.priority,
+      userId: state.identity?.userId,
+      channel: state.identity?.channel,
+      priority: state.priority,
 
       // Outcome
-      winner:       state.winner ? {
+      winner: state.winner ? {
         candidateId: state.winner.candidateId,
-        composite:   state.winner.composite,
-        tier:        state.winner.tier,
+        composite: state.winner.composite,
+        tier: state.winner.tier,
       } : null,
-      confidence:  state.confidence,
+      confidence: state.confidence,
 
       // Cognitive layer metadata
       cognitiveInsightCount: cognitive?.fused?.insights?.length || 0,
@@ -1417,17 +1417,17 @@ class HCFullPipeline extends EventEmitter {
     state.receipt = signedReceipt;
 
     this.emit('receipt:issued', {
-      runId:     state.runId,
-      keyId:     signedReceipt.signature.keyId,
+      runId: state.runId,
+      keyId: signedReceipt.signature.keyId,
       algorithm: signedReceipt.signature.algorithm,
-      hash:      signedReceipt.signature.canonicalHash?.substring(0, 16) + '...',
+      hash: signedReceipt.signature.canonicalHash?.substring(0, 16) + '...',
     });
 
     return {
-      receipt:   signedReceipt,
-      keyId:     signedReceipt.signature.keyId,
+      receipt: signedReceipt,
+      keyId: signedReceipt.signature.keyId,
       algorithm: 'Ed25519',
-      signed:    true,
+      signed: true,
     };
   }
 
@@ -1451,15 +1451,15 @@ class HCFullPipeline extends EventEmitter {
         this.emit('self-heal:rule-found', {
           stageName: failedStageName,
           ruleScore: topRule.score,
-          rule:      topRule.content,
+          rule: topRule.content,
         });
 
         // Apply healing: mark stage as healed, update context
         state.stageResults[failedStageName] = {
           ...state.stageResults[failedStageName],
-          status:    STATUS.STAGE_PASSED,
+          status: STATUS.STAGE_PASSED,
           selfHealed: true,
-          healRule:   topRule.content,
+          healRule: topRule.content,
         };
 
         return true;
@@ -1497,7 +1497,7 @@ class HCFullPipeline extends EventEmitter {
   // ─────────────────────────────────────────────────────────────────────────
 
   _generateRunId() {
-    const ts  = Date.now().toString(36).toUpperCase();
+    const ts = Date.now().toString(36).toUpperCase();
     const rnd = Math.random().toString(36).substring(2, 7).toUpperCase();
     return `HC3-${ts}-${rnd}`;
   }
@@ -1513,20 +1513,20 @@ class HCFullPipeline extends EventEmitter {
   }
 
   _resolveRoute(task) {
-    if (task.urgency > 0.8 || task.fastTrack)    return 'FAST';
-    if (task.type === 'competitive_analysis')     return 'ARENA';
-    if (task.type === 'learning' || task.learn)   return 'LEARNING';
+    if (task.urgency > 0.8 || task.fastTrack) return 'FAST';
+    if (task.type === 'competitive_analysis') return 'ARENA';
+    if (task.type === 'learning' || task.learn) return 'LEARNING';
     return 'FULL';
   }
 
   _classifyActionType(intent, task) {
     const map = {
-      query:     'READ',
-      mutation:  'WRITE',
-      analysis:  'ANALYZE',
+      query: 'READ',
+      mutation: 'WRITE',
+      analysis: 'ANALYZE',
       execution: 'EXECUTE',
-      monitoring:'OBSERVE',
-      learning:  'LEARN',
+      monitoring: 'OBSERVE',
+      learning: 'LEARN',
     };
     return map[intent] || 'UNKNOWN';
   }
@@ -1534,7 +1534,7 @@ class HCFullPipeline extends EventEmitter {
   /** Very lightweight text embedding (bigram frequency vector, 26-dim). */
   _textToEmbedding(text) {
     const lower = String(text).toLowerCase();
-    const vec   = new Array(26).fill(0);
+    const vec = new Array(26).fill(0);
     for (let i = 0; i < lower.length; i++) {
       const code = lower.charCodeAt(i) - 97;
       if (code >= 0 && code < 26) vec[code]++;
@@ -1544,18 +1544,18 @@ class HCFullPipeline extends EventEmitter {
   }
 
   _decomposeTask(task, intent, swarmSize) {
-    const desc     = task.description || task.task || String(task);
-    const words    = desc.split(/\s+/).filter(Boolean);
-    const chunkSz  = Math.max(1, Math.floor(words.length / Math.max(swarmSize, 1)));
+    const desc = task.description || task.task || String(task);
+    const words = desc.split(/\s+/).filter(Boolean);
+    const chunkSz = Math.max(1, Math.floor(words.length / Math.max(swarmSize, 1)));
 
     const subtasks = [];
     for (let i = 0; i < swarmSize && i * chunkSz < words.length; i++) {
       const chunk = words.slice(i * chunkSz, (i + 1) * chunkSz).join(' ');
       subtasks.push({
-        index:       i,
+        index: i,
         description: chunk || desc,
         intent,
-        priority:    i === 0 ? 'HIGH' : 'MEDIUM',
+        priority: i === 0 ? 'HIGH' : 'MEDIUM',
       });
     }
     if (subtasks.length === 0) {
@@ -1583,10 +1583,10 @@ class HCFullPipeline extends EventEmitter {
     await this._sleep(10 + Math.floor(variation * 50));  // 10–60ms simulated latency
     const baseScore = 0.5 + variation * 0.4;  // 0.5–0.9 range
     return {
-      output:  { result: `candidate-${index}`, variation },
+      output: { result: `candidate-${index}`, variation },
       metrics: {
         latencyMs: Math.round(50 + variation * 200),
-        memoryMB:  Math.round(16 + variation * 32),
+        memoryMB: Math.round(16 + variation * 32),
       },
       score: Math.min(1, baseScore),
       error: null,
@@ -1595,10 +1595,10 @@ class HCFullPipeline extends EventEmitter {
 
   _syntheticCandidates(state, count) {
     return Array.from({ length: count }, (_, i) => ({
-      id:     `synthetic-${i}`,
+      id: `synthetic-${i}`,
       output: { result: `synthetic-${i}` },
       metrics: { latencyMs: 100 + i * 50, memoryMB: 16 + i * 8 },
-      score:  0.5 + i * 0.1,
+      score: 0.5 + i * 0.1,
     }));
   }
 
@@ -1613,26 +1613,26 @@ class HCFullPipeline extends EventEmitter {
       output,
       metrics: {
         latencyMs: 50,
-        memoryMB:  8,
+        memoryMB: 8,
       },
     };
   }
 
   async _probeServiceHealth() {
     return {
-      status:    'healthy',
+      status: 'healthy',
       timestamp: new Date().toISOString(),
-      services:  [],
+      services: [],
     };
   }
 
   _inferRootCause(errorMessage) {
     if (!errorMessage) return 'unknown';
-    if (/timeout/i.test(errorMessage))   return 'timeout';
-    if (/network/i.test(errorMessage))   return 'network_error';
-    if (/memory/i.test(errorMessage))    return 'memory_exhaustion';
-    if (/confidence/i.test(errorMessage))return 'low_confidence';
-    if (/policy/i.test(errorMessage))    return 'policy_violation';
+    if (/timeout/i.test(errorMessage)) return 'timeout';
+    if (/network/i.test(errorMessage)) return 'network_error';
+    if (/memory/i.test(errorMessage)) return 'memory_exhaustion';
+    if (/confidence/i.test(errorMessage)) return 'low_confidence';
+    if (/policy/i.test(errorMessage)) return 'policy_violation';
     return 'runtime_error';
   }
 
@@ -1676,17 +1676,17 @@ class HCFullPipeline extends EventEmitter {
 
   _buildFinalResult() {
     return {
-      runId:       this.runState.runId,
-      status:      this.status,
-      path:        this.runState.path,
-      startedAt:   this.runState.startedAt,
+      runId: this.runState.runId,
+      status: this.status,
+      path: this.runState.path,
+      startedAt: this.runState.startedAt,
       completedAt: new Date().toISOString(),
-      winner:      this.runState.winner,
-      confidence:  this.runState.confidence,
-      priority:    this.runState.priority,
-      receipt:     this.runState.receipt,
+      winner: this.runState.winner,
+      confidence: this.runState.confidence,
+      priority: this.runState.priority,
+      receipt: this.runState.receipt,
       stageResults: this.runState.stageResults,
-      auditTrail:   this.runState.auditTrail,
+      auditTrail: this.runState.auditTrail,
     };
   }
 

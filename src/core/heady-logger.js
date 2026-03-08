@@ -4,7 +4,7 @@
  * © 2026 HeadySystems Inc. — Proprietary
  */
 
-import { EventEmitter } from 'events';
+const { EventEmitter } = require("events");
 
 /** @type {Record<string, number>} Log level priorities */
 const LEVELS = {
@@ -88,7 +88,7 @@ function serialize(value) {
  * @extends EventEmitter
  * Structured logger with ANSI color output, JSON mode, and child logger support.
  */
-export class HeadyLogger extends EventEmitter {
+class HeadyLogger extends EventEmitter {
   /**
    * @param {object} [options]
    * @param {string} [options.component] - Component/module name tag
@@ -263,7 +263,7 @@ export class HeadyLogger extends EventEmitter {
 }
 
 /** Singleton root logger */
-export const rootLogger = new HeadyLogger({ component: 'Heady' });
+const rootLogger = new HeadyLogger({ component: 'Heady' });
 
 /**
  * Creates a component-scoped child logger
@@ -271,8 +271,8 @@ export const rootLogger = new HeadyLogger({ component: 'Heady' });
  * @param {object} [context]
  * @returns {HeadyLogger}
  */
-export function createLogger(component, context = {}) {
+function createLogger(component, context = {}) {
   return rootLogger.child(component, context);
 }
 
-export default HeadyLogger;
+module.exports = HeadyLogger;

@@ -1,5 +1,5 @@
 {
-  "name": "@headysystems/types",
+  "name": "@heady-ai/types",
   "version": "1.0.0",
   "description": "Shared TypeScript types for HeadySystems",
   "main": "dist/index.js",

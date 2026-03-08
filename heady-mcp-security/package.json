@@ -1,5 +1,5 @@
 {
-  "name": "@heady/mcp-security",
+  "name": "@heady-ai/mcp-security",
   "version": "1.0.0",
   "description": "Heady MCP-I Security Gap Closure — Zero-Trust Gateway, Audit, RBAC, Rate Limiting",
   "main": "src/index.js",

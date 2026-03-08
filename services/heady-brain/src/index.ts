@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import { HeadyLogger, loadConfig, BaseServiceConfigSchema } from '@headysystems/core';
+import { HeadyLogger, loadConfig, BaseServiceConfigSchema } from '@heady-ai/core';
 import { z } from 'zod';
 import { chatRouter } from './routes/chat';
 import { analyzeRouter } from './routes/analyze';

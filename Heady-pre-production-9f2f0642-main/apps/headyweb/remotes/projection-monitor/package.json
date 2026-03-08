@@ -1,5 +1,5 @@
 {
-  "name": "@heady/projection-monitor",
+  "name": "@heady-ai/projection-monitor",
   "version": "3.1.0",
   "description": "Heady Projection Monitor — Deployment target health",
   "private": true,

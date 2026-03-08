@@ -9,5 +9,9 @@
     "dev": "tsx src/index.ts",
     "lint": "node -e \"console.log('lint service-runtime')\"",
     "test": "vitest run"
+  },
+  "dependencies": {
+    "@heady-ai/observability-client": "workspace:*",
+    "@heady-ai/contract-types": "workspace:*"
   }
 }

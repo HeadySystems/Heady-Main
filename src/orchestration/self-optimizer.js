@@ -26,9 +26,9 @@
  */
 
 const fs = require("fs");
-const { PHI_INTERVALS } = require("./vector-pipeline");
+let { PHI_INTERVALS } = {}; try { { PHI_INTERVALS } = require("./vector-pipeline"); } catch(e) { /* graceful */ }
 const path = require("path");
-const logger = require("./utils/logger");
+let logger = null; try { logger = require("./utils/logger"); } catch(e) { /* graceful */ }
 
 const OPT_FILE = path.join(__dirname, "..", "data", "optimization-state.json");
 const OPT_AUDIT = path.join(__dirname, "..", "data", "optimization-audit.jsonl");

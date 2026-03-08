@@ -28,4 +28,3 @@ export declare function spatialDistance(a: Vector3, b: Vector3): number;
 export declare function attenuationFromDistance(distance: number): number;
 export declare function hashToUnitInterval(seed: string): number;
 export declare function hashToVector3(seed: string, scale?: number): Vector3;
-//# sourceMappingURL=index.d.ts.map

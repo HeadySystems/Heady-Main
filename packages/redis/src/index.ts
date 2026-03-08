@@ -1,5 +1,5 @@
 import Redis, { Cluster } from 'ioredis';
-import { HeadyLogger } from '@headysystems/core';
+import { HeadyLogger } from '@heady-ai/core';
 
 export interface RedisPoolConfig {
   host?: string;

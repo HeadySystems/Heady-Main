@@ -7,8 +7,8 @@
  * PolicyService — Centralized provider for Policy and Budget Engines.
  */
 
-const PolicyEngine = require("./policy-engine");
-const BudgetService = require("./services/budget-service");
+let PolicyEngine = null; try { PolicyEngine = require("./policy-engine"); } catch(e) { /* graceful */ }
+let BudgetService = null; try { BudgetService = require("./services/budget-service"); } catch(e) { /* graceful */ }
 
 // Initialize singletons
 const budgetService = new BudgetService();

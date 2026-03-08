@@ -9,5 +9,9 @@
     "dev": "tsx src/index.ts",
     "lint": "node -e \"console.log('lint csl-gate')\"",
     "test": "vitest run"
+  },
+  "dependencies": {
+    "@heady-ai/phi-math-foundation": "workspace:*",
+    "@heady-ai/phi-math": "workspace:*"
   }
 }

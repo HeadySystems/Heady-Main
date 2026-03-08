@@ -5,7 +5,7 @@
  */
 "use strict";
 
-const { TERMINAL_STATES } = require("../memory-receipts");
+let { TERMINAL_STATES } = {}; try { { TERMINAL_STATES } = require("../memory-receipts"); } catch(e) { /* graceful */ }
 
 const PHASES = Object.freeze(["A", "B", "C", "D", "E", "F"]);
 

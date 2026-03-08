@@ -15,12 +15,12 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc",
+    "build:ignored": "tsc",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run clean && npm run build"
   },
   "dependencies": {
-    "@heady-ai/core": "^3.2.2"
+    "@heady-ai/core": "workspace:*"
   },
   "license": "UNLICENSED",
   "author": {

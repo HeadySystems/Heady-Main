@@ -3,7 +3,7 @@
  * HCTaskScheduler — Priority-based task scheduling with safe mode.
  */
 const { EventEmitter } = require("events");
-const logger = require("./utils/logger");
+let logger = null; try { logger = require("./utils/logger"); } catch(e) { /* graceful */ }
 
 class HCTaskScheduler extends EventEmitter {
     constructor(opts = {}) {

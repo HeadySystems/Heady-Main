@@ -40,4 +40,3 @@ export declare class SpatialEventBus extends EventEmitter {
         replayLimit: number;
     };
 }
-//# sourceMappingURL=index.d.ts.map

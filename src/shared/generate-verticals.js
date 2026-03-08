@@ -12,7 +12,7 @@
  */
 const fs = require("fs");
 const path = require("path");
-const logger = require("./utils/logger");
+let logger = null; try { logger = require("./utils/logger"); } catch(e) { /* graceful */ }
 
 const VERTICALS_PATH = path.join(__dirname, "verticals.json");
 const OUTPUT_DIR = path.join(__dirname, "..", "public", "verticals");

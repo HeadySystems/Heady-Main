@@ -14,11 +14,7 @@
  *   -1 = antipodal (FALSE)
  */
 
-import {
-  PHI, PSI, PSI_2, PSI_3, PSI_4, PSI_5, PSI_8, PSI_9,
-  CSL_THRESHOLDS, phiThreshold, phiFusionWeights,
-  cslGate, adaptiveTemperature, fib,
-} from './phi-math.js';
+const { PHI, PSI, PSI_2, PSI_3, PSI_4, PSI_5, PSI_8, PSI_9, CSL_THRESHOLDS, phiThreshold, phiFusionWeights, cslGate, adaptiveTemperature, fib, } = (function() { try { return require("./phi-math.js"); } catch(e) { return {}; } })();
 
 // ─── VECTOR OPERATIONS ───────────────────────────────────────────────────────
 
@@ -28,7 +24,7 @@ import {
  * @param {Float64Array|number[]} b
  * @returns {number}
  */
-export function dot(a, b) {
+function dot(a, b) {
   let sum = 0;
   for (let i = 0; i < a.length; i++) sum += a[i] * b[i];
   return sum;
@@ -39,7 +35,7 @@ export function dot(a, b) {
  * @param {Float64Array|number[]} v
  * @returns {number}
  */
-export function norm(v) {
+function norm(v) {
   return Math.sqrt(dot(v, v));
 }
 
@@ -48,7 +44,7 @@ export function norm(v) {
  * @param {Float64Array|number[]} v
  * @returns {Float64Array}
  */
-export function normalize(v) {
+function normalize(v) {
   const n = norm(v);
   if (n === 0) return new Float64Array(v.length);
   const result = new Float64Array(v.length);
@@ -68,7 +64,7 @@ export function normalize(v) {
  * @param {Float64Array|number[]} b
  * @returns {number} Cosine similarity ∈ [-1, +1]
  */
-export function cslAND(a, b) {
+function cslAND(a, b) {
   const na = norm(a);
   const nb = norm(b);
   if (na === 0 || nb === 0) return 0;
@@ -83,7 +79,7 @@ export function cslAND(a, b) {
  * @param {Float64Array|number[]} b
  * @returns {Float64Array} Normalized superposition
  */
-export function cslOR(a, b) {
+function cslOR(a, b) {
   const result = new Float64Array(a.length);
   for (let i = 0; i < a.length; i++) result[i] = a[i] + b[i];
   return normalize(result);
@@ -99,7 +95,7 @@ export function cslOR(a, b) {
  * @param {Float64Array|number[]} b - Reference direction
  * @returns {Float64Array} Component of a orthogonal to b
  */
-export function cslNOT(a, b) {
+function cslNOT(a, b) {
   const bb = dot(b, b);
   if (bb === 0) return new Float64Array(a);
   const scale = dot(a, b) / bb;
@@ -116,7 +112,7 @@ export function cslNOT(a, b) {
  * @param {Float64Array|number[]} b
  * @returns {Float64Array}
  */
-export function cslIMPLY(a, b) {
+function cslIMPLY(a, b) {
   const bb = dot(b, b);
   if (bb === 0) return new Float64Array(a.length);
   const scale = dot(a, b) / bb;
@@ -133,7 +129,7 @@ export function cslIMPLY(a, b) {
  * @param {Float64Array|number[]} b
  * @returns {Float64Array}
  */
-export function cslXOR(a, b) {
+function cslXOR(a, b) {
   const union = cslOR(a, b);
   const mutual = cslIMPLY(union, a.length === b.length ? a : b);
   const result = new Float64Array(a.length);
@@ -149,7 +145,7 @@ export function cslXOR(a, b) {
  * @param {number[]} [weights] - Agent weights (defaults to phiFusionWeights)
  * @returns {Float64Array} Consensus vector
  */
-export function cslCONSENSUS(vectors, weights) {
+function cslCONSENSUS(vectors, weights) {
   if (vectors.length === 0) return new Float64Array(0);
   const w = weights || phiFusionWeights(vectors.length);
   const dim = vectors[0].length;
@@ -177,7 +173,7 @@ export { cslGate as cslGATE } from './phi-math.js';
 // ─── TERNARY LOGIC ───────────────────────────────────────────────────────────
 
 /** Ternary logic modes */
-export const TERNARY_MODES = Object.freeze({
+const TERNARY_MODES = Object.freeze({
   KLEENE_K3:   'kleene_k3',
   LUKASIEWICZ: 'lukasiewicz',
   GODEL:       'godel',
@@ -197,7 +193,7 @@ export const TERNARY_MODES = Object.freeze({
  * @param {number} cosScore
  * @returns {'TRUE'|'UNKNOWN'|'FALSE'}
  */
-export function ternaryClassify(cosScore) {
+function ternaryClassify(cosScore) {
   if (cosScore >= PSI) return 'TRUE';        // ≥ 0.618 (φ⁻¹)
   if (cosScore <= -PSI) return 'FALSE';      // ≤ -0.618
   return 'UNKNOWN';
@@ -210,7 +206,7 @@ export function ternaryClassify(cosScore) {
  * @param {string} [mode='csl_continuous']
  * @returns {number}
  */
-export function ternaryAND(a, b, mode = TERNARY_MODES.CSL) {
+function ternaryAND(a, b, mode = TERNARY_MODES.CSL) {
   switch (mode) {
     case TERNARY_MODES.KLEENE_K3:   return Math.min(a, b);
     case TERNARY_MODES.LUKASIEWICZ: return Math.max(-1, a + b - 1);
@@ -228,7 +224,7 @@ export function ternaryAND(a, b, mode = TERNARY_MODES.CSL) {
  * @param {string} [mode='csl_continuous']
  * @returns {number}
  */
-export function ternaryOR(a, b, mode = TERNARY_MODES.CSL) {
+function ternaryOR(a, b, mode = TERNARY_MODES.CSL) {
   switch (mode) {
     case TERNARY_MODES.KLEENE_K3:   return Math.max(a, b);
     case TERNARY_MODES.LUKASIEWICZ: return Math.min(1, a + b + 1);
@@ -244,7 +240,7 @@ export function ternaryOR(a, b, mode = TERNARY_MODES.CSL) {
  * @param {number} a
  * @returns {number}
  */
-export function ternaryNOT(a) {
+function ternaryNOT(a) {
   return -a;
 }
 
@@ -260,7 +256,7 @@ export function ternaryNOT(a) {
  *   - Collapse detection: PSI_9 ≈ 0.0081
  *   - Top-K: fib(3) = 2
  */
-export class CSLMoERouter {
+class CSLMoERouter {
   /**
    * @param {number} numExperts - Number of experts
    * @param {number} inputDim - Input vector dimension
@@ -362,7 +358,7 @@ export class CSLMoERouter {
  * @param {Float64Array|number[]} b
  * @returns {Float64Array}
  */
-export function hdcBind(a, b) {
+function hdcBind(a, b) {
   const result = new Float64Array(a.length);
   for (let i = 0; i < a.length; i++) result[i] = a[i] * b[i];
   return result;
@@ -374,7 +370,7 @@ export function hdcBind(a, b) {
  * @param {Array<Float64Array|number[]>} vectors
  * @returns {Float64Array}
  */
-export function hdcBundle(vectors) {
+function hdcBundle(vectors) {
   if (vectors.length === 0) return new Float64Array(0);
   const dim = vectors[0].length;
   const result = new Float64Array(dim);
@@ -390,7 +386,7 @@ export function hdcBundle(vectors) {
  * @param {number} n - Shift amount
  * @returns {Float64Array}
  */
-export function hdcPermute(v, n) {
+function hdcPermute(v, n) {
   const dim = v.length;
   const shift = ((n % dim) + dim) % dim;
   const result = new Float64Array(dim);
@@ -406,7 +402,7 @@ export function hdcPermute(v, n) {
  * @param {number} dim
  * @returns {number}
  */
-export function hdcCapacity(dim) {
+function hdcCapacity(dim) {
   return Math.floor(dim / 4);
 }
 
@@ -421,7 +417,7 @@ export function hdcCapacity(dim) {
  * @param {number} [threshold=CSL_THRESHOLDS.CRITICAL]
  * @returns {boolean}
  */
-export function isSemanticDuplicate(a, b, threshold = CSL_THRESHOLDS.CRITICAL) {
+function isSemanticDuplicate(a, b, threshold = CSL_THRESHOLDS.CRITICAL) {
   return cslAND(a, b) >= threshold;
 }
 
@@ -442,7 +438,7 @@ export function isSemanticDuplicate(a, b, threshold = CSL_THRESHOLDS.CRITICAL) {
  * @param {number} scores.elegance
  * @returns {number} Composite score
  */
-export function cslCompositeScore(scores) {
+function cslCompositeScore(scores) {
   const factors = [
     scores.correctness || 0,
     scores.safety || 0,
@@ -458,7 +454,7 @@ export function cslCompositeScore(scores) {
  * CSL trial scoring weights (for trial-and-error stage).
  * Matches hcfullpipeline.yaml cslScoringWeights.
  */
-export const TRIAL_SCORING_WEIGHTS = Object.freeze({
+const TRIAL_SCORING_WEIGHTS = Object.freeze({
   correctness:         0.34,  // F(9)/100
   performance:         0.21,  // F(8)/100
   safety:              0.21,  // F(8)/100
@@ -469,7 +465,7 @@ export const TRIAL_SCORING_WEIGHTS = Object.freeze({
 /**
  * CSL optimization scoring weights (for optimization ops stage).
  */
-export const OPTIMIZATION_SCORING_WEIGHTS = Object.freeze({
+const OPTIMIZATION_SCORING_WEIGHTS = Object.freeze({
   cost:        PSI_2,  // 0.382
   performance: PSI_2,  // 0.382
   reliability: PSI_3,  // 0.236
@@ -478,7 +474,7 @@ export const OPTIMIZATION_SCORING_WEIGHTS = Object.freeze({
 /**
  * CSL evolution fitness weights.
  */
-export const EVOLUTION_FITNESS_WEIGHTS = Object.freeze({
+const EVOLUTION_FITNESS_WEIGHTS = Object.freeze({
   latency_improvement:     0.34,
   cost_reduction:          0.21,
   quality_improvement:     0.21,
@@ -486,7 +482,7 @@ export const EVOLUTION_FITNESS_WEIGHTS = Object.freeze({
   elegance_improvement:    0.11,
 });
 
-export default {
+module.exports = {
   // Vector operations
   dot, norm, normalize,
 

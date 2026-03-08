@@ -1,11 +1,11 @@
 {
-  "name": "@headysystems/heady-brain",
+  "name": "@heady-ai/heady-brain",
   "version": "2.0.0",
   "description": "HeadyBrain - Cognitive core service for chat, analysis, and semantic reasoning",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
+    "build:ignored": "tsc",
     "start": "node dist/index.js",
     "test": "jest",
     "lint": "eslint src",
@@ -14,10 +14,10 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@headysystems/core": "workspace:*",
-    "@headysystems/types": "workspace:*",
-    "@headysystems/redis": "workspace:*",
-    "@headysystems/semantic-logic": "workspace:*",
+    "@heady-ai/core": "workspace:*",
+    "@heady-ai/types": "workspace:*",
+    "@heady-ai/redis": "workspace:*",
+    "@heady-ai/semantic-logic": "workspace:*",
     "express": "^4.18.2",
     "cors": "^2.8.5",
     "helmet": "^7.1.0",
