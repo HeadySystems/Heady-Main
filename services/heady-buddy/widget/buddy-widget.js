@@ -4,7 +4,7 @@
  */
 (function () {
   'use strict';
-  const API = window.HEADY_API || 'https://api.headysystems.com';
+  const API = window.HEADY_API || 'https://heady-onboarding-609590223909.us-east1.run.app';
   const BRAND = { primary: '#7c3aed', accent: '#06b6d4', bg: '#0a0a1a', surface: '#1a1a2e', text: '#e0e0ff', dim: '#6b7280' };
   const DK = 'heady_device_id';
   const TK = 'heady_auth_token';
