@@ -23,6 +23,8 @@ const systemRouter = require("./system");
 const { router: configRouter, loadYamlConfig } = require("./config");
 const { tierMiddleware, registerTierRoutes } = require("../subscription-tiers");
 const headycoinRouter = require("./headycoin");
+const { storeSearchHandler } = require("./store-search");
+const { storeCheckoutHandler } = require("./store-checkout");
 
 module.exports = {
     registry: registryRouter,
@@ -30,6 +32,8 @@ module.exports = {
     system: systemRouter,
     config: configRouter,
     headycoin: headycoinRouter,
+    storeSearch: storeSearchHandler,
+    storeCheckout: storeCheckoutHandler,
 
     // Subscription tier system
     tierMiddleware,

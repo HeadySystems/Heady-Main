@@ -18,7 +18,7 @@
    Buddy can reshape this sidebar at any time by pushing new directives.
    ═══════════════════════════════════════════════════════════════════════ */
 
-const API_BASE = "https://manager.headysystems.com";
+const API_BASE = "https://headyapi.com";
 const BUDDY_AVATAR = "icons/buddy-avatar.png";
 const BUDDY_THINKING_IMG = "icons/buddy-thinking.png";
 const BUDDY_COMPLETE_IMG = "icons/buddy-complete.png";

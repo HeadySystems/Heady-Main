@@ -3,16 +3,21 @@
    Live data binding, tab navigation, API integration.
    ═══════════════════════════════════════════════════════════════════════ */
 
-const API_BASE = "https://manager.headysystems.com";
+const API_BASE = "https://headyapi.com";
 
 const DOMAINS = [
-    { name: "headysystems.com", url: "https://headysystems.com", critical: true },
-    { name: "manager.headysystems.com", url: "https://manager.headysystems.com/api/health", critical: true },
-    { name: "api.headysystems.com", url: "https://api.headysystems.com/api/health", critical: true },
+    { name: "headyapi.com", url: "https://headyapi.com/api/health", critical: true },
+    { name: "headymcp.com", url: "https://headymcp.com/api/health", critical: true },
+    { name: "heady-ai.com", url: "https://heady-ai.com/api/health", critical: true },
+    { name: "headybuddy.org", url: "https://headybuddy.org", critical: true },
     { name: "headyio.com", url: "https://headyio.com", critical: false },
-    { name: "headybuddy.org", url: "https://headybuddy.org", critical: false },
-    { name: "headymcp.com", url: "https://headymcp.com", critical: false },
+    { name: "headyos.com", url: "https://headyos.com", critical: false },
+    { name: "headycloud.com", url: "https://headycloud.com", critical: false },
+    { name: "headysecure.com", url: "https://headysecure.com", critical: false },
+    { name: "headydb.com", url: "https://headydb.com", critical: false },
     { name: "headyme.com", url: "https://headyme.com", critical: false },
+    { name: "headysystems.com", url: "https://headysystems.com", critical: false },
+    { name: "headyconnection.org", url: "https://headyconnection.org", critical: false },
 ];
 
 /* ─── TAB NAVIGATION ───────────────────────────────────────────────── */

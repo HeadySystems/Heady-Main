@@ -13,7 +13,7 @@ chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => 
 
 // Listen for messages from the sidebar
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
-    const apiBase = msg.apiBase || "https://manager.headysystems.com";
+    const apiBase = msg.apiBase || "https://headyapi.com";
     const apiKey = msg.apiKey || "";
     const authHeaders = apiKey ? { "Authorization": `Bearer ${apiKey}` } : {};
 
@@ -89,10 +89,13 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     // Service Discovery
     if (msg.action === "fetchServices") {
         const services = [
-            { name: "Manager", url: "https://manager.headysystems.com", path: "/api/health" },
-            { name: "API", url: "https://api.headysystems.com", path: "/api/health" },
-            { name: "Edge", url: "https://heady.headyme.com", path: "/api/health" },
-            { name: "MCP", url: "https://mcp.headymcp.com", path: "/health" },
+            { name: "HeadyAPI", url: "https://headyapi.com", path: "/api/health" },
+            { name: "HeadyMCP", url: "https://headymcp.com", path: "/api/health" },
+            { name: "HeadyAI", url: "https://heady-ai.com", path: "/api/health" },
+            { name: "HeadyBuddy", url: "https://headybuddy.org", path: "/api/health" },
+            { name: "HeadyIO", url: "https://headyio.com", path: "/api/health" },
+            { name: "HeadyCloud", url: "https://headycloud.com", path: "/api/health" },
+            { name: "HeadyOS", url: "https://headyos.com", path: "/api/health" },
         ];
         Promise.all(services.map(async (svc) => {
             const start = Date.now();

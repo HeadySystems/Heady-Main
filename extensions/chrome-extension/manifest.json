@@ -30,9 +30,17 @@
         "activeTab"
     ],
     "host_permissions": [
-        "https://manager.headysystems.com/*",
-        "https://api.headysystems.com/*",
-        "https://mcp.headymcp.com/*",
-        "https://heady.headyme.com/*"
+        "https://headyapi.com/*",
+        "https://headymcp.com/*",
+        "https://heady-ai.com/*",
+        "https://headybuddy.org/*",
+        "https://headyio.com/*",
+        "https://headyos.com/*",
+        "https://headycloud.com/*",
+        "https://headysecure.com/*",
+        "https://headydb.com/*",
+        "https://headyme.com/*",
+        "https://headysystems.com/*",
+        "https://headyconnection.org/*"
     ]
 }

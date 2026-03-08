@@ -1,7 +1,7 @@
 import { HeadyError } from '@heady-ai/core';
 
 export class HeadyClient {
-  constructor(private apiKey: string, private baseUrl = 'https://manager.headysystems.com') { }
+  constructor(private apiKey: string, private baseUrl = 'https://headyapi.com') { }
 
   async callTool(name: string, args: any): Promise<any> {
     const response = await fetch(this.baseUrl, {
