@@ -17,6 +17,7 @@ const { cosineSimilarity, EMBEDDING_DIM } = require('./vector-space-ops');
 const { EmbeddingProvider } = require('./embedding-provider');
 const { MonteCarloEngine } = require('./monte-carlo');
 const logger = require('./utils/logger');
+const PHI = (1 + Math.sqrt(5)) / 2;
 
 const COHERENCE_THRESHOLD = 0.75;
 
@@ -24,11 +25,11 @@ class SelfAwareness {
   /**
    * @param {object} [opts]
    * @param {string} [opts.systemId='heady-system']  identifier for this system instance
-   * @param {number} [opts.defaultIntervalMs=30000]  default heartbeat interval
+   * @param {number} [opts.defaultIntervalMs=29034]  default heartbeat interval (φ⁷×1000)
    */
   constructor(opts = {}) {
     this._systemId = opts.systemId || 'heady-system';
-    this._defaultIntervalMs = opts.defaultIntervalMs || 30000;
+    this._defaultIntervalMs = opts.defaultIntervalMs || Math.round(PHI ** 7 * 1000); // φ⁷×1000 ≈ 29034ms
     this._embeddingProvider = new EmbeddingProvider({ providerChain: ['local'] });
     this._monte = new MonteCarloEngine();
 

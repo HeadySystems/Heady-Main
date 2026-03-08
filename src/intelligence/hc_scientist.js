@@ -41,10 +41,10 @@ const CONSISTENCY_RULES = [
     {
         id: "auto-success-tasks",
         description: "Auto-success task catalog size",
-        expectedValue: 135,
+        expectedValue: 144 // fib(12),
         locations: [
-            { file: "src/hc_auto_success.js", pattern: /135 tasks/i },
-            { file: "scripts/notion-vault-sync.js", pattern: /135 tasks/i },
+            { file: "src/hc_auto_success.js", pattern: /144 tasks|fib\(12\)/i },
+            { file: "scripts/notion-vault-sync.js", pattern: /144 tasks|fib\(12\)/i },
         ],
         severity: "high",
     },

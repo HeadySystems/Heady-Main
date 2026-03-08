@@ -107,7 +107,7 @@ const config = {
     version: '3.1.0',
     platform: 'Heady™ AI Platform',
     company: 'HeadySystems Inc.',
-    requestTimeout: envInt('HEADY_REQUEST_TIMEOUT_MS', 30000),
+    requestTimeout: envInt('HEADY_REQUEST_TIMEOUT_MS', Math.round(((1 + Math.sqrt(5)) / 2) ** 7 * 1000)), // φ⁷×1000 ≈ 29034ms
     bodyLimit: envInt('HEADY_BODY_LIMIT_BYTES', 10 * 1024 * 1024), // 10 MB
     trustProxy: envBool('HEADY_TRUST_PROXY', false),
   },

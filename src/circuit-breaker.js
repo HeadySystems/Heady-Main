@@ -9,6 +9,7 @@
  */
 
 const logger = require('../utils/logger');
+const PHI = (1 + Math.sqrt(5)) / 2;
 
 const STATES = { CLOSED: 'CLOSED', OPEN: 'OPEN', HALF_OPEN: 'HALF_OPEN' };
 
@@ -18,7 +19,7 @@ class CircuitBreaker {
         this.state = STATES.CLOSED;
         this.failureThreshold = opts.failureThreshold || 5;
         this.successThreshold = opts.successThreshold || 3;
-        this.timeout = opts.timeout || 30000;
+        this.timeout = opts.timeout || Math.round(PHI ** 7 * 1000); // φ⁷×1000 ≈ 29034ms
         this.failureCount = 0;
         this.successCount = 0;
         this.lastFailureTime = null;

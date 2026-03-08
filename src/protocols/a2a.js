@@ -101,7 +101,7 @@ class A2AProtocol extends EventEmitter {
                 skill: params.skill,
                 input: params.input || {},
                 priority: params.priority || 'normal',
-                timeout: params.timeout || 30000,
+                timeout: params.timeout || Math.round(((1 + Math.sqrt(5)) / 2) ** 7 * 1000), // φ⁷×1000 ≈ 29034ms
                 createdAt: new Date().toISOString(),
             },
             status: 'pending',

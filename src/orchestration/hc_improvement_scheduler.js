@@ -35,7 +35,7 @@ class ImprovementScheduler {
         this._timer = setTimeout(() => {
             this._runCycle();
             this._timer = setInterval(() => this._runCycle(), this.interval);
-        }, 30000);
+        }, 29034); // φ⁷ × 1000
     }
 
     stop() {

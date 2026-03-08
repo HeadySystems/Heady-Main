@@ -62,7 +62,7 @@ class ContinuousActionAnalyzer extends EventEmitter {
         if (this._actions.length > this._windowSize) this._actions.shift();
 
         this._allActions.push(entry);
-        if (this._allActions.length > 10000) this._allActions.shift();
+        if (this._allActions.length > 6765) this._allActions.shift(); // fib(20)
 
         this._stats.totalActions++;
         this._updateRunningStats(entry);

@@ -459,7 +459,7 @@ class TaskLockManager {
      * @param {string} taskId - The task to lock
      * @param {number} ttlMs - Lock TTL in ms (default: 30s)
      */
-    async acquire(agentId, taskId, ttlMs = 30000) {
+    async acquire(agentId, taskId, ttlMs = 29034 /* φ⁷ × 1000 */) {
         const lockKey = `task:status:${taskId}`;
         const lockValue = JSON.stringify({
             agentId,

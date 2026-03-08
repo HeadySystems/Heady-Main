@@ -22,8 +22,9 @@
  * HeadyAutoSuccess — Always-On Dynamic Task Engine
  *
  * Continuously generates, executes, and auto-succeeds ALL background tasks
- * across 9 categories: learning, optimization, integration, monitoring,
- * maintenance, discovery, verification (liquidity), creative, and deep-intel.
+ * across fib(7) = 13 CSL-discovered categories: learning, optimization, integration,
+ * monitoring, maintenance, discovery, verification (liquidity), creative, deep-intel,
+ * hive-integration, security-governance, resilience, and evolution.
  * for targeted learning and optimization — even when idle.
  *
  * Key properties:
@@ -46,11 +47,12 @@ const logger = require("./utils/logger");
 const HISTORY_PATH = path.join(__dirname, "..", "data", "auto-success-tasks.json");
 const AUDIT_PATH = path.join(__dirname, "..", "data", "auto-success-audit.json");
 const TRIAL_LEDGER_PATH = path.join(__dirname, "..", "data", "trial-ledger.json");
-const MAX_HISTORY = 2000;
-const MAX_AUDIT = 10000;
-const MAX_TRIAL_ENTRIES = 5000;
-const REPEAT_WINDOW = 10;        // detect repeats within last N attempts per task
-const REPEAT_THRESHOLD = 3;      // force strategy shift after N identical failures
+// ─── φ-SCALED LIMITS — all values Fibonacci-derived, zero magic numbers ─────
+const MAX_HISTORY = 2584;        // fib(18) — auto-success task history cap
+const MAX_AUDIT = 6765;          // fib(20) — audit chain max entries
+const MAX_TRIAL_ENTRIES = 4181;  // fib(19) — trial ledger max entries
+const REPEAT_WINDOW = 13;       // fib(7) — detect repeats within last N attempts per task
+const REPEAT_THRESHOLD = 3;     // fib(4) — force strategy shift after N identical failures
 const PHI = (1 + Math.sqrt(5)) / 2;
 
 // ─── EXPLICIT TERMINAL STATES — every task MUST resolve to one ──────────────
@@ -103,7 +105,7 @@ const PROBE_TARGETS = [
 // ─── POOL PRIORITIES ────────────────────────────────────────────────────────
 const POOL_PRIORITY = { hot: 0, warm: 1, cold: 2 };
 
-// ─── TASK CATALOG (135 tasks × 9 categories) ────────────────────────────────
+// ─── TASK CATALOG (fib(12) = 144 tasks × fib(7) = 13 categories) ────────────
 let extraTasks = [];
 try { extraTasks = require('./auto-flow-200-tasks.json'); } catch (e) { }
 let nonprofitTasks = [];

@@ -1,5 +1,7 @@
 'use strict';
 
+const PHI = (1 + Math.sqrt(5)) / 2;
+
 /**
  * VectorFederation — Federates vector memory across multiple HeadyStack instances.
  * Enables multi-node vector search, replication, and consistency guarantees.
@@ -28,9 +30,9 @@ class VectorFederation extends EventEmitter {
     this._peers = new Map();              // nodeId → PeerRecord
     this._localMemory = opts.vectorMemory || null;
     this._syncStrategy = opts.syncStrategy || SYNC_STRATEGIES.PUSH;
-    this._syncIntervalMs = opts.syncIntervalMs || 30000;
+    this._syncIntervalMs = opts.syncIntervalMs || Math.round(PHI ** 7 * 1000); // φ⁷×1000 ≈ 29034ms
     this._vectorLog = [];                 // replication log
-    this._maxLogSize = opts.maxLogSize || 10000;
+    this._maxLogSize = opts.maxLogSize || 6765; // fib(20)
     this._stats = { syncs: 0, pushes: 0, pulls: 0, errors: 0, vectors: 0 };
     this._syncTimers = new Map();
   }
@@ -121,7 +123,7 @@ class VectorFederation extends EventEmitter {
     await axios.post(`${peer.url}/api/vector-federation/receive`, {
       sourceNode: this.nodeId,
       entry,
-    }, { timeout: 5000 });
+    }, { timeout: Math.round(PHI ** 3 * 1000) }); // φ³×1000 ≈ 4236ms
     peer.lastSync = new Date().toISOString();
     peer.failCount = 0;
     peer.status = NODE_STATUS.ACTIVE;
@@ -138,7 +140,7 @@ class VectorFederation extends EventEmitter {
     const axios = require('axios');
     const resp = await axios.get(`${peer.url}/api/vector-federation/log`, {
       params: { sinceIndex, requestingNode: this.nodeId },
-      timeout: 10000,
+      timeout: 6765, // fib(20)
     });
 
     const entries = resp.data?.entries || [];
@@ -171,7 +173,7 @@ class VectorFederation extends EventEmitter {
     if (this._syncTimers.has(peerId)) return;
     const timer = setInterval(async () => {
       if (this._syncStrategy === SYNC_STRATEGIES.PULL) {
-        try { await this.pullFromPeer(peerId); } catch {}
+        try { await this.pullFromPeer(peerId); } catch { }
       }
     }, this._syncIntervalMs);
     if (timer.unref) timer.unref();
@@ -197,7 +199,7 @@ class VectorFederation extends EventEmitter {
       try {
         const local = await this._localMemory.search(query, { topK });
         results.push(...(local || []).map(r => ({ ...r, node: this.nodeId, source: 'local' })));
-      } catch {}
+      } catch { }
     }
 
     // Peer search
@@ -205,7 +207,7 @@ class VectorFederation extends EventEmitter {
       if (peer.status === NODE_STATUS.OFFLINE || !peer.url) continue;
       try {
         const axios = require('axios');
-        const resp = await axios.post(`${peer.url}/api/vector/search`, { query, topK }, { timeout: 5000 });
+        const resp = await axios.post(`${peer.url}/api/vector/search`, { query, topK }, { timeout: Math.round(PHI ** 3 * 1000) }); // φ³×1000 ≈ 4236ms
         const peerResults = resp.data?.results || [];
         results.push(...peerResults.map(r => ({ ...r, node: peer.id, source: 'peer' })));
       } catch { /* peer unavailable */ }

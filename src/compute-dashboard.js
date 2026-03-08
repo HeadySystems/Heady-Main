@@ -6,16 +6,17 @@
  */
 
 const EventEmitter = require('events');
+const PHI = (1 + Math.sqrt(5)) / 2;
 
 class ComputeDashboard extends EventEmitter {
   constructor(opts = {}) {
     super();
     this._orchestrator = opts.orchestrator || null;
-    this._refreshIntervalMs = opts.refreshIntervalMs || 10000;
+    this._refreshIntervalMs = opts.refreshIntervalMs || 6765; // fib(20)
     this._timer = null;
     this._cachedDashboard = null;
     this._cacheTs = 0;
-    this._cacheTTL = opts.cacheTTL || 5000;
+    this._cacheTTL = opts.cacheTTL || Math.round(PHI ** 3 * 1000); // φ³×1000 ≈ 4236ms
   }
 
   setOrchestrator(orchestrator) {
@@ -140,7 +141,7 @@ class ComputeDashboard extends EventEmitter {
   start() {
     if (this._timer) return;
     this._timer = setInterval(async () => {
-      try { await this.getDashboard({ force: true }); } catch {}
+      try { await this.getDashboard({ force: true }); } catch { }
     }, this._refreshIntervalMs);
     if (this._timer.unref) this._timer.unref();
     this.emit('started');

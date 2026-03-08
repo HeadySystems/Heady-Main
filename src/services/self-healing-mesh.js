@@ -35,7 +35,7 @@ const PHI = 1.6180339887;
 const HEARTBEAT_INTERVAL_MS = Math.round(PHI * 5000); // ~8.09s
 const HALLUCINATION_THRESHOLD = 0.35;
 const MAX_CONSECUTIVE_FAILURES = 3;
-const LATENCY_CEILING_MS = 5000;
+const LATENCY_CEILING_MS = Math.round(((1 + Math.sqrt(5)) / 2) ** 3 * 1000); // φ³×1000 ≈ 4236ms
 const QUARANTINE_DURATION_MS = 60000;
 
 // ── Node States ─────────────────────────────────────────────────

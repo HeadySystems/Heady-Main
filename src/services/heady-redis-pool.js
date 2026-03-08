@@ -98,7 +98,7 @@ class HeadyRedisPool {
      * @param {number} timeoutMs — max wait time (default: 5000)
      * @returns {Promise<RedisClient>}
      */
-    async acquire(timeoutMs = 5000) {
+    async acquire(timeoutMs = Math.round(((1 + Math.sqrt(5)) / 2) ** 3 * 1000)) { // φ³×1000 ≈ 4236ms
         const start = Date.now();
 
         if (this.available.length > 0) {

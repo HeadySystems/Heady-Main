@@ -1,0 +1,7 @@
+name = "edge-auth-worker"
+main = "src/index.ts"
+compatibility_date = "2026-03-08"
+
+[vars]
+HEADY_ENV = "prod"
+WORKER_NAME = "edge-auth-worker"

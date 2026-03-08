@@ -28,7 +28,7 @@ class Vec3 {
   constructor(x = 0, y = 0, z = 0) { this.x = x; this.y = y; this.z = z; }
 
   static fromArray(arr) { return new Vec3(arr[0] || 0, arr[1] || 0, arr[2] || 0); }
-  toArray()  { return [this.x, this.y, this.z]; }
+  toArray() { return [this.x, this.y, this.z]; }
 
   distanceTo(other) {
     return Math.sqrt(
@@ -39,7 +39,7 @@ class Vec3 {
   }
 
   add(other) { return new Vec3(this.x + other.x, this.y + other.y, this.z + other.z); }
-  scale(s)   { return new Vec3(this.x * s, this.y * s, this.z * s); }
+  scale(s) { return new Vec3(this.x * s, this.y * s, this.z * s); }
   midpoint(other) {
     return new Vec3((this.x + other.x) / 2, (this.y + other.y) / 2, (this.z + other.z) / 2);
   }
@@ -65,8 +65,8 @@ class AABB {
 
   contains(point) {
     return point.x >= this.min.x && point.x <= this.max.x &&
-           point.y >= this.min.y && point.y <= this.max.y &&
-           point.z >= this.min.z && point.z <= this.max.z;
+      point.y >= this.min.y && point.y <= this.max.y &&
+      point.z >= this.min.z && point.z <= this.max.z;
   }
 
   intersectsSphere(center, radius) {
@@ -82,14 +82,14 @@ class AABB {
   split() {
     const c = this.center;
     return [
-      new AABB(this.min,                                    c),
-      new AABB(new Vec3(c.x, this.min.y, this.min.z),      new Vec3(this.max.x, c.y, c.z)),
-      new AABB(new Vec3(this.min.x, c.y, this.min.z),      new Vec3(c.x, this.max.y, c.z)),
-      new AABB(new Vec3(c.x, c.y, this.min.z),             new Vec3(this.max.x, this.max.y, c.z)),
-      new AABB(new Vec3(this.min.x, this.min.y, c.z),      new Vec3(c.x, c.y, this.max.z)),
-      new AABB(new Vec3(c.x, this.min.y, c.z),             new Vec3(this.max.x, c.y, this.max.z)),
-      new AABB(new Vec3(this.min.x, c.y, c.z),             new Vec3(c.x, this.max.y, this.max.z)),
-      new AABB(c,                                            this.max),
+      new AABB(this.min, c),
+      new AABB(new Vec3(c.x, this.min.y, this.min.z), new Vec3(this.max.x, c.y, c.z)),
+      new AABB(new Vec3(this.min.x, c.y, this.min.z), new Vec3(c.x, this.max.y, c.z)),
+      new AABB(new Vec3(c.x, c.y, this.min.z), new Vec3(this.max.x, this.max.y, c.z)),
+      new AABB(new Vec3(this.min.x, this.min.y, c.z), new Vec3(c.x, c.y, this.max.z)),
+      new AABB(new Vec3(c.x, this.min.y, c.z), new Vec3(this.max.x, c.y, this.max.z)),
+      new AABB(new Vec3(this.min.x, c.y, c.z), new Vec3(c.x, this.max.y, this.max.z)),
+      new AABB(c, this.max),
     ];
   }
 }
@@ -100,17 +100,17 @@ const OCTREE_CAPACITY = 8;
 
 class OctreeNode {
   constructor(bounds, depth = 0, maxDepth = 12, capacity = OCTREE_CAPACITY) {
-    this.bounds   = bounds;
-    this.depth    = depth;
+    this.bounds = bounds;
+    this.depth = depth;
     this.maxDepth = maxDepth;
     this.capacity = capacity;
-    this.points   = [];  // { id, pos: Vec3, data }
+    this.points = [];  // { id, pos: Vec3, data }
     this.children = null; // Array<OctreeNode>[8] when subdivided
-    this._count   = 0;
+    this._count = 0;
   }
 
-  get isLeaf()    { return this.children === null; }
-  get pointCount(){ return this._count; }
+  get isLeaf() { return this.children === null; }
+  get pointCount() { return this._count; }
 
   /**
    * Insert a point. Auto-subdivides when capacity is reached.
@@ -138,7 +138,7 @@ class OctreeNode {
 
   _subdivide() {
     const childBounds = this.bounds.split();
-    this.children     = childBounds.map(b =>
+    this.children = childBounds.map(b =>
       new OctreeNode(b, this.depth + 1, this.maxDepth, this.capacity)
     );
     // Redistribute existing points
@@ -215,8 +215,10 @@ class OctreeNode {
   }
 
   getStats() {
-    return { depth: this.depth, count: this._count, isLeaf: this.isLeaf,
-             children: this.isLeaf ? 0 : this.children.length };
+    return {
+      depth: this.depth, count: this._count, isLeaf: this.isLeaf,
+      children: this.isLeaf ? 0 : this.children.length
+    };
   }
 }
 
@@ -230,8 +232,8 @@ class PCAProjector {
    */
   constructor(inputDim = 384, seed = 42) {
     this._inputDim = inputDim;
-    this._seed     = seed;
-    this._matrix   = this._buildMatrix(inputDim, 3, seed);
+    this._seed = seed;
+    this._matrix = this._buildMatrix(inputDim, 3, seed);
   }
 
   _buildMatrix(inDim, outDim, seed) {
@@ -277,11 +279,11 @@ class PCAProjector {
 class SpatialIndex {
   constructor(opts = {}) {
     const extent = opts.extent || 10;
-    this._bounds    = opts.bounds || new AABB(new Vec3(-extent, -extent, -extent), new Vec3(extent, extent, extent));
-    this._root      = new OctreeNode(this._bounds, 0, opts.maxDepth || 12, opts.capacity || OCTREE_CAPACITY);
-    this._index     = new Map();  // id → point
+    this._bounds = opts.bounds || new AABB(new Vec3(-extent, -extent, -extent), new Vec3(extent, extent, extent));
+    this._root = new OctreeNode(this._bounds, 0, opts.maxDepth || 12, opts.capacity || OCTREE_CAPACITY);
+    this._index = new Map();  // id → point
     this._projector = opts.projector || null;  // PCAProjector
-    this._shards    = opts.numShards || 8;
+    this._shards = opts.numShards || 8;
   }
 
   /**
@@ -331,11 +333,11 @@ class SpatialIndex {
 
   get(id) { return this._index.get(id) || null; }
   has(id) { return this._index.has(id); }
-  size()  { return this._index.size; }
-  all()   { return this._root.all(); }
+  size() { return this._index.size; }
+  all() { return this._root.all(); }
 
   getProjector() { return this._projector; }
-  getRoot()      { return this._root; }
+  getRoot() { return this._root; }
 }
 
 // ─── GraphRAG ─────────────────────────────────────────────────────────────────
@@ -346,15 +348,15 @@ class GraphRAG {
    * Supports traversal for retrieval-augmented generation.
    */
   constructor(opts = {}) {
-    this._nodes   = new Map();  // id → { id, data }
-    this._edges   = new Map();  // id → [{to, type, weight}]
+    this._nodes = new Map();  // id → { id, data }
+    this._edges = new Map();  // id → [{to, type, weight}]
     this._reverseEdges = new Map(); // id → [{from, type, weight}]
     this._maxEdges = opts.maxEdgesPerNode || 50;
   }
 
   addNode(id, data = {}) {
     this._nodes.set(id, { id, data, ts: Date.now() });
-    if (!this._edges.has(id))        this._edges.set(id, []);
+    if (!this._edges.has(id)) this._edges.set(id, []);
     if (!this._reverseEdges.has(id)) this._reverseEdges.set(id, []);
     return this;
   }
@@ -398,8 +400,8 @@ class GraphRAG {
    */
   traverse(startId, maxDepth = 2, edgeTypes = null) {
     const visited = new Set();
-    const result  = [];
-    const queue   = [{ id: startId, depth: 0 }];
+    const result = [];
+    const queue = [{ id: startId, depth: 0 }];
 
     while (queue.length > 0) {
       const { id, depth } = queue.shift();
@@ -458,7 +460,7 @@ class ImportanceScorer {
    */
   constructor(opts = {}) {
     this._decayRate = opts.decayRate || 1 / (24 * 60 * 60 * 1000); // 1/day in ms
-    this._phiDecay  = opts.phiDecay !== false; // use φ-modulated decay
+    this._phiDecay = opts.phiDecay !== false; // use φ-modulated decay
   }
 
   /**
@@ -467,8 +469,8 @@ class ImportanceScorer {
    * @returns {number} importance in [0, 1]
    */
   score(memory) {
-    const now       = Date.now();
-    const age       = now - (memory.lastAccessed || memory.createdAt || now);
+    const now = Date.now();
+    const age = now - (memory.lastAccessed || memory.createdAt || now);
     const frequency = memory.frequency || 1;
     const relevance = memory.relevanceScore || 0.5;
 
@@ -507,13 +509,13 @@ class ZoneManager {
     const h = extent / 2;
     this._zones = [
       { id: 0, name: 'NW-Bottom', centroid: new Vec3(-h, -h, -h) },
-      { id: 1, name: 'NE-Bottom', centroid: new Vec3( h, -h, -h) },
-      { id: 2, name: 'SW-Bottom', centroid: new Vec3(-h,  h, -h) },
-      { id: 3, name: 'SE-Bottom', centroid: new Vec3( h,  h, -h) },
-      { id: 4, name: 'NW-Top',    centroid: new Vec3(-h, -h,  h) },
-      { id: 5, name: 'NE-Top',    centroid: new Vec3( h, -h,  h) },
-      { id: 6, name: 'SW-Top',    centroid: new Vec3(-h,  h,  h) },
-      { id: 7, name: 'SE-Top',    centroid: new Vec3( h,  h,  h) },
+      { id: 1, name: 'NE-Bottom', centroid: new Vec3(h, -h, -h) },
+      { id: 2, name: 'SW-Bottom', centroid: new Vec3(-h, h, -h) },
+      { id: 3, name: 'SE-Bottom', centroid: new Vec3(h, h, -h) },
+      { id: 4, name: 'NW-Top', centroid: new Vec3(-h, -h, h) },
+      { id: 5, name: 'NE-Top', centroid: new Vec3(h, -h, h) },
+      { id: 6, name: 'SW-Top', centroid: new Vec3(-h, h, h) },
+      { id: 7, name: 'SE-Top', centroid: new Vec3(h, h, h) },
     ];
   }
 
@@ -532,7 +534,7 @@ class ZoneManager {
   }
 
   getZoneById(id) { return this._zones[id] || null; }
-  getAllZones()   { return this._zones.slice(); }
+  getAllZones() { return this._zones.slice(); }
 }
 
 // ─── STMtoLTM ─────────────────────────────────────────────────────────────────
@@ -543,22 +545,22 @@ class STMtoLTM {
    * High-importance memories get promoted to LTM after a consolidation cycle.
    */
   constructor(opts = {}) {
-    this._stm         = new Map();  // id → memory
-    this._ltm         = new Map();  // id → memory
-    this._scorer      = new ImportanceScorer(opts.scorerOpts || {});
-    this._threshold   = opts.threshold || 0.4;
+    this._stm = new Map();  // id → memory
+    this._ltm = new Map();  // id → memory
+    this._scorer = new ImportanceScorer(opts.scorerOpts || {});
+    this._threshold = opts.threshold || 0.4;
     this._stmCapacity = opts.stmCapacity || 1000;
-    this._ltmCapacity = opts.ltmCapacity || 10000;
-    this._cycleMs     = opts.cycleMs || 30000;
-    this._timer       = null;
-    this._callbacks   = [];
+    this._ltmCapacity = opts.ltmCapacity || 6765; // fib(20)
+    this._cycleMs = opts.cycleMs || Math.round(PHI ** 7 * 1000); // φ⁷×1000 ≈ 29034ms
+    this._timer = null;
+    this._callbacks = [];
   }
 
   addToSTM(id, memory) {
     if (this._stm.size >= this._stmCapacity) {
       // Evict lowest importance
       const sorted = this._scorer.rank(Array.from(this._stm.values()));
-      const evict  = sorted[sorted.length - 1];
+      const evict = sorted[sorted.length - 1];
       if (evict) this._stm.delete(evict.id);
     }
     this._stm.set(id, { ...memory, id, frequency: 1, lastAccessed: Date.now(), createdAt: Date.now() });
@@ -568,7 +570,7 @@ class STMtoLTM {
   touch(id) {
     const m = this._stm.get(id) || this._ltm.get(id);
     if (m) {
-      m.frequency   = (m.frequency || 0) + 1;
+      m.frequency = (m.frequency || 0) + 1;
       m.lastAccessed = Date.now();
     }
     return this;
@@ -579,7 +581,7 @@ class STMtoLTM {
    */
   consolidate() {
     const promoted = [];
-    const evicted  = [];
+    const evicted = [];
 
     for (const [id, memory] of this._stm.entries()) {
       const importance = this._scorer.score(memory);
@@ -588,7 +590,7 @@ class STMtoLTM {
       if (importance >= this._threshold) {
         if (this._ltm.size >= this._ltmCapacity) {
           const sorted = this._scorer.rank(Array.from(this._ltm.values()));
-          const weak   = sorted[sorted.length - 1];
+          const weak = sorted[sorted.length - 1];
           if (weak && weak.importance < importance) {
             this._ltm.delete(weak.id);
           }
@@ -623,7 +625,7 @@ class STMtoLTM {
   getSTM() { return new Map(this._stm); }
   getLTM() { return new Map(this._ltm); }
   getMemory(id) { return this._stm.get(id) || this._ltm.get(id) || null; }
-  getStats()    { return { stm: this._stm.size, ltm: this._ltm.size, threshold: this._threshold }; }
+  getStats() { return { stm: this._stm.size, ltm: this._ltm.size, threshold: this._threshold }; }
 }
 
 // ─── MemoryStore (Top-level) ──────────────────────────────────────────────────
@@ -633,20 +635,20 @@ class MemoryStore {
    * Full 3D Vector Space Memory combining OctreeIndex + GraphRAG + STMtoLTM.
    */
   constructor(opts = {}) {
-    this._spatial    = new SpatialIndex(opts.spatialOpts || {});
-    this._graph      = new GraphRAG(opts.graphOpts || {});
-    this._zones      = new ZoneManager(opts.extent || 10);
-    this._stmLtm     = new STMtoLTM(opts.stmLtmOpts || {});
-    this._projector  = opts.inputDim ? new PCAProjector(opts.inputDim) : null;
-    this._scorer     = new ImportanceScorer(opts.scorerOpts || {});
+    this._spatial = new SpatialIndex(opts.spatialOpts || {});
+    this._graph = new GraphRAG(opts.graphOpts || {});
+    this._zones = new ZoneManager(opts.extent || 10);
+    this._stmLtm = new STMtoLTM(opts.stmLtmOpts || {});
+    this._projector = opts.inputDim ? new PCAProjector(opts.inputDim) : null;
+    this._scorer = new ImportanceScorer(opts.scorerOpts || {});
   }
 
   /**
    * Store a memory: insert into spatial index, add to graph, add to STM.
    */
   store(id, vector, data = {}) {
-    const point  = this._spatial.insert(id, vector, data);
-    const zone   = this._zones.getZone(point.pos);
+    const point = this._spatial.insert(id, vector, data);
+    const zone = this._zones.getZone(point.pos);
 
     this._graph.addNode(id, { ...data, zone: zone.name, pos: point.pos.toArray() });
     this._stmLtm.addToSTM(id, { ...data, pos: point.pos.toArray(), zone: zone.name, relevanceScore: data.relevanceScore || 0.5 });
@@ -664,7 +666,7 @@ class MemoryStore {
     for (const n of neighbors) this._stmLtm.touch(n.id);
 
     // Enrich with graph context
-    const ids     = neighbors.map(n => n.id);
+    const ids = neighbors.map(n => n.id);
     const context = this._graph.retrieveContext(ids, 1);
 
     return { neighbors, context };
@@ -688,17 +690,17 @@ class MemoryStore {
 
   getStats() {
     return {
-      spatial:   this._spatial.size(),
+      spatial: this._spatial.size(),
       graphNodes: this._graph.nodeCount(),
       graphEdges: this._graph.edgeCount(),
-      stmLtm:    this._stmLtm.getStats(),
+      stmLtm: this._stmLtm.getStats(),
     };
   }
 
-  getSpatialIndex()  { return this._spatial; }
-  getGraphRAG()      { return this._graph; }
-  getZoneManager()   { return this._zones; }
-  getSTMtoLTM()      { return this._stmLtm; }
+  getSpatialIndex() { return this._spatial; }
+  getGraphRAG() { return this._graph; }
+  getZoneManager() { return this._zones; }
+  getSTMtoLTM() { return this._stmLtm; }
   getImportanceScorer() { return this._scorer; }
 }
 

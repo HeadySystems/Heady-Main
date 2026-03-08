@@ -1,24 +1,37 @@
-/*
- * © 2026 HeadySystems Inc..
- * Unified Logger — delegates to StructuredLogger for JSON output.
- *
- * API preserved: logger.info(...), logger.child('module'), etc.
- * All output is now structured JSON via process.stdout/stderr,
- * compatible with Cloud Run, CloudWatch, and Stackdriver.
+'use strict';
+/**
+ * logger.js — Minimal structured logger for csl-output package.
+ * Delegates to console with structured JSON output.
+ * Matches the API of the main Heady logger.
  */
-const { getLogger } = require('../services/structured-logger');
 
-// Default root logger
-const root = getLogger('heady');
+function _log(level, ...args) {
+    const entry = {
+        ts:    new Date().toISOString(),
+        level,
+        msg:   args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '),
+    };
+    if (level === 'error' || level === 'warn') {
+        process.stderr.write(JSON.stringify(entry) + '\n');
+    } else {
+        process.stdout.write(JSON.stringify(entry) + '\n');
+    }
+}
+
+const root = {
+    debug: (...a) => _log('debug', ...a),
+    info:  (...a) => _log('info',  ...a),
+    warn:  (...a) => _log('warn',  ...a),
+    error: (...a) => _log('error', ...a),
+};
 
 module.exports = {
-    child: (mod) => getLogger(mod),
-    debug: (...a) => root.debug(a.join(' ')),
-    info: (...a) => root.info(a.join(' ')),
-    warn: (...a) => root.warn(a.join(' ')),
-    error: (...a) => root.error(a.join(' ')),
-    // Shimmed: used by 60+ files across the codebase
-    logNodeActivity: (node, ...msg) => root.info(`[${node}] ${msg.join(' ')}`),
-    logError: (node, ...msg) => root.error(`[${node}] ${msg.join(' ')}`),
-    logSystem: (...msg) => root.info(msg.join(' ')),
+    child:           (mod) => root,
+    debug:           (...a) => root.debug(...a),
+    info:            (...a) => root.info(...a),
+    warn:            (...a) => root.warn(...a),
+    error:           (...a) => root.error(...a),
+    logNodeActivity: (node, ...msg) => root.info(`[${node}]`, ...msg),
+    logError:        (node, ...msg) => root.error(`[${node}]`, ...msg),
+    logSystem:       (...msg) => root.info(...msg),
 };

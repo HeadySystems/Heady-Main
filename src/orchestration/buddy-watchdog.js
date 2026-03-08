@@ -24,7 +24,7 @@ const logger = require("../utils/logger");
 
 const PHI = 1.6180339887;
 const WATCHDOG_INTERVAL_MS = Math.round(PHI * PHI * PHI * PHI * 1000); // ~6.85 seconds
-const HEALTH_TIMEOUT_MS = 5000;
+const HEALTH_TIMEOUT_MS = Math.round(((1 + Math.sqrt(5)) / 2) ** 3 * 1000); // φ³×1000 ≈ 4236ms
 const MAX_CONSECUTIVE_FAILURES = 3;
 const HALLUCINATION_PATTERN_THRESHOLD = 5; // Same pattern repeated 5+ times = loop
 const MEMORY_GROWTH_THRESHOLD_MB = 200; // Alert if RSS grows by 200MB

@@ -12,7 +12,7 @@ const MCP_RATE_LIMIT = parseInt(process.env.MCP_RATE_LIMIT || '100', 10);
 class MCPGatewayAuth {
     constructor(opts = {}) {
         this.rateLimiter = new TokenBucketRateLimiter({ rate: MCP_RATE_LIMIT, burst: 20 });
-        this.breaker = new CircuitBreaker({ failureThreshold: 5, recoveryTimeout: 30000 });
+        this.breaker = new CircuitBreaker({ failureThreshold: 5, recoveryTimeout: Math.round(((1 + Math.sqrt(5)) / 2) ** 7 * 1000) }); // φ⁷×1000
         this.allowedScopes = opts.scopes || ['tools.read', 'tools.execute', 'resources.read'];
         this._sessions = new Map();
     }

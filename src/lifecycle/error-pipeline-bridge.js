@@ -32,8 +32,9 @@ const logger = require("../utils/logger");
 
 const LEDGER_PATH = path.join(__dirname, "..", "..", "data", "error-pipeline-ledger.jsonl");
 const ERROR_FLOWERS_PATH = path.join(__dirname, "..", "..", "data", "error-flowers.json");
-const DEDUP_TTL_MS = 60_000; // 60 seconds
-const MAX_LEDGER_LINES = 2000;
+const PHI = (1 + Math.sqrt(5)) / 2;
+const DEDUP_TTL_MS = Math.round(PHI ** 7 * 1000 * 2); // 2×φ⁷×1000 ≈ 58069ms
+const MAX_LEDGER_LINES = 2584; // fib(18)
 
 class ErrorPipelineBridge extends EventEmitter {
     constructor() {
@@ -108,7 +109,7 @@ class ErrorPipelineBridge extends EventEmitter {
         this._fingerprints.set(fingerprint, Date.now());
 
         // Clean old fingerprints periodically
-        if (this._fingerprints.size > 500) {
+        if (this._fingerprints.size > 610) { // fib(15)
             this._cleanFingerprints();
         }
 

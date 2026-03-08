@@ -19,7 +19,7 @@ const logger = require('../utils/logger');
 
 // ─── Trace Span Store (OTel-Compatible) ──────────────────────────────────────
 class TraceStore {
-    constructor(maxTraces = 5000) {
+    constructor(maxTraces = 4181) { // fib(19)
         this._traces = new Map();  // traceId → { spans[], metadata }
         this._maxTraces = maxTraces;
     }

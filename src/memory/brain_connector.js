@@ -51,7 +51,7 @@ class BrainConnector extends EventEmitter {
                 const fails = (this.failures.get(id) || 0) + 1;
                 this.failures.set(id, fails);
                 if (fails >= 3 && !this.circuitBreakers.get(id)?.open) {
-                    this.circuitBreakers.set(id, { open: true, openedAt: Date.now(), halfOpenAt: Date.now() + 30000 });
+                    this.circuitBreakers.set(id, { open: true, openedAt: Date.now(), halfOpenAt: Date.now() + Math.round(((1 + Math.sqrt(5)) / 2) ** 7 * 1000) }); // φ⁷×1000 ≈ 29034ms
                     this.emit("circuitBreakerOpen", { endpointId: id, failures: fails });
                 }
                 results.set(id, { status: "unhealthy" });

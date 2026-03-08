@@ -10,35 +10,35 @@ const crypto = require('crypto');
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const EVENT_TYPES = Object.freeze({
-  ACTION_TAKEN:       'action_taken',
-  DECISION_MADE:      'decision_made',
-  ERROR_ENCOUNTERED:  'error_encountered',
-  HEALING_PERFORMED:  'healing_performed',
-  MILESTONE_REACHED:  'milestone_reached',
-  LEARNING_CAPTURED:  'learning_captured',
-  NODE_STARTED:       'node_started',
-  NODE_STOPPED:       'node_stopped',
-  PIPELINE_RUN:       'pipeline_run',
-  TOOL_CALLED:        'tool_called',
+  ACTION_TAKEN: 'action_taken',
+  DECISION_MADE: 'decision_made',
+  ERROR_ENCOUNTERED: 'error_encountered',
+  HEALING_PERFORMED: 'healing_performed',
+  MILESTONE_REACHED: 'milestone_reached',
+  LEARNING_CAPTURED: 'learning_captured',
+  NODE_STARTED: 'node_started',
+  NODE_STOPPED: 'node_stopped',
+  PIPELINE_RUN: 'pipeline_run',
+  TOOL_CALLED: 'tool_called',
   GOVERNANCE_CHECKED: 'governance_checked',
-  BEE_SPAWNED:        'bee_spawned',
-  DRIFT_DETECTED:     'drift_detected',
+  BEE_SPAWNED: 'bee_spawned',
+  DRIFT_DETECTED: 'drift_detected',
 });
 
 const EVENT_TEMPLATES = {
-  action_taken:       (e) => `[Action] ${e.actor || 'System'} ${e.description || 'performed an action'}${e.target ? ` on ${e.target}` : ''}.`,
-  decision_made:      (e) => `[Decision] ${e.actor || 'Conductor'} decided to ${e.description || 'proceed'}. Rationale: ${e.rationale || 'not specified'}.`,
-  error_encountered:  (e) => `[Error] ${e.service || 'Unknown service'} encountered ${e.errorType || 'an error'}: ${e.description || e.message || 'no details'}.`,
-  healing_performed:  (e) => `[Healing] Self-healing triggered on ${e.target || 'unknown component'}: ${e.description || 'recovery action performed'}.`,
-  milestone_reached:  (e) => `[Milestone] ${e.description || 'A milestone was reached'}.${e.value ? ` Value: ${e.value}.` : ''}`,
-  learning_captured:  (e) => `[Learning] New insight captured: ${e.description || 'knowledge updated'}.`,
-  node_started:       (e) => `[Node] ${e.node || 'Unknown node'} came online at ${e.endpoint || 'unknown endpoint'}.`,
-  node_stopped:       (e) => `[Node] ${e.node || 'Unknown node'} went offline. Reason: ${e.reason || 'not specified'}.`,
-  pipeline_run:       (e) => `[Pipeline] HCFullPipeline executed with task: "${e.task || 'unspecified'}". Status: ${e.status || 'completed'}.`,
-  tool_called:        (e) => `[Tool] MCP tool '${e.tool || 'unknown'}' called${e.actor ? ` by ${e.actor}` : ''}. Result: ${e.result || 'success'}.`,
+  action_taken: (e) => `[Action] ${e.actor || 'System'} ${e.description || 'performed an action'}${e.target ? ` on ${e.target}` : ''}.`,
+  decision_made: (e) => `[Decision] ${e.actor || 'Conductor'} decided to ${e.description || 'proceed'}. Rationale: ${e.rationale || 'not specified'}.`,
+  error_encountered: (e) => `[Error] ${e.service || 'Unknown service'} encountered ${e.errorType || 'an error'}: ${e.description || e.message || 'no details'}.`,
+  healing_performed: (e) => `[Healing] Self-healing triggered on ${e.target || 'unknown component'}: ${e.description || 'recovery action performed'}.`,
+  milestone_reached: (e) => `[Milestone] ${e.description || 'A milestone was reached'}.${e.value ? ` Value: ${e.value}.` : ''}`,
+  learning_captured: (e) => `[Learning] New insight captured: ${e.description || 'knowledge updated'}.`,
+  node_started: (e) => `[Node] ${e.node || 'Unknown node'} came online at ${e.endpoint || 'unknown endpoint'}.`,
+  node_stopped: (e) => `[Node] ${e.node || 'Unknown node'} went offline. Reason: ${e.reason || 'not specified'}.`,
+  pipeline_run: (e) => `[Pipeline] HCFullPipeline executed with task: "${e.task || 'unspecified'}". Status: ${e.status || 'completed'}.`,
+  tool_called: (e) => `[Tool] MCP tool '${e.tool || 'unknown'}' called${e.actor ? ` by ${e.actor}` : ''}. Result: ${e.result || 'success'}.`,
   governance_checked: (e) => `[Governance] Action "${e.action || 'unspecified'}" validated. Decision: ${e.decision || 'approved'}.`,
-  bee_spawned:        (e) => `[Bee] Agent bee spawned for domain '${e.domain || 'general'}' with ID ${e.beeId || 'unknown'}.`,
-  drift_detected:     (e) => `[Drift] Semantic drift detected in component '${e.componentId || 'unknown'}'. Magnitude: ${e.magnitude || 'unknown'}.`,
+  bee_spawned: (e) => `[Bee] Agent bee spawned for domain '${e.domain || 'general'}' with ID ${e.beeId || 'unknown'}.`,
+  drift_detected: (e) => `[Drift] Semantic drift detected in component '${e.componentId || 'unknown'}'. Magnitude: ${e.magnitude || 'unknown'}.`,
 };
 
 // ─── StoryDriver ──────────────────────────────────────────────────────────────
@@ -58,7 +58,7 @@ class StoryDriver extends EventEmitter {
    * @param {object}  [opts.logger]            - Pino/Winston-compatible logger
    * @param {Function} [opts.persistFn]        - async (entry) => void  — external persistence hook
    */
-  constructor({ maxEntries = 10000, logger, persistFn } = {}) {
+  constructor({ maxEntries = 6765, logger, persistFn } = {}) { // fib(20)
     super();
     this._entries = [];
     this._maxEntries = maxEntries;
@@ -75,8 +75,8 @@ class StoryDriver extends EventEmitter {
 
   _defaultLogger() {
     return {
-      info:  (...a) => {},  // Silent by default in story driver
-      warn:  (...a) => console.error('[StoryDriver:WARN]',  ...a),
+      info: (...a) => { },  // Silent by default in story driver
+      warn: (...a) => console.error('[StoryDriver:WARN]', ...a),
       error: (...a) => console.error('[StoryDriver:ERROR]', ...a),
     };
   }

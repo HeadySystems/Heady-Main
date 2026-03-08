@@ -13,10 +13,11 @@
 const crypto = require('crypto');
 const { EMBEDDING_DIM } = require('./vector-space-ops');
 const logger = require('./utils/logger');
+const PHI = (1 + Math.sqrt(5)) / 2;
 
 // ─── LRU Cache ────────────────────────────────────────────────────────────────
 
-const LRU_MAX = 10000;
+const LRU_MAX = 6765; // fib(20) — φ-scaled LRU cache cap
 
 class LRUCache {
   constructor(max) {
@@ -50,7 +51,7 @@ class LRUCache {
 
 const CB_STATE = Object.freeze({ CLOSED: 'CLOSED', OPEN: 'OPEN', HALF_OPEN: 'HALF_OPEN' });
 const CB_FAILURE_THRESHOLD = 3;
-const CB_RESET_TIMEOUT_MS = 30000;
+const CB_RESET_TIMEOUT_MS = Math.round(PHI ** 7 * 1000); // φ⁷×1000 ≈ 29034ms
 
 class CircuitBreaker {
   constructor(name) {

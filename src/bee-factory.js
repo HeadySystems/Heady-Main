@@ -32,6 +32,8 @@ const path = require('path');
 const crypto = require('crypto');
 const logger = require('../utils/logger').child('bee-factory');
 const CSL = require('../core/semantic-logic');
+const PHI = (1 + Math.sqrt(5)) / 2;
+const INV_PHI = 1 / PHI; // ≈ 0.618
 
 const BEES_DIR = __dirname;
 const _dynamicRegistry = new Map();
@@ -104,7 +106,7 @@ function createBee(domain, config = {}) {
     const vector = _buildBeeVector(domain, description);
 
     // CSL: Classify priority using ternary_gate
-    const priorityClass = CSL.ternary_gate(priority, 0.7, 0.3);
+    const priorityClass = CSL.ternary_gate(priority, INV_PHI, 1 - INV_PHI); // φ-scaled: 0.618 / 0.382
 
     const entry = {
         domain,
@@ -172,7 +174,7 @@ function spawnBee(name, work, priority = 0.8) {
         createdAt: Date.now(),
         file: `ephemeral:${id}`,
         vector,
-        csl: { priorityState: CSL.ternary_gate(priority, 0.7, 0.3).state },
+        csl: { priorityState: CSL.ternary_gate(priority, INV_PHI, 1 - INV_PHI).state },
         getWork: () => workFns.map(fn => async (ctx) => {
             const result = await fn(ctx);
             return { bee: id, action: name, ...(typeof result === 'object' ? result : { result }) };
@@ -239,7 +241,7 @@ function routeBee(taskDescription, options = {}) {
         const bee = allBees.find(b => b.domain === s.id);
         const priorityActivation = CSL.soft_gate(bee.priority, 0.5, 10);
         // Composite: 70% semantic resonance + 30% priority
-        const composite = s.score * 0.7 + priorityActivation * 0.3;
+        const composite = s.score * INV_PHI + priorityActivation * (1 - INV_PHI); // φ-weighted: 0.618 / 0.382
         return {
             domain: s.id,
             description: bee.description,
@@ -340,7 +342,7 @@ function createFromTemplate(template, config = {}) {
         'monitor': (cfg) => ({
             domain: cfg.domain || `monitor-${cfg.target}`,
             description: `Monitor for ${cfg.target}`,
-            priority: 0.7,
+            priority: INV_PHI, // 1/φ ≈ 0.618
             workers: [
                 {
                     name: 'metrics', fn: async () => {
@@ -489,14 +491,14 @@ function createFromTemplate(template, config = {}) {
  * @param {Object} policy - Orchestration policy
  * @param {string} policy.mode - 'parallel', 'sequential', or 'pipeline'
  * @param {boolean} policy.requireConsensus - If true, all bees must succeed
- * @param {number} policy.timeoutMs - Max execution time per bee (default: 30000)
+ * @param {number} policy.timeoutMs - Max execution time per bee (default: φ⁷×1000 ≈ 29034ms)
  * @returns {Object} The swarm bee entry with CSL scoring
  */
 function createSwarm(name, beeConfigs = [], policy = {}) {
     const {
         mode = 'parallel',
         requireConsensus = false,
-        timeoutMs = 30000,
+        timeoutMs = Math.round(PHI ** 7 * 1000), // φ⁷×1000 ≈ 29034ms
     } = policy;
 
     // Create individual bees first

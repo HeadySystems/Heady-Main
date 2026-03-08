@@ -13,6 +13,14 @@ module.exports = function mountServices(app, { logger, authEngine, vectorMemory,
         ['../routes/headybuddy-config', '/api/headybuddy-config', 'HeadyBuddy Config'],
         ['../routes/headyme-onboarding', '/api/headyme-onboarding', 'HeadyMe Onboarding'],
         ['../routes/health-routes', '/health', 'Health Routes'],
+        // ─── Skill-derived services (Sprint: heady-new-skills-20) ─────────────────
+        ['../routes/drift-detection-routes', '/api/drift', 'Drift Detection'],
+        ['../routes/resilience-cache-routes', '/api/cache', 'Resilience Cache'],
+        ['../routes/incident-ops-routes', '/api/incidents', 'Incident Ops'],
+        ['../routes/intelligence-analytics-routes', '/api/analytics', 'Intelligence Analytics'],
+        ['../routes/cognitive-runtime-routes', '/api/cognitive', 'Cognitive Runtime'],
+        ['../routes/connector-vault-routes', '/api/connectors', 'Connector Vault'],
+        ['../routes/voice-relay-routes', '/api/voice', 'Voice Relay'],
     ];
     for (const [mod, mount, name] of routeServices) {
         try { app.use(mount, require(mod)); logger.logNodeActivity("CONDUCTOR", `  ∞ ${name}: LOADED → ${mount}`); }

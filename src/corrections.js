@@ -34,7 +34,7 @@ class HeadyCorrections extends EventEmitter {
     this._corrections = new Map();    // correctionId → Correction
     this._feedback = [];
     this._stats = { total: 0, byType: {}, byProvider: {}, positiveFeedback: 0, negativeFeedback: 0 };
-    this._maxCorrections = opts.maxCorrections || 10000;
+    this._maxCorrections = opts.maxCorrections || 6765; // fib(20)
     this._vectorMemory = opts.vectorMemory || null;
     this._autoLearn = opts.autoLearn !== false;
     this._learningLog = [];           // What was learned
@@ -156,7 +156,7 @@ class HeadyCorrections extends EventEmitter {
         correctionType: correction.correctionType,
         provider: correction.provider,
         taskType: correction.taskType,
-      }).catch(() => {});
+      }).catch(() => { });
     }
   }
 

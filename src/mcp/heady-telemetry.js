@@ -164,7 +164,7 @@ class HeadyTelemetry {
                 errorsSinceLastCapture: this.errors.length,
             };
             this._appendLog(METRICS_FILE, snapshot);
-        }, 30000); // Every 30 seconds
+        }, 29034); // φ⁷ × 1000ms — Auto-Success heartbeat cycle
 
         // Don't block process exit
         if (this._metricsInterval.unref) this._metricsInterval.unref();

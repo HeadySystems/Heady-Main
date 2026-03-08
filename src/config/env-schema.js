@@ -16,20 +16,20 @@ const ENV_SCHEMA = {
         { name: 'HEADY_API_KEY', description: 'Internal API gateway auth' },
     ],
 
-    // ── Required for full functionality ──
-    required: [
+    // ── Required for full functionality (warn if missing, don't crash) ──
+    required: [],
+
+    // ── Optional (degraded functionality if missing) ──
+    optional: [
         { name: 'PERPLEXITY_API_KEY', description: 'Perplexity Sonar Pro' },
         { name: 'GEMINI_API_KEY', description: 'Google Gemini' },
         { name: 'GITHUB_TOKEN', description: 'GitHub API' },
         { name: 'CLOUDFLARE_API_TOKEN', description: 'Cloudflare API' },
         { name: 'SENTRY_DSN', description: 'Sentry error tracking' },
-    ],
-
-    // ── Optional (degraded functionality if missing) ──
-    optional: [
         { name: 'GROQ_API_KEY', description: 'Groq fast inference' },
         { name: 'OPENAI_API_KEY', description: 'OpenAI GPT-4o' },
-        { name: 'CLAUDE_API_KEY', description: 'Anthropic Claude' },
+        { name: 'ANTHROPIC_API_KEY', description: 'Anthropic Claude' },
+        { name: 'CLAUDE_API_KEY', description: 'Anthropic Claude (alt)' },
         { name: 'ANTHROPIC_ADMIN_KEY', description: 'Anthropic admin' },
         { name: 'HF_TOKEN', description: 'Hugging Face' },
         { name: 'PINECONE_API_KEY', description: 'Pinecone vectors' },

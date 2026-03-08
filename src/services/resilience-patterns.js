@@ -377,7 +377,7 @@ class AutoTuner {
 // ═══════════════════════════════════════════════════════════════
 
 class HotColdRouter {
-    constructor({ hotThresholdMs = 100, hotCapacity = 1000, coldBatchSize = 50, coldFlushIntervalMs = 5000 } = {}) {
+    constructor({ hotThresholdMs = 100, hotCapacity = 1000, coldBatchSize = 50, coldFlushIntervalMs = Math.round(((1 + Math.sqrt(5)) / 2) ** 3 * 1000) } = {}) { // φ³×1000 ≈ 4236ms
         this.hotThresholdMs = hotThresholdMs;
         this.hotCapacity = hotCapacity;
         this.coldBatchSize = coldBatchSize;

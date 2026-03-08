@@ -9,7 +9,7 @@ const STATES = { CLOSED: 'closed', OPEN: 'open', HALF_OPEN: 'half-open' };
 class CircuitBreaker {
     constructor(opts = {}) {
         this.failureThreshold = opts.failureThreshold || 5;
-        this.recoveryTimeout = opts.recoveryTimeout || 30000;
+        this.recoveryTimeout = opts.recoveryTimeout || Math.round(((1 + Math.sqrt(5)) / 2) ** 7 * 1000); // φ⁷×1000 ≈ 29034ms
         this.halfOpenMaxCalls = opts.halfOpenMaxCalls || 3;
         this.state = STATES.CLOSED;
         this._failures = 0;

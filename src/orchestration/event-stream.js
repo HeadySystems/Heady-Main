@@ -56,7 +56,7 @@ class EventStream {
             const heartbeat = setInterval(() => {
                 try { res.write(`:heartbeat ${new Date().toISOString()}\n\n`); }
                 catch { clearInterval(heartbeat); }
-            }, 30000);
+            }, 29034); // φ⁷ × 1000
 
             // Cleanup on disconnect
             req.on("close", () => {

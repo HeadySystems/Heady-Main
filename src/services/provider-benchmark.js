@@ -40,7 +40,7 @@ function audit(entry) {
 }
 
 // ── Latency Test (HTTP ping) ────────────────────────────────────
-function httpPing(url, timeout = 10000) {
+function httpPing(url, timeout = 6765) { // fib(20)
     return new Promise((resolve) => {
         const start = Date.now();
         const mod = url.startsWith("https") ? https : http;
@@ -59,7 +59,7 @@ async function benchmarkHF() {
     try {
         // HeadyModelBridge replaces HuggingFace SDK — use heady-model-bridge.chat('huggingface', ...)
         const InferenceClient = null; // Replaced by HeadyModelBridge
-const logger = require("./utils/logger");
+        const logger = require("./utils/logger");
         const tokens = [process.env.HF_TOKEN, process.env.HF_TOKEN_2, process.env.HF_TOKEN_3].filter(Boolean);
         if (tokens.length === 0) return { provider: "hf", ok: false, error: "no tokens" };
 

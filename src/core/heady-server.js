@@ -16,10 +16,10 @@ const http = require('http');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
-const { createLogger } = require('../utils/logger');
-const { newCorrelationId } = require('../utils/logger');
+const loggerModule = require('../utils/logger');
 
-const logger = createLogger('heady-server');
+const logger = loggerModule.child ? loggerModule.child('heady-server') : loggerModule;
+const newCorrelationId = () => `hdy-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
 // ---------------------------------------------------------------------------
 // MIME types for static file serving

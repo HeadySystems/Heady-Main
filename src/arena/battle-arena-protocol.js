@@ -13,34 +13,34 @@ const PHI = 1.6180339887;
 // ─── Scoring Rubrics ──────────────────────────────────────────────────────────
 
 const DEFAULT_RUBRIC = {
-  accuracy:    { weight: 0.30, description: 'Factual correctness' },
-  reasoning:   { weight: 0.25, description: 'Logical coherence and depth' },
-  creativity:  { weight: 0.20, description: 'Novel approaches and ideas' },
+  accuracy: { weight: 0.30, description: 'Factual correctness' },
+  reasoning: { weight: 0.25, description: 'Logical coherence and depth' },
+  creativity: { weight: 0.20, description: 'Novel approaches and ideas' },
   conciseness: { weight: 0.15, description: 'Clarity and brevity' },
-  safety:      { weight: 0.10, description: 'Absence of harmful content' },
+  safety: { weight: 0.10, description: 'Absence of harmful content' },
 };
 
-const FORMAT_ROUND_ROBIN  = 'round_robin';
-const FORMAT_ELIMINATION  = 'elimination';
-const FORMAT_SWISS        = 'swiss';
+const FORMAT_ROUND_ROBIN = 'round_robin';
+const FORMAT_ELIMINATION = 'elimination';
+const FORMAT_SWISS = 'swiss';
 
-const STATUS_PENDING    = 'pending';
-const STATUS_RUNNING    = 'running';
-const STATUS_COMPLETED  = 'completed';
-const STATUS_FAILED     = 'failed';
+const STATUS_PENDING = 'pending';
+const STATUS_RUNNING = 'running';
+const STATUS_COMPLETED = 'completed';
+const STATUS_FAILED = 'failed';
 
 // ─── Contestant ───────────────────────────────────────────────────────────────
 
 class Contestant {
   constructor(opts = {}) {
-    this.id         = opts.id     || crypto.randomUUID();
-    this.name       = opts.name   || `Contestant-${this.id.slice(0, 6)}`;
-    this.provider   = opts.provider || 'unknown';   // anthropic, openai, google, groq ...
-    this.model      = opts.model    || 'unknown';
-    this.endpoint   = opts.endpoint || null;
-    this.apiKey     = opts.apiKey   || null;
-    this.headers    = opts.headers  || {};
-    this._stats     = { wins: 0, losses: 0, draws: 0, totalScore: 0, rounds: 0 };
+    this.id = opts.id || crypto.randomUUID();
+    this.name = opts.name || `Contestant-${this.id.slice(0, 6)}`;
+    this.provider = opts.provider || 'unknown';   // anthropic, openai, google, groq ...
+    this.model = opts.model || 'unknown';
+    this.endpoint = opts.endpoint || null;
+    this.apiKey = opts.apiKey || null;
+    this.headers = opts.headers || {};
+    this._stats = { wins: 0, losses: 0, draws: 0, totalScore: 0, rounds: 0 };
   }
 
   /**
@@ -54,14 +54,14 @@ class Contestant {
   }
 
   async _callApi(task) {
-    const url      = new URL(this.endpoint);
-    const isHttps  = url.protocol === 'https:';
-    const mod      = isHttps ? require('https') : require('http');
+    const url = new URL(this.endpoint);
+    const isHttps = url.protocol === 'https:';
+    const mod = isHttps ? require('https') : require('http');
     const bodyData = this._buildRequestBody(task);
-    const bodyStr  = JSON.stringify(bodyData);
+    const bodyStr = JSON.stringify(bodyData);
 
     const headers = Object.assign({
-      'Content-Type':   'application/json',
+      'Content-Type': 'application/json',
       'Content-Length': Buffer.byteLength(bodyStr),
     }, this.headers);
 
@@ -73,9 +73,9 @@ class Contestant {
     return new Promise((resolve, reject) => {
       const req = mod.request({
         hostname: url.hostname,
-        port:     url.port || (isHttps ? 443 : 80),
-        path:     url.pathname + url.search,
-        method:   'POST',
+        port: url.port || (isHttps ? 443 : 80),
+        path: url.pathname + url.search,
+        method: 'POST',
         headers,
       }, res => {
         let data = '';
@@ -90,7 +90,7 @@ class Contestant {
         });
       });
       req.on('error', reject);
-      req.setTimeout(30000, () => { req.destroy(); reject(new Error('Contestant API timeout')); });
+      req.setTimeout(Math.round(((1 + Math.sqrt(5)) / 2) ** 7 * 1000), () => { req.destroy(); reject(new Error('Contestant API timeout')); }); // φ⁷×1000 ≈ 29034ms
       req.write(bodyStr);
       req.end();
     });
@@ -99,13 +99,13 @@ class Contestant {
   _buildRequestBody(task) {
     if (this.provider === 'anthropic') {
       return {
-        model:      this.model || 'claude-3-opus-20240229',
+        model: this.model || 'claude-3-opus-20240229',
         max_tokens: 1024,
-        messages:   [{ role: 'user', content: task.prompt }],
+        messages: [{ role: 'user', content: task.prompt }],
       };
     }
     return {
-      model:    this.model || 'gpt-4',
+      model: this.model || 'gpt-4',
       messages: [{ role: 'user', content: task.prompt }],
     };
   }
@@ -119,22 +119,22 @@ class Contestant {
   recordResult(score, won) {
     this._stats.rounds++;
     this._stats.totalScore += score;
-    if (won === true)  this._stats.wins++;
+    if (won === true) this._stats.wins++;
     if (won === false) this._stats.losses++;
-    if (won === null)  this._stats.draws++;
+    if (won === null) this._stats.draws++;
   }
 
-  getStats()       { return { ...this._stats, avgScore: this._stats.rounds ? this._stats.totalScore / this._stats.rounds : 0 }; }
-  toString()       { return `${this.name}(${this.provider}/${this.model})`; }
+  getStats() { return { ...this._stats, avgScore: this._stats.rounds ? this._stats.totalScore / this._stats.rounds : 0 }; }
+  toString() { return `${this.name}(${this.provider}/${this.model})`; }
 }
 
 // ─── Judge ────────────────────────────────────────────────────────────────────
 
 class Judge {
   constructor(opts = {}) {
-    this.id      = opts.id   || crypto.randomUUID();
-    this.name    = opts.name || `Judge-${this.id.slice(0, 6)}`;
-    this.rubric  = opts.rubric || DEFAULT_RUBRIC;
+    this.id = opts.id || crypto.randomUUID();
+    this.name = opts.name || `Judge-${this.id.slice(0, 6)}`;
+    this.rubric = opts.rubric || DEFAULT_RUBRIC;
     this._scoreFn = opts.scoreFn || null;
     this._history = [];
   }
@@ -155,7 +155,7 @@ class Judge {
   _defaultScore(task, contestant, output) {
     // Deterministic scoring based on output properties and CSL resonance proxy
     const scores = {};
-    let total    = 0;
+    let total = 0;
 
     for (const [dim, config] of Object.entries(this.rubric)) {
       let raw = 0;
@@ -164,7 +164,7 @@ class Judge {
           // Keyword overlap with task expected keywords
           const keywords = (task.keywords || []).map(k => k.toLowerCase());
           const outLower = output.toLowerCase();
-          const hits     = keywords.filter(k => outLower.includes(k)).length;
+          const hits = keywords.filter(k => outLower.includes(k)).length;
           raw = keywords.length > 0 ? hits / keywords.length : 0.5;
           break;
         }
@@ -177,7 +177,7 @@ class Judge {
         }
         case 'creativity': {
           // Proxy: unique word ratio (type-token ratio)
-          const words  = output.toLowerCase().split(/\W+/).filter(Boolean);
+          const words = output.toLowerCase().split(/\W+/).filter(Boolean);
           const unique = new Set(words).size;
           raw = words.length > 0 ? Math.min(1, unique / words.length * 2) : 0;
           break;
@@ -185,14 +185,14 @@ class Judge {
         case 'conciseness': {
           // Optimal length relative to task max_length hint
           const maxLen = task.maxOutputLen || 500;
-          const len    = output.length;
+          const len = output.length;
           raw = len === 0 ? 0 : Math.max(0, 1 - Math.abs(len - maxLen) / maxLen);
           break;
         }
         case 'safety': {
           // Penalize unsafe patterns
           const unsafe = ['harm', 'kill', 'illegal', 'exploit', 'malware', 'phishing'];
-          const found  = unsafe.filter(u => output.toLowerCase().includes(u)).length;
+          const found = unsafe.filter(u => output.toLowerCase().includes(u)).length;
           raw = Math.max(0, 1 - found * 0.25);
           break;
         }
@@ -209,27 +209,27 @@ class Judge {
     }
 
     const result = {
-      judgeId:      this.id,
+      judgeId: this.id,
       contestantId: contestant.id,
-      taskId:       task.id,
+      taskId: task.id,
       scores,
-      total:        +total.toFixed(4),
-      ts:           Date.now(),
+      total: +total.toFixed(4),
+      ts: Date.now(),
     };
     this._history.push(result);
     return result;
   }
 
-  getHistory()       { return this._history.slice(); }
-  setRubric(rubric)  { this.rubric = rubric; return this; }
+  getHistory() { return this._history.slice(); }
+  setRubric(rubric) { this.rubric = rubric; return this; }
 }
 
 // ─── ConsensusScorer ──────────────────────────────────────────────────────────
 
 class ConsensusScorer {
   constructor(opts = {}) {
-    this._method    = opts.method || 'weighted_mean';  // weighted_mean | median | borda
-    this._weights   = opts.judgeWeights || null;       // judge id → weight
+    this._method = opts.method || 'weighted_mean';  // weighted_mean | median | borda
+    this._weights = opts.judgeWeights || null;       // judge id → weight
   }
 
   /**
@@ -239,10 +239,10 @@ class ConsensusScorer {
     if (judgeScores.length === 0) return null;
 
     switch (this._method) {
-      case 'median':    return this._median(judgeScores);
-      case 'borda':     return this._borda(judgeScores);
+      case 'median': return this._median(judgeScores);
+      case 'borda': return this._borda(judgeScores);
       case 'weighted_mean':
-      default:          return this._weightedMean(judgeScores);
+      default: return this._weightedMean(judgeScores);
     }
   }
 
@@ -259,7 +259,7 @@ class ConsensusScorer {
 
   _median(scores) {
     const sorted = scores.map(s => s.total).sort((a, b) => a - b);
-    const mid    = Math.floor(sorted.length / 2);
+    const mid = Math.floor(sorted.length / 2);
     return sorted.length % 2 === 0
       ? +((sorted[mid - 1] + sorted[mid]) / 2).toFixed(4)
       : +sorted[mid].toFixed(4);
@@ -281,27 +281,27 @@ class ConsensusScorer {
 
 class BattleRound {
   constructor(opts = {}) {
-    this.id           = opts.id || crypto.randomUUID();
-    this.roundNumber  = opts.roundNumber || 1;
-    this.task         = opts.task || null;
-    this.contestants  = opts.contestants || [];
-    this.judges       = opts.judges || [];
-    this.status       = STATUS_PENDING;
-    this.outputs      = {};       // contestantId → output
-    this.judgeScores  = {};       // contestantId → [judgeScore]
-    this.finalScores  = {};       // contestantId → aggregated score
-    this.winner       = null;
-    this._scorer      = opts.scorer || new ConsensusScorer();
-    this._executorFn  = opts.executorFn || null;
-    this.startedAt    = null;
-    this.completedAt  = null;
+    this.id = opts.id || crypto.randomUUID();
+    this.roundNumber = opts.roundNumber || 1;
+    this.task = opts.task || null;
+    this.contestants = opts.contestants || [];
+    this.judges = opts.judges || [];
+    this.status = STATUS_PENDING;
+    this.outputs = {};       // contestantId → output
+    this.judgeScores = {};       // contestantId → [judgeScore]
+    this.finalScores = {};       // contestantId → aggregated score
+    this.winner = null;
+    this._scorer = opts.scorer || new ConsensusScorer();
+    this._executorFn = opts.executorFn || null;
+    this.startedAt = null;
+    this.completedAt = null;
   }
 
   /**
    * Execute the round: run all contestants, collect outputs, score them.
    */
   async execute() {
-    this.status    = STATUS_RUNNING;
+    this.status = STATUS_RUNNING;
     this.startedAt = Date.now();
 
     try {
@@ -326,14 +326,14 @@ class BattleRound {
       }
 
       // Determine winner
-      let maxScore  = -1;
-      let winnerId  = null;
+      let maxScore = -1;
+      let winnerId = null;
       for (const [cid, score] of Object.entries(this.finalScores)) {
         if (score > maxScore) { maxScore = score; winnerId = cid; }
       }
-      this.winner       = winnerId;
-      this.status       = STATUS_COMPLETED;
-      this.completedAt  = Date.now();
+      this.winner = winnerId;
+      this.status = STATUS_COMPLETED;
+      this.completedAt = Date.now();
 
       // Record results on contestants
       for (const c of this.contestants) {
@@ -352,14 +352,14 @@ class BattleRound {
 
   getSummary() {
     return {
-      roundId:     this.id,
+      roundId: this.id,
       roundNumber: this.roundNumber,
-      status:      this.status,
-      taskId:      this.task?.id,
-      outputs:     this.outputs,
+      status: this.status,
+      taskId: this.task?.id,
+      outputs: this.outputs,
       finalScores: this.finalScores,
-      winner:      this.winner,
-      durationMs:  this.completedAt ? this.completedAt - this.startedAt : null,
+      winner: this.winner,
+      durationMs: this.completedAt ? this.completedAt - this.startedAt : null,
     };
   }
 }
@@ -368,16 +368,16 @@ class BattleRound {
 
 class TournamentBracket {
   constructor(opts = {}) {
-    this.id          = opts.id     || crypto.randomUUID();
-    this.format      = opts.format || FORMAT_ELIMINATION;
+    this.id = opts.id || crypto.randomUUID();
+    this.format = opts.format || FORMAT_ELIMINATION;
     this.contestants = (opts.contestants || []).slice();
-    this.rounds      = [];
-    this._current    = 0;
-    this._judges     = opts.judges  || [];
-    this._tasks      = opts.tasks   || [];
-    this._scorer     = opts.scorer  || new ConsensusScorer();
+    this.rounds = [];
+    this._current = 0;
+    this._judges = opts.judges || [];
+    this._tasks = opts.tasks || [];
+    this._scorer = opts.scorer || new ConsensusScorer();
     this._executorFn = opts.executorFn || null;
-    this.history     = [];
+    this.history = [];
   }
 
   /**
@@ -386,14 +386,14 @@ class TournamentBracket {
   build() {
     if (this.format === FORMAT_ELIMINATION) return this._buildElimination();
     if (this.format === FORMAT_ROUND_ROBIN) return this._buildRoundRobin();
-    if (this.format === FORMAT_SWISS)       return this._buildSwiss();
+    if (this.format === FORMAT_SWISS) return this._buildSwiss();
     throw new Error(`Unknown bracket format: ${this.format}`);
   }
 
   _buildElimination() {
     // Single-elimination: pairs of contestants, winners advance
     const brackets = [];
-    let remaining  = this.contestants.slice();
+    let remaining = this.contestants.slice();
 
     // Pad to power of 2
     const nextPow2 = Math.pow(2, Math.ceil(Math.log2(remaining.length)));
@@ -413,7 +413,7 @@ class TournamentBracket {
   _buildRoundRobin() {
     // Every contestant vs every other contestant
     const pairs = [];
-    const n     = this.contestants.length;
+    const n = this.contestants.length;
     for (let i = 0; i < n; i++) {
       for (let j = i + 1; j < n; j++) {
         pairs.push([this.contestants[i], this.contestants[j]]);
@@ -432,7 +432,7 @@ class TournamentBracket {
    */
   async run() {
     let remaining = this.contestants.slice();
-    let roundNum  = 0;
+    let roundNum = 0;
 
     if (this.format === FORMAT_ROUND_ROBIN || this.format === FORMAT_SWISS) {
       // Run every pair once
@@ -441,8 +441,8 @@ class TournamentBracket {
         for (let j = i + 1; j < n; j++) {
           roundNum++;
           const active = [remaining[i], remaining[j]];
-          const task   = this._tasks[roundNum % this._tasks.length] || { id: `task-${roundNum}`, prompt: 'Default task' };
-          const round  = new BattleRound({
+          const task = this._tasks[roundNum % this._tasks.length] || { id: `task-${roundNum}`, prompt: 'Default task' };
+          const round = new BattleRound({
             roundNumber: roundNum, task, contestants: active,
             judges: this._judges, scorer: this._scorer, executorFn: this._executorFn,
           });
@@ -458,7 +458,7 @@ class TournamentBracket {
         if (h.winner && scores[h.winner] !== undefined) scores[h.winner]++;
       }
       const sortedIds = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
-      const champion  = remaining.find(c => c.id === sortedIds[0]) || null;
+      const champion = remaining.find(c => c.id === sortedIds[0]) || null;
       return { champion, history: this.history };
     }
 
@@ -471,8 +471,8 @@ class TournamentBracket {
         const b = remaining[i + 1];
         if (!b) { roundWinners.push(a); continue; } // bye
         const active = [a, b];
-        const task   = this._tasks[roundNum % this._tasks.length] || { id: `task-${roundNum}`, prompt: 'Default task' };
-        const round  = new BattleRound({
+        const task = this._tasks[roundNum % this._tasks.length] || { id: `task-${roundNum}`, prompt: 'Default task' };
+        const round = new BattleRound({
           roundNumber: roundNum, task, contestants: active,
           judges: this._judges, scorer: this._scorer, executorFn: this._executorFn,
         });
@@ -489,24 +489,24 @@ class TournamentBracket {
   }
 
   getResults() { return this.history.slice(); }
-  getWinner()  { return this.rounds.length ? this.rounds[this.rounds.length - 1].winner : null; }
+  getWinner() { return this.rounds.length ? this.rounds[this.rounds.length - 1].winner : null; }
 }
 
 // ─── BattleArena ──────────────────────────────────────────────────────────────
 
 class BattleArena {
   constructor(opts = {}) {
-    this.id           = opts.id   || crypto.randomUUID();
-    this.name         = opts.name || 'HeadyArena';
+    this.id = opts.id || crypto.randomUUID();
+    this.name = opts.name || 'HeadyArena';
     this._contestants = new Map();
-    this._judges      = new Map();
-    this._tasks       = new Map();
-    this._scorer      = new ConsensusScorer(opts.scorerOpts || {});
-    this._brackets    = [];
-    this._rounds      = [];
-    this._auditTrail  = [];
-    this._executorFn  = opts.executorFn || null;
-    this._rubric      = opts.rubric || DEFAULT_RUBRIC;
+    this._judges = new Map();
+    this._tasks = new Map();
+    this._scorer = new ConsensusScorer(opts.scorerOpts || {});
+    this._brackets = [];
+    this._rounds = [];
+    this._auditTrail = [];
+    this._executorFn = opts.executorFn || null;
+    this._rubric = opts.rubric || DEFAULT_RUBRIC;
   }
 
   /**
@@ -543,17 +543,17 @@ class BattleArena {
    */
   async runRound(task) {
     const contestants = Array.from(this._contestants.values());
-    const judges      = Array.from(this._judges.values());
+    const judges = Array.from(this._judges.values());
     const resolvedTask = typeof task === 'string'
       ? { id: crypto.randomUUID(), prompt: task }
       : task;
 
     const round = new BattleRound({
-      task:         resolvedTask,
+      task: resolvedTask,
       contestants,
       judges,
-      scorer:       this._scorer,
-      executorFn:   this._executorFn,
+      scorer: this._scorer,
+      executorFn: this._executorFn,
     });
 
     const summary = await round.execute();
@@ -567,19 +567,19 @@ class BattleArena {
    */
   async runTournament(opts = {}) {
     const bracket = new TournamentBracket({
-      format:      opts.format      || FORMAT_ELIMINATION,
+      format: opts.format || FORMAT_ELIMINATION,
       contestants: Array.from(this._contestants.values()),
-      judges:      Array.from(this._judges.values()),
-      tasks:       Array.from(this._tasks.values()),
-      scorer:      this._scorer,
-      executorFn:  this._executorFn,
+      judges: Array.from(this._judges.values()),
+      tasks: Array.from(this._tasks.values()),
+      scorer: this._scorer,
+      executorFn: this._executorFn,
     });
 
     this._brackets.push(bracket);
     const result = await bracket.run();
     this._audit('tournament_complete', {
       champion: result.champion?.id,
-      rounds:   bracket.history.length,
+      rounds: bracket.history.length,
     });
     return result;
   }
@@ -594,15 +594,15 @@ class BattleArena {
   }
 
   getAuditTrail() { return this._auditTrail.slice(); }
-  getRounds()     { return this._rounds.slice(); }
-  getBrackets()   { return this._brackets.slice(); }
+  getRounds() { return this._rounds.slice(); }
+  getBrackets() { return this._brackets.slice(); }
 
   _audit(action, data) {
     this._auditTrail.push({ action, data, ts: Date.now() });
-    if (this._auditTrail.length > 10000) this._auditTrail.shift();
+    if (this._auditTrail.length > 6765) this._auditTrail.shift(); // fib(20)
   }
 
-  setExecutor(fn)   { this._executorFn = fn; return this; }
+  setExecutor(fn) { this._executorFn = fn; return this; }
   setRubric(rubric) { this._rubric = rubric; for (const j of this._judges.values()) j.setRubric(rubric); return this; }
 }
 

@@ -7,7 +7,7 @@
 
 const logger = require('../utils/logger');
 
-const DEFAULT_SIMULATIONS = 10000;
+const DEFAULT_SIMULATIONS = 6765; // fib(20)
 const RESOURCE_POOLS = ['colab-brain', 'colab-memory', 'colab-conductor', 'cloudrun-prod', 'cloudrun-staging', 'edge-cf', 'local-ryzen'];
 
 class MonteCarloScheduler {

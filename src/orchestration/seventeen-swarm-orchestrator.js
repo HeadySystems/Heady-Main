@@ -34,71 +34,71 @@ const SWARM_NAMES = [
 
 // Priority levels: higher = more urgent
 const PRIORITY = {
-  EMERGENCY:  100,
-  CRITICAL:    80,
-  HIGH:        60,
-  NORMAL:      40,
-  LOW:         20,
-  BACKGROUND:  10,
+  EMERGENCY: 100,
+  CRITICAL: 80,
+  HIGH: 60,
+  NORMAL: 40,
+  LOW: 20,
+  BACKGROUND: 10,
 };
 
 // Default priorities per swarm
 const SWARM_PRIORITIES = {
-  Emergency:     PRIORITY.EMERGENCY,
-  Security:      PRIORITY.CRITICAL,
-  Health:        PRIORITY.CRITICAL,
-  Deploy:        PRIORITY.HIGH,
-  Migration:     PRIORITY.HIGH,
-  Monitoring:    PRIORITY.HIGH,
-  Governance:    PRIORITY.NORMAL,
-  Testing:       PRIORITY.NORMAL,
-  Battle:        PRIORITY.NORMAL,
-  Research:      PRIORITY.NORMAL,
-  Memory:        PRIORITY.NORMAL,
-  Trading:       PRIORITY.NORMAL,
-  Creative:      PRIORITY.LOW,
+  Emergency: PRIORITY.EMERGENCY,
+  Security: PRIORITY.CRITICAL,
+  Health: PRIORITY.CRITICAL,
+  Deploy: PRIORITY.HIGH,
+  Migration: PRIORITY.HIGH,
+  Monitoring: PRIORITY.HIGH,
+  Governance: PRIORITY.NORMAL,
+  Testing: PRIORITY.NORMAL,
+  Battle: PRIORITY.NORMAL,
+  Research: PRIORITY.NORMAL,
+  Memory: PRIORITY.NORMAL,
+  Trading: PRIORITY.NORMAL,
+  Creative: PRIORITY.LOW,
   Documentation: PRIORITY.LOW,
-  Analytics:     PRIORITY.LOW,
-  Cleanup:       PRIORITY.BACKGROUND,
-  Onboarding:    PRIORITY.BACKGROUND,
+  Analytics: PRIORITY.LOW,
+  Cleanup: PRIORITY.BACKGROUND,
+  Onboarding: PRIORITY.BACKGROUND,
 };
 
 const SWARM_STATUS = {
-  IDLE:       'idle',
-  ACTIVE:     'active',
-  PAUSED:     'paused',
-  ERROR:      'error',
+  IDLE: 'idle',
+  ACTIVE: 'active',
+  PAUSED: 'paused',
+  ERROR: 'error',
   OVERLOADED: 'overloaded',
 };
 
 const MESSAGE_TYPE = {
-  TASK:        'task',
-  RESULT:      'result',
-  BROADCAST:   'broadcast',
-  CONSENSUS:   'consensus',
-  HEARTBEAT:   'heartbeat',
-  ESCALATION:  'escalation',
-  SYNC:        'sync',
+  TASK: 'task',
+  RESULT: 'result',
+  BROADCAST: 'broadcast',
+  CONSENSUS: 'consensus',
+  HEARTBEAT: 'heartbeat',
+  ESCALATION: 'escalation',
+  SYNC: 'sync',
 };
 
 // ─── SwarmTask ────────────────────────────────────────────────────────────────
 
 class SwarmTask {
   constructor(opts = {}) {
-    this.id         = opts.id       || crypto.randomUUID();
-    this.type       = opts.type     || 'generic';
-    this.payload    = opts.payload  || {};
-    this.priority   = opts.priority || PRIORITY.NORMAL;
+    this.id = opts.id || crypto.randomUUID();
+    this.type = opts.type || 'generic';
+    this.payload = opts.payload || {};
+    this.priority = opts.priority || PRIORITY.NORMAL;
     this.targetSwarm = opts.targetSwarm || null;
     this.sourceSwarm = opts.sourceSwarm || null;
-    this.createdAt  = Date.now();
-    this.deadline   = opts.deadline || null;
-    this.ttlMs      = opts.ttlMs    || 60000;
-    this.metadata   = opts.metadata || {};
-    this.status     = 'pending';
-    this.result     = null;
-    this.error      = null;
-    this.startedAt  = null;
+    this.createdAt = Date.now();
+    this.deadline = opts.deadline || null;
+    this.ttlMs = opts.ttlMs || 60000;
+    this.metadata = opts.metadata || {};
+    this.status = 'pending';
+    this.result = null;
+    this.error = null;
+    this.startedAt = null;
     this.completedAt = null;
   }
 
@@ -107,15 +107,15 @@ class SwarmTask {
   }
 
   complete(result) {
-    this.status      = 'completed';
-    this.result      = result;
+    this.status = 'completed';
+    this.result = result;
     this.completedAt = Date.now();
     return this;
   }
 
   fail(error) {
-    this.status   = 'failed';
-    this.error    = error instanceof Error ? error.message : String(error);
+    this.status = 'failed';
+    this.error = error instanceof Error ? error.message : String(error);
     this.completedAt = Date.now();
     return this;
   }
@@ -130,12 +130,12 @@ class SwarmTask {
 
 class SwarmMessage {
   constructor(opts = {}) {
-    this.id       = opts.id   || crypto.randomUUID();
-    this.type     = opts.type || MESSAGE_TYPE.BROADCAST;
-    this.from     = opts.from;
-    this.to       = opts.to   || null; // null = broadcast
-    this.payload  = opts.payload || {};
-    this.ts       = Date.now();
+    this.id = opts.id || crypto.randomUUID();
+    this.type = opts.type || MESSAGE_TYPE.BROADCAST;
+    this.from = opts.from;
+    this.to = opts.to || null; // null = broadcast
+    this.payload = opts.payload || {};
+    this.ts = Date.now();
     this.priority = opts.priority || PRIORITY.NORMAL;
   }
 }
@@ -144,14 +144,14 @@ class SwarmMessage {
 
 class SwarmBus {
   constructor() {
-    this._queues    = new Map();  // swarmName → Message[]
+    this._queues = new Map();  // swarmName → Message[]
     this._listeners = new Map();  // swarmName → fn[]
-    this._history   = [];
-    this._maxHistory = 10000;
+    this._history = [];
+    this._maxHistory = 6765; // fib(20)
   }
 
   register(swarmName) {
-    if (!this._queues.has(swarmName))    this._queues.set(swarmName, []);
+    if (!this._queues.has(swarmName)) this._queues.set(swarmName, []);
     if (!this._listeners.has(swarmName)) this._listeners.set(swarmName, []);
     return this;
   }
@@ -210,9 +210,9 @@ class SwarmBus {
   getHistory(filter = {}) {
     return this._history.filter(m => {
       if (filter.from && m.from !== filter.from) return false;
-      if (filter.to   && m.to   !== filter.to)   return false;
-      if (filter.type && m.type !== filter.type)  return false;
-      if (filter.since && m.ts < filter.since)   return false;
+      if (filter.to && m.to !== filter.to) return false;
+      if (filter.type && m.type !== filter.type) return false;
+      if (filter.since && m.ts < filter.since) return false;
       return true;
     });
   }
@@ -224,22 +224,22 @@ class SwarmBus {
 
 class Swarm {
   constructor(name, opts = {}) {
-    this.name       = name;
-    this.id         = opts.id       || crypto.randomUUID();
-    this.priority   = opts.priority || SWARM_PRIORITIES[name] || PRIORITY.NORMAL;
-    this.status     = SWARM_STATUS.IDLE;
-    this._bus       = null;
-    this._handlers  = {};   // task type → async fn
-    this._queue     = [];   // pending SwarmTasks
-    this._active    = [];   // in-flight SwarmTasks
+    this.name = name;
+    this.id = opts.id || crypto.randomUUID();
+    this.priority = opts.priority || SWARM_PRIORITIES[name] || PRIORITY.NORMAL;
+    this.status = SWARM_STATUS.IDLE;
+    this._bus = null;
+    this._handlers = {};   // task type → async fn
+    this._queue = [];   // pending SwarmTasks
+    this._active = [];   // in-flight SwarmTasks
     this._completed = [];
     this._maxConcurrency = opts.maxConcurrency || 5;
-    this._maxQueue       = opts.maxQueue       || 100;
-    this._stats          = { received: 0, completed: 0, failed: 0, escalated: 0 };
-    this._heartbeatMs    = opts.heartbeatMs || Math.round(5000 * (1 + (this.priority / 200)));
+    this._maxQueue = opts.maxQueue || 100;
+    this._stats = { received: 0, completed: 0, failed: 0, escalated: 0 };
+    this._heartbeatMs = opts.heartbeatMs || Math.round(5000 * (1 + (this.priority / 200)));
     this._heartbeatTimer = null;
-    this._capabilities   = opts.capabilities || [name.toLowerCase()];
-    this._callbacks      = { task: [], complete: [], error: [] };
+    this._capabilities = opts.capabilities || [name.toLowerCase()];
+    this._callbacks = { task: [], complete: [], error: [] };
   }
 
   connectBus(bus) {
@@ -287,8 +287,8 @@ class Swarm {
 
       this._active.push(task);
       task.startedAt = Date.now();
-      task.status    = 'running';
-      this.status    = SWARM_STATUS.ACTIVE;
+      task.status = 'running';
+      this.status = SWARM_STATUS.ACTIVE;
       this._emit('task', task);
 
       this._executeTask(task).then(result => {
@@ -306,9 +306,9 @@ class Swarm {
         if (this._bus && task.priority >= PRIORITY.HIGH) {
           this._stats.escalated++;
           this._bus.send({
-            type:    MESSAGE_TYPE.ESCALATION,
-            from:    this.name,
-            to:      'Emergency',
+            type: MESSAGE_TYPE.ESCALATION,
+            from: this.name,
+            to: 'Emergency',
             payload: { taskId: task.id, error: task.error, priority: task.priority },
             priority: PRIORITY.CRITICAL,
           });
@@ -337,9 +337,9 @@ class Swarm {
     // Reply if there's a target bus recipient
     if (this._bus && task.sourceSwarm) {
       this._bus.send({
-        type:    MESSAGE_TYPE.RESULT,
-        from:    this.name,
-        to:      task.sourceSwarm,
+        type: MESSAGE_TYPE.RESULT,
+        from: this.name,
+        to: task.sourceSwarm,
         payload: { taskId: task.id, status: task.status, result: task.result, error: task.error },
         priority: task.priority,
       });
@@ -369,8 +369,8 @@ class Swarm {
     this._heartbeatTimer = setInterval(() => {
       if (this._bus) {
         this._bus.send({
-          type:    MESSAGE_TYPE.HEARTBEAT,
-          from:    this.name,
+          type: MESSAGE_TYPE.HEARTBEAT,
+          from: this.name,
           payload: this.getStatus(),
           priority: PRIORITY.LOW,
         });
@@ -385,25 +385,25 @@ class Swarm {
     return this;
   }
 
-  pause()  { this.status = SWARM_STATUS.PAUSED;  return this; }
+  pause() { this.status = SWARM_STATUS.PAUSED; return this; }
   resume() { this.status = SWARM_STATUS.IDLE; this._drain(); return this; }
 
   getStatus() {
     return {
-      name:        this.name,
-      id:          this.id,
-      status:      this.status,
-      priority:    this.priority,
-      queue:       this._queue.length,
-      active:      this._active.length,
+      name: this.name,
+      id: this.id,
+      status: this.status,
+      priority: this.priority,
+      queue: this._queue.length,
+      active: this._active.length,
       capabilities: this._capabilities,
-      stats:       { ...this._stats },
+      stats: { ...this._stats },
     };
   }
 
   getCompletedTasks() { return this._completed.slice(); }
-  getQueueDepth()     { return this._queue.length; }
-  getActiveCount()    { return this._active.length; }
+  getQueueDepth() { return this._queue.length; }
+  getActiveCount() { return this._active.length; }
 
   _emit(event, data) {
     for (const fn of (this._callbacks[event] || [])) fn(data);
@@ -418,9 +418,9 @@ class ConsensusManager {
    * Aggregate decisions from multiple swarms using φ-weighted voting.
    */
   constructor(opts = {}) {
-    this._quorum     = opts.quorum     || 0.5;  // fraction of swarms that must agree
-    this._timeout    = opts.timeoutMs  || 10000;
-    this._proposals  = new Map();  // proposalId → { votes, result }
+    this._quorum = opts.quorum || 0.5;  // fraction of swarms that must agree
+    this._timeout = opts.timeoutMs || 6765; // fib(20)
+    this._proposals = new Map();  // proposalId → { votes, result }
   }
 
   /**
@@ -450,8 +450,8 @@ class ConsensusManager {
 
   _tryResolve(proposalId) {
     const proposal = this._proposals.get(proposalId);
-    const total    = proposal.participants.length;
-    const voted    = proposal.votes.size;
+    const total = proposal.participants.length;
+    const voted = proposal.votes.size;
 
     if (voted < Math.ceil(total * this._quorum)) return null;
 
@@ -474,7 +474,7 @@ class ConsensusManager {
 
     const confidence = maxScore / totalWeight;
     proposal.resolved = true;
-    proposal.result   = { decision: winner, confidence, tally, voted, total };
+    proposal.result = { decision: winner, confidence, tally, voted, total };
     return proposal.result;
   }
 
@@ -485,8 +485,8 @@ class ConsensusManager {
    */
   async waitForConsensus(proposalId) {
     return new Promise((resolve, reject) => {
-      const start   = Date.now();
-      const check   = setInterval(() => {
+      const start = Date.now();
+      const check = setInterval(() => {
         const p = this._proposals.get(proposalId);
         if (!p) { clearInterval(check); reject(new Error('Proposal not found')); return; }
         if (p.resolved) { clearInterval(check); resolve(p.result); return; }
@@ -507,15 +507,15 @@ class SwarmOrchestrator {
    * priority-based scheduling, and consensus support.
    */
   constructor(opts = {}) {
-    this._bus          = new SwarmBus();
-    this._swarms       = new Map();
-    this._consensus    = new ConsensusManager(opts.consensusOpts || {});
-    this._schedulerMs  = opts.schedulerMs || Math.round(1000 / PHI);
+    this._bus = new SwarmBus();
+    this._swarms = new Map();
+    this._consensus = new ConsensusManager(opts.consensusOpts || {});
+    this._schedulerMs = opts.schedulerMs || Math.round(1000 / PHI);
     this._schedulerTimer = null;
-    this._auditLog     = [];
-    this._maxAudit     = opts.maxAuditEntries || 50000;
-    this._initialized  = false;
-    this._taskRouter   = opts.taskRouter || null;
+    this._auditLog = [];
+    this._maxAudit = opts.maxAuditEntries || 50000;
+    this._initialized = false;
+    this._taskRouter = opts.taskRouter || null;
 
     // Initialize all 17 swarms
     for (const name of SWARM_NAMES) {
@@ -535,7 +535,7 @@ class SwarmOrchestrator {
     this._installDefaultHandlers(swarm);
 
     swarm.onChange('complete', task => this._audit('task_complete', { swarm: name, taskId: task.id, durationMs: task.getDuration() }));
-    swarm.onChange('error',    task => this._audit('task_error',    { swarm: name, taskId: task.id, error: task.error }));
+    swarm.onChange('error', task => this._audit('task_error', { swarm: name, taskId: task.id, error: task.error }));
 
     return swarm;
   }
@@ -558,7 +558,7 @@ class SwarmOrchestrator {
       case 'Monitoring':
         swarm.on('get_status', async (task, s) => ({
           swarms: Array.from(this._swarms.values()).map(sw => sw.getStatus()),
-          bus:    { queueDepths: SWARM_NAMES.reduce((acc, n) => { acc[n] = this._bus.getQueueDepth(n); return acc; }, {}) },
+          bus: { queueDepths: SWARM_NAMES.reduce((acc, n) => { acc[n] = this._bus.getQueueDepth(n); return acc; }, {}) },
         }));
         break;
 
@@ -580,8 +580,8 @@ class SwarmOrchestrator {
           this._audit('emergency', { taskId: task.id, priority: task.priority, payload: task.payload });
           // Broadcast emergency to all swarms
           this._bus.send({
-            type:    MESSAGE_TYPE.BROADCAST,
-            from:    'Emergency',
+            type: MESSAGE_TYPE.BROADCAST,
+            from: 'Emergency',
             payload: { emergency: true, taskId: task.id, payload: task.payload },
             priority: PRIORITY.EMERGENCY,
           });
@@ -687,9 +687,9 @@ class SwarmOrchestrator {
   /**
    * Run a cross-swarm consensus vote.
    */
-  async runConsensus(proposal, participants = null, timeoutMs = 10000) {
-    const proposalId  = crypto.randomUUID();
-    const swarmList   = participants || SWARM_NAMES;
+  async runConsensus(proposal, participants = null, timeoutMs = 6765) { // fib(20)
+    const proposalId = crypto.randomUUID();
+    const swarmList = participants || SWARM_NAMES;
     this._consensus.propose(proposalId, proposal, swarmList);
 
     // Ask the Governance swarm to cast a vote on behalf of each participant
@@ -698,27 +698,27 @@ class SwarmOrchestrator {
       const swarm = this._swarms.get(swarmName);
       if (!swarm || !governance) continue;
       governance.submit(new SwarmTask({
-        type:        'vote',
+        type: 'vote',
         targetSwarm: 'Governance',
         sourceSwarm: swarmName,
-        payload:     { proposalId, swarmName, decision: 'approve', weight: swarm.priority / PRIORITY.EMERGENCY },
-        priority:    PRIORITY.HIGH,
+        payload: { proposalId, swarmName, decision: 'approve', weight: swarm.priority / PRIORITY.EMERGENCY },
+        priority: PRIORITY.HIGH,
       }));
     }
 
     return this._consensus.waitForConsensus(proposalId);
   }
 
-  getSwarm(name)    { return this._swarms.get(name) || null; }
-  getAllSwarms()     { return new Map(this._swarms); }
-  listSwarmNames()  { return SWARM_NAMES.slice(); }
+  getSwarm(name) { return this._swarms.get(name) || null; }
+  getAllSwarms() { return new Map(this._swarms); }
+  listSwarmNames() { return SWARM_NAMES.slice(); }
 
   getStatus() {
     return {
       initialized: this._initialized,
-      swarms:      SWARM_NAMES.map(n => this._swarms.get(n).getStatus()),
-      busHistory:  this._bus.getHistory({ since: Date.now() - 60000 }).length,
-      totalTasks:  this._getTotalTasks(),
+      swarms: SWARM_NAMES.map(n => this._swarms.get(n).getStatus()),
+      busHistory: this._bus.getHistory({ since: Date.now() - 60000 }).length,
+      totalTasks: this._getTotalTasks(),
     };
   }
 
@@ -741,8 +741,8 @@ class SwarmOrchestrator {
     if (this._auditLog.length > this._maxAudit) this._auditLog.shift();
   }
 
-  getBus()      { return this._bus; }
-  getConsensus(){ return this._consensus; }
+  getBus() { return this._bus; }
+  getConsensus() { return this._consensus; }
 
   /**
    * Register a custom handler on a specific swarm.

@@ -1,135 +1,34 @@
-# Heady™ Systems
+# Heady Liquid Latent OS Bundle
 
-[![Deploy](https://github.com/HeadyMe/Heady-pre-production-9f2f0642/actions/workflows/deploy.yml/badge.svg)](https://github.com/HeadyMe/Heady-pre-production-9f2f0642/actions/workflows/deploy.yml)
+This bundle turns the attached Heady directives and configuration seeds into a production-oriented monorepo with Cloudflare edge workers, Cloud Run services, shared runtime packages, pgvector migrations, deployment workflows, and operational runbooks. Internal source material comes from the attached workspace directives, HCFullPipeline definitions, and cognitive configuration.
 
-> **v3.1.0** · Sacred Geometry Multi-Agent Orchestration · φ-Scaled Resilience · MCP Integration
+Cloudflare’s remote MCP guidance recommends Streamable HTTP as the current transport standard and Durable Objects when MCP sessions need state, which fits HeadyMCP’s edge-native control plane ([Cloudflare Agents docs](https://developers.cloudflare.com/agents/guides/remote-mcp-server/)).
 
----
+Cloudflare Vectorize supports up to 5 million vectors per index and up to 1536 dimensions, which makes it a strong edge retrieval layer while origin pgvector remains the authoritative memory plane ([Cloudflare Vectorize](https://blog.cloudflare.com/building-vectorize-a-distributed-vector-database-on-cloudflare-developer-platform/)).
 
-## Table of Contents
+HeadyMCP publicly positions itself as an edge-native MCP server with JSON-RPC transport, SSE support, and 30+ tools for IDEs such as VS Code, Cursor, and Windsurf ([HeadyMCP](https://headymcp.com)).
 
-- [Quick Start](#quick-start)
-- [Architecture](#architecture)
-- [Core Systems](#core-systems)
-- [API Endpoints](#api-endpoints)
-- [Health Probes](#health-probes)
-- [Resilience Stack](#resilience-stack)
-- [HeadyBees (Agent Decomposition)](#headybees-agent-decomposition)
-- [Deployment](#deployment)
-- [Security](#security)
-- [License](#license)
+HeadyAPI publicly positions itself as a liquid gateway that races 4+ providers and uses auto-failover, which directly informs the worker routing layer included here ([HeadyAPI](https://www.headyapi.com)).
 
----
+## Included
 
-## Quick Start
+- Shared phi and CSL packages
+- 15 Cloud Run service scaffolds
+- 4 Cloudflare worker scaffolds
+- pgvector and Graph RAG migrations
+- CI/CD, Docker, smoke tests, and deployment templates
+- Reconciled directives and missing cognitive-layer files
+- Runbooks, ADRs, and activation checklists
 
-```bash
-npm install
-cp .env.example .env
-npm run dev
-```
+## Activation
 
-> **Note:** This project uses `npm` as its package manager.
+1. Install `pnpm` and Node 22.
+2. Copy `.env.example` to `.env` and fill secrets.
+3. Provision Cloudflare, GCP, PostgreSQL with pgvector, and Redis.
+4. Run `pnpm install` then `pnpm build`.
+5. Run `pnpm dev` or `docker compose up --build`.
+6. Deploy Cloudflare workers and Cloud Run services via the included GitHub Actions.
 
-## Architecture
+## Honest status
 
-```
-heady-manager.js                # Node.js MCP Server & API Gateway
-├── src/
-│   ├── orchestration/          # Pipeline, conductor, self-optimizer (25 files)
-│   ├── memory/                 # Vector memory, search, federation (11 files)
-│   ├── agents/                 # Bees (58 workers), buddy, templates (13 files)
-│   ├── intelligence/           # Research, scanning, ML (14 files)
-│   ├── runtime/                # Cloud infra, compute, deployment (12 files)
-│   ├── auth/                   # Authentication, authorization, tiers (5 files)
-│   ├── mcp/                    # MCP server, connectors (7 files)
-│   ├── observability/          # Structured logger, health probes (7 files)
-│   ├── integrations/           # Provider connectors, SDKs (4 files)
-│   ├── shared/                 # Utils, registry, policies (11 files)
-│   ├── types/                  # TypeScript definitions
-│   ├── routes/                 # HTTP route handlers (52 files)
-│   ├── services/               # Service implementations (75 files)
-│   └── bees/                   # 26 domain-specific HeadyBee workers
-├── tests/                      # Unit, integration, and e2e tests
-├── configs/                    # YAML configuration
-├── docs/                       # Architecture, patents, API specs
-└── .github/workflows/          # Deploy pipeline (security → validate → deploy)
-```
-
-## Core Systems
-
-| System | Description |
-|---|---|
-| **HCFullPipeline** | 12-stage pipeline: INTAKE → TRIAGE → MONTE\_CARLO → ARENA → JUDGE → APPROVE → EXECUTE → VERIFY → RECEIPT |
-| **Sacred Geometry** | Non-linear multi-agent orchestration with φ-based routing |
-| **Buddy Core** | Sovereign orchestrator with MetacognitionEngine + DeterministicErrorInterceptor (5-phase ARCH loop) |
-| **Self-Awareness** | Internal Monologue Loop — telemetry ingestion → ring buffer → vector memory → confidence scoring |
-| **Vector Memory** | 3D spatial sharded store with Graph RAG, I(m) importance scoring, STM→LTM consolidation |
-| **MCP Integration** | Model Context Protocol dual-role (Client + Server) with tool registry |
-
-## API Endpoints
-
-| Endpoint | Description |
-|---|---|
-| `GET /api/health` | Basic health check |
-| `GET /api/pulse` | System pulse with layer info |
-| `GET /api/system/status` | Full system status |
-| `POST /api/pipeline/run` | Trigger pipeline run |
-| `GET /api/pipeline/state` | Current pipeline state |
-| `GET /api/nodes` | List all AI nodes |
-| `GET /api/resilience/status` | Circuit breaker / pool / cache metrics |
-
-## Health Probes
-
-| Endpoint | Purpose | Checks |
-|---|---|---|
-| `GET /health/live` | Liveness (K8s) | Process alive, PID, uptime |
-| `GET /health/ready` | Readiness (K8s) | Resilience, filesystem, memory, event loop, vector memory, self-awareness telemetry |
-| `GET /health/full` | Deep introspection | Full system state including self-awareness introspection |
-
-## Resilience Stack
-
-| Primitive | Implementation |
-|---|---|
-| **Circuit Breakers** | CLOSED→OPEN→HALF\_OPEN, 16 pre-registered services |
-| **φ-Exponential Backoff** | `1s → 1.6s → 2.6s → 4.2s → 6.9s → 11.1s → 17.9s → 29s` (PHI-scaled) |
-| **Connection Pooling** | Pre-authenticated socket pools with timeout management |
-| **Rate Limiting** | Per-client sliding window with configurable quotas |
-| **Caching** | In-memory TTL cache with hit/miss metrics |
-| **Graceful Shutdown** | SIGTERM/SIGINT handlers, LIFO cleanup, 5s timeout per handler |
-
-## HeadyBees (Agent Decomposition)
-
-24 domains · 197 workers · Dynamic factory for runtime bee creation.
-
-```javascript
-const { createBee, spawnBee } = require('./src/bees/bee-factory');
-
-// Create a full domain bee
-const healthBee = createBee('health-monitoring', { interval: 30000 });
-
-// Spawn an ephemeral single-purpose bee
-const scanBee = spawnBee('port-scanner', async () => { /* work */ });
-```
-
-## Deployment
-
-- **Platform:** Google Cloud Run via multi-stage Dockerfile
-- **Container:** `node:22-alpine` · Non-root user (`heady:1001`)
-- **CI/CD:** 10 GitHub Actions workflows (CodeQL SAST, Gitleaks, SBOM, dependency audit)
-- **Edge:** Cloudflare Workers proxy layer
-- **Lockfile:** `package-lock.json` (npm)
-
-## Security
-
-- All secrets managed via Cloud Run environment variables (never in code)
-- Git history sterilized via `git filter-repo` (no credentials in any commit)
-- Pre-commit hook scans for high-entropy strings
-- CodeQL + Gitleaks + SBOM scanning in CI
-- See [SECURITY.md](SECURITY.md) for vulnerability disclosure
-
-## License
-
-© 2026 Heady™ — HeadySystems Inc. Proprietary and Confidential.
-
-Heady™ is a trademark of HeadyConnection Inc. USPTO Serial No. 99680540.
+This bundle gives you the complete file system, contracts, deployment scaffolding, and core runtime glue needed for production hardening. Final go-live still requires live credentials, DNS, certificates, Cloudflare/GCP accounts, and real provider keys.

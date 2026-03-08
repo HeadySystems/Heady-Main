@@ -7,6 +7,7 @@
 
 const EventEmitter = require('events');
 const os = require('os');
+const PHI = (1 + Math.sqrt(5)) / 2;
 
 const ALERT_LEVELS = {
   OK: 'ok',
@@ -26,8 +27,8 @@ class SystemMonitor extends EventEmitter {
   constructor(opts = {}) {
     super();
     this._thresholds = Object.assign({}, THRESHOLDS, opts.thresholds || {});
-    this._sampleIntervalMs = opts.sampleIntervalMs || 5000;
-    this._retentionSamples = opts.retentionSamples || 360;  // 30 min at 5s interval
+    this._sampleIntervalMs = opts.sampleIntervalMs || Math.round(PHI ** 3 * 1000); // φ³×1000 ≈ 4236ms
+    this._retentionSamples = opts.retentionSamples || 377;  // fib(14) — ~26 min at φ³s interval
     this._samples = [];
     this._timers = {};
     this._running = false;

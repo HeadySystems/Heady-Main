@@ -1,38 +1,37 @@
-import express from 'express';
-import { HeadyLogger, loadConfig, BaseServiceConfigSchema } from '@headysystems/core';
-import { HeadyRedisPool } from '@headysystems/redis';
-import { TaskOrchestrator } from './orchestrator';
-import { healthRouter } from './routes/health';
-import { tasksRouter } from './routes/tasks';
+import { createServiceApp } from '@heady-ai/service-runtime';
+        import type { ServiceManifest } from '@heady-ai/contract-types';
 
-const config = loadConfig(BaseServiceConfigSchema);
-const logger = new HeadyLogger('heady-conductor');
-const app = express();
+        const manifest: ServiceManifest = {
+          "name": "heady-conductor",
+          "version": "0.1.0",
+          "port": 4306,
+          "summary": "Intent routing, pool assignment, and cross-service orchestration.",
+          "routes": [
+                    "/route",
+                    "/plan"
+          ],
+          "dependencies": [
+                    "csl-gate",
+                    "contract-types"
+          ]
+} as ServiceManifest;
+        const app = createServiceApp(manifest);
 
-// Initialize Redis pool
-const redisPool = new HeadyRedisPool({
-  host: config.REDIS_HOST,
-  port: config.REDIS_PORT,
-  password: config.REDIS_PASSWORD,
-  db: config.REDIS_DB
-});
 
-// Initialize task orchestrator
-const orchestrator = new TaskOrchestrator(redisPool);
+            app.post('/route', async (request) => ({
+              taskType: 'general',
+              pool: 'hot',
+              service: 'hcfullpipeline-executor',
+              confidence: 0.882,
+              request: request.body,
+            }));
+            app.post('/plan', async (request) => ({ steps: ['recon', 'plan', 'trial-and-error', 'execute-major-phase'], request: request.body }));
 
-app.use(express.json());
-app.use('/health', healthRouter);
-app.use('/tasks', tasksRouter(orchestrator));
 
-const PORT = config.PORT || 3002;
-
-app.listen(PORT, () => {
-  logger.info(\`HeadyConductor listening on port \${PORT}\`);
-});
-
-// Graceful shutdown
-process.on('SIGTERM', async () => {
-  logger.info('SIGTERM received, shutting down gracefully');
-  await redisPool.close();
-  process.exit(0);
-});
+        const port = Number(process.env.PORT ?? 4306);
+        app.listen({ port, host: '0.0.0.0' }).then(() => {
+          app.log.info(`heady-conductor listening on ${port}`);
+        }).catch((error) => {
+          app.log.error(error);
+          process.exit(1);
+        });

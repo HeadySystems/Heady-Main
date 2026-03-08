@@ -118,7 +118,7 @@ class HeadyConductor extends EventEmitter {
         this.emit('task:dispatched', { executionId, beeId: targetBee, taskType });
 
         try {
-            const timeout = opts.timeout || 30000;
+            const timeout = opts.timeout || 29034 /* φ⁷ × 1000 */;
             const result = await Promise.race([
                 this._executeBee(entry.bee, payload),
                 new Promise((_, reject) => setTimeout(() => reject(new Error('Execution timeout')), timeout)),

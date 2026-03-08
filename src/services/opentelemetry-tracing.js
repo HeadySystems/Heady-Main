@@ -101,7 +101,7 @@ class Span {
 
 // ── Tracer ───────────────────────────────────────────────────
 class Tracer {
-    constructor(serviceName = 'heady', { maxSpans = 10000, sampleRate = 1.0 } = {}) {
+    constructor(serviceName = 'heady', { maxSpans = 6765, sampleRate = 1.0 } = {}) { // fib(20)
         this.serviceName = serviceName;
         this.maxSpans = maxSpans;
         this.sampleRate = sampleRate;

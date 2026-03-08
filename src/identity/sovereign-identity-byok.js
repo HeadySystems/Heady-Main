@@ -14,25 +14,25 @@ const PHI = 1.6180339887;
 
 const PROVIDERS = {
   ANTHROPIC: 'anthropic',
-  OPENAI:    'openai',
-  GOOGLE:    'google',
-  GROQ:      'groq',
-  MISTRAL:   'mistral',
-  COHERE:    'cohere',
+  OPENAI: 'openai',
+  GOOGLE: 'google',
+  GROQ: 'groq',
+  MISTRAL: 'mistral',
+  COHERE: 'cohere',
 };
 
 const PROVIDER_ENDPOINTS = {
   [PROVIDERS.ANTHROPIC]: 'https://api.anthropic.com/v1/messages',
-  [PROVIDERS.OPENAI]:    'https://api.openai.com/v1/chat/completions',
-  [PROVIDERS.GOOGLE]:    'https://generativelanguage.googleapis.com/v1beta/models',
-  [PROVIDERS.GROQ]:      'https://api.groq.com/openai/v1/chat/completions',
-  [PROVIDERS.MISTRAL]:   'https://api.mistral.ai/v1/chat/completions',
-  [PROVIDERS.COHERE]:    'https://api.cohere.ai/v1/chat',
+  [PROVIDERS.OPENAI]: 'https://api.openai.com/v1/chat/completions',
+  [PROVIDERS.GOOGLE]: 'https://generativelanguage.googleapis.com/v1beta/models',
+  [PROVIDERS.GROQ]: 'https://api.groq.com/openai/v1/chat/completions',
+  [PROVIDERS.MISTRAL]: 'https://api.mistral.ai/v1/chat/completions',
+  [PROVIDERS.COHERE]: 'https://api.cohere.ai/v1/chat',
 };
 
 const AUTH_METHODS = {
-  OAUTH:    'oauth',
-  API_KEY:  'api_key',
+  OAUTH: 'oauth',
+  API_KEY: 'api_key',
   WEBAUTHN: 'webauthn',
 };
 
@@ -44,24 +44,24 @@ function deriveEncryptionKey(masterKey, salt) {
 
 function encryptApiKey(plaintext, masterKey) {
   const salt = crypto.randomBytes(16);
-  const key  = deriveEncryptionKey(masterKey, salt);
-  const iv   = crypto.randomBytes(12);
+  const key = deriveEncryptionKey(masterKey, salt);
+  const iv = crypto.randomBytes(12);
   const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
   const encrypted = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
   const tag = cipher.getAuthTag();
   return {
     data: encrypted.toString('base64'),
-    iv:   iv.toString('base64'),
+    iv: iv.toString('base64'),
     salt: salt.toString('base64'),
-    tag:  tag.toString('base64'),
+    tag: tag.toString('base64'),
   };
 }
 
 function decryptApiKey(envelope, masterKey) {
   const salt = Buffer.from(envelope.salt, 'base64');
-  const key  = deriveEncryptionKey(masterKey, salt);
-  const iv   = Buffer.from(envelope.iv,   'base64');
-  const tag  = Buffer.from(envelope.tag,  'base64');
+  const key = deriveEncryptionKey(masterKey, salt);
+  const iv = Buffer.from(envelope.iv, 'base64');
+  const tag = Buffer.from(envelope.tag, 'base64');
   const data = Buffer.from(envelope.data, 'base64');
   const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
   decipher.setAuthTag(tag);
@@ -77,11 +77,11 @@ class BYOKKeyVault {
    * The master key itself never leaves the vault.
    */
   constructor(opts = {}) {
-    this._store         = new Map();  // userId → { provider → envelope }
-    this._masterKeys    = new Map();  // userId → derivedMasterKey (ephemeral)
-    this._accessLog     = [];
-    this._maxLogEntries = opts.maxLogEntries || 10000;
-    this._keyRotations  = new Map();  // userId:provider → rotation history
+    this._store = new Map();  // userId → { provider → envelope }
+    this._masterKeys = new Map();  // userId → derivedMasterKey (ephemeral)
+    this._accessLog = [];
+    this._maxLogEntries = opts.maxLogEntries || 6765; // fib(20)
+    this._keyRotations = new Map();  // userId:provider → rotation history
   }
 
   /**
@@ -89,8 +89,8 @@ class BYOKKeyVault {
    * Returns a session token for subsequent operations.
    */
   initUser(userId, passphrase) {
-    const salt       = crypto.randomBytes(32);
-    const masterKey  = crypto.pbkdf2Sync(passphrase, salt, Math.round(200000 * PHI), 32, 'sha256');
+    const salt = crypto.randomBytes(32);
+    const masterKey = crypto.pbkdf2Sync(passphrase, salt, Math.round(200000 * PHI), 32, 'sha256');
     const sessionTok = crypto.randomBytes(32).toString('hex');
 
     this._masterKeys.set(sessionTok, { userId, masterKey, salt: salt.toString('base64'), createdAt: Date.now() });
@@ -124,7 +124,7 @@ class BYOKKeyVault {
    * Retrieve (decrypt) an API key for use. Key is never persisted in plaintext.
    */
   retrieveKey(sessionTok, provider) {
-    const session  = this._getSession(sessionTok);
+    const session = this._getSession(sessionTok);
     const userData = this._store.get(session.userId);
     if (!userData || !userData.keys[provider]) {
       throw new Error(`No key stored for provider '${provider}'`);
@@ -138,14 +138,14 @@ class BYOKKeyVault {
    * Rotate a key: store new key, increment rotation counter.
    */
   rotateKey(sessionTok, provider, newApiKey) {
-    const session  = this._getSession(sessionTok);
+    const session = this._getSession(sessionTok);
     const userData = this._store.get(session.userId);
     if (!userData || !userData.keys[provider]) {
       throw new Error(`No existing key for provider '${provider}' to rotate`);
     }
 
-    const old     = userData.keys[provider];
-    const rotKey  = `${session.userId}:${provider}`;
+    const old = userData.keys[provider];
+    const rotKey = `${session.userId}:${provider}`;
     const history = this._keyRotations.get(rotKey) || [];
     history.push({ rotatedAt: Date.now(), rotations: old.rotations });
     this._keyRotations.set(rotKey, history.slice(-10)); // keep last 10
@@ -153,7 +153,7 @@ class BYOKKeyVault {
     const envelope = encryptApiKey(newApiKey, session.masterKey);
     userData.keys[provider] = {
       envelope,
-      storedAt:  Date.now(),
+      storedAt: Date.now(),
       rotations: old.rotations + 1,
     };
 
@@ -173,12 +173,12 @@ class BYOKKeyVault {
   }
 
   listProviders(sessionTok) {
-    const session  = this._getSession(sessionTok);
+    const session = this._getSession(sessionTok);
     const userData = this._store.get(session.userId);
     if (!userData) return [];
     return Object.keys(userData.keys).map(p => ({
-      provider:  p,
-      storedAt:  userData.keys[p].storedAt,
+      provider: p,
+      storedAt: userData.keys[p].storedAt,
       rotations: userData.keys[p].rotations,
     }));
   }
@@ -209,8 +209,8 @@ class IdentityAttestor {
    */
   constructor(opts = {}) {
     this._challenges = new Map();  // challengeId → { userId, ts, provider, nonce }
-    this._proofs     = new Map();  // proofId → { verified, userId, provider, ts }
-    this._ttlMs      = opts.ttlMs || 5 * 60 * 1000;
+    this._proofs = new Map();  // proofId → { verified, userId, provider, ts }
+    this._ttlMs = opts.ttlMs || 5 * 60 * 1000;
   }
 
   /**
@@ -218,7 +218,7 @@ class IdentityAttestor {
    */
   issueChallenge(userId, provider) {
     const challengeId = crypto.randomUUID();
-    const nonce       = crypto.randomBytes(32).toString('hex');
+    const nonce = crypto.randomBytes(32).toString('hex');
     this._challenges.set(challengeId, {
       userId, provider, nonce, ts: Date.now(),
     });
@@ -234,8 +234,8 @@ class IdentityAttestor {
     const { nonce, userId, provider } = challenge;
     const message = Buffer.from(nonce + userId + provider, 'utf8');
     return crypto.createHmac('sha256', Buffer.from(apiKey, 'utf8'))
-                 .update(message)
-                 .digest('hex');
+      .update(message)
+      .digest('hex');
   }
 
   /**
@@ -258,10 +258,10 @@ class IdentityAttestor {
     if (match) {
       const proofId = crypto.randomUUID();
       this._proofs.set(proofId, {
-        verified:  true,
-        userId:    challenge.userId,
-        provider:  challenge.provider,
-        ts:        Date.now(),
+        verified: true,
+        userId: challenge.userId,
+        provider: challenge.provider,
+        ts: Date.now(),
       });
       this._challenges.delete(challengeId);
       return { verified: true, proofId };
@@ -283,10 +283,10 @@ class MultiProviderAuth {
    * Handles OAuth, API key, and WebAuthn authentication methods.
    */
   constructor(opts = {}) {
-    this._oauthClients  = opts.oauthClients  || {};
-    this._sessions      = new Map();
+    this._oauthClients = opts.oauthClients || {};
+    this._sessions = new Map();
     this._webauthnCreds = new Map();  // credId → { userId, publicKey }
-    this._sessionTtlMs  = opts.sessionTtlMs || 24 * 60 * 60 * 1000;
+    this._sessionTtlMs = opts.sessionTtlMs || 24 * 60 * 60 * 1000;
   }
 
   /**
@@ -303,19 +303,19 @@ class MultiProviderAuth {
     const client = this._oauthClients[provider];
     if (!client) throw new Error(`OAuth client not configured for '${provider}'`);
 
-    const state    = crypto.randomBytes(16).toString('hex');
+    const state = crypto.randomBytes(16).toString('hex');
     const verifier = crypto.randomBytes(32).toString('base64url');
     const challenge = crypto.createHash('sha256').update(verifier).digest('base64url');
 
     this._sessions.set('oauth:' + state, { provider, verifier, ts: Date.now() });
 
     const params = new URLSearchParams({
-      response_type:         'code',
-      client_id:             client.clientId,
-      redirect_uri:          client.redirectUri,
-      scope:                 client.scope || 'openid profile',
+      response_type: 'code',
+      client_id: client.clientId,
+      redirect_uri: client.redirectUri,
+      scope: client.scope || 'openid profile',
       state,
-      code_challenge:        challenge,
+      code_challenge: challenge,
       code_challenge_method: 'S256',
     });
 
@@ -390,22 +390,22 @@ class ModelAccessRouter {
    * Supports per-user provider selection based on their stored subscriptions.
    */
   constructor(vault, opts = {}) {
-    this._vault     = vault;
-    this._timeout   = opts.timeout || 30000;
+    this._vault = vault;
+    this._timeout = opts.timeout || Math.round(PHI ** 7 * 1000); // φ⁷×1000 ≈ 29034ms
     this._fallbacks = opts.fallbacks || [];
-    this._stats     = new Map();
+    this._stats = new Map();
   }
 
   /**
    * Route an inference request to the appropriate provider using the user's key.
    */
   async route(sessionTok, provider, requestBody) {
-    const apiKey   = this._vault.retrieveKey(sessionTok, provider);
+    const apiKey = this._vault.retrieveKey(sessionTok, provider);
     const endpoint = PROVIDER_ENDPOINTS[provider];
     if (!endpoint) throw new Error(`No endpoint configured for '${provider}'`);
 
-    const headers  = this._buildHeaders(provider, apiKey);
-    const result   = await this._callProvider(endpoint, headers, requestBody, provider);
+    const headers = this._buildHeaders(provider, apiKey);
+    const result = await this._callProvider(endpoint, headers, requestBody, provider);
 
     this._recordStat(provider, true);
     return result;
@@ -431,16 +431,16 @@ class ModelAccessRouter {
     switch (provider) {
       case PROVIDERS.ANTHROPIC:
         return {
-          'x-api-key':         apiKey,
+          'x-api-key': apiKey,
           'anthropic-version': '2023-06-01',
-          'Content-Type':      'application/json',
+          'Content-Type': 'application/json',
         };
       case PROVIDERS.OPENAI:
       case PROVIDERS.GROQ:
       case PROVIDERS.MISTRAL:
         return {
           'Authorization': `Bearer ${apiKey}`,
-          'Content-Type':  'application/json',
+          'Content-Type': 'application/json',
         };
       case PROVIDERS.GOOGLE:
         return { 'Content-Type': 'application/json' };
@@ -452,21 +452,21 @@ class ModelAccessRouter {
   }
 
   async _callProvider(endpoint, headers, body, provider) {
-    const url      = provider === PROVIDERS.GOOGLE
+    const url = provider === PROVIDERS.GOOGLE
       ? `${endpoint}/${body.model}:generateContent?key=${headers['x-api-key'] || ''}`
       : endpoint;
-    const isHttps  = url.startsWith('https:');
-    const mod      = isHttps ? require('https') : require('http');
-    const parsed   = new URL(url);
-    const bodyStr  = JSON.stringify(body);
+    const isHttps = url.startsWith('https:');
+    const mod = isHttps ? require('https') : require('http');
+    const parsed = new URL(url);
+    const bodyStr = JSON.stringify(body);
 
     return new Promise((resolve, reject) => {
       const req = mod.request({
         hostname: parsed.hostname,
-        port:     parsed.port || (isHttps ? 443 : 80),
-        path:     parsed.pathname + parsed.search,
-        method:   'POST',
-        headers:  Object.assign({ 'Content-Length': Buffer.byteLength(bodyStr) }, headers),
+        port: parsed.port || (isHttps ? 443 : 80),
+        path: parsed.pathname + parsed.search,
+        method: 'POST',
+        headers: Object.assign({ 'Content-Length': Buffer.byteLength(bodyStr) }, headers),
       }, res => {
         let data = '';
         res.on('data', c => { data += c; });
@@ -503,11 +503,11 @@ class SovereignIdentityManager {
    * - Routed inference
    */
   constructor(opts = {}) {
-    this._vault     = new BYOKKeyVault(opts.vaultOpts || {});
-    this._attestor  = new IdentityAttestor(opts.attestorOpts || {});
-    this._auth      = new MultiProviderAuth(opts.authOpts || {});
-    this._router    = new ModelAccessRouter(this._vault, opts.routerOpts || {});
-    this._profiles  = new Map();  // userId → { defaultProvider, preferredModels }
+    this._vault = new BYOKKeyVault(opts.vaultOpts || {});
+    this._attestor = new IdentityAttestor(opts.attestorOpts || {});
+    this._auth = new MultiProviderAuth(opts.authOpts || {});
+    this._router = new ModelAccessRouter(this._vault, opts.routerOpts || {});
+    this._profiles = new Map();  // userId → { defaultProvider, preferredModels }
   }
 
   /**
@@ -516,9 +516,9 @@ class SovereignIdentityManager {
   registerUser(userId, passphrase) {
     const vault = this._vault.initUser(userId, passphrase);
     this._profiles.set(userId, {
-      defaultProvider:  PROVIDERS.ANTHROPIC,
-      preferredModels:  {},
-      createdAt:        Date.now(),
+      defaultProvider: PROVIDERS.ANTHROPIC,
+      preferredModels: {},
+      createdAt: Date.now(),
     });
     return vault;
   }
@@ -571,10 +571,10 @@ class SovereignIdentityManager {
     return this._profiles.get(userId) || null;
   }
 
-  getKeyVault()   { return this._vault; }
-  getAttestor()   { return this._attestor; }
-  getAuth()       { return this._auth; }
-  getRouter()     { return this._router; }
+  getKeyVault() { return this._vault; }
+  getAttestor() { return this._attestor; }
+  getAuth() { return this._auth; }
+  getRouter() { return this._router; }
 }
 
 // ─── Exports ──────────────────────────────────────────────────────────────────

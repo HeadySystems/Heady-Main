@@ -35,7 +35,7 @@ class CircuitBreaker {
         this.failureCount = 0;
         this.successCount = 0;
         this.failureThreshold = options.failureThreshold || 5;
-        this.resetTimeout = options.resetTimeout || 30000;
+        this.resetTimeout = options.resetTimeout || 29034 /* φ⁷ */;
         this.halfOpenMax = options.halfOpenMax || 3;
         this.lastFailure = null;
         this._timer = null;

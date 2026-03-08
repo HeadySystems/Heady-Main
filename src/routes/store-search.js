@@ -1,169 +1,120 @@
 /**
  * HeadyStore Search Route — /api/store/search
- * Uses Perplexity Sonar for real product search when available.
- * Falls back to category-intelligent vendor search links — no fake data.
+ * Cascades through available AI providers for REAL product search:
+ *   1. Perplexity Sonar (best — has built-in web search)
+ *   2. OpenAI GPT-4o (good — can reference real products)
+ *   3. Gemini (good — can reference real products)
+ *   4. Honest fallback — category-intelligent vendor search links
+ *
+ * NO fake data. NO stock photos. NO wrong vendors.
  * Part of PPA #26: Dynamic User-Specific E-Commerce
  */
 
-const SHOPPING_SYSTEM_PROMPT = `You are a product search engine. Given a user query and budget, find REAL products available for purchase online right now.
+const SHOPPING_SYSTEM_PROMPT = `You are a product search engine. Given a user query and budget, find REAL products available for purchase online RIGHT NOW.
+
+CRITICAL RULES:
+- Every product MUST be a real, currently-available item
+- Every URL MUST be a real, working product page URL
+- Every image_url MUST be a real product image from the vendor's website
+- Every price MUST be the actual current price
+- Only recommend vendors that ACTUALLY SELL the product category
+- Do NOT invent products or make up URLs
 
 Return ONLY valid JSON — no markdown, no explanation, no code fences:
 {
   "products": [
     {
-      "name": "Exact Product Name",
-      "vendor": "Store Name",
+      "name": "Exact Real Product Name",
+      "vendor": "Real Store Name",
       "price": 99.99,
-      "url": "https://actual-store-url.com/product",
-      "image_url": "https://product-image-url.jpg",
+      "url": "https://real-vendor.com/real-product-page",
+      "image_url": "https://real-vendor.com/images/real-product.jpg",
       "match": 95,
       "description": "Brief 1-line description",
       "category": "emoji"
     }
   ],
   "summary": "Brief summary of results"
-}
-
-Rules:
-- Return 4-8 real, purchasable products
-- Use real prices and real store URLs
-- Only recommend vendors that actually sell the product category
-- Stay within the stated budget
-- Sort by relevance (match score)
-- Include the actual product image URL from the vendor page
-- Include diverse vendors when possible`;
+}`;
 
 // ═══════════════════════════════════════════════════════════════
 // VENDOR REGISTRY — only map vendors to what they actually sell
 // ═══════════════════════════════════════════════════════════════
 const VENDOR_REGISTRY = {
-    // General (every category)
     amazon: {
-        name: 'Amazon',
-        icon: '🛒',
-        favicon: 'https://www.amazon.com/favicon.ico',
-        searchUrl: (q) => `https://www.amazon.com/s?k=${encodeURIComponent(q)}`,
-        categories: ['*'], // sells everything
+        name: 'Amazon', icon: '🛒', categories: ['*'],
+        url: (q) => `https://www.amazon.com/s?k=${enc(q)}`
     },
-
-    // Electronics & Tech
     bestbuy: {
-        name: 'Best Buy',
-        icon: '🏪',
-        favicon: 'https://www.bestbuy.com/favicon.ico',
-        searchUrl: (q) => `https://www.bestbuy.com/site/searchpage.jsp?st=${encodeURIComponent(q)}`,
-        categories: ['electronics', 'audio', 'monitors', 'smart-home', 'gaming', 'phones', 'cameras', 'watches', 'computers', 'tablets'],
+        name: 'Best Buy', icon: '🏪', categories: ['electronics', 'audio', 'monitors', 'smart-home', 'gaming', 'phones', 'cameras', 'watches', 'computers', 'keyboards', 'tablets'],
+        url: (q) => `https://www.bestbuy.com/site/searchpage.jsp?st=${enc(q)}`
     },
     bhphoto: {
-        name: 'B&H Photo',
-        icon: '📷',
-        favicon: 'https://www.bhphotovideo.com/favicon.ico',
-        searchUrl: (q) => `https://www.bhphotovideo.com/c/search?Ntt=${encodeURIComponent(q)}`,
-        categories: ['electronics', 'cameras', 'audio', 'monitors', 'computers'],
+        name: 'B&H Photo', icon: '📷', categories: ['electronics', 'cameras', 'audio', 'monitors', 'computers'],
+        url: (q) => `https://www.bhphotovideo.com/c/search?Ntt=${enc(q)}`
     },
     newegg: {
-        name: 'Newegg',
-        icon: '💻',
-        favicon: 'https://www.newegg.com/favicon.ico',
-        searchUrl: (q) => `https://www.newegg.com/p/pl?d=${encodeURIComponent(q)}`,
-        categories: ['electronics', 'computers', 'monitors', 'gaming', 'keyboards'],
+        name: 'Newegg', icon: '💻', categories: ['electronics', 'computers', 'monitors', 'gaming', 'keyboards'],
+        url: (q) => `https://www.newegg.com/p/pl?d=${enc(q)}`
     },
-
-    // Fashion & Shoes
     nike: {
-        name: 'Nike',
-        icon: '👟',
-        favicon: 'https://www.nike.com/favicon.ico',
-        searchUrl: (q) => `https://www.nike.com/w?q=${encodeURIComponent(q)}`,
-        categories: ['shoes', 'athletic', 'clothing', 'sportswear'],
+        name: 'Nike', icon: '👟', categories: ['shoes', 'athletic', 'clothing', 'sportswear'],
+        url: (q) => `https://www.nike.com/w?q=${enc(q)}`
     },
     zappos: {
-        name: 'Zappos',
-        icon: '👠',
-        favicon: 'https://www.zappos.com/favicon.ico',
-        searchUrl: (q) => `https://www.zappos.com/search?term=${encodeURIComponent(q)}`,
-        categories: ['shoes', 'clothing', 'bags'],
+        name: 'Zappos', icon: '👠', categories: ['shoes', 'clothing', 'bags'],
+        url: (q) => `https://www.zappos.com/search?term=${enc(q)}`
     },
     footlocker: {
-        name: 'Foot Locker',
-        icon: '🏃',
-        favicon: 'https://www.footlocker.com/favicon.ico',
-        searchUrl: (q) => `https://www.footlocker.com/search?query=${encodeURIComponent(q)}`,
-        categories: ['shoes', 'athletic', 'sportswear'],
+        name: 'Foot Locker', icon: '🏃', categories: ['shoes', 'athletic', 'sportswear'],
+        url: (q) => `https://www.footlocker.com/search?query=${enc(q)}`
     },
     stockx: {
-        name: 'StockX',
-        icon: '📈',
-        favicon: 'https://stockx.com/favicon.ico',
-        searchUrl: (q) => `https://stockx.com/search?s=${encodeURIComponent(q)}`,
-        categories: ['shoes', 'sneakers', 'streetwear', 'watches'],
+        name: 'StockX', icon: '📈', categories: ['shoes', 'sneakers', 'streetwear', 'watches'],
+        url: (q) => `https://stockx.com/search?s=${enc(q)}`
     },
     nordstrom: {
-        name: 'Nordstrom',
-        icon: '👗',
-        favicon: 'https://www.nordstrom.com/favicon.ico',
-        searchUrl: (q) => `https://www.nordstrom.com/sr?keyword=${encodeURIComponent(q)}`,
-        categories: ['shoes', 'clothing', 'bags', 'watches', 'fashion'],
+        name: 'Nordstrom', icon: '👗', categories: ['shoes', 'clothing', 'bags', 'watches', 'fashion'],
+        url: (q) => `https://www.nordstrom.com/sr?keyword=${enc(q)}`
     },
-
-    // Home & Furniture
     wayfair: {
-        name: 'Wayfair',
-        icon: '🏠',
-        favicon: 'https://www.wayfair.com/favicon.ico',
-        searchUrl: (q) => `https://www.wayfair.com/keyword.php?keyword=${encodeURIComponent(q)}`,
-        categories: ['furniture', 'home', 'lighting'],
+        name: 'Wayfair', icon: '🏠', categories: ['furniture', 'home', 'lighting'],
+        url: (q) => `https://www.wayfair.com/keyword.php?keyword=${enc(q)}`
     },
     ikea: {
-        name: 'IKEA',
-        icon: '🪑',
-        favicon: 'https://www.ikea.com/favicon.ico',
-        searchUrl: (q) => `https://www.ikea.com/us/en/search/?q=${encodeURIComponent(q)}`,
-        categories: ['furniture', 'home', 'lighting'],
+        name: 'IKEA', icon: '🪑', categories: ['furniture', 'home', 'lighting'],
+        url: (q) => `https://www.ikea.com/us/en/search/?q=${enc(q)}`
     },
-
-    // Books & Media
-    bookshop: {
-        name: 'Bookshop.org',
-        icon: '📚',
-        favicon: 'https://bookshop.org/favicon.ico',
-        searchUrl: (q) => `https://bookshop.org/search?keywords=${encodeURIComponent(q)}`,
-        categories: ['books'],
-    },
-
-    // Outdoor & Sports
     rei: {
-        name: 'REI',
-        icon: '⛰️',
-        favicon: 'https://www.rei.com/favicon.ico',
-        searchUrl: (q) => `https://www.rei.com/search?q=${encodeURIComponent(q)}`,
-        categories: ['outdoor', 'shoes', 'bags', 'athletic', 'camping'],
+        name: 'REI', icon: '⛰️', categories: ['outdoor', 'shoes', 'bags', 'athletic', 'camping'],
+        url: (q) => `https://www.rei.com/search?q=${enc(q)}`
     },
-
-    // Gaming
     gamestop: {
-        name: 'GameStop',
-        icon: '🎮',
-        favicon: 'https://www.gamestop.com/favicon.ico',
-        searchUrl: (q) => `https://www.gamestop.com/search/?q=${encodeURIComponent(q)}`,
-        categories: ['gaming', 'consoles'],
+        name: 'GameStop', icon: '🎮', categories: ['gaming', 'consoles'],
+        url: (q) => `https://www.gamestop.com/search/?q=${enc(q)}`
+    },
+    bookshop: {
+        name: 'Bookshop.org', icon: '📚', categories: ['books'],
+        url: (q) => `https://bookshop.org/search?keywords=${enc(q)}`
     },
 };
 
+function enc(s) { return encodeURIComponent(s); }
+
 // ═══════════════════════════════════════════════════════════════
-// CATEGORY DETECTION — map natural language queries to categories
+// CATEGORY DETECTION
 // ═══════════════════════════════════════════════════════════════
 const CATEGORY_KEYWORDS = {
     shoes: ['shoe', 'sneaker', 'boot', 'running', 'jordan', 'nike', 'adidas', 'slipper', 'sandal', 'heel', 'loafer'],
-    audio: ['headphone', 'earphone', 'earbud', 'speaker', 'audio', 'noise cancel', 'soundbar', 'bluetooth speaker'],
+    audio: ['headphone', 'earphone', 'earbud', 'speaker', 'audio', 'noise cancel', 'soundbar'],
     electronics: ['laptop', 'tablet', 'computer', 'charger', 'cable', 'usb', 'adapter', 'power bank', 'ssd', 'hard drive'],
     keyboards: ['keyboard', 'keycap', 'mechanic', 'typing', 'switch'],
     monitors: ['monitor', 'display', 'screen', '4k', 'ultrawide'],
     'smart-home': ['smart home', 'homekit', 'thermostat', 'alexa', 'echo', 'nest', 'ring', 'smart plug', 'smart bulb'],
-    gaming: ['game', 'gaming', 'console', 'controller', 'playstation', 'xbox', 'switch', 'steam deck'],
-    phones: ['phone', 'iphone', 'samsung', 'pixel', 'smartphone', 'cell'],
+    gaming: ['game', 'gaming', 'console', 'controller', 'playstation', 'xbox', 'steam deck'],
+    phones: ['phone', 'iphone', 'samsung galaxy', 'pixel', 'smartphone', 'cell'],
     cameras: ['camera', 'lens', 'tripod', 'photo', 'dslr', 'mirrorless', 'gopro'],
-    watches: ['watch', 'smartwatch', 'fitness', 'tracker', 'garmin', 'apple watch', 'fitbit'],
+    watches: ['watch', 'smartwatch', 'fitness tracker', 'garmin', 'apple watch', 'fitbit'],
     furniture: ['chair', 'desk', 'stand', 'ergonomic', 'couch', 'sofa', 'table', 'shelf', 'bookcase'],
     bags: ['bag', 'backpack', 'tote', 'briefcase', 'laptop bag', 'messenger', 'duffel', 'suitcase'],
     clothing: ['shirt', 'pants', 'jacket', 'coat', 'hoodie', 'dress', 'jeans', 'shorts', 'sweater'],
@@ -174,33 +125,113 @@ const CATEGORY_KEYWORDS = {
 function detectCategories(query) {
     const q = query.toLowerCase();
     const matched = [];
-
-    for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
-        if (keywords.some(k => q.includes(k))) {
-            matched.push(category);
-        }
+    for (const [cat, kws] of Object.entries(CATEGORY_KEYWORDS)) {
+        if (kws.some(k => q.includes(k))) matched.push(cat);
     }
-
     return matched.length > 0 ? matched : ['general'];
 }
 
 function getVendorsForCategories(categories) {
-    const vendors = new Set();
+    const result = [];
+    for (const v of Object.values(VENDOR_REGISTRY)) {
+        if (v.categories.includes('*')) { result.push(v); continue; }
+        if (categories.some(c => v.categories.includes(c))) result.push(v);
+    }
+    return result.sort((a, b) => {
+        const ag = a.categories.includes('*') ? 1 : 0;
+        const bg = b.categories.includes('*') ? 1 : 0;
+        return ag - bg;
+    }).slice(0, 6);
+}
 
-    for (const vendor of Object.values(VENDOR_REGISTRY)) {
-        if (vendor.categories.includes('*')) {
-            vendors.add(vendor);
-            continue;
-        }
-        for (const cat of categories) {
-            if (vendor.categories.includes(cat)) {
-                vendors.add(vendor);
-                break;
-            }
+// ═══════════════════════════════════════════════════════════════
+// AI PROVIDER CASCADE — try each provider that has a key
+// ═══════════════════════════════════════════════════════════════
+async function searchWithPerplexity(userMessage) {
+    const key = process.env.PERPLEXITY_API_KEY || process.env.AI_PROVIDER_PERPLEXITY_KEY;
+    if (!key) return null;
+
+    const response = await fetch('https://api.perplexity.ai/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            model: 'sonar',
+            messages: [
+                { role: 'system', content: SHOPPING_SYSTEM_PROMPT },
+                { role: 'user', content: userMessage },
+            ],
+            temperature: 0.2,
+            max_tokens: 2000,
+        }),
+    });
+
+    if (!response.ok) return null;
+    const data = await response.json();
+    return extractJSON(data.choices?.[0]?.message?.content);
+}
+
+async function searchWithOpenAI(userMessage) {
+    const key = process.env.OPENAI_API_KEY;
+    if (!key) return null;
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            model: 'gpt-4o',
+            messages: [
+                { role: 'system', content: SHOPPING_SYSTEM_PROMPT },
+                { role: 'user', content: userMessage },
+            ],
+            temperature: 0.2,
+            max_tokens: 2000,
+            response_format: { type: 'json_object' },
+        }),
+    });
+
+    if (!response.ok) return null;
+    const data = await response.json();
+    return extractJSON(data.choices?.[0]?.message?.content);
+}
+
+async function searchWithGemini(userMessage) {
+    const key = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY_HEADY;
+    if (!key) return null;
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            contents: [{
+                parts: [{ text: SHOPPING_SYSTEM_PROMPT + '\n\n' + userMessage }]
+            }],
+            generationConfig: { temperature: 0.2, maxOutputTokens: 2000 },
+        }),
+    });
+
+    if (!response.ok) return null;
+    const data = await response.json();
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    return extractJSON(content);
+}
+
+function extractJSON(content) {
+    if (!content) return null;
+    try {
+        // Try direct parse first
+        const parsed = JSON.parse(content);
+        if (parsed.products?.length > 0) return parsed;
+    } catch (e) {
+        // Extract JSON from fenced code or mixed text
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            try {
+                const parsed = JSON.parse(jsonMatch[0]);
+                if (parsed.products?.length > 0) return parsed;
+            } catch (e2) { /* fall through */ }
         }
     }
-
-    return Array.from(vendors);
+    return null;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -214,62 +245,41 @@ async function storeSearchHandler(req, res) {
             return res.status(400).json({ error: 'Query is required' });
         }
 
-        const userMessage = `Find real products to buy: "${query}". Maximum budget: $${budget}. Style preference: ${style}. Search the internet for actual products with real prices and real purchase URLs.`;
+        const userMessage = `Find 4-6 real products to buy: "${query}". Maximum budget: $${budget}. Style: ${style}. Search the internet for actual products with REAL prices, REAL store URLs, and REAL product image URLs from the vendor pages. Only include vendors that actually sell this type of product.`;
 
-        // Try Perplexity first (has web search built in)
-        const perplexityKey = process.env.PERPLEXITY_API_KEY || process.env.AI_PROVIDER_PERPLEXITY_KEY;
-        if (perplexityKey) {
+        // Cascade through available AI providers
+        const providers = [
+            { name: 'perplexity', fn: searchWithPerplexity },
+            { name: 'openai', fn: searchWithOpenAI },
+            { name: 'gemini', fn: searchWithGemini },
+        ];
+
+        for (const provider of providers) {
             try {
-                const response = await fetch('https://api.perplexity.ai/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${perplexityKey}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        model: 'sonar',
-                        messages: [
-                            { role: 'system', content: SHOPPING_SYSTEM_PROMPT },
-                            { role: 'user', content: userMessage },
-                        ],
-                        temperature: 0.2,
-                        max_tokens: 2000,
-                    }),
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    const content = data.choices?.[0]?.message?.content || '';
-
-                    const jsonMatch = content.match(/\{[\s\S]*\}/);
-                    if (jsonMatch) {
-                        const parsed = JSON.parse(jsonMatch[0]);
-                        return res.json(parsed);
-                    }
+                console.log(`[store-search] Trying ${provider.name}...`);
+                const result = await provider.fn(userMessage);
+                if (result?.products?.length > 0) {
+                    console.log(`[store-search] ${provider.name} returned ${result.products.length} products`);
+                    return res.json({
+                        ...result,
+                        _provider: provider.name,
+                    });
                 }
             } catch (err) {
-                console.error('Perplexity store search failed:', err.message);
+                console.warn(`[store-search] ${provider.name} failed:`, err.message);
             }
         }
 
-        // Fallback: Generate category-intelligent search links
-        // These are HONEST — they say "Search [vendor]" and link to real search pages
+        // Honest fallback: category-intelligent vendor search links
         const categories = detectCategories(query);
         const vendors = getVendorsForCategories(categories);
 
-        // Cap at 6 vendors, prioritize category-specific ones over Amazon
-        const sorted = vendors.sort((a, b) => {
-            const aGeneral = a.categories.includes('*') ? 1 : 0;
-            const bGeneral = b.categories.includes('*') ? 1 : 0;
-            return aGeneral - bGeneral;
-        }).slice(0, 6);
-
-        const products = sorted.map((vendor, i) => ({
-            name: `Search ${vendor.name} for "${query}"`,
+        const products = vendors.map((vendor, i) => ({
+            name: `Search ${vendor.name} →`,
             vendor: vendor.name,
             price: 0,
-            url: vendor.searchUrl(query),
-            image_url: vendor.favicon,
+            url: vendor.url(query),
+            image_url: '',
             match: 90 - (i * 3),
             description: `Browse real ${categories[0] || 'product'} results on ${vendor.name}`,
             category: vendor.icon,
@@ -278,7 +288,7 @@ async function storeSearchHandler(req, res) {
 
         return res.json({
             products,
-            summary: `Showing search links for "${query}" on ${sorted.length} ${categories.join('/')} retailers. Click to browse real results.`,
+            summary: `Live product search unavailable — browse ${vendors.length} ${categories.join('/')} retailers directly`,
             _fallback: true,
             _categories: categories,
         });

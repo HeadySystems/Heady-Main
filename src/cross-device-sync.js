@@ -7,6 +7,7 @@
 
 const EventEmitter = require('events');
 const crypto = require('crypto');
+const PHI = (1 + Math.sqrt(5)) / 2;
 
 const SYNC_EVENT_TYPES = {
   SESSION_UPDATE: 'session_update',
@@ -23,7 +24,7 @@ class CrossDeviceSyncHub extends EventEmitter {
     this._users = new Map();     // userId → UserSyncRecord
     this._devices = new Map();   // deviceId → DeviceRecord
     this._syncLog = [];
-    this._maxSyncLog = opts.maxSyncLog || 5000;
+    this._maxSyncLog = opts.maxSyncLog || 4181; // fib(19)
     this._redisClient = opts.redis || null; // Optional Redis for pub/sub
     this._stats = { syncs: 0, devices: 0, users: 0, errors: 0 };
 
@@ -169,7 +170,7 @@ class CrossDeviceSyncHub extends EventEmitter {
   /**
    * Long-poll: wait for new events (resolved when events arrive or timeout).
    */
-  async waitForEvents(deviceId, timeoutMs = 30000) {
+  async waitForEvents(deviceId, timeoutMs = Math.round(PHI ** 7 * 1000)) { // φ⁷×1000 ≈ 29034ms
     const existing = this.getPendingEvents(deviceId);
     if (existing.length > 0) return existing;
 
@@ -289,7 +290,7 @@ class CrossDeviceSyncHub extends EventEmitter {
       const timeout = parseInt(req.query.timeout) || 20000;
 
       if (longPoll) {
-        const events = await this.waitForEvents(req.params.deviceId, Math.min(timeout, 30000));
+        const events = await this.waitForEvents(req.params.deviceId, Math.min(timeout, Math.round(PHI ** 7 * 1000)));
         return res.json({ ok: true, events });
       }
 

@@ -85,19 +85,19 @@ class MonteCarloEngine {
     } = signals;
 
     // Score components (each 0-100, weighted)
-    const errorScore      = Math.max(0, 100 - errorRate * 200);          // weight 25%
-    const deployScore     = lastDeploySuccess ? 100 : 30;                // weight 20%
-    const cpuScore        = Math.max(0, 100 - cpuPressure * 100);        // weight 15%
-    const memScore        = Math.max(0, 100 - memoryPressure * 100);     // weight 15%
-    const healthScore     = serviceHealthRatio * 100;                    // weight 20%
-    const incidentScore   = Math.max(0, 100 - openIncidents * 15);       // weight 5%
+    const errorScore = Math.max(0, 100 - errorRate * 200);          // weight 25%
+    const deployScore = lastDeploySuccess ? 100 : 30;                // weight 20%
+    const cpuScore = Math.max(0, 100 - cpuPressure * 100);        // weight 15%
+    const memScore = Math.max(0, 100 - memoryPressure * 100);     // weight 15%
+    const healthScore = serviceHealthRatio * 100;                    // weight 20%
+    const incidentScore = Math.max(0, 100 - openIncidents * 15);       // weight 5%
 
     const score = Math.round(
-      errorScore    * 0.25 +
-      deployScore   * 0.20 +
-      cpuScore      * 0.15 +
-      memScore      * 0.15 +
-      healthScore   * 0.20 +
+      errorScore * 0.25 +
+      deployScore * 0.20 +
+      cpuScore * 0.15 +
+      memScore * 0.15 +
+      healthScore * 0.20 +
       incidentScore * 0.05,
     );
 
@@ -133,7 +133,7 @@ class MonteCarloEngine {
    *   seed: number,
    * }}
    */
-  runFullCycle(scenario = {}, iterations = 10000) {
+  runFullCycle(scenario = {}, iterations = 6765) { // fib(20)
     const name = scenario.name || 'unnamed';
     const seed = scenario.seed !== undefined ? scenario.seed : (Date.now() & 0xffffffff);
     const riskFactors = scenario.riskFactors || [];
@@ -158,9 +158,9 @@ class MonteCarloEngine {
         }
       }
 
-      if (totalImpact < 0.3)       successCount++;
-      else if (totalImpact < 0.7)  partialCount++;
-      else                          failureCount++;
+      if (totalImpact < 0.3) successCount++;
+      else if (totalImpact < 0.7) partialCount++;
+      else failureCount++;
     }
 
     const failureRate = failureCount / iterations;

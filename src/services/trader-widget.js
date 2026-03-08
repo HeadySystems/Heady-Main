@@ -20,7 +20,7 @@ const logger = require('../utils/logger');
 
 // ─── Market Data Buffer (Zero-Copy Inspired) ────────────────────────────────
 class TickBuffer {
-    constructor(maxSize = 10000) {
+    constructor(maxSize = 6765) { // fib(20)
         this._buffer = new Float64Array(maxSize * 4); // [ts, price, volume, side]
         this._head = 0;
         this._maxSize = maxSize;
