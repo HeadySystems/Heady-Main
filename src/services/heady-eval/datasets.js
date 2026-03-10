@@ -1,4 +1,3 @@
-const logger = require('../../shared/logger')('datasets');
 'use strict';
 
 /**

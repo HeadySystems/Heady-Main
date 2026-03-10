@@ -14,7 +14,6 @@
  */
 
 'use strict';
-const logger = require('../../../shared/logger')('request-id-propagation');
 
 const crypto = require('crypto');
 
@@ -330,7 +329,7 @@ function requestIdMiddleware(opts = {}) {
     if (logger) {
       logger(entry);
     } else if (logOnRequest || logOnResponse) {
-      logger.info(JSON.stringify(entry));
+      console.log(JSON.stringify(entry));
     }
   };
 
@@ -554,7 +553,7 @@ app.use(requestIdMiddleware({
   propagateW3C:  true,         // W3C Trace Context
   propagateB3:   true,         // Zipkin B3
   logOnResponse: true,
-  logger: (entry) => logger.info(JSON.stringify(entry)),
+  logger: (entry) => console.log(JSON.stringify(entry)),
 }));
 
 // 2. Store context for async access
@@ -563,7 +562,7 @@ app.use(contextStorageMiddleware());
 // 3. Use in route handlers
 app.get('/api/data', async (req, res) => {
   // Access request ID
-  logger.info('Request ID:', req.id);
+  console.log('Request ID:', req.id);
 
   // Make service call with propagated headers
   const response = await req.tracedFetch('https://internal-service/api/data');
@@ -576,7 +575,7 @@ app.get('/api/data', async (req, res) => {
 async function someDeepFunction() {
   const ctx = getCurrentContext();
   if (ctx) {
-    logger.info('Trace ID:', ctx.traceId);
+    console.log('Trace ID:', ctx.traceId);
   }
 }
 

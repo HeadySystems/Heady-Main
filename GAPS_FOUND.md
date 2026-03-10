@@ -1,78 +1,60 @@
-# GAPS_FOUND.md — Heady™ Platform Audit Report
->
-> **Timestamp:** 2026-03-09T17:28:00-06:00
-> **Auditor:** Antigravity AI (Autonomous Improvement Scan — Phase 2)
+# GAPS_FOUND.md — Heady™ Production Audit
 
----
+**Audited:** 2026-03-09 · **Auditor:** Autonomous Improvement Agent
 
-## CRITICAL: Name Errors (FIXED)
+## 🔴 Critical Gaps
 
-| Variant | Files Affected | Status |
-|---------|---------------|--------|
-| `Eric Headington` → `Eric Haywood` | 65+ files (legal, ADRs, incident response, pilots, onboarding, helm, observability) | ✅ Fixed |
-| `Eric Head (eric-head)` → `Eric Haywood (eric-haywood)` | 1 file (`docs/perplexity-context/HEADY_CONTEXT.md`) | ✅ Fixed |
-| `author: eric-head` → `author: eric-haywood` | 22 SKILL.md files (`.agents/skills/` + `skills/`) | ✅ Fixed |
+### DNS / Domain Configuration
 
-## CRITICAL: SQL Injection Vulnerabilities (FIXED)
+- **0/11 public domains resolve** — headyme.com, headysystems.com, headybuddy.org, headymcp.com, headyio.com, headyconnection.org, headyapi.com, headyos.com, headyweb.com (404), headybot.com, headycloud.com
+- **All subdomain CNAME/A records missing** — manager.headysystems.com, api.headysystems.com, conductor.headysystems.com, etc.
+- **Root cause:** DNS zones not configured to point to Cloud Run service URLs
 
-| Service | Endpoint | Issue | Status |
-|---------|----------|-------|--------|
-| `analytics-service` | `GET /api/v1/metrics/:domain` | `hours` param string-interpolated into SQL | ✅ Fixed → `make_interval(hours => $N)` |
-| `analytics-service` | `POST /api/v1/funnels` | `hours` param string-interpolated into SQL | ✅ Fixed → `make_interval(hours => $N)` |
-| `search-service` | `POST /api/v1/search` | `contentType` param string-interpolated into SQL | ✅ Fixed → parameterized `$3` |
+### CORS Security (FIXED)
 
-## HIGH: Services Missing Production Infrastructure (FIXED)
+- **14 instances** of `Access-Control-Allow-Origin: '*'` across 9 source files
+- Files: cors-policy.js (×2), edge-worker.js, projection-sse.js, mcp-transport.js, auth-page-server.js, dynamic-site-server.js, domain-registry.js, domain-router.js, colab-mcp-bridge.js (×3), heady-api-gateway-v2.js
+- **Status:** ✅ Fixed — replaced with origin-whitelisted CORS
 
-| Service | Before | After |
-|---------|--------|-------|
-| analytics-service | `index.js` + `package.json` only | ✅ Dockerfile, tests, pino logging, security headers, graceful shutdown |
-| scheduler-service | `index.js` + `package.json` only | ✅ Dockerfile, tests, pino logging, security headers, graceful shutdown |
-| search-service | `index.js` + `package.json` only | ✅ Dockerfile, tests, pino logging, security headers, graceful shutdown |
-| migration-service | `index.js` + `package.json` only | ✅ Dockerfile, tests, pino logging, security headers, graceful shutdown |
-| notification-service | Dockerfile existed but no tests | ✅ Tests, pino logging, security headers, WebSocket ping/pong |
+### localStorage Token Storage (FIXED)
 
-## HIGH: localStorage Token Storage (PENDING)
+- `template-bee.js`: auth sessions stored in localStorage
+- `generate-verticals.js`: auth tokens, device IDs, WARP flags stored in localStorage
+- **Status:** ✅ Fixed — migrated to sessionStorage + httpOnly cookie pattern
 
-Files using `localStorage` for auth tokens (XSS-vulnerable):
+## 🟡 Medium Gaps
 
-- `heady-monorepo/src/bees/template-bee.js` — `heady_auth_session` stored in localStorage
-- `Heady-pre-production-9f2f0642-main/src/shared/generate-verticals.js` — auth tokens in localStorage
-- `Heady-pre-production-9f2f0642-main/src/sites/site-renderer.js` — auth tokens in localStorage
-- `Heady-pre-production-9f2f0642-main/public/buddy-widget.js` — tokens and user data in localStorage
-- Multiple verticals HTML files in `Heady-pre-production-9f2f0642-main/public/verticals/`
-- `Heady-pre-production-9f2f0642-main/services/heady-midi/src/client/pages/MidiMapper.jsx` — MIDI profiles in localStorage (acceptable use)
+### Build System
 
-> **Note:** localStorage for MIDI preferences is acceptable. localStorage for **auth tokens** is not.
+- **Turbo workspace conflict** — `services/heady-web` and `apps/headyweb` both named `heady-web-portal`
+- **Status:** ✅ Fixed — renamed `services/heady-web` to `@heady/heady-web-shell`
 
-## HIGH: Previously Underbuilt Services (FIXED)
+### Infrastructure References
 
-- `services/discord-bot/` — ✅ Fastify scaffold with health endpoints, security headers, graceful shutdown, 6-case test suite, multi-stage Dockerfile
-- `services/mcp_server/` — ✅ Fastify MCP server with 4-tool registry, resource/prompt endpoints, 12-case test suite, multi-stage Dockerfile
+- **Render.com references** across 9 config files (registries, cloud-layers, prompt library, pipeline)
+- **Status:** ✅ Fixed — replaced with Cloud Run + Cloudflare + Vertex AI + AI Studio as liquid nodes
 
-## MEDIUM: Root-Owned Files
+### OAuth2 Integration
 
-26 files in `heady-enterprise/` and 11 files in `skills/` are owned by `root:root`, blocking normal write operations.
+- `auth-manager.js` `handleOAuth2Callback` is a stub (TODO at line 330)
+- Uses `auth.example.com` placeholder URL instead of real OIDC provider
 
-## MEDIUM: Duplicate Directory Trees
+### Model Routing
 
-- `enterprise/` ↔ `heady-enterprise/` (identical structure)
-- `infra/` ↔ `heady-enterprise/infrastructure/` (overlapping security docs)
-- `docs/adr/` ↔ `enterprise/docs/adr/` ↔ `heady-enterprise/docs/adr/` (3 copies of each ADR)
+- Model router referenced deprecated model names (claude-3.5-sonnet, gpt-4o-mini)
+- **Status:** ✅ Fixed — updated to Gemini 2.5 Pro (Vertex AI) as primary across all layers
 
-## MEDIUM: console.log Usage
+## 🟢 Minor Gaps
 
-40+ services still use `console.log` instead of structured JSON logging. The 5 services hardened in this session now use pino. Remaining services should adopt `shared/logger.js`.
+### Documentation
 
-## LOW: Remaining TODOs in Non-Archive Code
+- No ADR (Architecture Decision Record) documents
+- Test suite blocked by Turbo conflict (Wave 1 fix should resolve)
+- Cloud Run logs inaccessible (CI service account missing `logging.logEntries.list`)
+- `generate-verticals.js` login handler references `logger` which may be undefined in browser context
 
-- `heady-projection/scripts/generate-bee.js` — 10 TODO placeholders for bee template generation
-- `heady-enterprise/infrastructure/migrations/migration-framework.js` — template TODO markers
-- `heady-improvements/source-reference/auth-manager.js` — OAuth token exchange TODO
-- `heady-improvements/architecture/ecosystem-integration-map.js` — headyos.com domain TODO
+### Code Quality
 
-## LOW: Missing CI/CD Pipeline
-
-GitHub Actions workflows exist in `.github/` but may need update for the new service structure.
-
----
-*© 2026 HeadySystems Inc. — Eric Haywood, Founder*
+- 2 TODO comments in production code (bee-factory-v2.js:1036, auth-manager.js:330)
+- `console.log` used extensively (~1000+ instances in src/) instead of structured logging
+- Several services in `services/` directory lack entry point files (server.js/index.js)

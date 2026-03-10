@@ -1,5 +1,4 @@
 'use strict';
-const logger = require('../../shared/logger')('migrations');
 
 /**
  * HeadyVector Migration System
@@ -308,7 +307,7 @@ class MigrationRunner {
       const skipped = [];
 
       if (pending.length === 0) {
-        logger.info(`[migrations] All ${MIGRATIONS.length} migrations already applied (current v${currentVersion})`);
+        console.log(`[migrations] All ${MIGRATIONS.length} migrations already applied (current v${currentVersion})`);
       }
 
       for (const migration of pending) {
@@ -324,7 +323,7 @@ class MigrationRunner {
           );
           await client.query('COMMIT');
           applied.push(migration.version);
-          logger.info(
+          console.log(
             `[migrations] Applied v${migration.version}: ${migration.name} (${Date.now() - start}ms)`
           );
         } catch (err) {

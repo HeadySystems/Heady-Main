@@ -1,119 +1,127 @@
 #!/usr/bin/env bash
-# ──────────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════
 # Heady™ Developer Setup Script
-# Zero to running system in < 5 minutes
-# © 2026 HeadySystems Inc. — Eric Haywood, Founder
-# ──────────────────────────────────────────────────────────────
-
+# Sets up a local development environment in < 5 minutes
+# ═══════════════════════════════════════════════════════════════════
 set -euo pipefail
 
-PHI="1.618"
+HEADY_MIN_NODE=20
+HEADY_MIN_NPM=10
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
-echo -e "${CYAN}
-╔════════════════════════════════════════════════╗
-║   Heady™ Developer Setup — Sacred Geometry     ║
-║   φ = $PHI | Concurrent-Equals Architecture    ║
-╚════════════════════════════════════════════════╝${NC}"
+echo -e "${CYAN}"
+echo "  ██╗  ██╗███████╗ █████╗ ██████╗ ██╗   ██╗"
+echo "  ██║  ██║██╔════╝██╔══██╗██╔══██╗╚██╗ ██╔╝"
+echo "  ███████║█████╗  ███████║██║  ██║ ╚████╔╝ "
+echo "  ██╔══██║██╔══╝  ██╔══██║██║  ██║  ╚██╔╝  "
+echo "  ██║  ██║███████╗██║  ██║██████╔╝   ██║   "
+echo "  ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝    ╚═╝   "
+echo -e "${NC}"
+echo "  ∞ Sacred Geometry · φ-Scaled · CSL-Gated"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
 
-CHECKS_PASSED=0
-CHECKS_FAILED=0
+errors=0
 
-check() {
-  local label="$1"
-  local cmd="$2"
-  local required="${3:-true}"
-
-  if eval "$cmd" &>/dev/null; then
-    echo -e "  ${GREEN}✓${NC} $label"
-    ((CHECKS_PASSED++))
-  else
-    if [ "$required" = "true" ]; then
-      echo -e "  ${RED}✗${NC} $label (REQUIRED)"
-      ((CHECKS_FAILED++))
-    else
-      echo -e "  ${YELLOW}⚠${NC} $label (optional)"
+# ─── Check Node.js ────────────────────────────────────────────────
+check_node() {
+    if ! command -v node &> /dev/null; then
+        echo -e "${RED}✗ Node.js not found${NC} — install v${HEADY_MIN_NODE}+ from https://nodejs.org"
+        ((errors++))
+        return
     fi
-  fi
+    local ver=$(node -v | sed 's/v//' | cut -d. -f1)
+    if [ "$ver" -ge "$HEADY_MIN_NODE" ]; then
+        echo -e "${GREEN}✓ Node.js $(node -v)${NC}"
+    else
+        echo -e "${RED}✗ Node.js $(node -v) — need v${HEADY_MIN_NODE}+${NC}"
+        ((errors++))
+    fi
 }
 
-# ── 1. Prerequisites ──────────────────────────────────────────
-echo -e "\n${CYAN}[1/5] Checking prerequisites...${NC}"
+# ─── Check npm ────────────────────────────────────────────────────
+check_npm() {
+    if ! command -v npm &> /dev/null; then
+        echo -e "${RED}✗ npm not found${NC}"
+        ((errors++))
+        return
+    fi
+    local ver=$(npm -v | cut -d. -f1)
+    if [ "$ver" -ge "$HEADY_MIN_NPM" ]; then
+        echo -e "${GREEN}✓ npm $(npm -v)${NC}"
+    else
+        echo -e "${YELLOW}⚠ npm $(npm -v) — recommend v${HEADY_MIN_NPM}+${NC}"
+    fi
+}
 
-check "Node.js >= 20" "node -v | grep -E 'v(2[0-9]|[3-9][0-9])'"
-check "pnpm installed" "command -v pnpm"
-check "Docker" "docker --version"
-check "Docker Compose" "docker compose version"
-check "gcloud CLI" "gcloud --version" false
-check "Git" "git --version"
+# ─── Check Docker ─────────────────────────────────────────────────
+check_docker() {
+    if command -v docker &> /dev/null; then
+        echo -e "${GREEN}✓ Docker $(docker --version | grep -oP '\d+\.\d+\.\d+')${NC}"
+    else
+        echo -e "${YELLOW}⚠ Docker not found — optional for local services${NC}"
+    fi
+}
 
-# ── 2. Environment ────────────────────────────────────────────
-echo -e "\n${CYAN}[2/5] Checking environment...${NC}"
+# ─── Check gcloud CLI ─────────────────────────────────────────────
+check_gcloud() {
+    if command -v gcloud &> /dev/null; then
+        local proj=$(gcloud config get-value project 2>/dev/null || echo "none")
+        echo -e "${GREEN}✓ gcloud CLI — project: ${proj}${NC}"
+    else
+        echo -e "${YELLOW}⚠ gcloud CLI not found — needed for Cloud Run deployment${NC}"
+    fi
+}
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+# ─── Check .env ───────────────────────────────────────────────────
+check_env() {
+    if [ -f ".env" ]; then
+        echo -e "${GREEN}✓ .env file exists${NC}"
+    elif [ -f ".env.example" ]; then
+        echo -e "${YELLOW}⚠ No .env file — copying from .env.example${NC}"
+        cp .env.example .env
+        echo -e "${GREEN}  Created .env from .env.example — edit with your values${NC}"
+    else
+        echo -e "${YELLOW}⚠ No .env file — create one with required environment variables${NC}"
+    fi
+}
 
-if [ -f "$PROJECT_ROOT/.env" ]; then
-  echo -e "  ${GREEN}✓${NC} .env file exists"
-  ((CHECKS_PASSED++))
-else
-  echo -e "  ${YELLOW}⚠${NC} .env file missing — copying from .env.example"
-  if [ -f "$PROJECT_ROOT/.env.example" ]; then
-    cp "$PROJECT_ROOT/.env.example" "$PROJECT_ROOT/.env"
-    echo -e "  ${GREEN}✓${NC} Created .env from .env.example (edit with your values)"
-    ((CHECKS_PASSED++))
-  else
-    echo -e "  ${RED}✗${NC} No .env.example found"
-    ((CHECKS_FAILED++))
-  fi
-fi
-
-# ── 3. Dependencies ───────────────────────────────────────────
-echo -e "\n${CYAN}[3/5] Installing dependencies...${NC}"
-
-cd "$PROJECT_ROOT"
-
-if command -v pnpm &>/dev/null; then
-  echo -e "  Installing via pnpm..."
-  pnpm install --prefer-offline 2>&1 | tail -3
-  echo -e "  ${GREEN}✓${NC} Dependencies installed"
-  ((CHECKS_PASSED++))
-else
-  echo -e "  ${YELLOW}⚠${NC} pnpm not found, trying npm..."
-  npm install 2>&1 | tail -3
-  echo -e "  ${GREEN}✓${NC} Dependencies installed via npm"
-  ((CHECKS_PASSED++))
-fi
-
-# ── 4. Docker Images ──────────────────────────────────────────
-echo -e "\n${CYAN}[4/5] Pulling Docker images...${NC}"
-
-if command -v docker &>/dev/null; then
-  docker pull postgres:16 2>/dev/null && echo -e "  ${GREEN}✓${NC} postgres:16" || echo -e "  ${YELLOW}⚠${NC} postgres:16 (pull failed)"
-  docker pull node:22-bookworm-slim 2>/dev/null && echo -e "  ${GREEN}✓${NC} node:22-bookworm-slim" || echo -e "  ${YELLOW}⚠${NC} node:22 (pull failed)"
-  docker pull redis:7-alpine 2>/dev/null && echo -e "  ${GREEN}✓${NC} redis:7-alpine" || echo -e "  ${YELLOW}⚠${NC} redis (pull failed)"
-else
-  echo -e "  ${YELLOW}⚠${NC} Docker not available — skipping image pull"
-fi
-
-# ── 5. Summary ─────────────────────────────────────────────────
-echo -e "\n${CYAN}[5/5] Setup Summary${NC}"
-echo -e "  Passed: ${GREEN}${CHECKS_PASSED}${NC}"
-echo -e "  Failed: ${RED}${CHECKS_FAILED}${NC}"
-
-if [ "$CHECKS_FAILED" -gt 0 ]; then
-  echo -e "\n${RED}Some checks failed. Fix the issues above before proceeding.${NC}"
-  exit 1
-fi
-
-echo -e "\n${GREEN}✓ Setup complete! Start developing:${NC}"
-echo -e "  ${CYAN}pnpm run dev${NC}          — Start all services in dev mode"
-echo -e "  ${CYAN}docker compose up -d${NC}  — Start Docker services (Postgres, Redis)"
-echo -e "  ${CYAN}pnpm run test${NC}         — Run all tests"
-echo -e "  ${CYAN}pnpm run smoke${NC}        — Run smoke tests"
+# ─── Run checks ───────────────────────────────────────────────────
+echo "Checking prerequisites..."
 echo ""
-echo -e "  ${CYAN}© 2026 HeadySystems Inc. — Eric Haywood, Founder${NC}"
+check_node
+check_npm
+check_docker
+check_gcloud
+check_env
+echo ""
+
+if [ "$errors" -gt 0 ]; then
+    echo -e "${RED}✗ ${errors} critical issue(s) found — fix before continuing${NC}"
+    exit 1
+fi
+
+# ─── Install dependencies ─────────────────────────────────────────
+if [ "${1:-}" != "--check" ]; then
+    echo "Installing dependencies..."
+    npm install 2>&1 | tail -5
+    echo ""
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo -e "✓ Heady™ dev environment ready!"
+    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    echo "  Start dev server:     npm run dev"
+    echo "  Run tests:            npm test"
+    echo "  Run pipeline:         node src/orchestration/hc-full-pipeline.js"
+    echo "  Docker compose:       docker-compose up"
+    echo ""
+else
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo -e "✓ All prerequisite checks passed!"
+    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+fi

@@ -1,4 +1,3 @@
-const logger = require('../shared/logger')('hc_autobuild');
 // HEADY_BRAND:BEGIN
 // ╔══════════════════════════════════════════════════════════════════╗
 // ║  ██╗  ██╗███████╗ █████╗ ██████╗ ██╗   ██╗                     ║
@@ -19,7 +18,7 @@ const { execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
-logger.info('\n🔨 Heady AutoBuild - Sacred Geometry Build System with Codemap Optimization\n');
+console.log('\n🔨 Heady AutoBuild - Sacred Geometry Build System with Codemap Optimization\n');
 
 const WORKTREE_BASE = (() => {
   const explicit = process.env.WINDSURF_WORKTREES || process.env.HEADY_WORKTREES;
@@ -100,7 +99,7 @@ function buildProject(projectPath) {
     return { success: false, reason: 'No package.json' };
   }
   
-  logger.info(`📦 Building: ${projectPath}`);
+  console.log(`📦 Building: ${projectPath}`);
   
   try {
     // Read package.json to check for build scripts
@@ -115,23 +114,23 @@ function buildProject(projectPath) {
     
     // Run build if available
     if (pkg.scripts && pkg.scripts.build) {
-      logger.info(`  🔧 Running build script...`);
+      console.log(`  🔧 Running build script...`);
       execSync('pnpm run build', { cwd: projectPath, stdio: 'inherit' });
     }
     
-    logger.info(`✅ ${path.basename(projectPath)} - Build complete\n`);
+    console.log(`✅ ${path.basename(projectPath)} - Build complete\n`);
     return { success: true };
   } catch (error) {
-    logger.info(`⚠️  ${path.basename(projectPath)} - Build failed: ${error.message}\n`);
+    console.log(`⚠️  ${path.basename(projectPath)} - Build failed: ${error.message}\n`);
     return { success: false, reason: error.message };
   }
 }
 
 // Main execution
 const worktrees = discoverWorktrees();
-logger.info(`🔍 Discovered ${worktrees.length} worktrees:\n`);
-worktrees.forEach(wt => logger.info(`   • ${wt}`));
-logger.info('');
+console.log(`🔍 Discovered ${worktrees.length} worktrees:\n`);
+worktrees.forEach(wt => console.log(`   • ${wt}`));
+console.log('');
 
 const allProjects = [];
 worktrees.forEach(wt => {
@@ -140,7 +139,7 @@ worktrees.forEach(wt => {
 });
 
 const uniqueProjects = [...new Set(allProjects)];
-logger.info(`📋 Found ${uniqueProjects.length} buildable projects\n`);
+console.log(`📋 Found ${uniqueProjects.length} buildable projects\n`);
 
 const results = { success: 0, failed: 0 };
 uniqueProjects.forEach(project => {
@@ -149,7 +148,7 @@ uniqueProjects.forEach(project => {
   else results.failed++;
 });
 
-logger.info('═'.repeat(60));
-logger.info('✅ Heady AutoBuild Complete!');
-logger.info(`   Success: ${results.success} | Failed: ${results.failed}`);
-logger.info('═'.repeat(60) + '\n');
+console.log('═'.repeat(60));
+console.log('✅ Heady AutoBuild Complete!');
+console.log(`   Success: ${results.success} | Failed: ${results.failed}`);
+console.log('═'.repeat(60) + '\n');

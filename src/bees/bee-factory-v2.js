@@ -1033,7 +1033,7 @@ ${workerNames.map(name => `        /**
          * @param {object} deps - Injected dependencies
          */
         async (ctx, deps) => {
-            // Implementation delegated to dynamic bee loader
+            // TODO: implement ${name}
             return { bee: domain, action: '${name}', status: 'active', ts: Date.now() };
         },`).join('\n')}
     ];

@@ -1,101 +1,86 @@
-# Contributing to Heady™
+# Contributing to Heady Sovereign AI Platform
 
-> Welcome. This guide covers everything you need to contribute to the Heady platform.
+Thank you for your interest in contributing to Heady! This document provides guidelines and information for contributors.
 
-## Quick Start
+## Code of Conduct
 
-```bash
-# Clone and setup (< 5 minutes)
-git clone https://github.com/HeadyMe/Heady.git
-cd Heady
-chmod +x scripts/setup-dev.sh
-./scripts/setup-dev.sh
+We are committed to fostering an open and welcoming environment. Please be respectful and constructive in all interactions.
 
-# Start infrastructure
-docker compose up -d
+## Getting Started
 
-# Start development
-npm run dev
-```
+### Prerequisites
 
-## Monorepo Structure
+- **Node.js** v22 LTS
+- **pnpm** v9+ (do NOT use npm)
+- **Docker** and Docker Compose
+- **PostgreSQL** 16 with pgvector extension
+- **Redis** 7+
 
-```
-Heady/
-├── services/           # 50+ microservices (ports 3310-3396+)
-├── shared/             # Shared libraries (js, auth, css)
-├── infrastructure/     # Envoy, Consul, OTel, NATS, PgBouncer, middleware
-├── drupal-config/      # Drupal 11 modules and content types
-├── sites/              # 9 website source directories
-├── docs/               # ADRs, runbooks, diagrams
-├── scripts/            # Dev tools and automation
-├── turbo.json          # Turborepo build config
-└── docker-compose.yml  # Full stack orchestration
-```
-
-## Commit Convention
-
-We use Conventional Commits. Every commit message must follow:
-
-```
-<type>(<scope>): <description>
-
-Types: feat, fix, chore, docs, perf, security, refactor, test
-Scope: service name, shared, infra, docs, etc.
-```
-
-Examples:
-
-- `feat(heady-brain): add streaming response for chat endpoint`
-- `fix(auth): correct relay iframe origin validation`  
-- `security(middleware): add prompt injection defense`
-- `perf(pgvector): tune HNSW ef_construction to 200`
-
-## Sacred Geometry Rules
-
-**All constants must derive from φ, ψ, or Fibonacci. No magic numbers.**
-
-```javascript
-// ✓ CORRECT
-const TIMEOUT_MS = Math.round(PHI * PHI * PHI * 1000); // φ³ ≈ 4236ms
-const POOL_SIZE = 34; // Fibonacci
-const CSL_GATE = PSI; // ≈ 0.618
-
-// ✗ WRONG
-const TIMEOUT_MS = 5000; // Magic number!
-const POOL_SIZE = 25;    // Not Fibonacci!
-const THRESHOLD = 0.7;   // Not φ-derived!
-```
-
-## Adding a New Service
-
-1. Create `services/{service-name}/index.js`
-2. Add health check: `GET /health` → `{ status: 'healthy', service: '{name}' }`
-3. Add to `docker-compose.yml` with unique port
-4. Use `shared/js/structured-logger.js` for logging
-5. Add error codes to `ERROR_CODES.md`
-6. Add Dockerfile using multi-stage template
-7. Register with Consul via `infrastructure/consul/consul-registration.js`
-
-## Testing
+### Setup
 
 ```bash
-npm test              # Run all tests
-npm run test:service  # Run tests for a specific service
-npm run lint          # ESLint + Prettier check
-npm run type-check    # TypeScript type validation
+git clone git@github.com:HeadyMe/Heady-pre-production-9f2f0642.git
+cd Heady-pre-production-9f2f0642
+cp .env.example .env
+pnpm install
+pnpm dev
 ```
 
-## Code Review Checklist
+### Architecture
 
-- [ ] No `console.log` — use `structured-logger.js`
-- [ ] No `localStorage` for tokens — use httpOnly cookies
-- [ ] No magic numbers — use φ/ψ/Fibonacci
-- [ ] No priority/ranking language — use concurrent-equals
-- [ ] No `Access-Control-Allow-Origin: *` — use domain whitelist
-- [ ] Health check endpoint exists
-- [ ] Error codes added to ERROR_CODES.md
+Heady uses a **six-layer architecture**: Edge → Gateway → Orchestration → Intelligence → Memory → Persistence.
+
+See `docs/architecture/OVERVIEW.md` for the full architecture guide.
+
+## Development Workflow
+
+1. **Fork** the repo and create a feature branch from `main`
+2. **Write tests** for any new functionality (minimum: health check per service)
+3. **Run the linter**: `pnpm lint`
+4. **Run tests**: `pnpm test`
+5. **Open a PR** against `main` with a clear description
+
+### Branch Naming
+
+- `feat/description` — new features
+- `fix/description` — bug fixes
+- `chore/description` — maintenance
+- `docs/description` — documentation changes
+
+### Commit Messages
+
+Follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+feat(telemetry): add OTel tracing middleware
+fix(auth): correct RBAC permission check for admin
+chore(deps): update opentelemetry packages
+docs(api): add health endpoint documentation
+```
+
+## Code Standards
+
+- **ESLint + Prettier**: Configuration in `.eslintrc.js` and `.prettierrc`
+- **JSDoc/TSDoc**: Required on all exported functions
+- **No `any`** types in TypeScript files
+- **Immutability**: Prefer `const` and frozen objects
+- **Error handling**: Always use structured error objects
+
+## Pull Request Process
+
+1. PRs require **1 approval** from a maintainer
+2. All CI checks must pass (lint, test, security scan, eval pipeline)
+3. Breaking changes must be documented in the PR description
+4. Update `CHANGELOG.md` for user-facing changes
+
+## Security
+
+If you discover a security vulnerability, please follow the disclosure process in `SECURITY.md`. Do **not** open a public issue.
+
+## License
+
+By contributing, you agree that your contributions will be licensed under the project's license.
 
 ---
 
-*© 2026 HeadySystems Inc. — Eric Haywood, Founder — 51 Provisional Patents*
+**Maintainer**: <eric@headyconnection.org>

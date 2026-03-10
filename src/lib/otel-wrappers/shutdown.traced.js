@@ -1,4 +1,3 @@
-const logger = require('../../shared/logger')('shutdown.traced');
 /**
  * shutdown.traced.js — OpenTelemetry tracing wrapper
  * Drop-in replacement for src/lib/shutdown.js
@@ -62,10 +61,10 @@ originalManager._shutdown = async function tracedShutdown(signal) {
   }, context.active());
 
   const shutdownStart = Date.now();
-  logger.info(`[SHUTDOWN:traced] Received ${signal}, starting graceful shutdown (${this._hooks.length} hooks)...`);
+  console.log(`[SHUTDOWN:traced] Received ${signal}, starting graceful shutdown (${this._hooks.length} hooks)...`);
 
   const timeout = setTimeout(() => {
-    logger.error('[SHUTDOWN:traced] Timeout exceeded, forcing exit');
+    console.error('[SHUTDOWN:traced] Timeout exceeded, forcing exit');
     process.exit(1);
   }, parseInt(process.env.SHUTDOWN_TIMEOUT_MS || '15000', 10));
   timeout.unref();
@@ -85,14 +84,14 @@ originalManager._shutdown = async function tracedShutdown(signal) {
 
     const hookStart = Date.now();
     try {
-      logger.info(`[SHUTDOWN:traced] Running: ${hook.name}`);
+      console.log(`[SHUTDOWN:traced] Running: ${hook.name}`);
       await Promise.resolve(hook.fn());
       const durationMs = Date.now() - hookStart;
       hookSpan.setAttribute('heady.duration_ms', durationMs);
       hookSpan.setAttribute('heady.success',     true);
       hookSpan.setStatus({ code: SpanStatusCode.OK });
       shutdownHookDurationMs.record(durationMs, { module: MODULE_NAME, hook: hook.name, success: 'true' });
-      logger.info(`[SHUTDOWN:traced] Done: ${hook.name} (${durationMs}ms)`);
+      console.log(`[SHUTDOWN:traced] Done: ${hook.name} (${durationMs}ms)`);
     } catch (err) {
       const durationMs = Date.now() - hookStart;
       hookErrors++;
@@ -102,7 +101,7 @@ originalManager._shutdown = async function tracedShutdown(signal) {
       hookSpan.setStatus({ code: SpanStatusCode.ERROR, message: err.message });
       shutdownErrorsTotal.add(1, { module: MODULE_NAME, hook: hook.name });
       shutdownHookDurationMs.record(durationMs, { module: MODULE_NAME, hook: hook.name, success: 'false' });
-      logger.error(`[SHUTDOWN:traced] Error in ${hook.name}: ${err.message}`);
+      console.error(`[SHUTDOWN:traced] Error in ${hook.name}: ${err.message}`);
     } finally {
       hookSpan.end();
     }
@@ -118,7 +117,7 @@ originalManager._shutdown = async function tracedShutdown(signal) {
   shutdownSpan.setStatus({ code: SpanStatusCode.OK });
   shutdownSpan.end();
 
-  logger.info(`[SHUTDOWN:traced] All hooks complete (${hookErrors} errors, ${totalDurationMs}ms total), exiting`);
+  console.log(`[SHUTDOWN:traced] All hooks complete (${hookErrors} errors, ${totalDurationMs}ms total), exiting`);
   clearTimeout(timeout);
   process.exit(hookErrors > 0 ? 1 : 0);
 };

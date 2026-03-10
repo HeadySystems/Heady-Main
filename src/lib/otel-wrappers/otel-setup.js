@@ -1,4 +1,3 @@
-const logger = require('../../shared/logger')('otel-setup');
 /**
  * OTel Bootstrap — OpenTelemetry SDK Setup for Heady™ Systems
  * Configures tracing, metrics, propagation, and auto-instrumentation.
@@ -67,7 +66,7 @@ const batchSpanProcessor = new BatchSpanProcessor(traceExporter, {
 // ─── Metrics: Prometheus (pull) + OTLP (push) ─────────────────────────────────
 const prometheusExporter = new PrometheusExporter(
   { port: PROMETHEUS_PORT, startServer: true },
-  () => logger.info(`[otel-setup] Prometheus metrics at http://localhost:${PROMETHEUS_PORT}/metrics`)
+  () => console.log(`[otel-setup] Prometheus metrics at http://localhost:${PROMETHEUS_PORT}/metrics`)
 );
 
 const otlpMetricExporter = new OTLPMetricExporter({ url: OTLP_ENDPOINT });
@@ -129,9 +128,9 @@ function start() {
   _started = true;
   try {
     sdk.start();
-    logger.info(`[otel-setup] SDK started — service="${SERVICE_NAME}" env="${DEPLOY_ENV}" otlp="${OTLP_ENDPOINT}"`);
+    console.log(`[otel-setup] SDK started — service="${SERVICE_NAME}" env="${DEPLOY_ENV}" otlp="${OTLP_ENDPOINT}"`);
   } catch (err) {
-    logger.error('[otel-setup] SDK start failed (telemetry disabled):', err.message);
+    console.error('[otel-setup] SDK start failed (telemetry disabled):', err.message);
   }
 }
 
@@ -139,9 +138,9 @@ async function shutdown() {
   if (!_started) return;
   try {
     await sdk.shutdown();
-    logger.info('[otel-setup] SDK shutdown complete');
+    console.log('[otel-setup] SDK shutdown complete');
   } catch (err) {
-    logger.error('[otel-setup] SDK shutdown error:', err.message);
+    console.error('[otel-setup] SDK shutdown error:', err.message);
   }
 }
 

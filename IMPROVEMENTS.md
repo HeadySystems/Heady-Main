@@ -1,107 +1,60 @@
-# IMPROVEMENTS.md — Heady™ Optimizations Applied
->
-> **Date:** 2026-03-09
-> **Session:** Maximum Potential Full Pipeline
+# IMPROVEMENTS.md — Heady™ Autonomous Improvement Log
 
----
+**Date:** 2026-03-09 · **Version:** v4.1.0
 
-## Shared Infrastructure Modules
+## Security Hardening
 
-### `shared/logger.js` (existing, verified)
+### CORS Wildcard Elimination
 
-- Pino-based structured JSON logging with domain tagging
-- Request-ID correlation (`X-Request-Id` header)
-- φ-exponential backoff utility (`phiBackoffMs`)
-- Pretty-printing in development, JSON in production
+- Replaced `Access-Control-Allow-Origin: '*'` with origin-whitelisted CORS across **9 files** (14 instances)
+- Created shared `packages/shared/cors-whitelist.js` with approved Heady domain list
+- Injected `_isHeadyOrigin()` helper into all affected files for runtime origin validation
+- Cloud Run `*.run.app` URLs auto-approved; localhost origins only allowed in development
 
-### `shared/security-headers.js` (existing, verified)
+### localStorage → httpOnly Cookie Migration
 
-- CSP: `default-src 'self'`, frame-ancestors none, form-action self
-- CORS: Allow-list of 11 Heady™ domains (no wildcards in production)
-- HSTS: 2-year max-age with includeSubDomains + preload
-- X-Content-Type-Options: nosniff, X-Frame-Options: DENY
-- Graceful shutdown handler with φ³-second forced exit timeout
+- `template-bee.js`: `localStorage.setItem('heady_auth_session',...)` → `sessionStorage` + server-side `fetch('/api/auth/session', {credentials:'include'})`
+- `generate-verticals.js`: Full auth flow migrated:
+  - `localStorage.setItem(TK, params.get('auth_token'))` → `fetch('/api/auth/set-session', {credentials:'include'})`
+  - Token verification via `credentials: 'include'` instead of `Authorization: Bearer` header with client-stored token
+  - Device ID stored in `sessionStorage` (tab-scoped) instead of `localStorage` (persistent)
+  - Session validity reduced from 365 days to 24 hours
 
-### `shared/rate-limiter.js` (NEW)
+## Infrastructure Modernization
 
-- In-memory sliding window counters per IP+route
-- Three tiers: tight (21 req/13s), standard (89 req/55s), relaxed (233 req/89s)
-- RFC 6585 headers: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`
-- Cloudflare CF-Connecting-IP aware key generation
-- All constants derived from Fibonacci sequence
+### Render → Cloud Run + Cloudflare Migration
 
----
+- Purged all Render.com references from **9 config/registry files**
+- Replaced `onrender.com` URLs with live Cloud Run service URLs (`bf4q4zywhq-uc.a.run.app`)
+- Renamed `render_service` keys to `cloud_run_service` in `cloud-layers.yaml`
+- Updated deployment prompt in `heady-prompt-library.json` from Render push to `gcloud run deploy`
 
-## Service Hardening (Full Pipeline)
+### Liquid Node Architecture
 
-### `notification-service/index.js` (REWRITTEN)
+Added 4 liquid nodes to `cloud-layers.yaml`:
 
-- WebSocket + SSE dual-transport with `userId` routing
-- Fibonacci-interval heartbeat (13s) for both WS and SSE
-- WS ping/pong keep-alive with timeout tracking
-- Input validation with length truncation
-- Broadcast endpoint for system-wide notifications
-- Structured logging + security headers + graceful shutdown
+1. **Vertex AI** — `us-central1-aiplatform.googleapis.com/v1` (gemini-2.5-pro, gemini-2.5-flash, gemini-2.0-flash)
+2. **AI Studio** — `generativelanguage.googleapis.com/v1beta` (gemini-2.5-pro, gemini-2.5-flash, gemini-2.0-flash-lite)
+3. **Cloud Run** — `run.googleapis.com/v2` (project: gen-lang-client-0920560496)
+4. **Cloudflare** — Workers, Pages, KV, D1, R2 (account: 8b1fa38f282c691423c6399247d53323)
 
-### `scheduler-service/index.js` (REWRITTEN)
+### Model Routing Upgrade
 
-- ScheduledJob class with circuit breaker (max 5 failures)
-- φ³-scaled circuit breaker reset timer
-- Fibonacci interval presets (5s–34m)
-- Job history ring buffer (Fibonacci 89 entries)
-- `fetch()` with 30s abort timeout for endpoint calls
-- CRUD API: register, list, history, delete
+- Primary model across all layers: **Gemini 2.5 Pro** (Vertex AI)
+- Fallbacks: Claude Sonnet 4 (code), GPT-4o (research), Ollama (privacy/cost)
+- Cost-sensitive: **Gemini 2.0 Flash Lite** (AI Studio free tier)
+- Voice: **Gemini 2.5 Flash** (low latency via Vertex AI)
 
-### `search-service/index.js` (REWRITTEN)
+## Build System Fixes
 
-- Hybrid BM25 + pgvector cosine search with RRF fusion (k=55)
-- Parameterized SQL throughout (zero string interpolation)
-- 384-dim embedding validation
-- Content indexing API with tsvector auto-generation
-- HNSW + trigram index creation
-- Input truncation for all string fields
+### Turbo Workspace Collision Resolution
 
-### `migration-service/index.js` (REWRITTEN)
+- `services/heady-web/package.json`: renamed from `heady-web-portal` to `@heady/heady-web-shell`
+- Resolved duplicate name collision with `apps/headyweb/package.json`
+- Unblocks `npm test` / `turbo run test` across the monorepo
 
-- 7 versioned migrations covering all tables
-- Transaction-safe apply with automatic rollback on failure
-- Rollback API for last-applied migration
-- Status endpoint showing pending vs applied
-- Migration table with checksum and rolled_back_at tracking
+## Pipeline Verification
 
-### `analytics-service/index.js` (USER-HARDENED)
-
-- Structured logging, security headers, graceful shutdown
-- Input validation with type checking and length truncation
-- `make_interval(hours => $N)` parameterized queries
-- Fibonacci-scaled pool sizes and timeouts
-
----
-
-## Dockerfiles Created (5)
-
-All services now have multi-stage distroless Dockerfiles:
-
-- `analytics-service/Dockerfile` (port 3394)
-- `notification-service/Dockerfile` (port 3395)
-- `scheduler-service/Dockerfile` (port 3396)
-- `search-service/Dockerfile` (port 3397)
-- `migration-service/Dockerfile` (port 3398)
-
----
-
-## Security Improvements Summary
-
-| Category | Before | After |
-|----------|--------|-------|
-| SQL Injection | 3 endpoints vulnerable | 0 — all parameterized |
-| CORS | Wildcards in some services | Allow-list of 11 domains |
-| CSP | None | Full policy on all services |
-| HSTS | None | 2-year + preload in production |
-| Rate Limiting | None | φ-scaled sliding windows |
-| Error Handling | Unhandled rejections crash | try/catch + structured error responses |
-| Logging | console.log | Pino structured JSON with request-ID |
-| Shutdown | None | Graceful drain with φ³-second timeout |
-
----
-*© 2026 HeadySystems Inc. — Eric Haywood, Founder*
+- 21-stage HCFullPipeline: 6/6 tests pass (full run, approval gate, skip stages, validation, status, self-awareness)
+- Cloud Run: 7/7 services live and healthy
+- MCP Bridge: v2.0.0 with 29 vectors, 384 dimensions, GPU enabled, 4 transports active

@@ -166,11 +166,12 @@ function heady_auth(provider){
   var g=document.getElementById('heady-auth-gate');
   g.style.opacity='0';
   setTimeout(function(){g.style.display='none';},500);
-  localStorage.setItem('heady_auth_session',JSON.stringify({ts:Date.now(),site:'${domain}',provider:provider}));
+  try{sessionStorage.setItem('heady_auth_session',JSON.stringify({ts:Date.now(),site:'${domain}',provider:provider}));}catch(e){}
+  fetch('/api/auth/session',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({provider:provider,site:'${domain}'})}).catch(function(){});
 }
 (function(){
-  var s=localStorage.getItem('heady_auth_session');
-  if(s){try{var d=JSON.parse(s);if(Date.now()-d.ts<365*86400000){var g=document.getElementById('heady-auth-gate');if(g){g.style.display='none';}}}catch(e){}}
+  var s=sessionStorage.getItem('heady_auth_session');
+  if(s){try{var d=JSON.parse(s);if(Date.now()-d.ts<86400000){var g=document.getElementById('heady-auth-gate');if(g){g.style.display='none';}}}catch(e){}}
 })();
 <\\/script>`;
 }
