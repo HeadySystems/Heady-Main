@@ -6,6 +6,9 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const path = require('path');
+let cookieParser;
+try { cookieParser = require('cookie-parser'); } catch { cookieParser = null; }
 
 const { logger } = require('./src/utils/logger');
 const { validateEnv } = require('./src/utils/env-validator');
@@ -17,6 +20,15 @@ const { setupMemoryRoutes } = require('./src/memory/memory-router');
 const { AutoSuccessEngine } = require('./src/services/auto-success');
 const { errorHandler } = require('./src/gateway/error-handler');
 const { metricsMiddleware, metricsEndpoint } = require('./src/utils/metrics');
+
+// Auth routes
+let authRouter;
+try {
+  const authModule = require('./src/routes/auth-routes');
+  authRouter = authModule.router;
+} catch (err) {
+  console.warn('[HeadyManager] Auth routes not loaded:', err.message);
+}
 
 // ── Validate environment ──
 const envOk = validateEnv();
@@ -35,7 +47,11 @@ app.use(cors({
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
+if (cookieParser) app.use(cookieParser());
 app.use(metricsMiddleware);
+
+// ── Static files (public/) ──
+app.use(express.static(path.join(__dirname, 'public')));
 
 // ── Routes ──
 setupHealthRoutes(app);
@@ -44,6 +60,12 @@ setupMCPRoutes(app);
 setupAgentRoutes(app);
 setupMemoryRoutes(app);
 app.get('/metrics', metricsEndpoint);
+
+// ── Auth routes ──
+if (authRouter) {
+  app.use('/api/auth', authRouter);
+  logger.info('[HeadyManager] ✅ Auth routes mounted at /api/auth');
+}
 
 // ── Error handling (must be last) ──
 app.use(errorHandler);

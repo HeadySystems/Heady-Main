@@ -3,8 +3,9 @@
   "version": "0.2.0",
   "description": "Heady Latent OS — Autonomous AI Platform",
   "main": "heady-manager.js",
-  "type": "commonjs",
-  "engines": { "node": ">=20.0.0" },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "start": "node heady-manager.js",
     "dev": "NODE_ENV=development node --watch heady-manager.js",

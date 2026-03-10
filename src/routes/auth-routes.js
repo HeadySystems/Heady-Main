@@ -49,6 +49,23 @@ function verifyPassword(password, stored) {
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const MAX_SESSIONS_PER_USER = 5;
 const SESSION_CLEANUP_INTERVAL = 60 * 60 * 1000; // 1 hour
+const COOKIE_NAME = 'heady_session';
+
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict',
+  maxAge: SESSION_TTL_MS,
+  path: '/',
+};
+
+function setSessionCookie(res, token) {
+  res.cookie(COOKIE_NAME, token, COOKIE_OPTIONS);
+}
+
+function clearSessionCookie(res) {
+  res.clearCookie(COOKIE_NAME, { path: '/' });
+}
 
 // ═════════════════════════════════════════════════════════════════════════════
 // IN-MEMORY STORAGE (demo only; replace with DB in production)
@@ -133,12 +150,16 @@ function extractToken(authHeader) {
  * Returns 401 if token is invalid or missing.
  */
 function requireAuth(req, res, next) {
-  const token = extractToken(req.headers.authorization);
+  // Check httpOnly cookie first, then fall back to Bearer header
+  let token = req.cookies?.[COOKIE_NAME] || null;
+  if (!token) {
+    token = extractToken(req.headers.authorization);
+  }
 
   if (!token) {
     return res.status(401).json({
       error: 'unauthorized',
-      message: 'Missing or invalid Authorization header',
+      message: 'Missing session cookie or Authorization header',
     });
   }
 
@@ -231,6 +252,7 @@ router.post('/login', (req, res) => {
         expiresAt: Date.now() + SESSION_TTL_MS,
       });
 
+      setSessionCookie(res, token);
       return res.status(200).json({ token, user: adminUser });
     }
 
@@ -308,6 +330,7 @@ router.post('/login', (req, res) => {
       expiresAt: Date.now() + SESSION_TTL_MS,
     });
 
+    setSessionCookie(res, token);
     return res.status(200).json({
       token,
       user: { id: user.id, email: user.email, name: user.name },
@@ -384,6 +407,7 @@ router.post('/register', (req, res) => {
       expiresAt: Date.now() + SESSION_TTL_MS,
     });
 
+    setSessionCookie(res, token);
     return res.status(201).json({
       token,
       user: {
@@ -416,6 +440,7 @@ router.post('/logout', requireAuth, (req, res) => {
   try {
     const token = req.token;
     sessions.delete(token);
+    clearSessionCookie(res);
 
     return res.status(200).json({
       message: 'Logged out successfully',
