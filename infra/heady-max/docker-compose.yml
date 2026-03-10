@@ -1,0 +1,1646 @@
+# Heady 50-Service Infrastructure
+# Author: Eric Haywood / HeadySystems Inc.
+# All numeric constants derived from φ (1.618) or Fibonacci sequence:
+# [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377]
+# φ² ≈ 2.618, φ³ ≈ 4.236, φ⁴ ≈ 6.854, φ⁵ ≈ 11.09, φ⁶ ≈ 17.94, φ⁷ ≈ 29.03
+
+version: "3.9"
+
+x-common: &common
+  restart: unless-stopped
+  networks:
+    - heady-net
+  env_file:
+    - .env
+
+x-healthcheck-fast: &healthcheck-fast
+  interval: 8s        # fib(6)
+  timeout: 5s         # fib(5)
+  retries: 8          # fib(6)
+  start_period: 13s   # fib(7)
+
+x-healthcheck-standard: &healthcheck-standard
+  interval: 13s       # fib(7)
+  timeout: 5s         # fib(5)
+  retries: 8          # fib(6)
+  start_period: 21s   # fib(8)
+
+x-healthcheck-slow: &healthcheck-slow
+  interval: 21s       # fib(8)
+  timeout: 8s         # fib(6)
+  retries: 5          # fib(5)
+  start_period: 34s   # fib(9)
+
+services:
+
+  # ============================================================================
+  # INFRASTRUCTURE — always start first
+  # ============================================================================
+
+  postgres:
+    <<: *common
+    image: pgvector/pgvector:pg16
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_MAX_CONNECTIONS: "233"  # fib(13)
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      <<: *healthcheck-fast
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-heady} -d ${POSTGRES_DB:-heady}"]
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+
+  redis:
+    <<: *common
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: >
+      redis-server
+      --maxmemory 377mb
+      --maxmemory-policy allkeys-lru
+      --save 89 1
+      --save 34 13
+      --save 13 144
+      --tcp-backlog 233
+      --hz 13
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      <<: *healthcheck-fast
+      test: ["CMD", "redis-cli", "ping"]
+
+  nats:
+    <<: *common
+    image: nats:2-alpine
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    command: ["--config", "/etc/nats/nats-server.conf"]
+    volumes:
+      - nats-data:/data/jetstream
+      - ./nats/nats-server.conf:/etc/nats/nats-server.conf:ro
+    healthcheck:
+      <<: *healthcheck-fast
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8222/healthz"]
+
+  envoy-proxy:
+    <<: *common
+    image: envoyproxy/envoy:v1.29-latest
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+      - "9901:9901"
+    volumes:
+      - ./envoy/envoy.yaml:/etc/envoy/envoy.yaml:ro
+      - ./certs:/etc/envoy/certs:ro
+    depends_on:
+      consul:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-fast
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:9901/ready"]
+
+  consul:
+    <<: *common
+    image: hashicorp/consul:1.17
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    command: agent -server -bootstrap-expect=1 -ui -client=0.0.0.0 -config-file=/consul/config/consul-config.json
+    volumes:
+      - ./consul/consul-config.json:/consul/config/consul-config.json:ro
+    healthcheck:
+      <<: *healthcheck-fast
+      test: ["CMD", "consul", "members"]
+
+  pgbouncer:
+    <<: *common
+    image: bitnami/pgbouncer:1
+    ports:
+      - "6432:6432"
+    volumes:
+      - ./pgbouncer/pgbouncer.ini:/bitnami/pgbouncer/conf/pgbouncer.ini:ro
+    environment:
+      POSTGRESQL_HOST: postgres
+      POSTGRESQL_PORT: "5432"
+      POSTGRESQL_USERNAME: ${POSTGRES_USER}
+      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRESQL_DATABASE: ${POSTGRES_DB}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-fast
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 6432"]
+
+  # ============================================================================
+  # CORE — ports 3310-3319
+  # ============================================================================
+
+  heady-brain:
+    <<: *common
+    build:
+      context: ./services/heady-brain/
+    ports:
+      - "3310:3310"
+    environment:
+      PORT: "3310"
+      SERVICE_NAME: heady-brain
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      PHI_HEARTBEAT_MS: "1618"
+      MAX_CONTEXT_TOKENS: "6765"  # fib(20)
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3310/health"]
+
+  heady-brains:
+    <<: *common
+    build:
+      context: ./services/heady-brains/
+    ports:
+      - "3311:3311"
+    environment:
+      PORT: "3311"
+      SERVICE_NAME: heady-brains
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      CONTEXT_ASSEMBLY_DEPTH: "13"  # fib(7)
+      PREPROCESSING_THREADS: "8"   # fib(6)
+    depends_on:
+      heady-brain:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3311/health"]
+
+  heady-infer:
+    <<: *common
+    build:
+      context: ./services/heady-infer/
+    ports:
+      - "3312:3312"
+    environment:
+      PORT: "3312"
+      SERVICE_NAME: heady-infer
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      MODEL_TIMEOUT_MS: "4236"  # φ³ × 1000
+      MAX_BATCH_SIZE: "34"      # fib(9)
+      INFERENCE_QUEUE_SIZE: "89" # fib(11)
+    depends_on:
+      heady-brain:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3312/health"]
+
+  ai-router:
+    <<: *common
+    build:
+      context: ./services/ai-router/
+    ports:
+      - "3313:3313"
+    environment:
+      PORT: "3313"
+      SERVICE_NAME: ai-router
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      CSL_SCORING_WEIGHT_PHI: "1.618"
+      PROVIDER_TIMEOUT_MS: "4236"  # φ³ × 1000
+      MAX_RETRIES: "5"             # fib(5)
+      FALLBACK_CHAIN_DEPTH: "8"    # fib(6)
+    depends_on:
+      heady-infer:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3313/health"]
+
+  model-gateway:
+    <<: *common
+    build:
+      context: ./services/model-gateway/
+    ports:
+      - "3314:3314"
+    environment:
+      PORT: "3314"
+      SERVICE_NAME: model-gateway
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
+      PERPLEXITY_API_KEY: ${PERPLEXITY_API_KEY}
+      REQUEST_POOL_SIZE: "55"  # fib(10)
+      RATE_LIMIT_WINDOW_MS: "1618"
+    depends_on:
+      ai-router:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3314/health"]
+
+  api-gateway:
+    <<: *common
+    build:
+      context: ./services/api-gateway/
+    ports:
+      - "3315:3315"
+    environment:
+      PORT: "3315"
+      SERVICE_NAME: api-gateway
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      RATE_LIMIT_RPM: "144"         # fib(12)
+      RATE_LIMIT_WINDOW_MS: "1618"
+      MAX_REQUEST_SIZE_KB: "987"    # fib(16)
+      AUTH_SESSION_TTL_S: "2584"    # fib(18)
+    depends_on:
+      consul:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3315/health"]
+
+  domain-router:
+    <<: *common
+    build:
+      context: ./services/domain-router/
+    ports:
+      - "3316:3316"
+    environment:
+      PORT: "3316"
+      SERVICE_NAME: domain-router
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DOMAIN_CACHE_TTL_S: "89"  # fib(11)
+      ROUTING_TABLE_REFRESH_S: "34"  # fib(9)
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3316/health"]
+
+  heady-manager:
+    <<: *common
+    build:
+      context: ./services/heady-manager/
+    ports:
+      - "3317:3317"
+    environment:
+      PORT: "3317"
+      SERVICE_NAME: heady-manager
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      BOOT_PHASES: "12"
+      BOOT_PHASE_TIMEOUT_MS: "6854"  # φ⁴ × 1000
+      READINESS_CHECK_INTERVAL_MS: "1618"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-slow
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3317/health"]
+
+  heady-conductor:
+    <<: *common
+    build:
+      context: ./services/heady-conductor/
+    ports:
+      - "3318:3318"
+    environment:
+      PORT: "3318"
+      SERVICE_NAME: heady-conductor
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      ORCHESTRATION_TIMEOUT_MS: "11090"  # φ⁵ × 1000
+      MAX_PARALLEL_WORKFLOWS: "21"       # fib(8)
+    depends_on:
+      heady-manager:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3318/health"]
+
+  hcfullpipeline-executor:
+    <<: *common
+    build:
+      context: ./services/hcfullpipeline-executor/
+    ports:
+      - "3319:3319"
+    environment:
+      PORT: "3319"
+      SERVICE_NAME: hcfullpipeline-executor
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      PIPELINE_STAGES: "21"             # fib(8) — 21-stage pipeline
+      STAGE_TIMEOUT_MS: "4236"          # φ³ × 1000
+      PIPELINE_TOTAL_TIMEOUT_MS: "29034" # φ⁷ × 1000
+    depends_on:
+      heady-conductor:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-slow
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3319/health"]
+
+  # ============================================================================
+  # MEMORY — ports 3320-3325
+  # ============================================================================
+
+  heady-embed:
+    <<: *common
+    build:
+      context: ./services/heady-embed/
+    ports:
+      - "3320:3320"
+    environment:
+      PORT: "3320"
+      SERVICE_NAME: heady-embed
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      EMBEDDING_MODEL: all-MiniLM-L6-v2
+      EMBEDDING_DIM: "384"
+      BATCH_SIZE: "34"          # fib(9)
+      EMBEDDING_CACHE_SIZE: "233" # fib(13)
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3320/health"]
+
+  heady-memory:
+    <<: *common
+    build:
+      context: ./services/heady-memory/
+    ports:
+      - "3321:3321"
+    environment:
+      PORT: "3321"
+      SERVICE_NAME: heady-memory
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      MEMORY_TTL_S: "4181"       # fib(19)
+      MAX_MEMORIES_PER_USER: "610" # fib(15)
+    depends_on:
+      heady-embed:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3321/health"]
+
+  heady-vector:
+    <<: *common
+    build:
+      context: ./services/heady-vector/
+    ports:
+      - "3322:3322"
+    environment:
+      PORT: "3322"
+      SERVICE_NAME: heady-vector
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      HNSW_EF_SEARCH: "89"      # fib(11)
+      HNSW_M: "34"              # fib(9) — scaled for search (index uses 32 as pgvector default pair)
+      TOP_K_DEFAULT: "13"        # fib(7)
+      SIMILARITY_THRESHOLD: "0.618"  # 1/φ
+    depends_on:
+      heady-embed:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3322/health"]
+
+  heady-projection:
+    <<: *common
+    build:
+      context: ./services/heady-projection/
+    ports:
+      - "3323:3323"
+    environment:
+      PORT: "3323"
+      SERVICE_NAME: heady-projection
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      SOURCE_DIM: "384"
+      TARGET_DIM: "3"
+      PROJECTION_BATCH_SIZE: "55"  # fib(10)
+      SPATIAL_SCALE_PHI: "1.618"
+    depends_on:
+      heady-vector:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3323/health"]
+
+  heady-cache:
+    <<: *common
+    build:
+      context: ./services/heady-cache/
+    ports:
+      - "3324:3324"
+    environment:
+      PORT: "3324"
+      SERVICE_NAME: heady-cache
+      CONSUL_HTTP_ADDR: consul:8500
+      REDIS_URL: redis://redis:6379
+      LRU_TIER_1_SIZE: "89"     # fib(11) — hot cache
+      LRU_TIER_2_SIZE: "144"    # fib(12) — warm cache
+      LRU_TIER_3_SIZE: "233"    # fib(13) — cold cache
+      CACHE_TTL_HOT_S: "55"     # fib(10)
+      CACHE_TTL_WARM_S: "144"   # fib(12)
+      CACHE_TTL_COLD_S: "377"   # fib(14)
+      PHI_DECAY_FACTOR: "1.618"
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3324/health"]
+
+  search-service:
+    <<: *common
+    build:
+      context: ./services/search-service/
+    ports:
+      - "3325:3325"
+    environment:
+      PORT: "3325"
+      SERVICE_NAME: search-service
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      BM25_K1: "1.618"                # φ for term frequency saturation
+      BM25_B: "0.618"                 # 1/φ for length normalization
+      HYBRID_VECTOR_WEIGHT: "0.618"   # 1/φ weight to vector score
+      HYBRID_BM25_WEIGHT: "0.382"     # 1 - 1/φ weight to BM25 score
+      SEARCH_RESULTS_LIMIT: "21"      # fib(8)
+    depends_on:
+      heady-vector:
+        condition: service_healthy
+      heady-embed:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3325/health"]
+
+  # ============================================================================
+  # AGENTS — ports 3326-3332
+  # ============================================================================
+
+  heady-bee-factory:
+    <<: *common
+    build:
+      context: ./services/heady-bee-factory/
+    ports:
+      - "3326:3326"
+    environment:
+      PORT: "3326"
+      SERVICE_NAME: heady-bee-factory
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      MAX_BEES: "6765"              # fib(20)
+      BEE_SPAWN_COOLDOWN_MS: "1618"
+      BEE_TTL_S: "2584"            # fib(18)
+      SWARM_SIZE_LIMIT: "233"       # fib(13)
+    depends_on:
+      nats:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3326/health"]
+
+  heady-hive:
+    <<: *common
+    build:
+      context: ./services/heady-hive/
+    ports:
+      - "3327:3327"
+    environment:
+      PORT: "3327"
+      SERVICE_NAME: heady-hive
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      MAX_SWARM_DEPTH: "8"          # fib(6)
+      COORDINATION_INTERVAL_MS: "1618"
+      CONSENSUS_THRESHOLD: "0.618"  # 1/φ
+      MAX_CONCURRENT_SWARMS: "13"   # fib(7)
+    depends_on:
+      heady-bee-factory:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3327/health"]
+
+  heady-federation:
+    <<: *common
+    build:
+      context: ./services/heady-federation/
+    ports:
+      - "3328:3328"
+    environment:
+      PORT: "3328"
+      SERVICE_NAME: heady-federation
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      FEDERATION_SYNC_INTERVAL_MS: "4236"  # φ³ × 1000
+      MAX_FEDERATED_HIVES: "21"            # fib(8)
+      CROSS_SWARM_TIMEOUT_MS: "6854"       # φ⁴ × 1000
+    depends_on:
+      heady-hive:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3328/health"]
+
+  heady-soul:
+    <<: *common
+    build:
+      context: ./services/heady-soul/
+    ports:
+      - "3329:3329"
+    environment:
+      PORT: "3329"
+      SERVICE_NAME: heady-soul
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      ARCHETYPE_COUNT: "7"
+      AWARENESS_CYCLE_MS: "1618"
+      SOUL_DEPTH_LAYERS: "13"       # fib(7)
+      INTROSPECTION_INTERVAL_MS: "4236"  # φ³ × 1000
+    depends_on:
+      heady-brain:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3329/health"]
+
+  auto-success-engine:
+    <<: *common
+    build:
+      context: ./services/auto-success-engine/
+    ports:
+      - "3330:3330"
+    environment:
+      PORT: "3330"
+      SERVICE_NAME: auto-success-engine
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      PHI_7_HEARTBEAT_MS: "29034"   # φ⁷ × 1000
+      SUCCESS_METRIC_WINDOW_S: "377" # fib(14)
+      GOAL_EVALUATION_DEPTH: "8"    # fib(6)
+    depends_on:
+      heady-conductor:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-slow
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3330/health"]
+
+  heady-chain:
+    <<: *common
+    build:
+      context: ./services/heady-chain/
+    ports:
+      - "3331:3331"
+    environment:
+      PORT: "3331"
+      SERVICE_NAME: heady-chain
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      MAX_CHAIN_LENGTH: "21"        # fib(8)
+      CHAIN_STEP_TIMEOUT_MS: "4236" # φ³ × 1000
+      MAX_PARALLEL_CHAINS: "13"     # fib(7)
+    depends_on:
+      heady-conductor:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3331/health"]
+
+  prompt-manager:
+    <<: *common
+    build:
+      context: ./services/prompt-manager/
+    ports:
+      - "3332:3332"
+    environment:
+      PORT: "3332"
+      SERVICE_NAME: prompt-manager
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      PROMPT_CATALOGUE_SIZE: "55"    # fib(10) — expandable catalogue slots
+      PROMPT_CACHE_TTL_S: "89"       # fib(11)
+      MAX_PROMPT_TOKENS: "6765"      # fib(20)
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3332/health"]
+
+  # ============================================================================
+  # SECURITY — ports 3333-3338
+  # ============================================================================
+
+  heady-guard:
+    <<: *common
+    build:
+      context: ./services/heady-guard/
+    ports:
+      - "3333:3333"
+    environment:
+      PORT: "3333"
+      SERVICE_NAME: heady-guard
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      MAX_INPUT_LENGTH: "6765"      # fib(20)
+      VALIDATION_TIMEOUT_MS: "1618"
+      SCHEMA_CACHE_SIZE: "89"       # fib(11)
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3333/health"]
+
+  heady-security:
+    <<: *common
+    build:
+      context: ./services/heady-security/
+    ports:
+      - "3334:3334"
+    environment:
+      PORT: "3334"
+      SERVICE_NAME: heady-security
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      CSP_REPORT_URI: ${CSP_REPORT_URI}
+      INJECTION_SCAN_DEPTH: "8"     # fib(6)
+      THREAT_LOG_RETENTION_DAYS: "89" # fib(11)
+      WAF_RULE_REFRESH_S: "55"      # fib(10)
+    depends_on:
+      heady-guard:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3334/health"]
+
+  heady-governance:
+    <<: *common
+    build:
+      context: ./services/heady-governance/
+    ports:
+      - "3335:3335"
+    environment:
+      PORT: "3335"
+      SERVICE_NAME: heady-governance
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      POLICY_REFRESH_INTERVAL_S: "34" # fib(9)
+      AUDIT_BATCH_SIZE: "55"          # fib(10)
+      COMPLIANCE_CHECK_DEPTH: "8"     # fib(6)
+    depends_on:
+      heady-security:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3335/health"]
+
+  secret-gateway:
+    <<: *common
+    build:
+      context: ./services/secret-gateway/
+    ports:
+      - "3336:3336"
+    environment:
+      PORT: "3336"
+      SERVICE_NAME: secret-gateway
+      CONSUL_HTTP_ADDR: consul:8500
+      GOOGLE_CLOUD_PROJECT: ${GOOGLE_CLOUD_PROJECT}
+      SECRET_CACHE_TTL_S: "89"      # fib(11)
+      SECRET_ROTATION_CHECK_S: "377" # fib(14)
+      MAX_SECRET_SIZE_BYTES: "6765"  # fib(20)
+    depends_on:
+      consul:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3336/health"]
+
+  auth-session-server:
+    <<: *common
+    build:
+      context: ./services/auth-session-server/
+    ports:
+      - "3337:3337"
+    environment:
+      PORT: "3337"
+      SERVICE_NAME: auth-session-server
+      CONSUL_HTTP_ADDR: consul:8500
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      FIREBASE_SERVICE_ACCOUNT_KEY: ${FIREBASE_SERVICE_ACCOUNT_KEY}
+      SESSION_TTL_S: "2584"          # fib(18)
+      SESSION_REFRESH_THRESHOLD_S: "987" # fib(16)
+      COOKIE_SECURE: "true"
+      COOKIE_HTTP_ONLY: "true"
+      COOKIE_SAME_SITE: "strict"
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3337/health"]
+
+  heady-check:
+    <<: *common
+    build:
+      context: ./services/heady-check/
+    ports:
+      - "3338:3338"
+    environment:
+      PORT: "3338"
+      SERVICE_NAME: heady-check
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      QUALITY_GATE_THRESHOLD: "0.618"  # 1/φ
+      VERIFICATION_DEPTH: "5"          # fib(5)
+      ASSURE_CHECK_TIMEOUT_MS: "4236"  # φ³ × 1000
+    depends_on:
+      heady-governance:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3338/health"]
+
+  # ============================================================================
+  # MONITORING — ports 3339-3344
+  # ============================================================================
+
+  heady-health:
+    <<: *common
+    build:
+      context: ./services/heady-health/
+    ports:
+      - "3339:3339"
+    environment:
+      PORT: "3339"
+      SERVICE_NAME: heady-health
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      HEALTH_POLL_INTERVAL_MS: "1618"
+      SERVICE_COUNT: "55"            # total services tracked (fib(10) — nearest fib to 50)
+      HEALTH_HISTORY_SIZE: "144"     # fib(12)
+      DEGRADED_THRESHOLD: "0.618"    # 1/φ
+    depends_on:
+      consul:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3339/health"]
+
+  heady-eval:
+    <<: *common
+    build:
+      context: ./services/heady-eval/
+    ports:
+      - "3340:3340"
+    environment:
+      PORT: "3340"
+      SERVICE_NAME: heady-eval
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      QUALITY_SCORE_MIN: "0.618"     # 1/φ
+      EVAL_SAMPLE_RATE: "0.382"      # 1 - 1/φ
+      EVAL_BATCH_SIZE: "34"          # fib(9)
+      EVAL_RETENTION_DAYS: "89"      # fib(11)
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3340/health"]
+
+  heady-maintenance:
+    <<: *common
+    build:
+      context: ./services/heady-maintenance/
+    ports:
+      - "3341:3341"
+    environment:
+      PORT: "3341"
+      SERVICE_NAME: heady-maintenance
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      VACUUM_INTERVAL_S: "2584"      # fib(18)
+      LOG_ROTATION_SIZE_MB: "89"     # fib(11)
+      CLEANUP_BATCH_SIZE: "144"      # fib(12)
+      STALE_DATA_TTL_DAYS: "55"      # fib(10)
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-slow
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3341/health"]
+
+  heady-testing:
+    <<: *common
+    build:
+      context: ./services/heady-testing/
+    ports:
+      - "3342:3342"
+    environment:
+      PORT: "3342"
+      SERVICE_NAME: heady-testing
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      TEST_TIMEOUT_MS: "11090"       # φ⁵ × 1000
+      MAX_PARALLEL_TESTS: "13"       # fib(7)
+      TEST_RETRY_COUNT: "3"          # fib(4)
+    depends_on:
+      consul:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3342/health"]
+
+  observability-kernel:
+    <<: *common
+    build:
+      context: ./services/observability-kernel/
+    ports:
+      - "3343:3343"
+    environment:
+      PORT: "3343"
+      SERVICE_NAME: observability-kernel
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      LOG_BUFFER_SIZE: "233"         # fib(13)
+      TRACE_SAMPLE_RATE: "0.382"     # 1 - 1/φ
+      METRIC_FLUSH_INTERVAL_MS: "1618"
+      LOG_RETENTION_HOURS: "377"     # fib(14)
+    depends_on:
+      nats:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3343/health"]
+
+  notification-service:
+    <<: *common
+    build:
+      context: ./services/notification-service/
+    ports:
+      - "3344:3344"
+    environment:
+      PORT: "3344"
+      SERVICE_NAME: notification-service
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      WS_HEARTBEAT_MS: "1618"
+      SSE_RETRY_MS: "4236"          # φ³ × 1000
+      PUSH_BATCH_SIZE: "34"         # fib(9)
+      MAX_WS_CONNECTIONS: "610"     # fib(15)
+    depends_on:
+      nats:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3344/health"]
+
+  # ============================================================================
+  # WEB — ports 3345-3352
+  # ============================================================================
+
+  heady-web:
+    <<: *common
+    build:
+      context: ./services/heady-web/
+    ports:
+      - "3345:3345"
+    environment:
+      PORT: "3345"
+      SERVICE_NAME: heady-web
+      CONSUL_HTTP_ADDR: consul:8500
+      REDIS_URL: redis://redis:6379
+      API_GATEWAY_URL: http://api-gateway:3315
+      SESSION_SECRET: ${SESSION_SECRET}
+      NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL}
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+      auth-session-server:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3345/health"]
+
+  heady-buddy:
+    <<: *common
+    build:
+      context: ./services/heady-buddy/
+    ports:
+      - "3346:3346"
+    environment:
+      PORT: "3346"
+      SERVICE_NAME: heady-buddy
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      API_GATEWAY_URL: http://api-gateway:3315
+      CHAT_HISTORY_LIMIT: "89"      # fib(11)
+      TYPING_INDICATOR_MS: "1618"
+      MAX_MESSAGE_LENGTH: "6765"    # fib(20)
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+      heady-brain:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3346/health"]
+
+  heady-ui:
+    <<: *common
+    build:
+      context: ./services/heady-ui/
+    ports:
+      - "3347:3347"
+    environment:
+      PORT: "3347"
+      SERVICE_NAME: heady-ui
+      CONSUL_HTTP_ADDR: consul:8500
+      COMPONENT_CACHE_TTL_S: "89"   # fib(11)
+    depends_on:
+      consul:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3347/health"]
+
+  heady-onboarding:
+    <<: *common
+    build:
+      context: ./services/heady-onboarding/
+    ports:
+      - "3348:3348"
+    environment:
+      PORT: "3348"
+      SERVICE_NAME: heady-onboarding
+      CONSUL_HTTP_ADDR: consul:8500
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      API_GATEWAY_URL: http://api-gateway:3315
+      ONBOARDING_STEPS: "8"          # fib(6)
+      STEP_TIMEOUT_S: "89"           # fib(11)
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+      auth-session-server:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3348/health"]
+
+  heady-pilot-onboarding:
+    <<: *common
+    build:
+      context: ./services/heady-pilot-onboarding/
+    ports:
+      - "3349:3349"
+    environment:
+      PORT: "3349"
+      SERVICE_NAME: heady-pilot-onboarding
+      CONSUL_HTTP_ADDR: consul:8500
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      API_GATEWAY_URL: http://api-gateway:3315
+      PILOT_COHORT_SIZE: "34"        # fib(9)
+      PILOT_DURATION_DAYS: "21"      # fib(8)
+    depends_on:
+      heady-onboarding:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3349/health"]
+
+  heady-task-browser:
+    <<: *common
+    build:
+      context: ./services/heady-task-browser/
+    ports:
+      - "3350:3350"
+    environment:
+      PORT: "3350"
+      SERVICE_NAME: heady-task-browser
+      CONSUL_HTTP_ADDR: consul:8500
+      REDIS_URL: redis://redis:6379
+      API_GATEWAY_URL: http://api-gateway:3315
+      TASKS_PER_PAGE: "21"           # fib(8)
+      TASK_CACHE_TTL_S: "34"         # fib(9)
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3350/health"]
+
+  analytics-service:
+    <<: *common
+    build:
+      context: ./services/analytics-service/
+    ports:
+      - "3351:3351"
+    environment:
+      PORT: "3351"
+      SERVICE_NAME: analytics-service
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      ANALYTICS_FLUSH_INTERVAL_MS: "4236"  # φ³ × 1000
+      AGGREGATION_WINDOW_S: "89"           # fib(11)
+      RETENTION_DAYS: "55"                 # fib(10)
+      ANONYMIZATION_ENABLED: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3351/health"]
+
+  billing-service:
+    <<: *common
+    build:
+      context: ./services/billing-service/
+    ports:
+      - "3352:3352"
+    environment:
+      PORT: "3352"
+      SERVICE_NAME: billing-service
+      CONSUL_HTTP_ADDR: consul:8500
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      STRIPE_API_KEY: ${STRIPE_API_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      BILLING_CYCLE_DAYS: "34"       # fib(9) — roughly monthly
+      INVOICE_RETRY_COUNT: "5"       # fib(5)
+      PAYMENT_TIMEOUT_MS: "6854"     # φ⁴ × 1000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-session-server:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3352/health"]
+
+  # ============================================================================
+  # INTEGRATION — ports 3353-3364
+  # ============================================================================
+
+  mcp-server:
+    <<: *common
+    build:
+      context: ./services/mcp-server/
+    ports:
+      - "3353:3353"
+    environment:
+      PORT: "3353"
+      SERVICE_NAME: mcp-server
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      MCP_TOOL_COUNT: "34"           # fib(9) — 31 tools + 3 reserved slots
+      TOOL_EXECUTION_TIMEOUT_MS: "6854"  # φ⁴ × 1000
+      MAX_CONCURRENT_TOOLS: "13"     # fib(7)
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3353/health"]
+
+  google-mcp:
+    <<: *common
+    build:
+      context: ./services/google-mcp/
+    ports:
+      - "3354:3354"
+    environment:
+      PORT: "3354"
+      SERVICE_NAME: google-mcp
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      GOOGLE_CLOUD_PROJECT: ${GOOGLE_CLOUD_PROJECT}
+      GOOGLE_APPLICATION_CREDENTIALS: ${GOOGLE_APPLICATION_CREDENTIALS}
+      GOOGLE_API_TIMEOUT_MS: "4236"  # φ³ × 1000
+    depends_on:
+      mcp-server:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3354/health"]
+
+  memory-mcp:
+    <<: *common
+    build:
+      context: ./services/memory-mcp/
+    ports:
+      - "3355:3355"
+    environment:
+      PORT: "3355"
+      SERVICE_NAME: memory-mcp
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      MEMORY_OPS_TIMEOUT_MS: "4236"  # φ³ × 1000
+    depends_on:
+      mcp-server:
+        condition: service_healthy
+      heady-memory:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3355/health"]
+
+  perplexity-mcp:
+    <<: *common
+    build:
+      context: ./services/perplexity-mcp/
+    ports:
+      - "3356:3356"
+    environment:
+      PORT: "3356"
+      SERVICE_NAME: perplexity-mcp
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      PERPLEXITY_API_KEY: ${PERPLEXITY_API_KEY}
+      PERPLEXITY_MODEL: sonar-pro
+      SEARCH_TIMEOUT_MS: "6854"      # φ⁴ × 1000
+      RESULT_CACHE_TTL_S: "55"       # fib(10)
+    depends_on:
+      mcp-server:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3356/health"]
+
+  jules-mcp:
+    <<: *common
+    build:
+      context: ./services/jules-mcp/
+    ports:
+      - "3357:3357"
+    environment:
+      PORT: "3357"
+      SERVICE_NAME: jules-mcp
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      JULES_AGENT_TIMEOUT_MS: "29034"  # φ⁷ × 1000
+      MAX_CODE_LENGTH: "6765"          # fib(20)
+    depends_on:
+      mcp-server:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-slow
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3357/health"]
+
+  huggingface-gateway:
+    <<: *common
+    build:
+      context: ./services/huggingface-gateway/
+    ports:
+      - "3358:3358"
+    environment:
+      PORT: "3358"
+      SERVICE_NAME: huggingface-gateway
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      HF_API_KEY: ${HF_API_KEY}
+      MODEL_CACHE_SIZE: "89"         # fib(11)
+      INFERENCE_TIMEOUT_MS: "6854"   # φ⁴ × 1000
+      MAX_BATCH_SIZE: "34"           # fib(9)
+    depends_on:
+      model-gateway:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3358/health"]
+
+  colab-gateway:
+    <<: *common
+    build:
+      context: ./services/colab-gateway/
+    ports:
+      - "3359:3359"
+    environment:
+      PORT: "3359"
+      SERVICE_NAME: colab-gateway
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      COLAB_AUTH_TOKEN: ${COLAB_AUTH_TOKEN}
+      CLUSTER_HEARTBEAT_MS: "4236"   # φ³ × 1000
+      MAX_NOTEBOOK_SIZE_KB: "987"    # fib(16)
+    depends_on:
+      consul:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-slow
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3359/health"]
+
+  silicon-bridge:
+    <<: *common
+    build:
+      context: ./services/silicon-bridge/
+    ports:
+      - "3360:3360"
+    environment:
+      PORT: "3360"
+      SERVICE_NAME: silicon-bridge
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      GPU_POOL_SIZE: "8"             # fib(6)
+      COMPUTE_TIMEOUT_MS: "17944"    # φ⁶ × 1000
+      MEMORY_LIMIT_GB: "13"          # fib(7)
+    depends_on:
+      consul:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-slow
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3360/health"]
+
+  discord-bot:
+    <<: *common
+    build:
+      context: ./services/discord-bot/
+    ports:
+      - "3361:3361"
+    environment:
+      PORT: "3361"
+      SERVICE_NAME: discord-bot
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN}
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID}
+      COMMAND_COOLDOWN_MS: "1618"
+      MAX_MESSAGE_LENGTH: "1597"     # fib(17)
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3361/health"]
+
+  scheduler-service:
+    <<: *common
+    build:
+      context: ./services/scheduler-service/
+    ports:
+      - "3362:3362"
+    environment:
+      PORT: "3362"
+      SERVICE_NAME: scheduler-service
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      PHI_SCALE_FACTOR: "1.618"
+      MIN_INTERVAL_S: "5"            # fib(5)
+      DEFAULT_INTERVAL_S: "55"       # fib(10)
+      MAX_INTERVAL_S: "2584"         # fib(18)
+      MAX_SCHEDULED_JOBS: "233"      # fib(13)
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3362/health"]
+
+  migration-service:
+    <<: *common
+    build:
+      context: ./services/migration-service/
+    ports:
+      - "3363:3363"
+    environment:
+      PORT: "3363"
+      SERVICE_NAME: migration-service
+      CONSUL_HTTP_ADDR: consul:8500
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      MIGRATION_LOCK_TIMEOUT_MS: "6854"  # φ⁴ × 1000
+      MIGRATION_BATCH_SIZE: "34"         # fib(9)
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3363/health"]
+
+  asset-pipeline:
+    <<: *common
+    build:
+      context: ./services/asset-pipeline/
+    ports:
+      - "3364:3364"
+    environment:
+      PORT: "3364"
+      SERVICE_NAME: asset-pipeline
+      CONSUL_HTTP_ADDR: consul:8500
+      REDIS_URL: redis://redis:6379
+      CDN_BASE_URL: ${CDN_BASE_URL}
+      IMAGE_MAX_WIDTH: "1597"        # fib(17)
+      IMAGE_QUALITY: "89"            # fib(11)
+      CACHE_TTL_S: "2584"           # fib(18)
+      PIPELINE_CONCURRENCY: "8"     # fib(6)
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3364/health"]
+
+  # ============================================================================
+  # SPECIALIZED — ports 3365-3370
+  # ============================================================================
+
+  heady-vinci:
+    <<: *common
+    build:
+      context: ./services/heady-vinci/
+    ports:
+      - "3365:3365"
+    environment:
+      PORT: "3365"
+      SERVICE_NAME: heady-vinci
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      PATTERN_DEPTH: "13"            # fib(7)
+      RECOGNITION_THRESHOLD: "0.618" # 1/φ
+      MAX_PATTERN_CACHE: "233"       # fib(13)
+      PHI_WEIGHT: "1.618"
+    depends_on:
+      heady-brain:
+        condition: service_healthy
+      heady-vector:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3365/health"]
+
+  heady-autobiographer:
+    <<: *common
+    build:
+      context: ./services/heady-autobiographer/
+    ports:
+      - "3366:3366"
+    environment:
+      PORT: "3366"
+      SERVICE_NAME: heady-autobiographer
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      NARRATIVE_DEPTH: "8"           # fib(6)
+      EVENT_BUFFER_SIZE: "144"       # fib(12)
+      NARRATIVE_REFRESH_MS: "4236"   # φ³ × 1000
+    depends_on:
+      heady-memory:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3366/health"]
+
+  heady-midi:
+    <<: *common
+    build:
+      context: ./services/heady-midi/
+    ports:
+      - "3367:3367"
+    environment:
+      PORT: "3367"
+      SERVICE_NAME: heady-midi
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      MIDI_BUFFER_SIZE: "233"        # fib(13)
+      MIDI_LATENCY_TARGET_MS: "8"    # fib(6)
+      HARDWARE_SCAN_INTERVAL_S: "34" # fib(9)
+    depends_on:
+      nats:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3367/health"]
+
+  budget-tracker:
+    <<: *common
+    build:
+      context: ./services/budget-tracker/
+    ports:
+      - "3368:3368"
+    environment:
+      PORT: "3368"
+      SERVICE_NAME: budget-tracker
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      COST_AGGREGATION_INTERVAL_S: "55"  # fib(10)
+      BUDGET_ALERT_THRESHOLD: "0.618"    # 1/φ — alert at 61.8% of budget
+      PROVIDER_POLL_INTERVAL_S: "89"     # fib(11)
+    depends_on:
+      postgres:
+        condition: service_healthy
+      model-gateway:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3368/health"]
+
+  cli-service:
+    <<: *common
+    build:
+      context: ./services/cli-service/
+    ports:
+      - "3369:3369"
+    environment:
+      PORT: "3369"
+      SERVICE_NAME: cli-service
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      API_GATEWAY_URL: http://api-gateway:3315
+      CLI_HISTORY_SIZE: "89"         # fib(11)
+      COMMAND_TIMEOUT_MS: "6854"     # φ⁴ × 1000
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3369/health"]
+
+  heady-orchestration:
+    <<: *common
+    build:
+      context: ./services/heady-orchestration/
+    ports:
+      - "3370:3370"
+    environment:
+      PORT: "3370"
+      SERVICE_NAME: heady-orchestration
+      CONSUL_HTTP_ADDR: consul:8500
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      WORKFLOW_TIMEOUT_MS: "17944"   # φ⁶ × 1000
+      MAX_WORKFLOW_STEPS: "34"       # fib(9)
+      PARALLEL_WORKFLOW_LIMIT: "13"  # fib(7)
+      RETRY_BACKOFF_FACTOR: "1.618"  # φ
+    depends_on:
+      heady-conductor:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-standard
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3370/health"]
+
+# ==============================================================================
+# VOLUMES
+# ==============================================================================
+
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  nats-data:
+    driver: local
+
+# ==============================================================================
+# NETWORKS
+# ==============================================================================
+
+networks:
+  heady-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16

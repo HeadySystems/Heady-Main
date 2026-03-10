@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HeadyMCP — Model Context Protocol Documentation</title>
+    <meta name="description"
+        content="HeadyMCP documentation — connect any IDE, agent, or AI assistant to the Heady ecosystem via the Model Context Protocol. 12+ tools, brain-aware routing, zero-config onboarding.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #16161f;
+            --bg-card-hover: #1c1c28;
+            --bg-code: #0d0d14;
+            --border: #1e1e2e;
+            --border-accent: #2a2a3e;
+            --text-primary: #e8e8f0;
+            --text-secondary: #9898b0;
+            --text-muted: #6868a0;
+            --accent: #6366f1;
+            --accent-bright: #818cf8;
+            --accent-glow: rgba(99, 102, 241, 0.15);
+            --accent-2: #06b6d4;
+            --accent-3: #a855f7;
+            --accent-4: #22c55e;
+            --accent-5: #f59e0b;
+            --accent-6: #ef4444;
+            --gold: #fbbf24;
+            --phi: 1.618;
+            --radius: 12px;
+            --radius-lg: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 80px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        code,
+        pre {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* ─── Animated Background ──────────────────────────── */
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-image:
+                radial-gradient(circle at 25% 25%, rgba(99, 102, 241, 0.04) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(6, 182, 212, 0.03) 0%, transparent 50%),
+                linear-gradient(rgba(30, 30, 46, 0.4) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(30, 30, 46, 0.4) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 60px 60px, 60px 60px;
+            animation: gridPulse 8s ease-in-out infinite;
+        }
+
+        @keyframes gridPulse {
+
+            0%,
+            100% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        /* ─── Navigation ───────────────────────────────────── */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px) saturate(180%);
+            background: rgba(10, 10, 15, 0.82);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: -0.02em;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .nav-brand .logo-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-3));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 900;
+            color: white;
+        }
+
+        .nav-brand span {
+            color: var(--accent-bright);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-links .btn-nav {
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            background: var(--accent);
+            color: white;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .nav-links .btn-nav:hover {
+            background: var(--accent-bright);
+            transform: translateY(-1px);
+        }
+
+        /* ─── Layout ───────────────────────────────────────── */
+        .page-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        section {
+            padding: 5rem 0;
+        }
+
+        /* ─── Hero ─────────────────────────────────────────── */
+        .hero {
+            padding-top: 140px;
+            padding-bottom: 80px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            border-radius: 40px;
+            background: var(--accent-glow);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--accent-bright);
+            margin-bottom: 24px;
+            letter-spacing: 0.04em;
+        }
+
+        .hero-badge .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--accent-4);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+            }
+
+            50% {
+                opacity: 0.7;
+                box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+            }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5.5vw, 4rem);
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-bright) 50%, var(--accent-2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            max-width: 620px;
+            margin: 0 auto 36px;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent-3));
+            color: white;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-accent);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent);
+        }
+
+        /* ─── Quick Config Block ───────────────────────────── */
+        .hero-code {
+            max-width: 680px;
+            margin: 48px auto 0;
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            text-align: left;
+        }
+
+        .code-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            background: rgba(22, 22, 31, 0.6);
+        }
+
+        .code-tab {
+            padding: 10px 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border: none;
+            background: none;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .code-tab.active {
+            color: var(--accent-bright);
+            border-bottom-color: var(--accent);
+        }
+
+        .code-tab:hover {
+            color: var(--text-secondary);
+        }
+
+        .code-panel {
+            display: none;
+        }
+
+        .code-panel.active {
+            display: block;
+        }
+
+        .code-panel pre {
+            padding: 20px 24px;
+            font-size: 0.82rem;
+            line-height: 1.65;
+            overflow-x: auto;
+            color: var(--text-secondary);
+        }
+
+        .code-panel pre .key {
+            color: var(--accent-2);
+        }
+
+        .code-panel pre .str {
+            color: var(--accent-4);
+        }
+
+        .code-panel pre .comment {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .code-panel pre .punct {
+            color: var(--text-muted);
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 48px;
+            right: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-accent);
+            color: var(--text-muted);
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            color: var(--accent-bright);
+            border-color: var(--accent);
+        }
+
+        .hero-code {
+            position: relative;
+        }
+
+        /* ─── Section Headers ──────────────────────────────── */
+        .section-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent-bright);
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 12px;
+        }
+
+        .section-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            max-width: 580px;
+            margin-bottom: 40px;
+        }
+
+        /* ─── Endpoints Table ──────────────────────────────── */
+        .endpoints-section {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .endpoints-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .endpoint-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            transition: all 0.25s;
+        }
+
+        .endpoint-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .endpoint-method {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            margin-bottom: 10px;
+        }
+
+        .method-get {
+            background: rgba(34, 197, 94, 0.12);
+            color: var(--accent-4);
+        }
+
+        .method-post {
+            background: rgba(99, 102, 241, 0.12);
+            color: var(--accent-bright);
+        }
+
+        .method-ws {
+            background: rgba(168, 85, 247, 0.12);
+            color: var(--accent-3);
+        }
+
+        .endpoint-path {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .endpoint-desc {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
+
+        /* ─── Tools Grid ───────────────────────────────────── */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .tool-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            transition: all 0.25s;
+            cursor: default;
+        }
+
+        .tool-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .tool-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-bottom: 14px;
+        }
+
+        .tool-card h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .tool-card p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .tool-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .tool-action {
+            font-size: 0.68rem;
+            padding: 3px 8px;
+            border-radius: 5px;
+            background: rgba(99, 102, 241, 0.08);
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* ─── Config Section ───────────────────────────────── */
+        .config-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .config-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .config-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 0.88rem;
+        }
+
+        .config-header .icon {
+            font-size: 1.1rem;
+        }
+
+        .config-card pre {
+            padding: 16px 20px;
+            font-size: 0.78rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            color: var(--text-secondary);
+        }
+
+        .config-card pre .key {
+            color: var(--accent-2);
+        }
+
+        .config-card pre .str {
+            color: var(--accent-4);
+        }
+
+        .config-card pre .comment {
+            color: var(--text-muted);
+        }
+
+        /* ─── Architecture ─────────────────────────────────── */
+        .arch-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            flex-wrap: wrap;
+            margin: 40px 0;
+        }
+
+        .arch-node {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px 28px;
+            text-align: center;
+            min-width: 160px;
+            transition: all 0.25s;
+        }
+
+        .arch-node:hover {
+            border-color: var(--accent);
+            transform: scale(1.04);
+        }
+
+        .arch-node .icon {
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+        }
+
+        .arch-node h4 {
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .arch-node p {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        .arch-arrow {
+            font-size: 1.4rem;
+            color: var(--text-muted);
+            padding: 0 12px;
+        }
+
+        /* ─── Servers Table ────────────────────────────────── */
+        .server-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .server-table th {
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .server-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+
+        .server-table tr:hover td {
+            background: var(--bg-card);
+        }
+
+        .server-table .server-name {
+            font-weight: 700;
+            color: var(--accent-bright);
+        }
+
+        .server-table .server-url {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            color: var(--accent-2);
+        }
+
+        .server-table .badge-transport {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-http {
+            background: rgba(6, 182, 212, 0.12);
+            color: var(--accent-2);
+        }
+
+        .badge-stdio {
+            background: rgba(168, 85, 247, 0.12);
+            color: var(--accent-3);
+        }
+
+        .badge-ws {
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--accent-5);
+        }
+
+        /* ─── Auth / Security ──────────────────────────────── */
+        .auth-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .auth-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            text-align: center;
+        }
+
+        .auth-card .icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+
+        .auth-card h3 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .auth-card p {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+        }
+
+        /* ─── Footer ───────────────────────────────────────── */
+        footer {
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+
+        footer p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        footer a {
+            color: var(--accent-bright);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 16px;
+        }
+
+        .footer-links a {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
+
+        /* ─── Responsive ───────────────────────────────────── */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .endpoints-grid,
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .auth-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .arch-flow {
+                flex-direction: column;
+            }
+
+            .arch-arrow {
+                transform: rotate(90deg);
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+        }
+
+        /* ─── Inline Code ──────────────────────────────────── */
+        p code,
+        li code,
+        td code {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--accent-bright);
+            padding: 2px 7px;
+            border-radius: 5px;
+            font-size: 0.82em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-grid"></div>
+
+    <!-- ─── Navigation ─────────────────────────────────────── -->
+    <nav>
+        <a href="#" class="nav-brand">
+            <div class="logo-icon">H</div>
+            Heady<span>MCP</span>
+        </a>
+        <div class="nav-links">
+            <a href="#quickstart">Quickstart</a>
+            <a href="#endpoints">Endpoints</a>
+            <a href="#tools">Tools</a>
+            <a href="#servers">Servers</a>
+            <a href="#config">Configuration</a>
+            <a href="#security">Security</a>
+            <a href="https://headysystems.com" class="btn-nav">Heady Platform →</a>
+        </div>
+    </nav>
+
+    <div class="page-wrapper">
+
+        <!-- ─── Hero ──────────────────────────────────────── -->
+        <section class="hero">
+            <div class="container">
+                <div class="hero-badge">
+                    <div class="dot"></div>
+                    MCP v1.0 · Protocol Stable
+                </div>
+                <h1>Connect anything to Heady</h1>
+                <p>
+                    HeadyMCP exposes the entire Heady ecosystem — 12 tools, brain-aware routing,
+                    and the HCFullPipeline — through the Model Context Protocol.
+                    Drop in one config block. Works everywhere MCP is spoken.
+                </p>
+                <div class="hero-actions">
+                    <a href="#quickstart" class="btn btn-primary">Get Started →</a>
+                    <a href="#tools" class="btn btn-secondary">Explore Tools</a>
+                </div>
+
+                <!-- Quick-config code block -->
+                <div class="hero-code" id="quickstart">
+                    <div class="code-tabs">
+                        <button class="code-tab active" data-panel="json">mcp.json</button>
+                        <button class="code-tab" data-panel="env">Environment</button>
+                        <button class="code-tab" data-panel="curl">cURL Test</button>
+                    </div>
+                    <button class="copy-btn" onclick="copyCode()">Copy</button>
+                    <div class="code-panel active" id="panel-json">
+                        <pre>{
+  <span class="key">"mcpServers"</span>: {
+    <span class="key">"heady-brain"</span>: {
+      <span class="key">"displayName"</span>: <span class="str">"Heady"</span>,
+      <span class="key">"transport"</span>:   <span class="str">"http"</span>,
+      <span class="key">"url"</span>:         <span class="str">"https://headyio.com/mcp"</span>,
+      <span class="key">"apiKey"</span>:      <span class="str">"${HEADY_API_KEY}"</span>
+    },
+    <span class="key">"heady-manager"</span>: {
+      <span class="key">"displayName"</span>: <span class="str">"Heady Manager"</span>,
+      <span class="key">"transport"</span>:   <span class="str">"http"</span>,
+      <span class="key">"url"</span>:         <span class="str">"https://headyio.com/manager"</span>,
+      <span class="key">"apiKey"</span>:      <span class="str">"${HEADY_API_KEY}"</span>
+    },
+    <span class="key">"heady-registry"</span>: {
+      <span class="key">"displayName"</span>: <span class="str">"Heady Registry"</span>,
+      <span class="key">"transport"</span>:   <span class="str">"http"</span>,
+      <span class="key">"url"</span>:         <span class="str">"https://headyio.com/registry"</span>,
+      <span class="key">"apiKey"</span>:      <span class="str">"${HEADY_API_KEY}"</span>
+    }
+  }
+}</pre>
+                    </div>
+                    <div class="code-panel" id="panel-env">
+                        <pre><span class="comment"># Set your Heady API key</span>
+<span class="key">HEADY_API_KEY</span>=<span class="str">hdy_ent_your_key_here</span>
+
+<span class="comment"># Key prefixes by tier:</span>
+<span class="comment">#   hdy_int_  →  Internal / Developer</span>
+<span class="comment">#   hdy_pro_  →  Professional</span>
+<span class="comment">#   hdy_ent_  →  Enterprise</span>
+
+<span class="comment"># Optional: MCP Gateway port (default 3500)</span>
+<span class="key">MCP_PORT</span>=<span class="str">3500</span>
+
+<span class="comment"># Optional: Workspace root for file scoping</span>
+<span class="key">HEADY_WORKSPACE</span>=<span class="str">/path/to/your/project</span></pre>
+                    </div>
+                    <div class="code-panel" id="panel-curl">
+                        <pre><span class="comment"># Health check</span>
+curl <span class="str">https://headyio.com/mcp</span>/health
+
+<span class="comment"># List all available MCP tools</span>
+curl <span class="str">https://headyio.com/mcp</span>/tools \
+  -H <span class="str">"Authorization: Bearer $HEADY_API_KEY"</span>
+
+<span class="comment"># Call a specific tool</span>
+curl -X POST <span class="str">https://headyio.com/mcp</span>/tools/filesystem/call \
+  -H <span class="str">"Authorization: Bearer $HEADY_API_KEY"</span> \
+  -H <span class="str">"Content-Type: application/json"</span> \
+  -d <span class="str">'{"action":"list","path":"."}'</span></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── Architecture Flow ─────────────────────────── -->
+        <section>
+            <div class="container">
+                <div class="section-label">Architecture</div>
+                <div class="section-title">Brain-Aware Tool Routing</div>
+                <p class="section-subtitle">Every MCP request flows through the HCSysOrchestrator for intelligent
+                    context-aware execution.</p>
+                <div class="arch-flow">
+                    <div class="arch-node">
+                        <div class="icon">🖥️</div>
+                        <h4>IDE / Agent</h4>
+                        <p>Claude, Cursor, Jules, etc.</p>
+                    </div>
+                    <div class="arch-arrow">→</div>
+                    <div class="arch-node" style="border-color: var(--accent);">
+                        <div class="icon">⚡</div>
+                        <h4>MCP Gateway</h4>
+                        <p>Port 3500 · 12 tools</p>
+                    </div>
+                    <div class="arch-arrow">→</div>
+                    <div class="arch-node">
+                        <div class="icon">🧠</div>
+                        <h4>Orchestrator</h4>
+                        <p>HCSysOrchestrator</p>
+                    </div>
+                    <div class="arch-arrow">→</div>
+                    <div class="arch-node">
+                        <div class="icon">∞</div>
+                        <h4>Heady Services</h4>
+                        <p>Brain · Registry · Pipeline</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── Endpoints ─────────────────────────────────── -->
+        <section class="endpoints-section" id="endpoints">
+            <div class="container">
+                <div class="section-label">API Reference</div>
+                <div class="section-title">Gateway Endpoints</div>
+                <p class="section-subtitle">The MCP Gateway at <code>https://headyio.com/mcp</code> exposes these REST
+                    endpoints.</p>
+                <div class="endpoints-grid">
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-get">GET</span>
+                        <div class="endpoint-path">/health</div>
+                        <div class="endpoint-desc">Gateway health, tool count, and orchestrator status</div>
+                    </div>
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-get">GET</span>
+                        <div class="endpoint-path">/tools</div>
+                        <div class="endpoint-desc">List all available MCP tools with input schemas</div>
+                    </div>
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-post">POST</span>
+                        <div class="endpoint-path">/tools/:toolId/call</div>
+                        <div class="endpoint-desc">Execute a tool through the brain-aware orchestrator</div>
+                    </div>
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-get">GET</span>
+                        <div class="endpoint-path">/resources</div>
+                        <div class="endpoint-desc">List MCP resources (registry, pipeline status, metrics)</div>
+                    </div>
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-post">POST</span>
+                        <div class="endpoint-path">/prompts/:promptId</div>
+                        <div class="endpoint-desc">Execute a prompt template via the orchestrator</div>
+                    </div>
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-ws">WS</span>
+                        <div class="endpoint-path">/mcp</div>
+                        <div class="endpoint-desc">Full MCP protocol over WebSocket (streaming)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── Tools ─────────────────────────────────────── -->
+        <section id="tools">
+            <div class="container">
+                <div class="section-label">MCP Tools</div>
+                <div class="section-title">12 Built-In Tools</div>
+                <p class="section-subtitle">Every tool is routed through the HCSysOrchestrator for brain-aware,
+                    context-enriched execution.</p>
+                <div class="tools-grid">
+                    <div class="tool-card">
+                        <div class="tool-icon" style="background: rgba(99,102,241,0.1);">📁</div>
+                        <h3>Filesystem</h3>
+                        <p>Read, write, list, and search files on the local filesystem</p>
+                        <div class="tool-actions">
+                            <span class="tool-action">read</span>
+                            <span class="tool-action">write</span>
+                            <span class="tool-action">list</span>
+                            <span class="tool-action">search</span>
+                            <span class="tool-action">stat</span>
+                        </div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-icon" style="background: rgba(168,85,247,0.1);">⬛</div>
+                        <h3>Terminal</h3>
+                        <p>Execute shell commands with safety controls and timeout guards</p>
+                        <div class="tool-actions">
+                            <span class="tool-action">command</span>
+                            <span class="tool-action">cwd</span>
+                            <span class="tool-action">timeout</span>
+                        </div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-icon" style="background: rgba(6,182,212,0.1);">🌐</div>
+                        <h3>Browser</h3>
+                        <p>Navigate, screenshot, and interact with web pages</p>
+                        <div class="tool-actions">
+                            <span class="tool-action">navigate</span>
+                            <span class="tool-action">screenshot</span>
+                            <span class="tool-action">click</span>
+                            <span class="tool-action">type</span>
+                            <span class="tool-action">extract</span>
+                        </div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-icon" style="background: rgba(34,197,94,0.1);">🐙</div>
+                        <h3>GitHub</h3>
+                        <p>Manage repos, issues, PRs, and actions on GitHub</p>
+                        <div class="tool-actions">
+                            <span class="tool-action">list-repos</span>
+                            <span class="tool-action">create-issue</span>
+                            <span class="tool-action">create-pr</span>
+                        </div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-icon" style="background: rgba(245,158,11,0.1);">💬</div>
+                        <h3>Slack</h3>
+                        <p>Send messages, list channels, and manage workspace</p>
+                        <div class="tool-actions">
+                            <span class="tool-action">send</span>
+                            <span class="tool-action">list-channels</span>
+                            <span class="tool-action">read-channel</span>
+                            <span class="tool-action">search</span>
+                        </div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-icon" style="background: rgba(99,102,241,0.1);">📝</div>
+                        <h3>Notion</h3>
+                        <p>Query and update Notion databases and pages</p>
+                        <div class="tool-actions">
+                            <span class="tool-action">query-db</span>
+                            <span class="tool-action">get-page</span>
+                            <span class="tool-action">create-page</span>
+                            <span class="tool-action">search</span>
+                        </div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-icon" style="background: rgba(6,182,212,0.1);">📂</div>
+                        <h3>Google Drive</h3>
+                        <p>Access and manage Google Drive files</p>
+                        <div class="tool-actions">
+                            <span class="tool-action">list</span>
+                            <span class="tool-action">read</span>
+                            <span class="tool-action">search</span>
+                            <span class="tool-action">upload</span>
+                        </div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-icon" style="background: rgba(168,85,247,0.1);">🐳</div>
+                        <h3>Docker</h3>
+                        <p>Manage Docker containers, images, and compose stacks</p>
+                        <div class="tool-actions">
+                            <span class="tool-action">ps</span>
+                            <span class="tool-action">up</span>
+                            <span class="tool-action">down</span>
+                            <span class="tool-action">logs</span>
+                            <span class="tool-action">exec</span>
+                        </div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-icon" style="background: rgba(34,197,94,0.1);">📅</div>
+                        <h3>Calendar</h3>
+                        <p>Manage calendar events and scheduling</p>
+                        <div class="tool-actions">
+                            <span class="tool-action">list</span>
+                            <span class="tool-action">create</span>
+                            <span class="tool-action">find-free</span>
+                        </div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-icon" style="background: rgba(245,158,11,0.1);">🗂️</div>
+                        <h3>Heady Registry</h3>
+                        <p>Query and update the central service catalog</p>
+                        <div class="tool-actions">
+                            <span class="tool-action">list</span>
+                            <span class="tool-action">get</span>
+                            <span class="tool-action">search</span>
+                            <span class="tool-action">update-status</span>
+                        </div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-icon" style="background: rgba(99,102,241,0.1);">🔄</div>
+                        <h3>HCFullPipeline</h3>
+                        <p>Trigger and monitor HCFullPipeline runs</p>
+                        <div class="tool-actions">
+                            <span class="tool-action">run</span>
+                            <span class="tool-action">status</span>
+                            <span class="tool-action">history</span>
+                            <span class="tool-action">cancel</span>
+                        </div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-icon" style="background: rgba(168,85,247,0.1);">🧠</div>
+                        <h3>HeadyBrain</h3>
+                        <p>Request plans from the HeadyBrain orchestrator</p>
+                        <div class="tool-actions">
+                            <span class="tool-action">plan</span>
+                            <span class="tool-action">feedback</span>
+                            <span class="tool-action">arena</span>
+                            <span class="tool-action">health</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── Servers ───────────────────────────────────── -->
+        <section class="endpoints-section" id="servers">
+            <div class="container">
+                <div class="section-label">Core Servers</div>
+                <div class="section-title">HeadyMCP Server Registry</div>
+                <p class="section-subtitle">Three core servers power the Heady MCP ecosystem. All traffic is brain-first
+                    with 100% Heady routing.</p>
+                <table class="server-table">
+                    <thead>
+                        <tr>
+                            <th>Server</th>
+                            <th>Endpoint</th>
+                            <th>Transport</th>
+                            <th>Priority</th>
+                            <th>Capabilities</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="server-name">HeadyBrain</td>
+                            <td class="server-url">https://headyio.com/mcp</td>
+                            <td><span class="badge-transport badge-http">HTTP</span></td>
+                            <td>200 (default)</td>
+                            <td>Chat · Completion · Embedding · Code Analysis · Image Gen</td>
+                        </tr>
+                        <tr>
+                            <td class="server-name">HeadyManager</td>
+                            <td class="server-url">https://headyio.com/manager</td>
+                            <td><span class="badge-transport badge-http">HTTP</span></td>
+                            <td>150</td>
+                            <td>Deployment · Service Management · Health Monitoring</td>
+                        </tr>
+                        <tr>
+                            <td class="server-name">HeadyRegistry</td>
+                            <td class="server-url">https://headyio.com/registry</td>
+                            <td><span class="badge-transport badge-http">HTTP</span></td>
+                            <td>140</td>
+                            <td>Service Discovery · Catalog Query</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3 style="margin-top: 40px; font-size: 1.1rem; font-weight: 700; margin-bottom: 16px;">Access Points
+                </h3>
+                <table class="server-table">
+                    <thead>
+                        <tr>
+                            <th>Access Method</th>
+                            <th>Endpoint</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>IDE Extension</td>
+                            <td class="server-url">https://mcp.headymcp.com</td>
+                            <td>VSCode / Cursor / Windsurf</td>
+                        </tr>
+                        <tr>
+                            <td>API Gateway</td>
+                            <td class="server-url">https://api.headymcp.com</td>
+                            <td>REST API</td>
+                        </tr>
+                        <tr>
+                            <td>Web Interface</td>
+                            <td class="server-url">https://app.headymcp.com</td>
+                            <td>Dashboard</td>
+                        </tr>
+                        <tr>
+                            <td>Edge AI</td>
+                            <td class="server-url">https://headyio.com/edge</td>
+                            <td>Cloudflare Workers</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ─── Configuration ─────────────────────────────── -->
+        <section id="config">
+            <div class="container">
+                <div class="section-label">Configuration</div>
+                <div class="section-title">IDE Setup Configs</div>
+                <p class="section-subtitle">Drop these into your IDE's MCP settings. Works with Claude Desktop, Cursor,
+                    Windsurf, and any MCP-compatible client.</p>
+                <div class="config-grid">
+                    <div class="config-card">
+                        <div class="config-header">
+                            <span class="icon">📋</span> Full Config (headymcp.json)
+                        </div>
+                        <pre>{
+  <span class="key">"mcpServers"</span>: {
+    <span class="key">"heady-brain"</span>: {
+      <span class="key">"url"</span>: <span class="str">"https://headyio.com/mcp"</span>,
+      <span class="key">"apiKey"</span>: <span class="str">"${HEADY_API_KEY}"</span>,
+      <span class="key">"priority"</span>: 200,
+      <span class="key">"default"</span>: true
+    },
+    <span class="key">"heady-manager"</span>: {
+      <span class="key">"url"</span>: <span class="str">"https://headyio.com/manager"</span>,
+      <span class="key">"apiKey"</span>: <span class="str">"${HEADY_API_KEY}"</span>
+    },
+    <span class="key">"heady-registry"</span>: {
+      <span class="key">"url"</span>: <span class="str">"https://headyio.com/registry"</span>,
+      <span class="key">"apiKey"</span>: <span class="str">"${HEADY_API_KEY}"</span>
+    }
+  },
+  <span class="key">"modelRouting"</span>: {
+    <span class="key">"defaultModel"</span>: <span class="str">"heady-brain"</span>,
+    <span class="key">"policy"</span>: <span class="str">"heady_only"</span>,
+    <span class="key">"headyPercentage"</span>: 100
+  }
+}</pre>
+                    </div>
+                    <div class="config-card">
+                        <div class="config-header">
+                            <span class="icon">⚡</span> Minimal Config
+                        </div>
+                        <pre><span class="comment">// Minimum viable config — one server</span>
+{
+  <span class="key">"mcpServers"</span>: {
+    <span class="key">"heady"</span>: {
+      <span class="key">"transport"</span>: <span class="str">"http"</span>,
+      <span class="key">"url"</span>: <span class="str">"https://headyio.com/mcp"</span>,
+      <span class="key">"headers"</span>: {
+        <span class="key">"Authorization"</span>:
+          <span class="str">"Bearer $HEADY_API_KEY"</span>
+      }
+    }
+  }
+}
+
+<span class="comment">// That's it. 12 tools. Zero config.</span></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── Security ──────────────────────────────────── -->
+        <section class="endpoints-section" id="security">
+            <div class="container">
+                <div class="section-label">Security</div>
+                <div class="section-title">Authentication & Security</div>
+                <p class="section-subtitle">All HeadyMCP endpoints enforce TLS 1.3 with tier-prefixed API keys.</p>
+                <div class="auth-grid">
+                    <div class="auth-card">
+                        <div class="icon">🔑</div>
+                        <h3>API Key Auth</h3>
+                        <p>Tier-prefixed keys: <code>hdy_int_</code>, <code>hdy_pro_</code>, <code>hdy_ent_</code>. Set
+                            via <code>HEADY_API_KEY</code> env var.</p>
+                    </div>
+                    <div class="auth-card">
+                        <div class="icon">🔒</div>
+                        <h3>TLS 1.3 / HTTPS</h3>
+                        <p>All HTTP endpoints enforced over HTTPS with modern TLS. No plaintext ever.</p>
+                    </div>
+                    <div class="auth-card">
+                        <div class="icon">📋</div>
+                        <h3>Audit Logging</h3>
+                        <p>Enterprise tier includes full MCP audit logging. Every tool call recorded with 365-day
+                            retention.</p>
+                    </div>
+                </div>
+
+                <div style="margin-top: 32px;">
+                    <div class="config-card">
+                        <div class="config-header">
+                            <span class="icon">🛡️</span> Model Routing Policy
+                        </div>
+                        <pre><span class="comment">// All MCP requests are brain-first</span>
+{
+  <span class="key">"defaultModel"</span>: <span class="str">"heady-brain"</span>,
+  <span class="key">"policy"</span>: <span class="str">"heady_only"</span>,
+  <span class="key">"headyPercentage"</span>: 100,
+  <span class="key">"allowExternalOverride"</span>: true,
+  <span class="key">"overrideRequires"</span>: <span class="str">"explicit_user_direction"</span>,
+  <span class="key">"logAllModelSwitches"</span>: true,
+  <span class="key">"fallbackChain"</span>: [<span class="str">"heady-brain"</span>, <span class="str">"heady-manager"</span>]
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── MCP Resources ─────────────────────────────── -->
+        <section id="resources">
+            <div class="container">
+                <div class="section-label">Resources</div>
+                <div class="section-title">Available MCP Resources</div>
+                <p class="section-subtitle">These resources are exposed via the <code>GET /resources</code> endpoint and
+                    can be read by any MCP client.</p>
+                <div class="endpoints-grid">
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-get"
+                            style="background: rgba(245,158,11,0.12); color: var(--accent-5);">URI</span>
+                        <div class="endpoint-path">heady://registry</div>
+                        <div class="endpoint-desc">Central service catalog — every Heady service and its status</div>
+                    </div>
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-get"
+                            style="background: rgba(245,158,11,0.12); color: var(--accent-5);">URI</span>
+                        <div class="endpoint-path">heady://pipeline/status</div>
+                        <div class="endpoint-desc">Current HCFullPipeline run status and history</div>
+                    </div>
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-get"
+                            style="background: rgba(245,158,11,0.12); color: var(--accent-5);">URI</span>
+                        <div class="endpoint-path">heady://brain/health</div>
+                        <div class="endpoint-desc">HeadyBrain orchestrator health and metrics</div>
+                    </div>
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-get"
+                            style="background: rgba(245,158,11,0.12); color: var(--accent-5);">URI</span>
+                        <div class="endpoint-path">heady://metrics</div>
+                        <div class="endpoint-desc">System-wide metrics including tool call latency and throughput</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── Footer ────────────────────────────────────── -->
+        <footer>
+            <div class="container">
+                <div class="footer-links">
+                    <a href="https://headysystems.com">Heady Systems</a>
+                    <a href="https://headyio.com">HeadyIO</a>
+                    <a href="https://headyme.com">HeadyMe</a>
+                    <a href="https://headyconnection.org">HeadyConnection</a>
+                    <a href="https://headyweb.com">HeadyWeb</a>
+                </div>
+                <p>© 2026 Heady Systems Inc. · <a href="https://headysystems.com">headysystems.com</a> · ∞ Sacred
+                    Geometry</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Tab switching
+        document.querySelectorAll('.code-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById('panel-' + tab.dataset.panel).classList.add('active');
+            });
+        });
+
+        // Copy button
+        function copyCode() {
+            const active = document.querySelector('.code-panel.active pre');
+            const text = active.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.textContent = 'Copied!';
+                setTimeout(() => btn.textContent = 'Copy', 2000);
+            });
+        }
+
+        // Smooth scroll for nav links
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', e => {
+                e.preventDefault();
+                const target = document.querySelector(a.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+
+</html>

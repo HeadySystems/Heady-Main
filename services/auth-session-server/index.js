@@ -13,9 +13,17 @@ app.use(helmet());
 const corsOptions = {
     origin: (origin, callback) => {
         const whitelist = [
-            'https://auth.headysystems.com',
+            'https://headyme.com',
             'https://headysystems.com',
-            'https://headyme.com'
+            'https://auth.headysystems.com',
+            'https://admin.headysystems.com',
+            'https://heady-ai.com',
+            'https://headyos.com',
+            'https://headyconnection.org',
+            'https://headyconnection.com',
+            'https://headyex.com',
+            'https://headyfinance.com',
+            'https://headybuddy.com',
         ];
         if (whitelist.indexOf(origin) !== -1 || !origin) {
             callback(null, true);
@@ -28,7 +36,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 const PHI = 1.618033988749895;
-const FIB = [1,1,2,3,5,8,13,21,34,55,89,144,233,377,610,987];
+const FIB = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987];
 
 // Initialize Firebase Admin SDK using the default credential
 if (!admin.apps.length) {
@@ -58,7 +66,7 @@ app.post('/api/session', async (req, res) => {
 
         const cookieName = process.env.NODE_ENV === 'production' ? '__Host-heady_session' : '__heady_session';
         res.cookie(cookieName, sessionCookie, cookieOptions);
-        
+
         res.status(200).json({ status: 'success' });
     } catch (error) {
         console.error('Session creation failed:', error);

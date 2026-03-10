@@ -1205,7 +1205,9 @@ const server = http.createServer((req, res) => {
     || req.headers.host
     || 'headyme.com';
   const site = resolveSite(host);
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const _headyOrigins = ['https://headyme.com', 'https://heady-ai.com', 'https://headyos.com', 'https://headysystems.com', 'https://headyconnection.org', 'https://headyconnection.com', 'https://headyex.com', 'https://headyfinance.com', 'https://headyio.com', 'https://headyweb.com', 'https://auth.headyme.com'];
+  const _reqOrigin = req.headers?.origin || '';
+  res.setHeader('Access-Control-Allow-Origin', _headyOrigins.includes(_reqOrigin) ? _reqOrigin : _headyOrigins[0]);
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
   if (req.method === 'OPTIONS') {
