@@ -48,7 +48,7 @@ const PROJECTION_TARGETS = [
         id: 'github',
         name: 'GitHub Monorepo',
         type: 'code-projection',
-        url: 'https://github.com/HeadyMe/Heady-pre-production',
+        url: 'https://github.com/HeadyConnection/Heady-Testing',
         tier: 1, // First projection from vector space
         autonomous: true,
     },

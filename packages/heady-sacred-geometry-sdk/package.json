@@ -13,7 +13,7 @@
   "homepage": "https://headyme.com",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/HeadyMe/Heady-pre-production-9f2f0642.git",
+    "url": "git+https://github.com/HeadyConnection/Heady-Testing.git",
     "directory": "packages/heady-sacred-geometry-sdk"
   },
   "keywords": [

@@ -333,7 +333,7 @@ function boot() {
     const defaultTargets = [
         { id: 'cloud-run', type: 'container', url: 'https://heady-manager-*.run.app', tier: 1 },
         { id: 'cloudflare-edge', type: 'network-projection', url: 'https://heady.headyme.com', tier: 1 },
-        { id: 'github-monorepo', type: 'code-projection', url: 'https://github.com/HeadyMe/Heady-pre-production', tier: 1 },
+        { id: 'github-monorepo', type: 'code-projection', url: 'https://github.com/HeadyConnection/Heady-Testing', tier: 1 },
         { id: 'huggingface-spaces', type: 'frontend-projection', url: 'https://huggingface.co/HeadyMe', tier: 2 },
         { id: 'colab-notebooks', type: 'compute-projection', url: 'https://colab.research.google.com', tier: 2 },
         { id: 'local-dev', type: 'dev-projection', url: 'http://localhost:3301', tier: 3 },

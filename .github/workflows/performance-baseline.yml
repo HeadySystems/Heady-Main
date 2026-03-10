@@ -40,7 +40,7 @@ on:
       branch:
         description: 'Branch to baseline against'
         required: false
-        default: 'pre-production'
+        default: 'staging'
         type: string
 
 env:
@@ -69,7 +69,7 @@ jobs:
     timeout-minutes: 89
     # Run on pre-production (or specified branch)
     env:
-      TARGET_BRANCH: ${{ inputs.branch || 'pre-production' }}
+      TARGET_BRANCH: ${{ inputs.branch || 'staging' }}
     services:
       redis:
         image: redis:7-alpine
@@ -327,7 +327,7 @@ jobs:
             const baseline = {
               metadata: {
                 generatedAt: new Date().toISOString(),
-                branch: process.env.TARGET_BRANCH || 'pre-production',
+                branch: process.env.TARGET_BRANCH || 'staging',
                 sha: '${{ github.sha }}',
                 phi: PHI,
                 // fib sequence used for sample counts

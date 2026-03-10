@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "projection": true,
-  "source_repo": "HeadyMe/Heady-pre-production-9f2f0642",
+  "source_repo": "HeadyConnection/Heady-Testing",
   "source_path": "src/<canonical-module>",
   "projection_type": "site-shell",
   "target_repo": "HeadyMe/<target-repo>",

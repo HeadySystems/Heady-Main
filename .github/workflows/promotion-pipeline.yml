@@ -806,7 +806,7 @@ jobs:
                 repo: context.repo.repo,
                 title: `chore: promote pre-production → main (${nextVersion})`,
                 body: body,
-                head: 'pre-production',
+                head: 'staging',
                 base: 'main',
                 draft: false
               });

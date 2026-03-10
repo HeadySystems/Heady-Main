@@ -1,7 +1,7 @@
 {
   "_meta": {
     "version": "1.0.0",
-    "description": "Deprecation manifest for HeadyMe/Heady-pre-production. Lists every file scheduled for removal after consolidation to its canonical replacement. All deprecated files must be migrated before the deadline.",
+    "description": "Deprecation manifest for HeadyConnection/Heady-Testing. Lists every file scheduled for removal after consolidation to its canonical replacement. All deprecated files must be migrated before the deadline.",
     "generatedAt": "2026-03-08",
     "law2Reference": "LAW-02 Solutions Not Workarounds",
     "maxDeprecationDays": 13,

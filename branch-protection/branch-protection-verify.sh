@@ -29,7 +29,7 @@ set -euo pipefail
 
 readonly ORG_DEFAULT="HeadyMe"
 readonly REPOS=(
-  "Heady-pre-production-9f2f0642"
+  "Heady-Testing"
   "headysystems-production"
   "headymcp-production"
   "headyio-core"

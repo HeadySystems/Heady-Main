@@ -194,7 +194,7 @@ function getSystemInfo() {
     workflow: process.env.GITHUB_WORKFLOW || 'unknown',
     runId:    process.env.GITHUB_RUN_ID  || 'unknown',
     runNumber: parseInt(process.env.GITHUB_RUN_NUMBER || '0'),
-    repo:     process.env.GITHUB_REPOSITORY || 'HeadyMe/Heady-pre-production-9f2f0642',
+    repo:     process.env.GITHUB_REPOSITORY || 'HeadyConnection/Heady-Testing',
     ref:      process.env.GITHUB_REF    || 'refs/heads/main',
   };
 }

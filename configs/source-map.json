@@ -1,7 +1,7 @@
 {
-  "primary_truth": "https://github.com/HeadyMe/Heady-pre-production-9f2f0642",
+  "primary_truth": "https://github.com/HeadyConnection/Heady-Testing",
   "secondary_sources": [
-    "https://github.com/HeadyMe/Heady-pre-production",
+    "https://github.com/HeadyConnection/Heady-Testing",
     "https://github.com/HeadyMe/headyme-core",
     "https://github.com/HeadyMe/headymcp-core",
     "https://github.com/HeadyMe/headyapi-core",

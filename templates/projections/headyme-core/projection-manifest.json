@@ -3,7 +3,7 @@
   "domain": "headyme.com",
   "version": "1.0.0",
   "generatedFrom": {
-    "repo": "https://github.com/HeadyMe/Heady-pre-production-9f2f0642",
+    "repo": "https://github.com/HeadyConnection/Heady-Testing",
     "commit": "REPLACE_WITH_COMMIT_SHA"
   },
   "purpose": "personal-command-center",

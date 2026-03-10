@@ -2,7 +2,7 @@
 # =============================================================================
 # Heady Sovereign AI Platform — Production Startup Script
 # =============================================================================
-# Monorepo: github.com/HeadyMe/Heady-pre-production-9f2f0642
+# Monorepo: github.com/HeadyConnection/Heady-Testing
 # Maintained by: eric@headyconnection.org
 #
 # Usage:

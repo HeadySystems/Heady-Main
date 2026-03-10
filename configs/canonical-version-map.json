@@ -1,7 +1,7 @@
 {
   "_meta": {
     "version": "1.0.0",
-    "description": "Canonical version map for HeadyMe/Heady-pre-production. Declares the authoritative file for each duplicated component group and enumerates deprecated variants for removal.",
+    "description": "Canonical version map for HeadyConnection/Heady-Testing. Declares the authoritative file for each duplicated component group and enumerates deprecated variants for removal.",
     "updatedAt": "2026-03-08",
     "law2Reference": "LAW-02 Solutions Not Workarounds",
     "selectionRules": [

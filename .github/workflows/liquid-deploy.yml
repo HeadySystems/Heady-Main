@@ -233,7 +233,7 @@ jobs:
           # Inject projection metadata into vertical
           cat > "$VERT_ROOT/.projection-meta.json" << EOF
           {
-            "monorepo": "github.com/HeadyMe/Heady-pre-production-9f2f0642",
+            "monorepo": "github.com/HeadyConnection/Heady-Testing",
             "sourceSha": "${{ github.sha }}",
             "projectedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "vertical": "$VERTICAL",

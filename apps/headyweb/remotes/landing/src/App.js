@@ -145,7 +145,7 @@ function buildNav() {
       <li><a href="#architecture">Architecture</a></li>
       <li><a href="#capabilities">Capabilities</a></li>
       <li>
-        <a href="https://github.com/HeadyMe/Heady-pre-production-9f2f0642"
+        <a href="https://github.com/HeadyConnection/Heady-Testing"
            target="_blank" rel="noopener noreferrer">GitHub</a>
       </li>
     </ul>
@@ -188,7 +188,7 @@ function buildHero() {
   actions.className = 'ld-hero-actions';
   actions.innerHTML = `
     <a href="#architecture" class="ld-btn-primary">Explore Architecture</a>
-    <a href="https://github.com/HeadyMe/Heady-pre-production-9f2f0642"
+    <a href="https://github.com/HeadyConnection/Heady-Testing"
        target="_blank" rel="noopener noreferrer" class="ld-btn-ghost">View on GitHub</a>
   `;
   section.appendChild(actions);
@@ -295,7 +295,7 @@ function buildFooter() {
       <span class="ld-footer-copy">© 2026 Heady™Systems Inc. All rights reserved.</span>
     </div>
     <nav class="ld-footer-links" aria-label="Footer links">
-      <a href="https://github.com/HeadyMe/Heady-pre-production-9f2f0642"
+      <a href="https://github.com/HeadyConnection/Heady-Testing"
          target="_blank" rel="noopener noreferrer">GitHub</a>
       <a href="#architecture">Architecture</a>
       <a href="#capabilities">Capabilities</a>

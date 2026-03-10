@@ -134,7 +134,7 @@ async function projectDomain(domain, options = {}) {
 
     const octokit = getOctokit();
     const ts = new Date().toISOString();
-    const commitMessage = `Autonomous Latent OS Projection: Update ${domain}\n\nProjected at ${ts} by the Heady Continuous Public Projection Pipeline.\nSource: HeadyMe/Heady-pre-production-9f2f0642`;
+    const commitMessage = `Autonomous Latent OS Projection: Update ${domain}\n\nProjected at ${ts} by the Heady Continuous Public Projection Pipeline.\nSource: HeadyConnection/Heady-Testing`;
 
     const result = await pushToRepo(octokit, repo, files, commitMessage);
     return { domain, ...result, projectedAt: ts };

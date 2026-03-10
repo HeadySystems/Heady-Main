@@ -543,7 +543,7 @@
       "maxBatchSize": 34
     },
     "github": {
-      "monorepo": "HeadyMe/Heady-pre-production",
+      "monorepo": "HeadyConnection/Heady-Testing",
       "mainBranch": "main",
       "ciCheckTimeout": 29034,
       "requirePhiCompliance": true,

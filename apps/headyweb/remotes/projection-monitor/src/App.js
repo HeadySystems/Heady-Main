@@ -46,7 +46,7 @@ const PROJECTION_TARGETS = [
   {
     name: 'GitHub Monorepo',
     status: 'syncing',
-    endpoint: 'github.com/HeadyMe/Heady-pre-production-9f2f0642',
+    endpoint: 'github.com/HeadyConnection/Heady-Testing',
     stalenessBudget: '∞',
     lastSync: 'in progress',
     syncMode: 'event-driven',

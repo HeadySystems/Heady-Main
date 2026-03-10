@@ -27,11 +27,11 @@
 #   - GITHUB_REPOSITORY env var (owner/repo) OR pass as $2
 #
 # Usage:
-#   GITHUB_TOKEN=ghp_xxx GITHUB_REPOSITORY=HeadyMe/Heady-pre-production-9f2f0642 \
+#   GITHUB_TOKEN=ghp_xxx GITHUB_REPOSITORY=HeadyConnection/Heady-Testing \
 #     bash scripts/ci/setup-branch-protection.sh
 #
 #   # Or with positional args:
-#   bash scripts/ci/setup-branch-protection.sh ghp_xxx HeadyMe/Heady-pre-production-9f2f0642
+#   bash scripts/ci/setup-branch-protection.sh ghp_xxx HeadyConnection/Heady-Testing
 #
 # φ design:
 #   Required approvals: fib(1)=1 (minimum meaningful review)
@@ -42,7 +42,7 @@ set -euo pipefail
 
 # ─── Configuration ────────────────────────────────────────────────────────────
 TOKEN="${1:-${GITHUB_TOKEN:-}}"
-REPO="${2:-${GITHUB_REPOSITORY:-HeadyMe/Heady-pre-production-9f2f0642}}"
+REPO="${2:-${GITHUB_REPOSITORY:-HeadyConnection/Heady-Testing}}"
 
 OWNER="${REPO%%/*}"
 REPO_NAME="${REPO##*/}"

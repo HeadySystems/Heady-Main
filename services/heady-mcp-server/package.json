@@ -29,7 +29,7 @@
   "license": "SEE LICENSE IN LICENSE",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/HeadyMe/Heady-pre-production-9f2f0642.git",
+    "url": "git+https://github.com/HeadyConnection/Heady-Testing.git",
     "directory": "services/heady-mcp-server"
   },
   "homepage": "https://headymcp.com",

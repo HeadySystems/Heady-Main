@@ -43,7 +43,7 @@ const CLOUD_ORIGINS = {
 };
 
 const DEPLOY_TARGETS = {
-    github: { type: "git", repo: "HeadyMe/Heady-pre-production-9f2f0642" },
+    github: { type: "git", repo: "HeadyConnection/Heady-Testing" },
     cloudrun: { type: "gcloud", project: "gen-lang-client-0920560496", service: "heady-edge-gateway", region: "us-central1" },
     workers: { type: "cf", name: "heady-edge-proxy" },
 };

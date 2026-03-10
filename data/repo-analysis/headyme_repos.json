@@ -16,10 +16,10 @@
       "topics": []
     },
     {
-      "name": "Heady-pre-production-9f2f0642",
-      "full_name": "HeadyMe/Heady-pre-production-9f2f0642",
+      "name": "Heady-Testing",
+      "full_name": "HeadyConnection/Heady-Testing",
       "private": false,
-      "html_url": "https://github.com/HeadyMe/Heady-pre-production-9f2f0642",
+      "html_url": "https://github.com/HeadyConnection/Heady-Testing",
       "description": "Official HeadySystems Inc. Repo",
       "language": "JavaScript",
       "default_branch": "main",

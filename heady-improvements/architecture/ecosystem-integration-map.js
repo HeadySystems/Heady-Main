@@ -50,7 +50,7 @@ const SERVICES = {
     displayName: 'Heady Pre-Production Monorepo',
     type: 'monorepo',
     tier: 0,
-    repo: 'https://github.com/HeadyMe/Heady-pre-production-9f2f0642',
+    repo: 'https://github.com/HeadyConnection/Heady-Testing',
     version: '3.1.0',
     runtime: 'node:22-alpine',
     deployment: 'cloud-run',
@@ -486,7 +486,7 @@ const SERVICES = {
     displayName: 'Heady Event Bus',
     type: 'infrastructure',
     tier: 2,
-    repo: 'https://github.com/HeadyMe/Heady-pre-production-9f2f0642',
+    repo: 'https://github.com/HeadyConnection/Heady-Testing',
     file: 'heady-event-bus.js',
     status: 'new', // Provided in this deliverable
     capabilities: [
@@ -504,7 +504,7 @@ const SERVICES = {
     displayName: 'Heady Service Mesh',
     type: 'infrastructure',
     tier: 2,
-    repo: 'https://github.com/HeadyMe/Heady-pre-production-9f2f0642',
+    repo: 'https://github.com/HeadyConnection/Heady-Testing',
     file: 'heady-service-mesh.js',
     status: 'new',
     capabilities: [
@@ -521,7 +521,7 @@ const SERVICES = {
     displayName: 'Heady Config Server',
     type: 'infrastructure',
     tier: 2,
-    repo: 'https://github.com/HeadyMe/Heady-pre-production-9f2f0642',
+    repo: 'https://github.com/HeadyConnection/Heady-Testing',
     file: 'heady-config-server.js',
     status: 'new',
     capabilities: [
@@ -538,7 +538,7 @@ const SERVICES = {
     displayName: 'Heady Observability',
     type: 'infrastructure',
     tier: 2,
-    repo: 'https://github.com/HeadyMe/Heady-pre-production-9f2f0642',
+    repo: 'https://github.com/HeadyConnection/Heady-Testing',
     file: 'heady-observability.js',
     status: 'new',
     capabilities: [

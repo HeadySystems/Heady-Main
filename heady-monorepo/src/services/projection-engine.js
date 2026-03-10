@@ -43,7 +43,7 @@ const PROJECTION_TARGETS = {
     },
     'github-monorepo': {
         type: 'source-of-truth',
-        endpoint: 'https://github.com/HeadyMe/Heady-pre-production-9f2f0642',
+        endpoint: 'https://github.com/HeadyConnection/Heady-Testing',
         healthPath: null,
         stalenessBudgetMs: 0, // Always fresh (it IS the source)
         status: 'active',

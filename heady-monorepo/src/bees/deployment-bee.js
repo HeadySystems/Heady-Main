@@ -21,7 +21,7 @@ const PROJECT_ROOT = path.join(__dirname, '../..');
 const DEPLOY_TARGETS = {
     'cloud-run': { service: 'heady-manager', region: 'us-central1', project: 'heady-pre-production' },
     'cloudflare-worker': { name: 'heady-edge-proxy', account: '8b1fa38f282c691423c6399247d53323' },
-    'github': { repo: 'HeadyMe/Heady-pre-production-9f2f0642', branch: 'main' },
+    'github': { repo: 'HeadyConnection/Heady-Testing', branch: 'main' },
     'hf-spaces': ['HeadyMe/heady-ai', 'HeadyMe/heady-systems', 'HeadyConnection/heady-connection'],
 };
 

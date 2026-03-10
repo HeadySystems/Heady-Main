@@ -76,7 +76,7 @@ ${siteConfig.description}
 
 [![Deploy](https://img.shields.io/badge/deploy-Cloud%20Run-blue?logo=google-cloud)](https://${domain})
 [![License](https://img.shields.io/badge/license-Proprietary-red)](LICENSE)
-[![Projected](https://img.shields.io/badge/projected-Heady%20Latent%20OS-purple)](https://github.com/HeadyMe/Heady-pre-production-9f2f0642)
+[![Projected](https://img.shields.io/badge/projected-Heady%20Latent%20OS-purple)](https://github.com/HeadyConnection/Heady-Testing)
 
 ## Quick Start
 
@@ -95,7 +95,7 @@ ${(siteConfig.features || []).map(f => `- ${f.icon} **${f.title}** — ${f.desc}
 
 ## Architecture
 
-This repository is **autonomously projected** from the [Heady Latent OS](https://github.com/HeadyMe/Heady-pre-production-9f2f0642) — the continuous AI reasoning engine that powers the entire Heady ecosystem.
+This repository is **autonomously projected** from the [Heady Latent OS](https://github.com/HeadyConnection/Heady-Testing) — the continuous AI reasoning engine that powers the entire Heady ecosystem.
 
 \`\`\`
 pgvector (Brain) → Eradication Protocol → Domain Slicer → GitHub Push → Live at ${domain}

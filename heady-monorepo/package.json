@@ -12,11 +12,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/HeadyMe/Heady-pre-production-9f2f0642.git"
+    "url": "https://github.com/HeadyConnection/Heady-Testing.git"
   },
   "homepage": "https://headysystems.com",
   "bugs": {
-    "url": "https://github.com/HeadyMe/Heady-pre-production-9f2f0642/issues",
+    "url": "https://github.com/HeadyConnection/Heady-Testing/issues",
     "email": "eric@headyconnection.org"
   },
   "keywords": [
