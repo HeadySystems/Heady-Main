@@ -66,10 +66,7 @@ function createTask(options) {
   return {
     id,
     type: options.type || "generic",
-<<<<<<< HEAD
-=======
     concurrent_equals: options.concurrent_equals != null ? options.concurrent_equals : TASK_PRIORITY.NORMAL,
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
     taskClass: options.taskClass || TASK_CLASS.BATCH,
     status: TASK_STATUS.QUEUED,
     resourceTier: null,
@@ -178,31 +175,17 @@ class HCTaskScheduler extends EventEmitter {
     const routing = this.tierRouting[task.type];
     if (!routing) return RESOURCE_TIER.M;
 
-<<<<<<< HEAD
-    if (task.constraints.riskLevel === "critical") {
-      return routing.maxTier;
-    }
-
-    if (this.safeModeActive) {
-=======
     if (task.constraints.riskLevel === "critical" || task.concurrent_equals === TASK_PRIORITY.CRITICAL) {
       return routing.maxTier;
     }
 
     if (this.safeModeActive || task.concurrent_equals === TASK_PRIORITY.BACKGROUND) {
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
       return routing.minTier;
     }
 
     return routing.defaultTier;
   }
 
-<<<<<<< HEAD
-  // ─── Queue insertion (FIFO) ────────────
-
-  _insertIntoQueue(queue, task) {
-    queue.push(task);
-=======
   // ─── Priority insertion (lower number = higher concurrent_equals) ────────────
 
   _insertByPriority(queue, task) {
@@ -215,7 +198,6 @@ class HCTaskScheduler extends EventEmitter {
       }
     }
     if (!inserted) queue.push(task);
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
   }
 
   // ─── Drain queues ──────────────────────────────────────────────────
@@ -395,11 +377,7 @@ class HCTaskScheduler extends EventEmitter {
 
   getQueueDetails() {
     const summarize = (tasks) => tasks.map(t => ({
-<<<<<<< HEAD
-      id: t.id, type: t.type, tier: t.resourceTier,
-=======
       id: t.id, type: t.type, concurrent_equals: t.concurrent_equals, tier: t.resourceTier,
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
       status: t.status, waitMs: Date.now() - t.metrics.queuedAt,
     }));
     return {
@@ -411,11 +389,7 @@ class HCTaskScheduler extends EventEmitter {
 
   getRecentCompleted(limit = 20) {
     return this.completed.slice(-limit).map(t => ({
-<<<<<<< HEAD
-      id: t.id, type: t.type, tier: t.resourceTier,
-=======
       id: t.id, type: t.type, concurrent_equals: t.concurrent_equals, tier: t.resourceTier,
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
       status: t.status, waitMs: (t.metrics.startedAt || 0) - (t.metrics.queuedAt || 0),
       execMs: (t.metrics.completedAt || 0) - (t.metrics.startedAt || 0),
       retries: t.metrics.retries, error: t.error,
@@ -453,10 +427,7 @@ function registerSchedulerRoutes(app, scheduler) {
       const task = scheduler.submit({
         ...req.body,
         type: 'hcfullpipeline',
-<<<<<<< HEAD
-=======
         concurrent_equals: TASK_PRIORITY.HIGH,
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
         constraints: { queue: 'hcfp' }
       });
       res.json({ 
@@ -464,10 +435,7 @@ function registerSchedulerRoutes(app, scheduler) {
         task: { 
           id: task.id, 
           type: task.type,
-<<<<<<< HEAD
-=======
           concurrent_equals: task.concurrent_equals,
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
           status: task.status 
         } 
       });
@@ -488,10 +456,7 @@ function registerSchedulerRoutes(app, scheduler) {
         task: { 
           id: task.id, 
           type: task.type,
-<<<<<<< HEAD
-=======
           concurrent_equals: task.concurrent_equals,
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
           status: task.status 
         } 
       });

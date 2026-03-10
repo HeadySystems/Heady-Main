@@ -9,26 +9,6 @@
 // ║                                                                  ║
 // ║  ∞ SACRED GEOMETRY ∞  Organic Systems · Breathing Interfaces    ║
 // ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
-<<<<<<< HEAD
-// ║  FILE: frontend/vite.config.ts                                                    ║
-// ║  LAYER: ui/frontend                                                  ║
-// ╚══════════════════════════════════════════════════════════════════╝
-// HEADY_BRAND:END
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-
-// Removed vite-plugin-obfuscator due to build errors
-
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    port: 3001,
-  },
-  build: {
-    outDir: "dist",
-  },
-});
-=======
 // ║  FILE: test-db-connection.js                                                    ║
 // ║  LAYER: root                                                  ║
 // ╚══════════════════════════════════════════════════════════════════╝
@@ -57,4 +37,3 @@ async function testConnection() {
 
 testConnection();
 
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd

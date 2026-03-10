@@ -105,26 +105,18 @@ class HeadyStackApp {
 
 // Exercise 1: Create your own sacred greeting
 function createPersonalGreeting(name, favoriteShape) {
-<<<<<<< HEAD
-    return `${favoriteShape} Greetings, ${name}! Welcome to the organic system.`;
-=======
     // TODO: Modify this function to create your personal greeting
     // Hint: Use the sacredShapes object and template literals
     
     return `${favoriteShape} Greetings, ${name}!`;
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 }
 
 // Exercise 2: Calculate fibonacci growth
 function fibonacciGrowth(n) {
-<<<<<<< HEAD
-    if (n <= 1) return fibonacci[n] || n;
-=======
     // TODO: Implement fibonacci sequence calculation
     // Hint: Use the fibonacci array and calculate the nth value
     
     if (n <= 1) return fibonacci[n];
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
     let a = 0, b = 1;
     for (let i = 2; i <= n; i++) {
         [a, b] = [b, a + b];
@@ -134,14 +126,10 @@ function fibonacciGrowth(n) {
 
 // Exercise 3: Design a sacred geometry pattern
 function designSacredPattern(shape, size, color) {
-<<<<<<< HEAD
-    return `A golden ${shape} of size ${Math.round(size * GOLDEN_RATIO)} in ${color}`;
-=======
     // TODO: Create a pattern description
     // Example: "A golden triangle of size 42 in cosmic blue"
     
     return `A ${shape} of size ${size} in ${color}`;
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 }
 
 // ===== MAIN EXECUTION =====

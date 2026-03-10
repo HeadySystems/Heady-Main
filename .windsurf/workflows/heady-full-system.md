@@ -18,71 +18,31 @@ Boots with: MC Scheduler (speed_priority), Pattern Engine, Self-Critique Engine,
 ```powershell
 # "off" = balanced | "on" = speed priority (default) | "max" = absolute fastest
 $body = @{ mode = "max" } | ConvertTo-Json
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/monte-carlo/speed-mode" -Method POST -Body $body -ContentType "application/json" | ConvertTo-Json -Depth 5
-=======
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/monte-carlo/speed-mode" -Method POST -Body $body -ContentType "application/json" | ConvertTo-Json -Depth 5
-=======
 Invoke-RestMethod -Uri "http://localhost:3300/api/monte-carlo/speed-mode" -Method POST -Body $body -ContentType "application/json" | ConvertTo-Json -Depth 5
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 ## 3. Plan a Task with MC
 ```powershell
 $body = @{ taskType = "code_generation"; taskMeta = @{ complex = $false } } | ConvertTo-Json
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/monte-carlo/plan" -Method POST -Body $body -ContentType "application/json" | ConvertTo-Json -Depth 5
-=======
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/monte-carlo/plan" -Method POST -Body $body -ContentType "application/json" | ConvertTo-Json -Depth 5
-=======
 Invoke-RestMethod -Uri "http://localhost:3300/api/monte-carlo/plan" -Method POST -Body $body -ContentType "application/json" | ConvertTo-Json -Depth 5
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 ## 4. Record Execution Result (Feedback)
 ```powershell
 $body = @{ taskType = "code_generation"; strategyId = "fast_parallel"; actualLatencyMs = 800; success = $true; qualityScore = 92 } | ConvertTo-Json
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/monte-carlo/result" -Method POST -Body $body -ContentType "application/json" | ConvertTo-Json -Depth 5
-=======
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/monte-carlo/result" -Method POST -Body $body -ContentType "application/json" | ConvertTo-Json -Depth 5
-=======
 Invoke-RestMethod -Uri "http://localhost:3300/api/monte-carlo/result" -Method POST -Body $body -ContentType "application/json" | ConvertTo-Json -Depth 5
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 ## 5. Check MC Metrics
 // turbo
 ```powershell
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/monte-carlo/metrics" | ConvertTo-Json -Depth 5
-=======
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/monte-carlo/metrics" | ConvertTo-Json -Depth 5
-=======
 Invoke-RestMethod -Uri "http://localhost:3300/api/monte-carlo/metrics" | ConvertTo-Json -Depth 5
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 ## 6. Check Drift Alerts
 // turbo
 ```powershell
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/monte-carlo/drift" | ConvertTo-Json -Depth 5
-=======
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/monte-carlo/drift" | ConvertTo-Json -Depth 5
-=======
 Invoke-RestMethod -Uri "http://localhost:3300/api/monte-carlo/drift" | ConvertTo-Json -Depth 5
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 ---
@@ -92,57 +52,25 @@ Invoke-RestMethod -Uri "http://localhost:3300/api/monte-carlo/drift" | ConvertTo
 ## 7. View Recent Patterns
 // turbo
 ```powershell
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/patterns/recent" | ConvertTo-Json -Depth 5
-=======
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/patterns/recent" | ConvertTo-Json -Depth 5
-=======
 Invoke-RestMethod -Uri "http://localhost:3300/api/patterns/recent" | ConvertTo-Json -Depth 5
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 ## 8. View Bottleneck Patterns
 // turbo
 ```powershell
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/patterns/bottlenecks" | ConvertTo-Json -Depth 5
-=======
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/patterns/bottlenecks" | ConvertTo-Json -Depth 5
-=======
 Invoke-RestMethod -Uri "http://localhost:3300/api/patterns/bottlenecks" | ConvertTo-Json -Depth 5
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 ## 9. View Pattern Summary
 // turbo
 ```powershell
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/patterns/summary" | ConvertTo-Json -Depth 5
-=======
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/patterns/summary" | ConvertTo-Json -Depth 5
-=======
 Invoke-RestMethod -Uri "http://localhost:3300/api/patterns/summary" | ConvertTo-Json -Depth 5
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 ## 10. View Improvement Tasks (from stagnant/degrading patterns)
 // turbo
 ```powershell
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/patterns/improvements" | ConvertTo-Json -Depth 5
-=======
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/patterns/improvements" | ConvertTo-Json -Depth 5
-=======
 Invoke-RestMethod -Uri "http://localhost:3300/api/patterns/improvements" | ConvertTo-Json -Depth 5
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 ---
@@ -152,29 +80,13 @@ Invoke-RestMethod -Uri "http://localhost:3300/api/patterns/improvements" | Conve
 ## 11. View System Self-Knowledge
 // turbo
 ```powershell
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/self/knowledge" | ConvertTo-Json -Depth 5
-=======
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/self/knowledge" | ConvertTo-Json -Depth 5
-=======
 Invoke-RestMethod -Uri "http://localhost:3300/api/self/knowledge" | ConvertTo-Json -Depth 5
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 ## 12. View Self-Critique Status
 // turbo
 ```powershell
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/self/status" | ConvertTo-Json -Depth 5
-=======
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/self/status" | ConvertTo-Json -Depth 5
-=======
 Invoke-RestMethod -Uri "http://localhost:3300/api/self/status" | ConvertTo-Json -Depth 5
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 ## 13. Record a Critique (manual or automated)
@@ -185,29 +97,13 @@ $body = @{
   severity = "high"
   suggestedImprovements = @("Add warm pool for pipeline agents", "Seed pattern engine with baseline data")
 } | ConvertTo-Json
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/self/critique" -Method POST -Body $body -ContentType "application/json" | ConvertTo-Json -Depth 5
-=======
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/self/critique" -Method POST -Body $body -ContentType "application/json" | ConvertTo-Json -Depth 5
-=======
 Invoke-RestMethod -Uri "http://localhost:3300/api/self/critique" -Method POST -Body $body -ContentType "application/json" | ConvertTo-Json -Depth 5
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 ## 14. View Recent Critiques
 // turbo
 ```powershell
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/self/critiques" | ConvertTo-Json -Depth 5
-=======
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/self/critiques" | ConvertTo-Json -Depth 5
-=======
 Invoke-RestMethod -Uri "http://localhost:3300/api/self/critiques" | ConvertTo-Json -Depth 5
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 ## 15. Record an Improvement
@@ -219,15 +115,7 @@ $body = @{
   after = "fast_parallel (800ms avg)"
   status = "applied"
 } | ConvertTo-Json
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/self/improvement" -Method POST -Body $body -ContentType "application/json" | ConvertTo-Json -Depth 5
-=======
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/self/improvement" -Method POST -Body $body -ContentType "application/json" | ConvertTo-Json -Depth 5
-=======
 Invoke-RestMethod -Uri "http://localhost:3300/api/self/improvement" -Method POST -Body $body -ContentType "application/json" | ConvertTo-Json -Depth 5
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 ## 16. Run Bottleneck Diagnostic
@@ -237,29 +125,13 @@ $body = @{
   latencyData = @{ code_generation = 3200; pipeline_stage = 8000; deployment = 15000 }
   errorRates = @{ code_generation = 0.02; deployment = 0.08 }
 } | ConvertTo-Json -Depth 3
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/self/diagnose" -Method POST -Body $body -ContentType "application/json" | ConvertTo-Json -Depth 5
-=======
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/self/diagnose" -Method POST -Body $body -ContentType "application/json" | ConvertTo-Json -Depth 5
-=======
 Invoke-RestMethod -Uri "http://localhost:3300/api/self/diagnose" -Method POST -Body $body -ContentType "application/json" | ConvertTo-Json -Depth 5
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 ## 17. View Diagnostics History
 // turbo
 ```powershell
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/self/diagnostics" | ConvertTo-Json -Depth 5
-=======
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/self/diagnostics" | ConvertTo-Json -Depth 5
-=======
 Invoke-RestMethod -Uri "http://localhost:3300/api/self/diagnostics" | ConvertTo-Json -Depth 5
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 ---
@@ -269,42 +141,18 @@ Invoke-RestMethod -Uri "http://localhost:3300/api/self/diagnostics" | ConvertTo-
 ## 18. Check a Channel's Health
 ```powershell
 $body = @{ channelId = "ide_extension"; metrics = @{ latencyMs = 450; errorRate = 0.5 } } | ConvertTo-Json
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/self/connection-health" -Method POST -Body $body -ContentType "application/json" | ConvertTo-Json -Depth 5
-=======
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/self/connection-health" -Method POST -Body $body -ContentType "application/json" | ConvertTo-Json -Depth 5
-=======
 Invoke-RestMethod -Uri "http://localhost:3300/api/self/connection-health" -Method POST -Body $body -ContentType "application/json" | ConvertTo-Json -Depth 5
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 ## 19. View All Connection Health
 // turbo
 ```powershell
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/self/connections" | ConvertTo-Json -Depth 5
-=======
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/self/connections" | ConvertTo-Json -Depth 5
-=======
 Invoke-RestMethod -Uri "http://localhost:3300/api/self/connections" | ConvertTo-Json -Depth 5
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 ## 20. Run Meta-Analysis (periodic self-review)
 ```powershell
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/self/meta-analysis" -Method POST -ContentType "application/json" | ConvertTo-Json -Depth 5
-=======
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/self/meta-analysis" -Method POST -ContentType "application/json" | ConvertTo-Json -Depth 5
-=======
 Invoke-RestMethod -Uri "http://localhost:3300/api/self/meta-analysis" -Method POST -ContentType "application/json" | ConvertTo-Json -Depth 5
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 ---
@@ -314,43 +162,19 @@ Invoke-RestMethod -Uri "http://localhost:3300/api/self/meta-analysis" -Method PO
 ## 21. View Pricing Tiers
 // turbo
 ```powershell
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/pricing/tiers" | ConvertTo-Json -Depth 5
-=======
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/pricing/tiers" | ConvertTo-Json -Depth 5
-=======
 Invoke-RestMethod -Uri "http://localhost:3300/api/pricing/tiers" | ConvertTo-Json -Depth 5
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 ## 22. View Fair Access Programs
 // turbo
 ```powershell
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/pricing/fair-access" | ConvertTo-Json -Depth 5
-=======
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/pricing/fair-access" | ConvertTo-Json -Depth 5
-=======
 Invoke-RestMethod -Uri "http://localhost:3300/api/pricing/fair-access" | ConvertTo-Json -Depth 5
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 ## 23. View Pricing Metrics to Track
 // turbo
 ```powershell
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/pricing/metrics" | ConvertTo-Json -Depth 5
-=======
-<<<<<<< HEAD
-Invoke-RestMethod -Uri "http://internal.headyio.com:3300/api/pricing/metrics" | ConvertTo-Json -Depth 5
-=======
 Invoke-RestMethod -Uri "http://localhost:3300/api/pricing/metrics" | ConvertTo-Json -Depth 5
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 ---

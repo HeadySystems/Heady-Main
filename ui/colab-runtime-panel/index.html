@@ -85,11 +85,7 @@
     (function () {
       'use strict';
       var PHI = 1.618; var PSI = 0.618;
-<<<<<<< HEAD
-      
-=======
 
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
       // Default gateway port
       const gatewayPort = 3352;
       const protocol = window.location.protocol === 'file:' ? 'http:' : window.location.protocol;
@@ -116,11 +112,7 @@
 
       function render(data) {
         var grid = document.getElementById('runtime-grid');
-<<<<<<< HEAD
-        
-=======
 
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
         // Convert runtimes object to array
         const runtimesList = [];
         if (data.runtimes) {
@@ -140,11 +132,7 @@
                 });
             }
         }
-<<<<<<< HEAD
-        
-=======
 
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
         grid.innerHTML = runtimesList.map(function (r) {
           var utilPct = (r.utilization * 100).toFixed(1);
           var memPct = r.vram ? ((r.memUsed / r.vram) * 100).toFixed(1) : '0.0';

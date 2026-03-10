@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-const logger = require('./src/utils/logger.js');
-=======
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 // HEADY_BRAND:BEGIN
 // ╔══════════════════════════════════════════════════════════════════╗
 // ║  ██╗  ██╗███████╗ █████╗ ██████╗ ██╗   ██╗                     ║
@@ -53,14 +49,8 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-<<<<<<< HEAD
-    logger.info(`✅ HeadyManager RUNNING on http://manager.local:${PORT}`);
-    logger.info(`🌐 Website: http://app.local:${PORT}`);
-    logger.info(`📊 Health: http://manager.local:${PORT}/api/health`);
-=======
     console.log(`✅ HeadyManager RUNNING on http://manager.local:${PORT}`);
     console.log(`🌐 Website: http://app.local:${PORT}`);
     console.log(`📊 Health: http://manager.local:${PORT}/api/health`);
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 });
 

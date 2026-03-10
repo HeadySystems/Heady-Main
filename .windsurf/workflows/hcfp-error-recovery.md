@@ -42,18 +42,8 @@ This workflow ensures that **every change triggers a full clean build** with **s
 
 ### 1. Pre-flight Checks (Always Run)
 ```bash
-<<<<<<< HEAD
-# Check for forbidden internal.headyio.com references
-grep -r "http://internal.headyio.com\|internal.headyio.com" --include="*.js" --include="*.json" --include="*.yaml"
-=======
-<<<<<<< HEAD
-# Check for forbidden internal.headyio.com references
-grep -r "http://internal.headyio.com\|internal.headyio.com" --include="*.js" --include="*.json" --include="*.yaml"
-=======
 # Check for forbidden localhost references
 grep -r "http://localhost\|127.0.0.1" --include="*.js" --include="*.json" --include="*.yaml"
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 
 # Verify service discovery config is valid
 node scripts/validate-domains.js
@@ -177,15 +167,7 @@ exit 1
 # Run clean build locally
 npm run clean-build
 
-<<<<<<< HEAD
-# Verify no internal.headyio.com references
-=======
-<<<<<<< HEAD
-# Verify no internal.headyio.com references
-=======
 # Verify no localhost references
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 npm run check:domains
 
 # Run full test suite
@@ -219,15 +201,7 @@ npm run format
 
 ### Dashboard
 ```
-<<<<<<< HEAD
-Build Status Dashboard (http://internal.headyio.com:3300/api/build-status)
-=======
-<<<<<<< HEAD
-Build Status Dashboard (http://internal.headyio.com:3300/api/build-status)
-=======
 Build Status Dashboard (http://localhost:3300/api/build-status)
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ├── Last 24 hours: 47 builds, 44 passed (93.6%)
 ├── Error breakdown:
 │   ├── Transient (retried): 2

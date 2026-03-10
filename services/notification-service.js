@@ -1,10 +1,6 @@
 /**
  * Heady Notification Service — Port 3311
-<<<<<<< HEAD
- * Multi-channel: Email, Push, In-App, SMS with concurrent queue + DLQ
-=======
  * Multi-channel: Email, Push, In-App, SMS with csl_relevance queue + DLQ
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
  * Author: Eric Haywood | All constants φ-derived | ESM only
  */
 import { createHash, randomBytes } from 'crypto';
@@ -17,8 +13,6 @@ const BATCH_SIZE_MEDIUM    = fibonacci(8);                   // 21
 const BATCH_SIZE_LARGE     = fibonacci(10);                  // 55
 const MAX_RETRIES          = fibonacci(5);                   // 5
 const DLQ_MAX_SIZE         = fibonacci(14);                  // 377
-<<<<<<< HEAD
-=======
 const CSL_RELEVANCE_LEVELS      = {
   CRITICAL: phiThreshold(4),   // ≈0.927
   HIGH:     phiThreshold(3),   // ≈0.882
@@ -26,7 +20,6 @@ const CSL_RELEVANCE_LEVELS      = {
   LOW:      phiThreshold(1),   // ≈0.691
   MINIMUM:  phiThreshold(0),   // ≈0.500
 };
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 const CHANNEL_TYPES        = ['email', 'push', 'in_app', 'sms'];
 const TEMPLATE_CACHE_SIZE  = fibonacci(12);                  // 144
 
@@ -88,9 +81,6 @@ function getUserPreferences(userId) {
   };
 }
 
-<<<<<<< HEAD
-// ── Queue ───────────────────────────────────
-=======
 // ── CslRelevance Queue (CSL-Gated) ───────────────────────────────────
 function computeCslRelevance(notification) {
   const urgencyVec = [notification.urgency || 0.5];
@@ -99,16 +89,12 @@ function computeCslRelevance(notification) {
   return cslGate(rawScore, rawScore, phiThreshold(1), PSI * PSI * PSI);
 }
 
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 function enqueueNotification(notification) {
   const id = sha256(randomBytes(16).toString('hex') + Date.now());
   const entry = {
     id,
     ...notification,
-<<<<<<< HEAD
-=======
     csl_relevance: computeCslRelevance(notification),
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
     attempts: 0,
     maxRetries: MAX_RETRIES,
     status: 'pending',
@@ -116,12 +102,8 @@ function enqueueNotification(notification) {
     lastAttempt: null,
   };
   notificationQueue.push(entry);
-<<<<<<< HEAD
-  return { id, status: 'queued' };
-=======
   notificationQueue.sort((a, b) => b.csl_relevance - a.csl_relevance);
   return { id, csl_relevance: entry.csl_relevance, status: 'queued' };
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 }
 
 // ── Channel Senders ──────────────────────────────────────────────
@@ -147,11 +129,7 @@ async function sendPush(notification) {
         body: notification.body || '',
       },
       data: notification.data || {},
-<<<<<<< HEAD
-      android: { ttl: String(fibonacci(13)) + 's' },
-=======
       android: { priority: 'high', ttl: String(fibonacci(13)) + 's' },
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
       apns: { payload: { aps: { sound: 'default' } } },
     },
   };

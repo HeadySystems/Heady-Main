@@ -72,25 +72,15 @@ const FIB_TOTAL = FIBONACCI.slice(0, 17).reduce((a, b) => a + b, 0);
  *
  * The gaps between levels now follow the golden ratio: gap(LOW→MED)/gap(MED→HIGH) ≈ φ.
  */
-<<<<<<< HEAD
-const CSL_THRESHOLD_0_882 = CSL_THRESHOLDS.HIGH;     // ≈ 0.882  (was 0.85)
-const CSL_THRESHOLD_0_809  = CSL_THRESHOLDS.MEDIUM;   // ≈ 0.809  (was 0.72)
-const CSL_THRESHOLD_0_691  = CSL_THRESHOLDS.LOW;      // ≈ 0.691  (was 0.55)
-=======
 const CSL_THRESHOLD_HIGH = CSL_THRESHOLDS.HIGH;     // ≈ 0.882  (was 0.85)
 const CSL_THRESHOLD_MED  = CSL_THRESHOLDS.MEDIUM;   // ≈ 0.809  (was 0.72)
 const CSL_THRESHOLD_LOW  = CSL_THRESHOLDS.LOW;      // ≈ 0.691  (was 0.55)
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 
 /**
  * Phi-derived resource weights for the 17-swarm pool.
  *
  * phiResourceWeights(17) assigns Fibonacci-normalized weights in descending
-<<<<<<< HEAD
- * order so the highest-weighted swarm gets F(18)/sum and the lowest gets F(2)/sum.
-=======
  * order so the highest-csl_relevance swarm gets F(18)/sum and the lowest gets F(2)/sum.
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
  * This replaces the per-swarm fibWeight() lookup with a single computed array.
  *
  * @type {number[]}
@@ -155,33 +145,6 @@ const MIN_HEALTHY_SWARMS = 5;
  */
 const SWARM_DEFINITIONS = [
   // CENTER — HeadySoul (strategic, highest Fibonacci weight)
-<<<<<<< HEAD
-  { id: 'heady-soul',        ring: RING.CENTER,     layer: LAYER.STRATEGIC,   fibIdx: 10, domain: 'orchestration',  cslThreshold: CSL_THRESHOLD_0_882 },
-
-  // INNER — Tactical coordinators (5 swarms)
-  { id: 'cognition-core',    ring: RING.INNER,      layer: LAYER.TACTICAL,    fibIdx: 9,  domain: 'reasoning',      cslThreshold: CSL_THRESHOLD_0_882 },
-  { id: 'memory-weave',      ring: RING.INNER,      layer: LAYER.TACTICAL,    fibIdx: 8,  domain: 'memory',         cslThreshold: CSL_THRESHOLD_0_882 },
-  { id: 'context-bridge',    ring: RING.INNER,      layer: LAYER.TACTICAL,    fibIdx: 8,  domain: 'context',        cslThreshold: CSL_THRESHOLD_0_809  },
-  { id: 'task-planner',      ring: RING.INNER,      layer: LAYER.TACTICAL,    fibIdx: 7,  domain: 'planning',       cslThreshold: CSL_THRESHOLD_0_882 },
-  { id: 'consensus-forge',   ring: RING.INNER,      layer: LAYER.TACTICAL,    fibIdx: 7,  domain: 'consensus',      cslThreshold: CSL_THRESHOLD_0_809  },
-
-  // MIDDLE — Operational specialists (7 swarms)
-  { id: 'code-artisan',      ring: RING.MIDDLE,     layer: LAYER.OPERATIONAL, fibIdx: 6,  domain: 'coding',         cslThreshold: CSL_THRESHOLD_0_809  },
-  { id: 'data-sculptor',     ring: RING.MIDDLE,     layer: LAYER.OPERATIONAL, fibIdx: 6,  domain: 'data',           cslThreshold: CSL_THRESHOLD_0_809  },
-  { id: 'research-herald',   ring: RING.MIDDLE,     layer: LAYER.OPERATIONAL, fibIdx: 5,  domain: 'research',       cslThreshold: CSL_THRESHOLD_0_809  },
-  { id: 'tool-weaver',       ring: RING.MIDDLE,     layer: LAYER.OPERATIONAL, fibIdx: 5,  domain: 'tools',          cslThreshold: CSL_THRESHOLD_0_809  },
-  { id: 'language-flow',     ring: RING.MIDDLE,     layer: LAYER.OPERATIONAL, fibIdx: 5,  domain: 'language',       cslThreshold: CSL_THRESHOLD_0_809  },
-  { id: 'vision-scribe',     ring: RING.MIDDLE,     layer: LAYER.OPERATIONAL, fibIdx: 4,  domain: 'vision',         cslThreshold: CSL_THRESHOLD_0_691  },
-  { id: 'audio-pulse',       ring: RING.MIDDLE,     layer: LAYER.OPERATIONAL, fibIdx: 4,  domain: 'audio',          cslThreshold: CSL_THRESHOLD_0_691  },
-
-  // OUTER — Edge workers (3 swarms)
-  { id: 'integration-node',  ring: RING.OUTER,      layer: LAYER.OPERATIONAL, fibIdx: 3,  domain: 'integration',    cslThreshold: CSL_THRESHOLD_0_691  },
-  { id: 'cache-guardian',    ring: RING.OUTER,      layer: LAYER.OPERATIONAL, fibIdx: 3,  domain: 'caching',        cslThreshold: CSL_THRESHOLD_0_691  },
-  { id: 'stream-runner',     ring: RING.OUTER,      layer: LAYER.OPERATIONAL, fibIdx: 2,  domain: 'streaming',      cslThreshold: CSL_THRESHOLD_0_691  },
-
-  // GOVERNANCE — Policy + compliance (1 swarm)
-  { id: 'policy-sentinel',   ring: RING.GOVERNANCE, layer: LAYER.STRATEGIC,   fibIdx: 6,  domain: 'governance',     cslThreshold: CSL_THRESHOLD_0_882 },
-=======
   { id: 'heady-soul',        ring: RING.CENTER,     layer: LAYER.STRATEGIC,   fibIdx: 10, domain: 'orchestration',  cslThreshold: CSL_THRESHOLD_HIGH },
 
   // INNER — Tactical coordinators (5 swarms)
@@ -207,7 +170,6 @@ const SWARM_DEFINITIONS = [
 
   // GOVERNANCE — Policy + compliance (1 swarm)
   { id: 'policy-sentinel',   ring: RING.GOVERNANCE, layer: LAYER.STRATEGIC,   fibIdx: 6,  domain: 'governance',     cslThreshold: CSL_THRESHOLD_HIGH },
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ];
 
 // ─── Helper Utilities ─────────────────────────────────────────────────────────
@@ -479,11 +441,7 @@ class SwarmInstance {
 
 /**
  * Lightweight in-process message bus for swarm-to-swarm communication.
-<<<<<<< HEAD
- * Supports topic-based pub/sub with concurrent routing.
-=======
  * Supports topic-based pub/sub with csl_relevance queuing.
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
  */
 class SwarmMessageBus extends EventEmitter {
   constructor() {
@@ -499,22 +457,14 @@ class SwarmMessageBus extends EventEmitter {
    * Publish a message to a topic.
    * @param {string} topic   - Target topic (e.g. 'swarm:coding', 'broadcast')
    * @param {object} message - Message payload
-<<<<<<< HEAD
-   * @param {object} [opts]  - Options: { confidence?: number, ttlMs?: number }
-=======
    * @param {object} [opts]  - Options: { csl_relevance?: number, ttlMs?: number }
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
    */
   publish(topic, message, opts = {}) {
     const envelope = {
       id:        randomUUID(),
       topic,
       message,
-<<<<<<< HEAD
-      confidence:  opts.confidence ?? 0.5,
-=======
       csl_relevance:  opts.csl_relevance ?? 5,
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
       publishedAt: Date.now(),
       expiresAt: opts.ttlMs ? Date.now() + opts.ttlMs : null,
     };
@@ -576,11 +526,7 @@ class SwarmMessageBus extends EventEmitter {
    * @param {number} pressure   - Pressure level [0, 1]
    */
   broadcastBackpressure(swarmId, pressure) {
-<<<<<<< HEAD
-    return this.publish('backpressure', { swarmId, pressure, ts: Date.now() }, {  });
-=======
     return this.publish('backpressure', { swarmId, pressure, ts: Date.now() }, { csl_relevance: 10 });
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
   }
 }
 
@@ -629,11 +575,7 @@ class SwarmCoordinator extends EventEmitter {
     this._beeRegistry     = opts.beeRegistry     ?? null;
     this._headyBees       = opts.headyBees       ?? null;
     this._swarmConsensus  = opts.swarmConsensus  ?? null;
-<<<<<<< HEAD
-    this._cslThreshold    = opts.cslThreshold    ?? CSL_THRESHOLD_0_809;
-=======
     this._cslThreshold    = opts.cslThreshold    ?? CSL_THRESHOLD_MED;
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
     this._metricsInterval = opts.metricsIntervalMs ?? METRICS_INTERVAL_MS;
     this._healthCheckMs   = opts.healthCheckMs   ?? HEALTH_CHECK_INTERVAL_MS;
     this._embedFn         = opts.embedFn         ?? null;
@@ -736,11 +678,7 @@ class SwarmCoordinator extends EventEmitter {
   /**
    * Route and execute a task to the best-matching swarm.
    *
-<<<<<<< HEAD
-   * Routing order:
-=======
    * Routing csl_relevance:
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
    *   1. Deterministic: explicit swarmId on task
    *   2. CSL cosine similarity gate (if embedFn available)
    *   3. Domain string matching
@@ -752,12 +690,8 @@ class SwarmCoordinator extends EventEmitter {
    * @param {string} [task.swarmId] - Explicit target swarm (bypasses routing)
    * @param {string} [task.domain]  - Domain hint for routing ('coding', 'research', …)
    * @param {string} [task.description] - Task description for CSL embedding
-<<<<<<< HEAD
-   *    * @param {number[]} [task.embedding] - Pre-computed embedding (skips embedFn call)
-=======
    * @param {number} [task.csl_relevance]    - CslRelevance [1-10], default 5
    * @param {number[]} [task.embedding] - Pre-computed embedding (skips embedFn call)
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
    * @param {object} [task.payload]     - Task-specific data
    * @param {Function} [executor]   - Async fn(task, swarm) → result (optional override)
    * @returns {Promise<object>} Task result with routing metadata
@@ -766,11 +700,7 @@ class SwarmCoordinator extends EventEmitter {
     if (!this._initialized) await this.initialize();
 
     const taskId = task.id ?? randomUUID();
-<<<<<<< HEAD
-    const enriched = { ...task, id: taskId, confidence: task.confidence ?? 0.5 };
-=======
     const enriched = { ...task, id: taskId, csl_relevance: task.csl_relevance ?? 5 };
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 
     // Step 1: Resolve target swarm
     const { swarmId, strategy } = await this._resolveTargetSwarm(enriched);
@@ -1268,15 +1198,9 @@ export {
   RING,
   FIBONACCI,
   FIB_TOTAL,
-<<<<<<< HEAD
-  CSL_THRESHOLD_0_882,
-  CSL_THRESHOLD_0_809,
-  CSL_THRESHOLD_0_691,
-=======
   CSL_THRESHOLD_HIGH,
   CSL_THRESHOLD_MED,
   CSL_THRESHOLD_LOW,
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
   cosineSimilarity,
   fibWeight,
 };

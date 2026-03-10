@@ -1,26 +1,4 @@
 {
-<<<<<<< HEAD
-  "env": {
-    "node": true,
-    "es2024": true
-  },
-  "parserOptions": {
-    "ecmaVersion": "latest",
-    "sourceType": "module"
-  },
-  "rules": {
-    "no-unused-vars": [
-      "warn",
-      {
-        "argsIgnorePattern": "^_"
-      }
-    ],
-    "no-console": "off",
-    "prefer-const": "error",
-    "no-var": "error"
-  }
-}
-=======
   "root": true,
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint"],
@@ -36,4 +14,3 @@
   }
 }
 
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd

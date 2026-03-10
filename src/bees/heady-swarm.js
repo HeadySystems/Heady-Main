@@ -12,16 +12,10 @@
 const EventEmitter = require('events');
 const {
   PHI, PSI, PSI_SQ, fib, phiFusionScore,
-<<<<<<< HEAD
-  CSL_THRESHOLDS, TIMING,
-  cslAND, getPressureLevel,
-} = require('../../shared/phi-math');
-=======
   CSL_THRESHOLDS, PHI_TIMING,
   cslAND, getPressureLevel,
 } = require('../../shared/phi-math');
 const TIMING = { HEALTH_CHECK_MS: Math.round(fib(7) * 1000), DRIFT_CHECK_MS: Math.round(fib(9) * 1000) }; // Mock timing using fib logic if missing
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 const { createLogger } = require('../../shared/logger');
 const { HeadyBee, BEE_STATES, BEE_DOMAINS } = require('./heady-bee');
 

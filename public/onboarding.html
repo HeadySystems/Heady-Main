@@ -921,19 +921,12 @@
 
         // ===== AUTH CHECK =====
         function checkAuth() {
-<<<<<<< HEAD
-            // Using httpOnly cookies for sessions; client doesn't access the token directly.
-            // A more robust check should ping a `/auth/me` endpoint.
-            const hasSession = document.cookie.includes('__heady_onboarding');
-            return true; // We will assume auth is handled at network level.
-=======
             const token = localStorage.getItem('heady_auth_token');
             if (!token) {
                 window.location.href = '/auth.html';
                 return false;
             }
             return true;
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
         }
 
         // ===== PARTICLE BACKGROUND =====
@@ -1071,24 +1064,15 @@
         // ===== SAVE PREFERENCES =====
         async function savePreferences() {
             await resolveApi();
-<<<<<<< HEAD
-=======
             const token = localStorage.getItem('heady_auth_token');
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 
             try {
                 const response = await fetch(`${HEADY_API}/auth/preferences`, {
                     method: 'POST',
                     headers: {
-<<<<<<< HEAD
-                        'Content-Type': 'application/json'
-                    },
-                    // We rely on httpOnly cookies to send the token
-=======
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`,
                     },
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
                     body: JSON.stringify({
                         workspace: selectedUseCase,
                         integrations: selectedIntegrations,
@@ -1098,20 +1082,12 @@
                 });
 
                 if (response.ok) {
-<<<<<<< HEAD
-                    document.cookie = `__heady_onboarding_completed=true; path=/; max-age=31536000; secure; samesite=strict`;
-=======
                     localStorage.setItem('heady_onboarding_completed', 'true');
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
                     return true;
                 }
             } catch (err) {
                 console.warn('Could not save preferences (offline ok)', err);
-<<<<<<< HEAD
-                document.cookie = `__heady_onboarding_completed=true; path=/; max-age=31536000; secure; samesite=strict`;
-=======
                 localStorage.setItem('heady_onboarding_completed', 'true');
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
                 return true;
             }
         }
