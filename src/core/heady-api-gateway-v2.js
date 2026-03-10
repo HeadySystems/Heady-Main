@@ -76,10 +76,10 @@ const logger = pino();
 'use strict';
 
 const { PHI_TIMING } = require('../shared/phi-math');
-const http         = require('http');
-const https        = require('https');
-const { URL }      = require('url');
-const crypto       = require('crypto');
+const http = require('http');
+const https = require('https');
+const { URL } = require('url');
+const crypto = require('crypto');
 const EventEmitter = require('events');
 const { pipeline } = require('stream');
 
@@ -88,15 +88,15 @@ const PHI = 1.6180339887;
 
 // ─── All 9 Heady™ domains + canonical www variants ─────────────────────────────
 const HEADY_DOMAINS = Object.freeze([
-  'headyme.com',       'www.headyme.com',
-  'headysystems.com',  'www.headysystems.com',
-  'headyapi.com',      'www.headyapi.com',
+  'headyme.com', 'www.headyme.com',
+  'headysystems.com', 'www.headysystems.com',
+  'headyapi.com', 'www.headyapi.com',
   'headyconnection.org', 'www.headyconnection.org',
-  'headybuddy.org',    'www.headybuddy.org',
-  'headymcp.com',      'www.headymcp.com',
-  'headyio.com',       'www.headyio.com',
-  'headybot.com',      'www.headybot.com',
-  'heady-ai.com',       'www.heady-ai.com',
+  'headybuddy.org', 'www.headybuddy.org',
+  'headymcp.com', 'www.headymcp.com',
+  'headyio.com', 'www.headyio.com',
+  'headybot.com', 'www.headybot.com',
+  'heady-ai.com', 'www.heady-ai.com',
   // Dev / local
   'localhost',
   '127.0.0.1',
@@ -104,8 +104,8 @@ const HEADY_DOMAINS = Object.freeze([
 
 // ─── Supported API versions ───────────────────────────────────────────────────
 const SUPPORTED_VERSIONS = Object.freeze(['v1', 'v2']);
-const CURRENT_VERSION    = 'v2';
-const LEGACY_VERSION     = 'v1';
+const CURRENT_VERSION = 'v2';
+const LEGACY_VERSION = 'v1';
 
 // ─── Public (no-auth) routes by version ──────────────────────────────────────
 const PUBLIC_ROUTES = Object.freeze({
@@ -130,10 +130,10 @@ const PUBLIC_ROUTES = Object.freeze({
 
 // ─── Rate limit tiers ─────────────────────────────────────────────────────────
 const RATE_TIERS = Object.freeze({
-  anonymous:     { windowMs: 60_000, maxRequests: 60   },
+  anonymous: { windowMs: 60_000, maxRequests: 60 },
   authenticated: { windowMs: 60_000, maxRequests: 1000 },
-  admin:         { windowMs: 60_000, maxRequests: 200  },
-  pipeline_sse:  { windowMs: 60_000, maxStreams: 10    },
+  admin: { windowMs: 60_000, maxRequests: 200 },
+  pipeline_sse: { windowMs: 60_000, maxStreams: 10 },
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -156,15 +156,15 @@ class RateLimiter {
    * @returns {{ allowed: boolean, remaining: number, resetMs: number }}
    */
   check(key, tier = 'anonymous') {
-    const config  = RATE_TIERS[tier] || RATE_TIERS.anonymous;
-    const now     = Date.now();
-    const entry   = this._windows.get(key) || { timestamps: [] };
-    const cutoff  = now - config.windowMs;
+    const config = RATE_TIERS[tier] || RATE_TIERS.anonymous;
+    const now = Date.now();
+    const entry = this._windows.get(key) || { timestamps: [] };
+    const cutoff = now - config.windowMs;
 
     // Slide window
     entry.timestamps = entry.timestamps.filter((t) => t > cutoff);
 
-    const allowed   = entry.timestamps.length < config.maxRequests;
+    const allowed = entry.timestamps.length < config.maxRequests;
     if (allowed) entry.timestamps.push(now);
 
     this._windows.set(key, entry);
@@ -172,8 +172,8 @@ class RateLimiter {
     return {
       allowed,
       remaining: Math.max(0, config.maxRequests - entry.timestamps.length),
-      resetMs:   entry.timestamps.length ? (entry.timestamps[0] + config.windowMs - now) : 0,
-      limit:     config.maxRequests,
+      resetMs: entry.timestamps.length ? (entry.timestamps[0] + config.windowMs - now) : 0,
+      limit: config.maxRequests,
     };
   }
 
@@ -213,8 +213,8 @@ function base64urlDecode(str) {
  * @param {number} [expiresInS=3600]
  */
 function signJwt(payload, secret, expiresInS = 3600) {
-  const header  = base64urlEncode(Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })));
-  const body    = base64urlEncode(Buffer.from(JSON.stringify({
+  const header = base64urlEncode(Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })));
+  const body = base64urlEncode(Buffer.from(JSON.stringify({
     ...payload,
     iat: Math.floor(Date.now() / 1000),
     exp: Math.floor(Date.now() / 1000) + expiresInS,
@@ -252,8 +252,8 @@ function verifyApiKey(key, secret) {
   // Key format: <keyId>.<hmac>
   const sep = key.lastIndexOf('.');
   if (sep === -1) throw new Error('Invalid API key format.');
-  const keyId  = key.substring(0, sep);
-  const hmac   = key.substring(sep + 1);
+  const keyId = key.substring(0, sep);
+  const hmac = key.substring(sep + 1);
   const expected = crypto.createHmac('sha256', secret).update(keyId).digest('hex');
   if (!crypto.timingSafeEqual(Buffer.from(hmac), Buffer.from(expected))) {
     throw new Error('Invalid API key.');
@@ -269,27 +269,27 @@ class HeadyApiGatewayV2 extends EventEmitter {
   constructor(opts = {}) {
     super();
     this._opts = {
-      port:           opts.port           || parseInt(process.env.PORT || '8080', 10),
-      jwtSecret:      opts.jwtSecret      || process.env.JWT_SECRET    || '',
-      apiKeySecret:   opts.apiKeySecret   || process.env.API_KEY_SECRET || '',
+      port: opts.port || parseInt(process.env.PORT || '8080', 10),
+      jwtSecret: opts.jwtSecret || process.env.JWT_SECRET || '',
+      apiKeySecret: opts.apiKeySecret || process.env.API_KEY_SECRET || '',
       adminTokenHash: opts.adminTokenHash || process.env.ADMIN_TOKEN_HASH || '',
-      trustProxy:     opts.trustProxy     !== false,
-      enableCors:     opts.enableCors     !== false,
+      trustProxy: opts.trustProxy !== false,
+      enableCors: opts.enableCors !== false,
       enableRateLimit: opts.enableRateLimit !== false,
-      enableAuth:     opts.enableAuth     !== false,
-      serviceName:    opts.serviceName    || 'headyapi',
+      enableAuth: opts.enableAuth !== false,
+      serviceName: opts.serviceName || 'headyapi',
     };
 
     this._rateLimiter = new RateLimiter();
-    this._sseClients  = new Map();   // traceId → res
-    this._server      = null;
-    this._started     = false;
+    this._sseClients = new Map();   // traceId → res
+    this._server = null;
+    this._started = false;
 
     // Lazy-load singleton collaborators to avoid circular requires at module load
-    this._mesh  = null;   // HeadyServiceMesh singleton
-    this._obs   = null;   // HeadyObservability singleton
-    this._cfg   = null;   // ConfigServer singleton
-    this._bus   = null;   // HeadyEventBus singleton
+    this._mesh = null;   // HeadyServiceMesh singleton
+    this._obs = null;   // HeadyObservability singleton
+    this._cfg = null;   // ConfigServer singleton
+    this._bus = null;   // HeadyEventBus singleton
   }
 
   // ── Lazy singleton accessors ──────────────────────────────────────────────────
@@ -356,12 +356,12 @@ class HeadyApiGatewayV2 extends EventEmitter {
 
     // ── Health probes (no version prefix — Cloud Run requires /) ───────────
     app.get('/health', (_req, res) => res.json({ status: 'ok', service: this._opts.serviceName, ts: Date.now() }));
-    app.get('/ready',  (_req, res) => res.json({ status: 'ready', service: this._opts.serviceName }));
-    app.get('/',       (_req, res) => res.json({
-      name:     'Heady™ API Gateway',
-      version:  CURRENT_VERSION,
-      docs:     'https://headyapi.com/docs',
-      github:   'https://github.com/heady-project/headyapi-core',
+    app.get('/ready', (_req, res) => res.json({ status: 'ready', service: this._opts.serviceName }));
+    app.get('/', (_req, res) => res.json({
+      name: 'Heady™ API Gateway',
+      version: CURRENT_VERSION,
+      docs: 'https://headyapi.com/docs',
+      github: 'https://github.com/heady-project/headyapi-core',
     }));
 
     // ── Observability error middleware (last) ───────────────────────────────
@@ -370,15 +370,15 @@ class HeadyApiGatewayV2 extends EventEmitter {
     // ── Unhandled routes ────────────────────────────────────────────────────
     app.use((req, res) => {
       res.status(404).json({
-        error:   'Not Found',
-        path:    req.path,
-        hint:    `API routes live under /api/${CURRENT_VERSION}/. Check the docs at https://headyapi.com/docs`,
+        error: 'Not Found',
+        path: req.path,
+        hint: `API routes live under /api/${CURRENT_VERSION}/. Check the docs at https://headyapi.com/docs`,
         traceId: req.headyTrace?.traceId || null,
       });
     });
 
     this._server = http.createServer(app);
-    const port   = this.cfg ? this.cfg.get('gateway.port', this._opts.port) : this._opts.port;
+    const port = this.cfg ? this.cfg.get('gateway.port', this._opts.port) : this._opts.port;
 
     await new Promise((resolve, reject) => {
       this._server.listen(port, '0.0.0.0', (err) => {
@@ -412,8 +412,8 @@ class HeadyApiGatewayV2 extends EventEmitter {
   _corsMiddleware() {
     return (req, res, next) => {
       const origin = req.headers.origin || '';
-      const allowed = HEADY_DOMAINS.some((d) => origin.includes(d)) || !origin;
-      res.setHeader('Access-Control-Allow-Origin',  allowed ? (origin || '*') : 'null');
+      const allowed = origin && HEADY_DOMAINS.some((d) => origin.includes(d));
+      res.setHeader('Access-Control-Allow-Origin', allowed ? origin : 'null');
       res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
       res.setHeader('Access-Control-Allow-Headers', [
         'Content-Type', 'Authorization', 'X-Heady-Key',
@@ -444,17 +444,17 @@ class HeadyApiGatewayV2 extends EventEmitter {
 
   _versionRouter() {
     const express = require('express');
-    const router  = express.Router();
+    const router = express.Router();
 
     // Version detection
     router.use('/:version/*', (req, res, next) => {
       const { version } = req.params;
       if (!SUPPORTED_VERSIONS.includes(version)) {
         return res.status(404).json({
-          error:     `API version '${version}' is not supported.`,
+          error: `API version '${version}' is not supported.`,
           supported: SUPPORTED_VERSIONS,
-          current:   CURRENT_VERSION,
-          upgrade:   `https://headyapi.com/docs/migration/${version}-to-${CURRENT_VERSION}`,
+          current: CURRENT_VERSION,
+          upgrade: `https://headyapi.com/docs/migration/${version}-to-${CURRENT_VERSION}`,
         });
       }
       req.apiVersion = version;
@@ -474,7 +474,7 @@ class HeadyApiGatewayV2 extends EventEmitter {
     return (req, res, next) => {
       if (!this._opts.enableAuth) { req.auth = { anonymous: true }; return next(); }
 
-      const version  = req.apiVersion || 'v2';
+      const version = req.apiVersion || 'v2';
       const routeKey = `${req.method} ${req.path}`;
 
       // Check if route is public
@@ -532,9 +532,9 @@ class HeadyApiGatewayV2 extends EventEmitter {
 
       // No credentials provided
       return res.status(401).json({
-        error:   'Authentication required.',
+        error: 'Authentication required.',
         schemes: ['Bearer <JWT>', 'X-Heady-Key: <api-key>'],
-        docs:    'https://headyapi.com/docs/auth',
+        docs: 'https://headyapi.com/docs/auth',
         traceId: req.headyTrace?.traceId || null,
       });
     };
@@ -546,24 +546,24 @@ class HeadyApiGatewayV2 extends EventEmitter {
     return (req, res, next) => {
       if (!this._opts.enableRateLimit) return next();
 
-      const tier     = req.auth?.roles?.includes('admin') ? 'admin' : (req.auth?.anonymous ? 'anonymous' : defaultTier);
+      const tier = req.auth?.roles?.includes('admin') ? 'admin' : (req.auth?.anonymous ? 'anonymous' : defaultTier);
       const identity = req.auth?.userId || req.auth?.keyId || req.ip || 'unknown';
-      const result   = this._rateLimiter.check(identity, tier);
+      const result = this._rateLimiter.check(identity, tier);
 
-      res.setHeader('X-RateLimit-Limit',     String(result.limit));
+      res.setHeader('X-RateLimit-Limit', String(result.limit));
       res.setHeader('X-RateLimit-Remaining', String(result.remaining));
-      res.setHeader('X-RateLimit-Reset',     String(Math.ceil(result.resetMs / 1000)));
+      res.setHeader('X-RateLimit-Reset', String(Math.ceil(result.resetMs / 1000)));
 
       if (!result.allowed) {
         this.obs?.metrics.counter('heady_http_requests_total').inc({
           service: this._opts.serviceName, method: req.method, path: req.path, status_code: '429',
         });
         return res.status(429).json({
-          error:      'Rate limit exceeded.',
+          error: 'Rate limit exceeded.',
           tier,
-          resetInMs:  result.resetMs,
+          resetInMs: result.resetMs,
           retryAfter: Math.ceil(result.resetMs / 1000),
-          traceId:    req.headyTrace?.traceId || null,
+          traceId: req.headyTrace?.traceId || null,
         });
       }
       next();
@@ -574,17 +574,17 @@ class HeadyApiGatewayV2 extends EventEmitter {
 
   _v1Router() {
     const express = require('express');
-    const router  = express.Router();
+    const router = express.Router();
 
     // Health
-    router.get('/health',  (_req, res) => res.json({ status: 'ok',   version: 'v1', ts: Date.now() }));
-    router.get('/ready',   (_req, res) => res.json({ status: 'ready', version: 'v1' }));
+    router.get('/health', (_req, res) => res.json({ status: 'ok', version: 'v1', ts: Date.now() }));
+    router.get('/ready', (_req, res) => res.json({ status: 'ready', version: 'v1' }));
     router.get('/version', (_req, res) => res.json({
-      current:  CURRENT_VERSION,
-      version:  'v1',
-      status:   'legacy',
-      sunset:   '2027-01-01',
-      docs:     'https://headyapi.com/docs/v1',
+      current: CURRENT_VERSION,
+      version: 'v1',
+      status: 'legacy',
+      sunset: '2027-01-01',
+      docs: 'https://headyapi.com/docs/v1',
     }));
 
     // Pipeline run (v1 — proxied to v2 internally)
@@ -625,17 +625,17 @@ class HeadyApiGatewayV2 extends EventEmitter {
 
   _v2Router() {
     const express = require('express');
-    const router  = express.Router();
+    const router = express.Router();
 
     // ── Meta ───────────────────────────────────────────────────────────────
-    router.get('/health',  (_req, res) => res.json({ status: 'ok',    version: 'v2', ts: Date.now() }));
-    router.get('/ready',   (_req, res) => res.json({ status: 'ready', version: 'v2' }));
+    router.get('/health', (_req, res) => res.json({ status: 'ok', version: 'v2', ts: Date.now() }));
+    router.get('/ready', (_req, res) => res.json({ status: 'ready', version: 'v2' }));
     router.get('/version', (_req, res) => res.json({
-      name:     'Heady™ API Gateway',
-      current:  CURRENT_VERSION,
+      name: 'Heady™ API Gateway',
+      current: CURRENT_VERSION,
       versions: SUPPORTED_VERSIONS,
-      docs:     'https://headyapi.com/docs',
-      email:    'eric@headyconnection.org',
+      docs: 'https://headyapi.com/docs',
+      email: 'eric@headyconnection.org',
     }));
 
     // ── Auth ───────────────────────────────────────────────────────────────
@@ -682,7 +682,7 @@ class HeadyApiGatewayV2 extends EventEmitter {
     // ── Pipeline SSE stream ────────────────────────────────────────────────
     router.get('/pipeline/stream/:runId', (req, res) => {
       const { runId } = req.params;
-      const traceId  = req.headyTrace?.traceId || crypto.randomUUID();
+      const traceId = req.headyTrace?.traceId || crypto.randomUUID();
 
       res.setHeader('Content-Type', 'text/event-stream');
       res.setHeader('Cache-Control', 'no-cache');
@@ -726,36 +726,36 @@ class HeadyApiGatewayV2 extends EventEmitter {
     });
 
     // ── Bees ──────────────────────────────────────────────────────────────
-    router.get('/bees',        async (req, res) => this._proxyToService(req, res, 'headyapi', '/api/v2/bees'));
-    router.post('/bees',       async (req, res) => this._proxyToService(req, res, 'headyapi', '/api/v2/bees'));
-    router.get('/bees/:id',    async (req, res) => this._proxyToService(req, res, 'headyapi', `/api/v2/bees/${req.params.id}`));
+    router.get('/bees', async (req, res) => this._proxyToService(req, res, 'headyapi', '/api/v2/bees'));
+    router.post('/bees', async (req, res) => this._proxyToService(req, res, 'headyapi', '/api/v2/bees'));
+    router.get('/bees/:id', async (req, res) => this._proxyToService(req, res, 'headyapi', `/api/v2/bees/${req.params.id}`));
     router.delete('/bees/:id', async (req, res) => this._proxyToService(req, res, 'headyapi', `/api/v2/bees/${req.params.id}`));
     router.post('/bees/:id/restart', async (req, res) => this._proxyToService(req, res, 'headyapi', `/api/v2/bees/${req.params.id}/restart`));
 
     // ── Vector memory ────────────────────────────────────────────────────
     router.post('/memory/ingest', async (req, res) => this._proxyToService(req, res, 'headyapi', '/api/v2/memory/ingest'));
-    router.get('/memory/query',   async (req, res) => this._proxyToService(req, res, 'headyapi', '/api/v2/memory/query'));
-    router.delete('/memory',      async (req, res) => this._proxyToService(req, res, 'headyapi', '/api/v2/memory'));
+    router.get('/memory/query', async (req, res) => this._proxyToService(req, res, 'headyapi', '/api/v2/memory/query'));
+    router.delete('/memory', async (req, res) => this._proxyToService(req, res, 'headyapi', '/api/v2/memory'));
 
     // ── Creative engine ──────────────────────────────────────────────────
     router.post('/creative/generate', async (req, res) => this._proxyToService(req, res, 'headyapi', '/api/v2/creative/generate'));
-    router.get('/creative/styles',    async (req, res) => this._proxyToService(req, res, 'headyapi', '/api/v2/creative/styles'));
+    router.get('/creative/styles', async (req, res) => this._proxyToService(req, res, 'headyapi', '/api/v2/creative/styles'));
 
     // ── Edge diffusion (image generation) ────────────────────────────────
     router.post('/image/generate', async (req, res) => this._proxyToService(req, res, 'heady-ai', '/api/v2/image/generate'));
 
     // ── MCP tools ────────────────────────────────────────────────────────
-    router.get('/mcp/tools',               async (req, res) => this._proxyToService(req, res, 'headymcp', '/api/v2/mcp/tools'));
+    router.get('/mcp/tools', async (req, res) => this._proxyToService(req, res, 'headymcp', '/api/v2/mcp/tools'));
     router.post('/mcp/tools/:toolName/run', async (req, res) => this._proxyToService(req, res, 'headymcp', `/api/v2/mcp/tools/${req.params.toolName}/run`));
 
     // ── Buddy / sovereign orchestrator ────────────────────────────────────
-    router.post('/buddy/task',          async (req, res) => this._proxyToService(req, res, 'headybuddy', '/api/v2/buddy/task'));
-    router.get('/buddy/status',         async (req, res) => this._proxyToService(req, res, 'headybuddy', '/api/v2/buddy/status'));
-    router.get('/buddy/metacognition',  async (req, res) => this._proxyToService(req, res, 'headybuddy', '/api/v2/buddy/metacognition'));
+    router.post('/buddy/task', async (req, res) => this._proxyToService(req, res, 'headybuddy', '/api/v2/buddy/task'));
+    router.get('/buddy/status', async (req, res) => this._proxyToService(req, res, 'headybuddy', '/api/v2/buddy/status'));
+    router.get('/buddy/metacognition', async (req, res) => this._proxyToService(req, res, 'headybuddy', '/api/v2/buddy/metacognition'));
 
     // ── Self-awareness ────────────────────────────────────────────────────
-    router.get('/awareness/status',     async (req, res) => this._proxyToService(req, res, 'headyapi', '/api/v2/awareness/status'));
-    router.get('/awareness/telemetry',  async (req, res) => this._proxyToService(req, res, 'headyapi', '/api/v2/awareness/telemetry'));
+    router.get('/awareness/status', async (req, res) => this._proxyToService(req, res, 'headyapi', '/api/v2/awareness/status'));
+    router.get('/awareness/telemetry', async (req, res) => this._proxyToService(req, res, 'headyapi', '/api/v2/awareness/telemetry'));
 
     // ── Config (admin only) ───────────────────────────────────────────────
     router.use('/admin/config', this._adminAuthMiddleware(), (() => {
@@ -817,7 +817,7 @@ class HeadyApiGatewayV2 extends EventEmitter {
 
   _webhookRouter() {
     const express = require('express');
-    const router  = express.Router();
+    const router = express.Router();
 
     // GCP Pub/Sub push subscription
     router.post('/pubsub', express.json(), async (req, res) => {
@@ -831,8 +831,8 @@ class HeadyApiGatewayV2 extends EventEmitter {
         this.obs?.logger.info('PubSub message received', {
           subscription,
           messageId: message.messageId,
-          topic:     attributes.topic,
-          traceId:   req.headyTrace?.traceId,
+          topic: attributes.topic,
+          traceId: req.headyTrace?.traceId,
         });
 
         // Publish to internal event bus
@@ -860,8 +860,8 @@ class HeadyApiGatewayV2 extends EventEmitter {
       baseUrl = this.mesh ? await this.mesh.resolve(serviceName) : this._fallbackUrl(serviceName);
     } catch (err) {
       return res.status(503).json({
-        error:   `Service '${serviceName}' unavailable.`,
-        detail:  err.message,
+        error: `Service '${serviceName}' unavailable.`,
+        detail: err.message,
         traceId: req.headyTrace?.traceId,
       });
     }
@@ -869,24 +869,24 @@ class HeadyApiGatewayV2 extends EventEmitter {
     const url = `${baseUrl}${targetPath}${req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : ''}`;
 
     const outHeaders = {
-      'Content-Type':    'application/json',
+      'Content-Type': 'application/json',
       'X-Forwarded-For': req.ip,
-      'X-Real-IP':       req.ip,
-      ...( this.obs ? this.obs.tracer.injectHeaders({}) : {} ),
+      'X-Real-IP': req.ip,
+      ...(this.obs ? this.obs.tracer.injectHeaders({}) : {}),
     };
-    if (req.auth?.userId)  outHeaders['X-Heady-User']    = req.auth.userId;
-    if (req.auth?.roles)   outHeaders['X-Heady-Roles']   = req.auth.roles.join(',');
+    if (req.auth?.userId) outHeaders['X-Heady-User'] = req.auth.userId;
+    if (req.auth?.roles) outHeaders['X-Heady-Roles'] = req.auth.roles.join(',');
 
     try {
-      const parsed  = new URL(url);
-      const mod     = parsed.protocol === 'https:' ? https : http;
+      const parsed = new URL(url);
+      const mod = parsed.protocol === 'https:' ? https : http;
       const reqOpts = {
         hostname: parsed.hostname,
-        port:     parsed.port || (parsed.protocol === 'https:' ? 443 : 80),
-        path:     parsed.pathname + parsed.search,
-        method:   req.method,
-        headers:  outHeaders,
-        timeout:  PHI_TIMING.CYCLE,
+        port: parsed.port || (parsed.protocol === 'https:' ? 443 : 80),
+        path: parsed.pathname + parsed.search,
+        method: req.method,
+        headers: outHeaders,
+        timeout: PHI_TIMING.CYCLE,
       };
 
       const proxyReq = mod.request(reqOpts, (proxyRes) => {
@@ -923,14 +923,14 @@ class HeadyApiGatewayV2 extends EventEmitter {
 
   _fallbackUrl(serviceName) {
     const FALLBACK = {
-      headyapi:     process.env.HEADY_API_URL     || 'https://heady-manager-609590223909.us-central1.run.app',
-      headymcp:     process.env.HEADY_MCP_URL     || 'https://headymcp.com',
-      headybuddy:   process.env.HEADY_BUDDY_URL   || 'https://headybuddy.org',
-      heady-ai:      process.env.HEADY_AI_URL      || 'https://heady-ai.com',
-      headyio:      process.env.HEADY_IO_URL      || 'https://headyio.com',
-      headybot:     process.env.HEADY_BOT_URL     || 'https://headybot.com',
+      headyapi: process.env.HEADY_API_URL || 'https://heady-manager-609590223909.us-central1.run.app',
+      headymcp: process.env.HEADY_MCP_URL || 'https://headymcp.com',
+      headybuddy: process.env.HEADY_BUDDY_URL || 'https://headybuddy.org',
+      'heady-ai': process.env.HEADY_AI_URL || 'https://heady-ai.com',
+      headyio: process.env.HEADY_IO_URL || 'https://headyio.com',
+      headybot: process.env.HEADY_BOT_URL || 'https://headybot.com',
       headysystems: process.env.HEADY_SYSTEMS_URL || 'https://headysystems.com',
-      headyme:      process.env.HEADY_ME_URL      || 'https://headyme.com',
+      headyme: process.env.HEADY_ME_URL || 'https://headyme.com',
       headyconnection: process.env.HEADY_CONNECTION_URL || 'https://headyconnection.org',
     };
     const url = FALLBACK[serviceName];
@@ -943,7 +943,7 @@ class HeadyApiGatewayV2 extends EventEmitter {
    */
   router() {
     const express = require('express');
-    const router  = express.Router();
+    const router = express.Router();
     router.use(this._corsMiddleware());
     router.use(this._securityHeaders());
     router.use('/api', this._versionRouter());
@@ -965,7 +965,7 @@ function createGateway(opts) {
 }
 
 function _resetGatewayForTests() {
-  if (_instance) _instance.stop().catch(() => {});
+  if (_instance) _instance.stop().catch(() => { });
   _instance = null;
 }
 
@@ -991,7 +991,7 @@ module.exports = {
 if (require.main === module) {
   (async () => {
     const gw = createGateway({
-      port:       parseInt(process.env.PORT || '8080', 10),
+      port: parseInt(process.env.PORT || '8080', 10),
       enableAuth: process.env.NODE_ENV === 'production',
     });
     await gw.start();
@@ -1003,6 +1003,6 @@ if (require.main === module) {
       process.exit(0);
     };
     process.on('SIGTERM', () => shutdown('SIGTERM'));
-    process.on('SIGINT',  () => shutdown('SIGINT'));
+    process.on('SIGINT', () => shutdown('SIGINT'));
   })().catch((err) => { logger.error(err); process.exit(1); });
 }

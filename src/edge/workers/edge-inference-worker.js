@@ -38,7 +38,7 @@ const PSI = 0.6180339887498949;
  * fib(6)=8, fib(7)=13, fib(8)=21, fib(9)=34, fib(10)=55, fib(11)=89
  */
 // F(n) values for rate limits and TTLs — all are true Fibonacci numbers:
-const _FIB_8  = 8;    // fib(6)
+const _FIB_8 = 8;    // fib(6)
 const _FIB_13 = 13;   // fib(7)
 const _FIB_21 = 21;   // fib(8)
 const _FIB_34 = 34;   // fib(9)
@@ -46,9 +46,9 @@ const _FIB_55 = 55;   // fib(10)
 const _FIB_89 = 89;   // fib(11)
 
 // CSL thresholds from phi-math (phiThreshold(n) = 1 - PSI^n * 0.5)
-const _CSL_MEDIUM   = 1.0 - Math.pow(PSI, 2) * 0.5;  // ≈ 0.809
-const _CSL_LOW      = 1.0 - Math.pow(PSI, 1) * 0.5;  // ≈ 0.691
-const _CSL_MINIMUM  = 1.0 - Math.pow(PSI, 0) * 0.5;  // ≈ 0.500
+const _CSL_MEDIUM = 1.0 - Math.pow(PSI, 2) * 0.5;  // ≈ 0.809
+const _CSL_LOW = 1.0 - Math.pow(PSI, 1) * 0.5;  // ≈ 0.691
+const _CSL_MINIMUM = 1.0 - Math.pow(PSI, 0) * 0.5;  // ≈ 0.500
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -71,9 +71,9 @@ const _CSL_MINIMUM  = 1.0 - Math.pow(PSI, 0) * 0.5;  // ≈ 0.500
  *   60 * PHI^7 ≈ 1741 → use fib(16)=987*4=3948 → 3600 rounded
  */
 const CACHE_TTL = {
-  EMBED:      Math.round(60 * Math.pow(PHI, 7)),  // ≈ 3541 → ~1h; embeddings are stable
-  CLASSIFY:   Math.round(60 * Math.pow(PHI, 4)),  // ≈ 411 → ~7m; classifications may drift
-  RERANK:     Math.round(60 * Math.pow(PHI, 5)),  // ≈ 665 → ~11m
+  EMBED: Math.round(60 * Math.pow(PHI, 7)),  // ≈ 3541 → ~1h; embeddings are stable
+  CLASSIFY: Math.round(60 * Math.pow(PHI, 4)),  // ≈ 411 → ~7m; classifications may drift
+  RERANK: Math.round(60 * Math.pow(PHI, 5)),  // ≈ 665 → ~11m
   CHAT_EXACT: Math.round(60 * Math.pow(PHI, 2)),  // ≈ 157 → ~2.6m; deterministic chat (temp=0)
 };
 
@@ -83,10 +83,10 @@ const CACHE_TTL = {
  * Already Fibonacci — made explicit via named constants.
  */
 const RATE_LIMITS = {
-  EMBED:    _FIB_55,  // fib(10) = 55
-  CHAT:     _FIB_21,  // fib(8)  = 21
+  EMBED: _FIB_55,  // fib(10) = 55
+  CHAT: _FIB_21,  // fib(8)  = 21
   CLASSIFY: _FIB_89,  // fib(11) = 89
-  RERANK:   _FIB_34,  // fib(9)  = 34
+  RERANK: _FIB_34,  // fib(9)  = 34
 };
 
 /** Model assignments by complexity tier */
@@ -100,14 +100,36 @@ const MODELS = {
   SAFETY: '@cf/meta/llama-guard-3-8b',
 };
 
-/** CORS allowed origins — tighten in production */
-const ALLOWED_ORIGINS = [
-  'https://heady-ai.com',
-  'https://app.heady-ai.com',
+/**
+ * CORS allowed origins — all 9 Heady™ domains.
+ * Localhost only allowed in non-production via _isHeadyOrigin().
+ */
+const HEADY_ALLOWED_ORIGINS = new Set([
+  'https://headyme.com',
+  'https://headysystems.com',
+  'https://headyapi.com',
   'https://headyconnection.org',
-  'http://localhost:3000',
-  'http://localhost:5173',
-];
+  'https://headybuddy.org',
+  'https://headymcp.com',
+  'https://headyio.com',
+  'https://headybot.com',
+  'https://heady-ai.com',
+  'https://auth.headysystems.com',
+  'https://admin.headysystems.com',
+]);
+
+/** Check if an origin is an allowed Heady™ domain or dev localhost */
+function _isHeadyOrigin(origin) {
+  if (!origin) return false;
+  if (HEADY_ALLOWED_ORIGINS.has(origin)) return true;
+  // Allow *.run.app (Cloud Run)
+  if (/\.run\.app$/.test(new URL(origin).hostname)) return true;
+  // Dev only: localhost
+  if (typeof globalThis.ENVIRONMENT === 'undefined' || globalThis.ENVIRONMENT !== 'production') {
+    if (/^https?:\/\/(localhost|127\.0\.0\.1):/.test(origin)) return true;
+  }
+  return false;
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CORS helpers
@@ -115,12 +137,13 @@ const ALLOWED_ORIGINS = [
 
 /**
  * Build CORS response headers.
+ * Uses _isHeadyOrigin() for dynamic, secure origin matching.
  * @param {Request} request
  * @returns {Headers}
  */
 function corsHeaders(request) {
   const origin = request.headers.get('Origin') || '';
-  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  const allowed = _isHeadyOrigin(origin) ? origin : 'null';
   const h = new Headers();
   h.set('Access-Control-Allow-Origin', allowed);
   h.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -186,7 +209,7 @@ async function checkRateLimit(kv, key, limitPerMin) {
   }
 
   // Increment — fire and forget to avoid blocking the request path
-  kv.put(windowKey, String(count + 1), { expirationTtl: 120 }).catch(() => {});
+  kv.put(windowKey, String(count + 1), { expirationTtl: 120 }).catch(() => { });
   return { allowed: true, remaining: limitPerMin - count - 1, resetAt: (Math.floor(Date.now() / 60_000) + 1) * 60_000 };
 }
 
@@ -228,7 +251,7 @@ function scoreChatComplexity(body) {
 
   // Thresholds derived from CSL noise floor (_CSL_MINIMUM ≈ 0.5) and LOW (≈ 0.691)
   // scaled to the 0–81 score range (sum of all max weights = 34+21+13+8+5=81)
-  const SIMPLE_THRESHOLD   = Math.round(_CSL_MINIMUM * 40);   // ≈ 20
+  const SIMPLE_THRESHOLD = Math.round(_CSL_MINIMUM * 40);   // ≈ 20
   const STANDARD_THRESHOLD = Math.round(_CSL_LOW * 72);       // ≈ 50
 
   if (score < SIMPLE_THRESHOLD) return 'simple';
