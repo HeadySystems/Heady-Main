@@ -13,96 +13,6 @@
   const PSI = 0.6180339887;
   const PSI2 = PSI * PSI;
 
-<<<<<<< HEAD
-  // ── Dynamic Topology Data ──────────
-
-  let NODES = [];
-  let CONNECTIONS = [];
-  
-  const protocol = window.location.protocol === 'file:' ? 'http:' : window.location.protocol;
-  const hostname = window.location.hostname || 'localhost';
-  const managerUrl = `${protocol}//${hostname}:3300/api/registry`;
-
-  // Pseudorandom seeded by string
-  function seededRandom(seedStr) {
-      let h = 0;
-      for (let i = 0; i < seedStr.length; i++) h = Math.imul(31, h) + seedStr.charCodeAt(i) | 0;
-      return function() {
-          h = Math.imul(h ^ h >>> 16, 2246822507);
-          h = Math.imul(h ^ h >>> 13, 3266489909);
-          return (h ^= h >>> 16) >>> 0;
-      }
-  }
-
-  async function fetchTopologyData() {
-      try {
-          const res = await fetch(managerUrl);
-          if (!res.ok) throw new Error('Network response was not ok');
-          const registry = await res.json();
-          
-          NODES = [];
-          CONNECTIONS = [];
-          
-          // Generate deterministic coordinates based on node ID
-          const assignVector = (id, basePlatform) => {
-              const rand = seededRandom(id);
-              let baseVec = { x: rand() % 2, y: rand() % 2, z: rand() % 2 };
-              
-              // Apply layer anchors
-              if (basePlatform === 'cloudflare') baseVec = { x: 1.0 + (rand()%10)/20, y: (rand()%10)/20, z: PHI + (rand()%10)/20 };
-              else if (basePlatform === 'colab') baseVec = { x: (rand()%10)/20, y: PHI + (rand()%10)/20, z: (rand()%10)/20 };
-              else if (basePlatform === 'vertex') baseVec = { x: PSI + (rand()%10)/20, y: 1.0 + (rand()%10)/20, z: PSI + (rand()%10)/20 };
-              else baseVec = { x: PSI2 + (rand()%10)/20, y: PSI2 + (rand()%10)/20, z: PSI2 + (rand()%10)/20 }; // default origin
-              
-              return baseVec;
-          };
-
-          // Add Manager as central hub
-          NODES.push({
-              id: 'origin-manager',
-              name: 'Heady Manager',
-              platform: 'cloud_run',
-              type: 'service',
-              vector: { x: PSI2, y: PSI2, z: PSI2 },
-              status: 'active'
-          });
-
-          // Map registry nodes
-          if (registry.nodes) {
-              for (const [id, node] of Object.entries(registry.nodes)) {
-                  const platform = node.platform || (id.includes('EDGE') ? 'cloudflare' : 'local');
-                  NODES.push({
-                      id: id.toLowerCase(),
-                      name: node.name || id,
-                      platform: platform,
-                      type: node.role || 'node',
-                      vector: assignVector(id, platform),
-                      status: node.status || 'unknown'
-                  });
-                  
-                  // Connect to manager
-                  CONNECTIONS.push({
-                      from: 'origin-manager',
-                      to: id.toLowerCase(),
-                      type: 'mesh',
-                      weight: (seededRandom(id)() % 100) / 100 * PHI
-                  });
-              }
-          }
-          
-          // Render panels if data successfully mapped
-          if (NODES.length > 0) {
-              populateNodeList();
-              populateLayers();
-              populateConnections();
-              populateRoutingStats();
-              updateClusterHealth();
-          }
-
-      } catch (error) {
-          console.error("Failed to load topology data:", error);
-      }
-=======
   // ── Network Topology Data ─────────────────────────────────────────
   let NODES = [];
   let CONNECTIONS = [];
@@ -125,7 +35,6 @@
     } catch (e) {
       console.error('Failed to fetch topology:', e);
     }
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
   }
 
   const PLATFORM_COLORS = {
@@ -347,11 +256,6 @@
   // ── Initialize ───────────────────────────────────────────────────
 
   document.addEventListener('DOMContentLoaded', async function () {
-<<<<<<< HEAD
-    await fetchTopologyData();
-    drawTopology();
-    setInterval(fetchTopologyData, 15000); // refresh every 15s
-=======
     await fetchTopology();
     populateNodeList();
     populateLayers();
@@ -367,6 +271,5 @@
       populateRoutingStats();
       updateClusterHealth();
     }, 5000);
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
   });
 })();

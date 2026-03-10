@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-const logger = require('../utils/logger.js');
-=======
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 /* ╔══════════════════════════════════════════════════════════════════╗
    ║  ██╗  ██╗███████╗ █████╗ ██████╗ ██╗   ██╗                     ║
    ║  ██║  ██║██╔════╝██╔══██╗██╔══██╗╚██╗ ██╔╝                     ║
@@ -20,10 +16,6 @@ const logger = require('../utils/logger.js');
 
 const express = require('express');
 const crypto = require('crypto');
-<<<<<<< HEAD
-
-const router = express.Router();
-=======
 const { createLogger } = require('../../packages/structured-logger');
 
 const router = express.Router();
@@ -57,26 +49,11 @@ function verifyPassword(password, stored) {
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const MAX_SESSIONS_PER_USER = 5;
 const SESSION_CLEANUP_INTERVAL = 60 * 60 * 1000; // 1 hour
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 
 // ═════════════════════════════════════════════════════════════════════════════
 // IN-MEMORY STORAGE (demo only; replace with DB in production)
 // ═════════════════════════════════════════════════════════════════════════════
 
-<<<<<<< HEAD
-// Map<token, { userId, email, name, createdAt }>
-const sessions = new Map();
-
-// Map<userId, { email, password (hashed in prod), name, createdAt }>
-const users = new Map();
-
-// Demo user seed
-const DEMO_USER = {
-  id: 'demo-user-1',
-  email: 'eric@headyconnection.org',
-  password: 'heady2026', // In production, this would be hashed
-  name: 'Eric Heady',
-=======
 // Map<token, { userId, email, name, createdAt, expiresAt }>
 const sessions = new Map();
 
@@ -94,14 +71,11 @@ const DEMO_USER = {
   email: 'eric@headyconnection.org',
   passwordHash: hashPassword('heady2026'),
   name: 'Eric Haywood',
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 };
 
 // Register demo user on startup
 users.set(DEMO_USER.id, DEMO_USER);
 
-<<<<<<< HEAD
-=======
 // Periodic session cleanup
 setInterval(() => {
   const now = Date.now();
@@ -112,7 +86,6 @@ setInterval(() => {
   }
 }, SESSION_CLEANUP_INTERVAL);
 
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 // ═════════════════════════════════════════════════════════════════════════════
 // UTILITIES
 // ═════════════════════════════════════════════════════════════════════════════
@@ -142,21 +115,6 @@ function generateToken() {
 }
 
 /**
-<<<<<<< HEAD
- * Extract Bearer token from Authorization header or cookie.
- */
-function extractToken(req) {
-  const authHeader = req.headers.authorization;
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    return authHeader.substring(7);
-  }
-
-  if (req.cookies && req.cookies.__heady_session) {
-    return req.cookies.__heady_session;
-  }
-
-  return null;
-=======
  * Extract Bearer token from Authorization header.
  */
 function extractToken(authHeader) {
@@ -164,7 +122,6 @@ function extractToken(authHeader) {
     return null;
   }
   return authHeader.substring(7);
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -176,11 +133,7 @@ function extractToken(authHeader) {
  * Returns 401 if token is invalid or missing.
  */
 function requireAuth(req, res, next) {
-<<<<<<< HEAD
-  const token = extractToken(req);
-=======
   const token = extractToken(req.headers.authorization);
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 
   if (!token) {
     return res.status(401).json({
@@ -197,8 +150,6 @@ function requireAuth(req, res, next) {
     });
   }
 
-<<<<<<< HEAD
-=======
   // Check session expiry
   if (session.expiresAt && Date.now() > session.expiresAt) {
     sessions.delete(token);
@@ -208,7 +159,6 @@ function requireAuth(req, res, next) {
     });
   }
 
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
   const user = users.get(session.userId);
   if (!user) {
     return res.status(401).json({
@@ -259,10 +209,6 @@ router.post('/login', (req, res) => {
         });
       }
 
-<<<<<<< HEAD
-      // Timing-safe comparison to prevent timing attacks
-=======
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
       if (!timingSafeEqual(apiKey, adminToken)) {
         return res.status(401).json({
           error: 'unauthorized',
@@ -270,10 +216,6 @@ router.post('/login', (req, res) => {
         });
       }
 
-<<<<<<< HEAD
-      // Create admin session
-=======
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
       const token = generateToken();
       const adminUser = {
         id: 'admin-system',
@@ -286,26 +228,10 @@ router.post('/login', (req, res) => {
         email: adminUser.email,
         name: adminUser.name,
         createdAt: new Date(),
-<<<<<<< HEAD
-      });
-
-      res.cookie('__heady_session', token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-        maxAge: 8 * 60 * 60 * 1000 // 8 hours
-      });
-
-      return res.status(200).json({
-        token,
-        user: adminUser,
-      });
-=======
         expiresAt: Date.now() + SESSION_TTL_MS,
       });
 
       return res.status(200).json({ token, user: adminUser });
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
     }
 
     // Email/password authentication
@@ -316,12 +242,6 @@ router.post('/login', (req, res) => {
       });
     }
 
-<<<<<<< HEAD
-    // Find user by email
-    let user = null;
-    for (const [, u] of users) {
-      if (u.email === email) {
-=======
     // Sanitize email
     const cleanEmail = String(email).toLowerCase().trim();
 
@@ -343,38 +263,22 @@ router.post('/login', (req, res) => {
     let user = null;
     for (const [, u] of users) {
       if (u.email === cleanEmail) {
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
         user = u;
         break;
       }
     }
 
-<<<<<<< HEAD
-    if (!user) {
-=======
     if (!user || !verifyPassword(password, user.passwordHash)) {
       // Track failed attempt
       const current = loginAttempts.get(cleanEmail) || { count: 0, lastAttempt: 0 };
       loginAttempts.set(cleanEmail, { count: current.count + 1, lastAttempt: Date.now() });
 
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
       return res.status(401).json({
         error: 'unauthorized',
         message: 'Invalid email or password',
       });
     }
 
-<<<<<<< HEAD
-    // Validate password (timing-safe comparison)
-    if (!timingSafeEqual(password, user.password)) {
-      return res.status(401).json({
-        error: 'unauthorized',
-        message: 'Invalid email or password',
-      });
-    }
-
-    // Create session
-=======
     // Clear failed attempts on success
     loginAttempts.delete(cleanEmail);
 
@@ -395,44 +299,21 @@ router.post('/login', (req, res) => {
       sessions.delete(oldestToken);
     }
 
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
     const token = generateToken();
     sessions.set(token, {
       userId: user.id,
       email: user.email,
       name: user.name,
-<<<<<<< HEAD
-      createdAt: new Date(),
-    });
-
-    res.cookie('__heady_session', token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      maxAge: 8 * 60 * 60 * 1000 // 8 hours
-=======
       createdAt: Date.now(),
       expiresAt: Date.now() + SESSION_TTL_MS,
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
     });
 
     return res.status(200).json({
       token,
-<<<<<<< HEAD
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-      },
-    });
-  } catch (error) {
-    logger.error('Login error:', error);
-=======
       user: { id: user.id, email: user.email, name: user.name },
     });
   } catch (error) {
     log.error('Login error', { errorMessage: error.message, errorStack: error.stack });
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
     return res.status(500).json({
       error: 'server_error',
       message: error.message,
@@ -481,15 +362,6 @@ router.post('/register', (req, res) => {
       }
     }
 
-<<<<<<< HEAD
-    // Create new user
-    const userId = `user-${crypto.randomBytes(8).toString('hex')}`;
-    const newUser = {
-      id: userId,
-      email,
-      password, // In production, hash with bcrypt or similar
-      name,
-=======
     // Create new user with hashed password
     const userId = `user-${crypto.randomBytes(8).toString('hex')}`;
     const newUser = {
@@ -497,7 +369,6 @@ router.post('/register', (req, res) => {
       email: String(email).toLowerCase().trim(),
       passwordHash: hashPassword(password),
       name: String(name).trim().substring(0, 100),
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
       createdAt: new Date(),
     };
 
@@ -509,19 +380,8 @@ router.post('/register', (req, res) => {
       userId: newUser.id,
       email: newUser.email,
       name: newUser.name,
-<<<<<<< HEAD
-      createdAt: new Date(),
-    });
-
-    res.cookie('__heady_session', token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      maxAge: 8 * 60 * 60 * 1000 // 8 hours
-=======
       createdAt: Date.now(),
       expiresAt: Date.now() + SESSION_TTL_MS,
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
     });
 
     return res.status(201).json({
@@ -533,11 +393,7 @@ router.post('/register', (req, res) => {
       },
     });
   } catch (error) {
-<<<<<<< HEAD
-    logger.error('Registration error:', error);
-=======
     log.error('Registration error', { errorMessage: error.message, errorStack: error.stack });
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
     return res.status(500).json({
       error: 'server_error',
       message: error.message,
@@ -565,11 +421,7 @@ router.post('/logout', requireAuth, (req, res) => {
       message: 'Logged out successfully',
     });
   } catch (error) {
-<<<<<<< HEAD
-    logger.error('Logout error:', error);
-=======
     log.error('Logout error', { errorMessage: error.message, errorStack: error.stack });
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
     return res.status(500).json({
       error: 'server_error',
       message: error.message,
@@ -594,11 +446,7 @@ router.get('/me', requireAuth, (req, res) => {
       user: req.user,
     });
   } catch (error) {
-<<<<<<< HEAD
-    logger.error('GET /me error:', error);
-=======
     log.error('GET /me error', { errorMessage: error.message, errorStack: error.stack });
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
     return res.status(500).json({
       error: 'server_error',
       message: error.message,
@@ -620,11 +468,7 @@ router.get('/me', requireAuth, (req, res) => {
  */
 router.get('/validate', (req, res) => {
   try {
-<<<<<<< HEAD
-    let token = extractToken(req);
-=======
     let token = extractToken(req.headers.authorization);
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
     if (!token) {
       token = req.query.token;
     }
@@ -658,11 +502,7 @@ router.get('/validate', (req, res) => {
       },
     });
   } catch (error) {
-<<<<<<< HEAD
-    logger.error('Validate error:', error);
-=======
     log.error('Validate error', { errorMessage: error.message, errorStack: error.stack });
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
     return res.status(500).json({
       error: 'server_error',
       message: error.message,
@@ -677,11 +517,7 @@ router.get('/validate', (req, res) => {
 router.post('/preferences', requireAuth, (req, res) => {
   try {
     const { workspace, integrations } = req.body;
-<<<<<<< HEAD
-    const user = users.get(req.user.email);
-=======
     const user = users.get(req.user.id);
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
     if (user) {
       user.preferences = { workspace, integrations, onboardedAt: new Date().toISOString() };
     }

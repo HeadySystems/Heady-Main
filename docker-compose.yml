@@ -1,51 +1,8 @@
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
-# HEADY_BRAND:BEGIN
-# ╔══════════════════════════════════════════════════════════════════╗
-# ║  ██╗  ██╗███████╗ █████╗ ██████╗ ██╗   ██╗                     ║
-# ║  ██║  ██║██╔════╝██╔══██╗██╔══██╗╚██╗ ██╔╝                     ║
-# ║  ███████║█████╗  ███████║██║  ██║ ╚████╔╝                      ║
-# ║  ██╔══██║██╔══╝  ██╔══██║██║  ██║  ╚██╔╝                       ║
-# ║  ██║  ██║███████╗██║  ██║██████╔╝   ██║                        ║
-# ║  ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝    ╚═╝                        ║
-# ║                                                                  ║
-# ║  ∞ SACRED GEOMETRY ∞  Organic Systems · Breathing Interfaces    ║
-# ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
-# ║  FILE: docker-compose.yml                                                    ║
-# ║  LAYER: root                                                  ║
-# ╚══════════════════════════════════════════════════════════════════╝
-# HEADY_BRAND:END
-<<<<<<< HEAD
-=======
-=======
 version: '3.8'
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 
 services:
   heady-manager:
     build: .
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
-    environment:
-      - NODE_ENV=production
-      - DATABASE_URL=postgresql://user:pass@cloud-postgres.heady.io:5432/heady_sys
-      - REDIS_URL=redis://cloud-redis.heady.io:6379
-      - HEADY_API_KEY=${HEADY_API_KEY}
-      - ADMIN_TOKEN=${ADMIN_TOKEN}
-      - RENDER_API_KEY=${RENDER_API_KEY}
-      - HF_TOKEN=${HF_TOKEN}
-      - USE_HEADY_MANAGER=${USE_HEADY_MANAGER:-true}
-      - HEADY_TARGET=CloudOnly
-    healthcheck:
-      # NOTE: api.headysystems.com is required here — healthcheck runs inside the container
-<<<<<<< HEAD
-=======
-=======
     container_name: heady-manager
     ports:
       - "3300:3300"
@@ -59,100 +16,10 @@ services:
     networks:
       - heady-net
     healthcheck:
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
       test: ["CMD", "wget", "-qO-", "http://api.headysystems.com:3300/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
-      start_period: 40s
-    hostname: heady-manager
-    networks:
-      heady-main-network:
-        aliases:
-          - manager.headysystems.com
-          - api.headysystems.com
-    volumes:
-      - heady-data:/app/data
-      - heady-logs:/app/logs
-      - heady-cache:/app/.cache
-      - heady-config:/app/config:ro
-      - heady-plugins:/app/plugins:rw
-      - heady-exports:/app/exports:rw
-      - heady-backups:/app/backups:rw
-      - heady-temp:/app/temp:rw
-      - heady-models:/app/models:ro
-      - heady-embeddings:/app/embeddings:rw
-      - heady-sessions:/app/sessions:rw
-      - heady-uploads:/app/uploads:rw
-      - heady-downloads:/app/downloads:rw
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-        compress: "true"
-        labels: "service=heady-manager"
-    security_opt:
-      - no-new-privileges:true
-    read_only: false
-    tmpfs:
-      - /tmp:size=100M,mode=1777
-
-  heady:
-    image: python:3.11.14-alpine3.23
-    container_name: Heady
-    command: python3 -m http.server 8000
-    networks:
-      - heady-main-network
-
-networks:
-  heady-main-network:
-    external: true
-    name: heady_heady-main-network
-
-volumes:
-  heady-data:
-    driver: local
-  heady-logs:
-    driver: local
-  heady-cache:
-    driver: local
-  heady-config:
-    driver: local
-  heady-plugins:
-    driver: local
-  heady-exports:
-    driver: local
-  heady-backups:
-    driver: local
-  heady-temp:
-    driver: local
-  heady-models:
-    driver: local
-  heady-embeddings:
-    driver: local
-  heady-sessions:
-    driver: local
-  heady-uploads:
-    driver: local
-  heady-downloads:
-    driver: local
-
-<<<<<<< HEAD
-=======
-=======
     restart: unless-stopped
 
   heady-redis:
@@ -189,5 +56,3 @@ volumes:
 networks:
   heady-net:
     driver: bridge
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd

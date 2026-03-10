@@ -256,12 +256,7 @@ const TASK_CATALOG = [
     { id: "mop-site-003", name: "Remove PM2 site entries from ecosystem", cat: "mop-sites", pool: "warm", w: 3, desc: "Remove 40+ site PM2 entries from ecosystem.config.cjs" },
 ];
 
-<<<<<<< HEAD
-// ─── POOL ALLOCATION ────────────────────────────────────────────────────────
-module.exports = { TASK_CATALOG };
-=======
 // ─── POOL PRIORITIES ────────────────────────────────────────────────────────
 const POOL_PRIORITY = { hot: 0, warm: 1, cold: 2 };
 
 module.exports = { TASK_CATALOG, POOL_PRIORITY };
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd

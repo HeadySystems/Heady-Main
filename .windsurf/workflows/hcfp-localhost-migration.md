@@ -5,15 +5,7 @@ description: HCFP Localhost-to-Domain Migration & Multi-Channel Extensions
 # HCFP Localhost-to-Domain Migration Workflow
 
 ## Overview
-<<<<<<< HEAD
-Systematic migration from internal.headyio.com references to proper internal domain architecture with clean build CI/CD and multi-channel extensions.
-=======
-<<<<<<< HEAD
-Systematic migration from internal.headyio.com references to proper internal domain architecture with clean build CI/CD and multi-channel extensions.
-=======
 Systematic migration from localhost references to proper internal domain architecture with clean build CI/CD and multi-channel extensions.
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 
 ## Prerequisites
 - Service discovery configured (`configs/service-discovery.yaml`)
@@ -23,18 +15,8 @@ Systematic migration from localhost references to proper internal domain archite
 ## Phase 1: Inventory & Analysis
 
 ```powershell
-<<<<<<< HEAD
-# Scan for all internal.headyio.com references
-node scripts/internal.headyio.com-to-domain.js inventory ./
-=======
-<<<<<<< HEAD
-# Scan for all internal.headyio.com references
-node scripts/internal.headyio.com-to-domain.js inventory ./
-=======
 # Scan for all localhost references
 node scripts/localhost-to-domain.js inventory ./
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 
 # Review the inventory report
 # Files processed, total replacements needed will be shown
@@ -45,32 +27,14 @@ node scripts/localhost-to-domain.js inventory ./
 ### Step 1: Dry Run
 ```powershell
 # Test migration without making changes
-<<<<<<< HEAD
-node scripts/internal.headyio.com-to-domain.js migrate ./ --dry-run
-=======
-<<<<<<< HEAD
-node scripts/internal.headyio.com-to-domain.js migrate ./ --dry-run
-=======
 node scripts/localhost-to-domain.js migrate ./ --dry-run
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 ### Step 2: Execute Migration
 // turbo
 ```powershell
-<<<<<<< HEAD
-# Migrate internal.headyio.com to domains
-node scripts/internal.headyio.com-to-domain.js migrate ./
-=======
-<<<<<<< HEAD
-# Migrate internal.headyio.com to domains
-node scripts/internal.headyio.com-to-domain.js migrate ./
-=======
 # Migrate localhost to domains
 node scripts/localhost-to-domain.js migrate ./
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 
 # Verify changes
 git diff
@@ -79,15 +43,7 @@ git diff
 ### Step 3: Update Hosts File
 ```powershell
 # Generate hosts file entries
-<<<<<<< HEAD
-node scripts/internal.headyio.com-to-domain.js hosts > heady-hosts.txt
-=======
-<<<<<<< HEAD
-node scripts/internal.headyio.com-to-domain.js hosts > heady-hosts.txt
-=======
 node scripts/localhost-to-domain.js hosts > heady-hosts.txt
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 
 # Add to Windows hosts file (requires admin)
 # C:\Windows\System32\drivers\etc\hosts
@@ -101,15 +57,7 @@ Manual step: Open Notepad as Administrator, append `heady-hosts.txt` content to 
 Located at `.github/workflows/hcfp-production-clean-build.yml`
 
 Features:
-<<<<<<< HEAD
-- ✅ Pre-flight validation (no internal.headyio.com in production configs)
-=======
-<<<<<<< HEAD
-- ✅ Pre-flight validation (no internal.headyio.com in production configs)
-=======
 - ✅ Pre-flight validation (no localhost in production configs)
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 - ✅ Clean builds from scratch (no cache artifacts)
 - ✅ Error classification (RECOVERABLE vs NON-RECOVERABLE)
 - ✅ Intelligent retry logic
@@ -227,15 +175,7 @@ RCA Process:
 npm test -- tests/integration/domain-connectivity.test.js
 
 # Verify all services
-<<<<<<< HEAD
-node scripts/internal.headyio.com-to-domain.js inventory ./
-=======
-<<<<<<< HEAD
-node scripts/internal.headyio.com-to-domain.js inventory ./
-=======
 node scripts/localhost-to-domain.js inventory ./
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 Tests verify:
@@ -262,15 +202,7 @@ Per Checkpoint Protocol:
 ## Phase 10: Registry Update
 
 heady-registry.json entries added:
-<<<<<<< HEAD
-- `internal.headyio.com-to-domain` migration tool
-=======
-<<<<<<< HEAD
-- `internal.headyio.com-to-domain` migration tool
-=======
 - `localhost-to-domain` migration tool
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 - `hcfp-production-clean-build` workflow
 - `heady-pwa` (manifest + service worker)
 - `chrome-extension` browser integration

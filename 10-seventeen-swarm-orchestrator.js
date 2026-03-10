@@ -32,8 +32,6 @@ const SWARM_NAMES = [
   'Emergency',
 ];
 
-<<<<<<< HEAD
-=======
 // CslRelevance levels: higher = more urgent
 const CSL_RELEVANCE = {
   EMERGENCY:  100,
@@ -65,7 +63,6 @@ const SWARM_PRIORITIES = {
   Onboarding:    CSL_RELEVANCE.BACKGROUND,
 };
 
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 const SWARM_STATUS = {
   IDLE:       'idle',
   ACTIVE:     'active',
@@ -91,10 +88,7 @@ class SwarmTask {
     this.id         = opts.id       || crypto.randomUUID();
     this.type       = opts.type     || 'generic';
     this.payload    = opts.payload  || {};
-<<<<<<< HEAD
-=======
     this.csl_relevance   = opts.csl_relevance || CSL_RELEVANCE.NORMAL;
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
     this.targetSwarm = opts.targetSwarm || null;
     this.sourceSwarm = opts.sourceSwarm || null;
     this.createdAt  = Date.now();
@@ -142,10 +136,7 @@ class SwarmMessage {
     this.to       = opts.to   || null; // null = broadcast
     this.payload  = opts.payload || {};
     this.ts       = Date.now();
-<<<<<<< HEAD
-=======
     this.csl_relevance = opts.csl_relevance || CSL_RELEVANCE.NORMAL;
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
   }
 }
 
@@ -235,10 +226,7 @@ class Swarm {
   constructor(name, opts = {}) {
     this.name       = name;
     this.id         = opts.id       || crypto.randomUUID();
-<<<<<<< HEAD
-=======
     this.csl_relevance   = opts.csl_relevance || SWARM_PRIORITIES[name] || CSL_RELEVANCE.NORMAL;
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
     this.status     = SWARM_STATUS.IDLE;
     this._bus       = null;
     this._handlers  = {};   // task type → async fn
@@ -248,11 +236,7 @@ class Swarm {
     this._maxConcurrency = opts.maxConcurrency || 5;
     this._maxQueue       = opts.maxQueue       || 100;
     this._stats          = { received: 0, completed: 0, failed: 0, escalated: 0 };
-<<<<<<< HEAD
-    this._heartbeatMs    = opts.heartbeatMs || 5000;
-=======
     this._heartbeatMs    = opts.heartbeatMs || Math.round(5000 * (1 + (this.csl_relevance / 200)));
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
     this._heartbeatTimer = null;
     this._capabilities   = opts.capabilities || [name.toLowerCase()];
     this._callbacks      = { task: [], complete: [], error: [] };
@@ -279,13 +263,6 @@ class Swarm {
   submit(task) {
     const t = task instanceof SwarmTask ? task : new SwarmTask({ ...task, targetSwarm: this.name });
     if (this._queue.length >= this._maxQueue) {
-<<<<<<< HEAD
-      t.fail(new Error('Swarm queue full'));
-      return t;
-    }
-    this._stats.received++;
-    this._queue.push(t);
-=======
       // Evict lowest csl_relevance task if new one is higher
       this._queue.sort((a, b) => a.csl_relevance - b.csl_relevance);
       if (this._queue[0].csl_relevance < t.csl_relevance) {
@@ -299,7 +276,6 @@ class Swarm {
     this._stats.received++;
     this._queue.push(t);
     this._queue.sort((a, b) => b.csl_relevance - a.csl_relevance); // highest csl_relevance first
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
     this._drain();
     return t;
   }
@@ -325,8 +301,6 @@ class Swarm {
         this._stats.failed++;
         this._emit('error', task);
         this._finishTask(task);
-<<<<<<< HEAD
-=======
 
         // Escalate to Emergency swarm if critical
         if (this._bus && task.csl_relevance >= CSL_RELEVANCE.HIGH) {
@@ -339,7 +313,6 @@ class Swarm {
             csl_relevance: CSL_RELEVANCE.CRITICAL,
           });
         }
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
       });
     }
 
@@ -368,10 +341,7 @@ class Swarm {
         from:    this.name,
         to:      task.sourceSwarm,
         payload: { taskId: task.id, status: task.status, result: task.result, error: task.error },
-<<<<<<< HEAD
-=======
         csl_relevance: task.csl_relevance,
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
       });
     }
     this._drain();
@@ -402,10 +372,7 @@ class Swarm {
           type:    MESSAGE_TYPE.HEARTBEAT,
           from:    this.name,
           payload: this.getStatus(),
-<<<<<<< HEAD
-=======
           csl_relevance: CSL_RELEVANCE.LOW,
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
         });
       }
     }, this._heartbeatMs);
@@ -426,10 +393,7 @@ class Swarm {
       name:        this.name,
       id:          this.id,
       status:      this.status,
-<<<<<<< HEAD
-=======
       csl_relevance:    this.csl_relevance,
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
       queue:       this._queue.length,
       active:      this._active.length,
       capabilities: this._capabilities,
@@ -495,13 +459,9 @@ class ConsensusManager {
     const tally = {};
     let totalWeight = 0;
     for (const [swarm, { decision, weight }] of proposal.votes) {
-<<<<<<< HEAD
-      const effectiveWeight = weight * PHI;
-=======
       // Weight by swarm csl_relevance
       const csl_relevanceWeight = (SWARM_PRIORITIES[swarm] || CSL_RELEVANCE.NORMAL) / CSL_RELEVANCE.EMERGENCY;
       const effectiveWeight = weight * csl_relevanceWeight * PHI;
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
       tally[decision] = (tally[decision] || 0) + effectiveWeight;
       totalWeight += effectiveWeight;
     }
@@ -544,11 +504,7 @@ class ConsensusManager {
 class SwarmOrchestrator {
   /**
    * Manages all 17 canonical swarms with inter-swarm comms,
-<<<<<<< HEAD
-   * concurrent scheduling, and consensus support.
-=======
    * csl_relevance-based scheduling, and consensus support.
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
    */
   constructor(opts = {}) {
     this._bus          = new SwarmBus();
@@ -569,10 +525,7 @@ class SwarmOrchestrator {
 
   _createSwarm(name, opts = {}) {
     const swarm = new Swarm(name, {
-<<<<<<< HEAD
-=======
       csl_relevance: SWARM_PRIORITIES[name] || CSL_RELEVANCE.NORMAL,
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
       ...opts,
     });
     swarm.connectBus(this._bus);
@@ -624,20 +577,13 @@ class SwarmOrchestrator {
 
       case 'Emergency':
         swarm.on('*', async (task) => {
-<<<<<<< HEAD
-          this._audit('emergency', { taskId: task.id, payload: task.payload });
-=======
           this._audit('emergency', { taskId: task.id, csl_relevance: task.csl_relevance, payload: task.payload });
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
           // Broadcast emergency to all swarms
           this._bus.send({
             type:    MESSAGE_TYPE.BROADCAST,
             from:    'Emergency',
             payload: { emergency: true, taskId: task.id, payload: task.payload },
-<<<<<<< HEAD
-=======
             csl_relevance: CSL_RELEVANCE.EMERGENCY,
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
           });
           return { acknowledged: true, ts: Date.now() };
         });
@@ -694,11 +640,7 @@ class SwarmOrchestrator {
   }
 
   _schedulerTick() {
-<<<<<<< HEAD
-    // Check overloaded swarms, rebalance tasks
-=======
     // CslRelevance-based: check overloaded swarms, rebalance tasks
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
     for (const [name, swarm] of this._swarms.entries()) {
       if (swarm.status === SWARM_STATUS.ERROR) swarm.status = SWARM_STATUS.IDLE;
       const qd = swarm.getQueueDepth();
@@ -737,13 +679,8 @@ class SwarmOrchestrator {
   /**
    * Broadcast to all swarms.
    */
-<<<<<<< HEAD
-  broadcast(payload, type = MESSAGE_TYPE.BROADCAST) {
-    this._bus.send({ type, from: 'Orchestrator', payload });
-=======
   broadcast(payload, type = MESSAGE_TYPE.BROADCAST, rel = CSL_RELEVANCE.NORMAL) {
     this._bus.send({ type, from: 'Orchestrator', payload, csl_relevance: rel });
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
     return this;
   }
 
@@ -764,12 +701,8 @@ class SwarmOrchestrator {
         type:        'vote',
         targetSwarm: 'Governance',
         sourceSwarm: swarmName,
-<<<<<<< HEAD
-        payload:     { proposalId, swarmName, decision: 'approve', weight: 1.0 },
-=======
         payload:     { proposalId, swarmName, decision: 'approve', weight: swarm.csl_relevance / CSL_RELEVANCE.EMERGENCY },
         csl_relevance:    CSL_RELEVANCE.HIGH,
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
       }));
     }
 
@@ -827,11 +760,8 @@ class SwarmOrchestrator {
 module.exports = {
   PHI,
   SWARM_NAMES,
-<<<<<<< HEAD
-=======
   CSL_RELEVANCE,
   SWARM_PRIORITIES,
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
   SWARM_STATUS,
   MESSAGE_TYPE,
   SwarmTask,

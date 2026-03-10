@@ -53,15 +53,7 @@ View runs: https://github.com/HeadySystems/Heady/actions
 **Actions:**
 - Verify Node.js version (20.18.1)
 - Verify Python version (3.12.7)
-<<<<<<< HEAD
-- Scan for internal.headyio.com references in code
-=======
-<<<<<<< HEAD
-- Scan for internal.headyio.com references in code
-=======
 - Scan for localhost references in code
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 - Clean dependency caches (tools only, not artifacts)
 
 **Success Criteria:**
@@ -248,15 +240,7 @@ foreach ($component in $components) {
 - Transient errors that recovered after retry
 - Test failures
 - Lint warnings
-<<<<<<< HEAD
-- internal.headyio.com references found
-=======
-<<<<<<< HEAD
-- internal.headyio.com references found
-=======
 - localhost references found
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 
 **Info Only:**
 - Build successful
@@ -287,25 +271,11 @@ notifications:
 
 ### Automatic Scanning
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
-The build pipeline automatically scans for internal.headyio.com references:
-
-```powershell
-# During Phase 1 (Setup)
-python scripts/internal.headyio.com-inventory.py --root . --output localhost-check.json
-<<<<<<< HEAD
-=======
-=======
 The build pipeline automatically scans for localhost references:
 
 ```powershell
 # During Phase 1 (Setup)
 python scripts/localhost-inventory.py --root . --output localhost-check.json
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 ### Migration Report
@@ -374,15 +344,7 @@ View at: https://grafana.heady.io/d/build-pipeline
 - Success/failure rates
 - Error classification counts
 - Test pass rates
-<<<<<<< HEAD
-- internal.headyio.com ref counts (should trend to 0)
-=======
-<<<<<<< HEAD
-- internal.headyio.com ref counts (should trend to 0)
-=======
 - localhost ref counts (should trend to 0)
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 
 ### Device Fleet Health
 
@@ -523,15 +485,7 @@ POST /api/monte-carlo/result
 1. **Always use `-FullRebuild` for production builds**
 2. **Never commit with `--no-verify` unless emergency**
 3. **Review all warnings, not just errors**
-<<<<<<< HEAD
-4. **Keep internal.headyio.com ref count at 0**
-=======
-<<<<<<< HEAD
-4. **Keep internal.headyio.com ref count at 0**
-=======
 4. **Keep localhost ref count at 0**
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 5. **Update extensions monthly**
 6. **Monitor build duration trends**
 

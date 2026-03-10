@@ -1,25 +1,3 @@
-<<<<<<< HEAD
-#!/usr/bin/env node
-/**
- * Database / storage migration script
- */
-import fs from 'fs';
-import path from 'path';
-
-const DATA_DIR = process.env.DATA_DIR || './data';
-
-const dirs = ['memories', 'agents', 'sessions', 'logs', 'checkpoints'];
-
-for (const dir of dirs) {
-  const full = path.join(DATA_DIR, dir);
-  if (!fs.existsSync(full)) {
-    fs.mkdirSync(full, { recursive: true });
-    console.log(`Created: ${full}`);
-  }
-}
-
-console.log('Migration complete.');
-=======
 import pino from 'pino';
 const logger = pino();
 #!/usr/bin/env node
@@ -968,4 +946,3 @@ const isMain = process.argv[1] === fileURLToPath(import.meta.url);
 if (isMain) main();
 
 export { MIGRATIONS, runMigrations, rollbackLastMigration };
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd

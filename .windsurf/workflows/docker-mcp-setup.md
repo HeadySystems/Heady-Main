@@ -184,15 +184,7 @@ node heady-manager.js
 
 Verify manager can access MCP services:
 ```powershell
-<<<<<<< HEAD
-curl http://internal.headyio.com:3300/api/health
-=======
-<<<<<<< HEAD
-curl http://internal.headyio.com:3300/api/health
-=======
 curl http://localhost:3300/api/health
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
 ```
 
 ### 10. Run HeadySync (Optional)

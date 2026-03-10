@@ -9,18 +9,6 @@
 // ║                                                                  ║
 // ║  ∞ SACRED GEOMETRY ∞  Organic Systems · Breathing Interfaces    ║
 // ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
-<<<<<<< HEAD
-// ║  FILE: frontend/postcss.config.js                                                    ║
-// ║  LAYER: ui/frontend                                                  ║
-// ╚══════════════════════════════════════════════════════════════════╝
-// HEADY_BRAND:END
-export default {
-  plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
-  },
-};
-=======
 // ║  FILE: websites/sites/admin.headysystems.com/.eleventy.js
 // ║  LAYER: root                                                  ║
 // ╚══════════════════════════════════════════════════════════════════╝
@@ -34,4 +22,3 @@ module.exports = function(eleventyConfig) {
     }
   };
 };
->>>>>>> f1ab914a56ebb387b9669c4d2f46e3c53f393edd
