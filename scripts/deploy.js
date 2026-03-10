@@ -1,6 +1,6 @@
+#!/usr/bin/env node
 const pino = require('pino');
 const logger = pino();
-#!/usr/bin / env node
 /*
  * © 2026 Heady™Systems Inc..
  * PROPRIETARY AND CONFIDENTIAL.

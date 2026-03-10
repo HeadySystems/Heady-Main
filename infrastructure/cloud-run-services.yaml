@@ -1,0 +1,207 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Heady™ Cloud Run Service Configuration — Single Source of Truth
+# Founded by Eric Haywood — HeadySystems Inc.
+#
+# All numeric constants from Fibonacci:
+#   FIB = [1,1,2,3,5,8,13,21,34,55,89,144,233,377,610,987,1597]
+#   φ = 1.6180339887498948
+#
+# Tiers:
+#   HOT  — Always-on (min-instances ≥ 1), critical path services
+#   WARM — Scale-to-zero (min-instances = 0), secondary services
+#   COLD — Batch/Jobs, no always-on instances
+#
+# GCP Project: gen-lang-client-0920560496
+# Region: us-east1
+# ─────────────────────────────────────────────────────────────────────────────
+
+project: gen-lang-client-0920560496
+region: us-east1
+registry: us-east1-docker.pkg.dev/gen-lang-client-0920560496/heady
+
+# Global defaults (overridden per-service)
+defaults:
+  execution_environment: gen2
+  startup_cpu_boost: true
+  cpu: "1"
+  timeout: 34s                              # FIB[8]
+  env:
+    NODE_ENV: production
+    PHI: "1.6180339887498948"
+    SEED: "42"
+    TEMPERATURE: "0"
+    FOUNDER: "Eric Haywood"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# HOT Pool — Always-on, min-instances ≥ 1
+# Critical path services that must never cold-start.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+services:
+
+  # ── Inference / Brain ──────────────────────────────────────────────────────
+  heady-brain:
+    tier: hot
+    port: 3310
+    cpu: "1"
+    memory: 1Gi
+    min_instances: 2                        # FIB[2]
+    max_instances: 21                       # FIB[7]
+    concurrency: 21                         # FIB[7] — inference workloads
+    timeout: 55s                            # FIB[9]
+    cpu_throttle: false
+    profile: inference
+
+  heady-soul:
+    tier: hot
+    port: 3310
+    cpu: "1"
+    memory: 233Mi                           # FIB[12]
+    min_instances: 2                        # FIB[2]
+    max_instances: 34                       # FIB[8]
+    concurrency: 89                         # FIB[10]
+    timeout: 55s                            # FIB[9]
+    cpu_throttle: false
+    profile: api
+
+  # ── Memory / Vector ────────────────────────────────────────────────────────
+  heady-memory:
+    tier: hot
+    port: 3316
+    cpu: "1"
+    memory: 1Gi
+    min_instances: 2                        # FIB[2]
+    max_instances: 21                       # FIB[7]
+    concurrency: 21                         # FIB[7]
+    timeout: 55s                            # FIB[9]
+    cpu_throttle: false
+    profile: inference
+
+  # ── Orchestration ──────────────────────────────────────────────────────────
+  heady-conductor:
+    tier: hot
+    port: 3323
+    cpu: "1"
+    memory: 512Mi
+    min_instances: 1                        # FIB[1]
+    max_instances: 21                       # FIB[7]
+    concurrency: 55                         # FIB[9]
+    timeout: 55s                            # FIB[9]
+    cpu_throttle: false
+    profile: api
+
+  # ── API Gateway ────────────────────────────────────────────────────────────
+  api-gateway:
+    tier: hot
+    port: 3344
+    cpu: "1"
+    memory: 512Mi
+    min_instances: 2                        # FIB[2]
+    max_instances: 34                       # FIB[8]
+    concurrency: 89                         # FIB[10]
+    timeout: 34s                            # FIB[8]
+    cpu_throttle: true
+    profile: api
+
+  # ── Auth / Session ─────────────────────────────────────────────────────────
+  auth-session:
+    tier: hot
+    port: 3360
+    cpu: "1"
+    memory: 512Mi
+    min_instances: 1                        # FIB[1]
+    max_instances: 13                       # FIB[6]
+    concurrency: 89                         # FIB[10]
+    timeout: 34s                            # FIB[8]
+    cpu_throttle: true
+    session_affinity: true
+    profile: api
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# WARM Pool — Scale-to-zero, min-instances = 0
+# Secondary services that can tolerate cold starts.
+# startup-cpu-boost mitigates latency when they wake.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  search:
+    tier: warm
+    port: 3364
+    cpu: "1"
+    memory: 512Mi
+    min_instances: 0
+    max_instances: 13                       # FIB[6]
+    concurrency: 55                         # FIB[9]
+    timeout: 34s                            # FIB[8]
+    cpu_throttle: true
+    profile: api
+
+  mcp-server:
+    tier: warm
+    port: 3346
+    cpu: "1"
+    memory: 512Mi
+    min_instances: 0
+    max_instances: 8                        # FIB[5]
+    concurrency: 34                         # FIB[8]
+    timeout: 55s                            # FIB[9]
+    cpu_throttle: true
+    profile: api
+
+  heady-buddy:
+    tier: warm
+    port: 3380
+    cpu: "1"
+    memory: 256Mi
+    min_instances: 0
+    max_instances: 13                       # FIB[6]
+    concurrency: 144                        # FIB[11] — web/UI profile
+    timeout: 34s                            # FIB[8]
+    cpu_throttle: true
+    profile: web
+
+  heady-web:
+    tier: warm
+    port: 3390
+    cpu: "1"
+    memory: 256Mi
+    min_instances: 0
+    max_instances: 55                       # FIB[9]
+    concurrency: 144                        # FIB[11]
+    timeout: 34s                            # FIB[8]
+    cpu_throttle: true
+    profile: web
+
+  notification:
+    tier: warm
+    port: 3370
+    cpu: "1"
+    memory: 256Mi
+    min_instances: 0
+    max_instances: 8                        # FIB[5]
+    concurrency: 55                         # FIB[9]
+    timeout: 34s                            # FIB[8]
+    cpu_throttle: true
+    profile: worker
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# COLD Pool — Batch / Jobs
+# Use Cloud Run Jobs for these workloads instead of services.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  auto-success-engine:
+    tier: cold
+    type: job
+    cpu: "4"
+    memory: 4Gi
+    concurrency: 3                          # FIB[3]
+    timeout: 377s                           # FIB[13]
+    profile: batch
+
+  hcfullpipeline-executor:
+    tier: cold
+    type: job
+    cpu: "4"
+    memory: 4Gi
+    concurrency: 3                          # FIB[3]
+    timeout: 610s                           # FIB[14]
+    profile: batch

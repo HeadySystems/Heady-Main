@@ -146,7 +146,7 @@ jobs:
 
       - name: Deploy to Cloud Run
         run: |
-          # Deploy critical HOT pool services first (34% resources)
+          # ── HOT Pool: Always-on critical services (min-instances=1) ──
           for service in heady-inference heady-memory heady-conductor heady-auth; do
             gcloud run deploy ${service} \
               --image ${{ env.REGISTRY }}/${service}:${{ github.sha }} \
@@ -155,10 +155,29 @@ jobs:
               --allow-unauthenticated \
               --min-instances 1 \
               --max-instances 8 \
-              --memory 2Gi \
-              --cpu 2 \
+              --memory 1Gi \
+              --cpu 1 \
               --timeout 34s \
-              --concurrency 21
+              --concurrency 21 \
+              --startup-cpu-boost \
+              --execution-environment gen2
+          done
+
+          # ── WARM Pool: Scale-to-zero secondary services ──
+          for service in heady-web heady-monitor mcp-server heady-buddy; do
+            gcloud run deploy ${service} \
+              --image ${{ env.REGISTRY }}/${service}:${{ github.sha }} \
+              --region ${{ env.GCP_REGION }} \
+              --platform managed \
+              --allow-unauthenticated \
+              --min-instances 0 \
+              --max-instances 5 \
+              --memory 512Mi \
+              --cpu 1 \
+              --timeout 34s \
+              --concurrency 55 \
+              --startup-cpu-boost \
+              --execution-environment gen2
           done
 
       - name: Deploy Cloudflare Workers
