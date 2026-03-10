@@ -1,6 +1,6 @@
 const pino = require('pino');
 const logger = pino();
-#!/usr/bin/env node
+#!/usr/bin / env node
 /*
  * © 2026 Heady™Systems Inc..
  * PROPRIETARY AND CONFIDENTIAL.
@@ -29,7 +29,7 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
 const GCP_PROJECT = process.env.GCP_PROJECT_ID || 'heady-project';
-const GCP_REGION = process.env.GCP_REGION || 'us-central1';
+const GCP_REGION = process.env.GCP_REGION || 'us-east1';
 const SERVICE_NAME = 'heady-manager';
 
 const args = process.argv.slice(2);
@@ -75,11 +75,13 @@ async function main() {
                 `--region ${GCP_REGION}`,
                 `--project ${GCP_PROJECT}`,
                 '--allow-unauthenticated',
-                '--memory 1Gi',
+                '--memory 2Gi',
                 '--cpu 1',
                 '--min-instances 0',
-                '--max-instances 3',
+                '--max-instances 8',
                 '--timeout 300',
+                '--startup-cpu-boost',
+                '--execution-environment gen2',
                 '--set-env-vars="NODE_ENV=production"',
                 '--quiet',
             ].join(' ');

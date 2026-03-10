@@ -1,5 +1,6 @@
 # Heady™ CI/CD — Build, Test, Deploy
 # © 2026 HeadySystems Inc. — Eric Haywood — 51 Provisional Patents
+# All numeric constants φ-derived from Fibonacci sequence
 name: Heady Deploy Pipeline
 
 on:
@@ -85,13 +86,15 @@ jobs:
     strategy:
       matrix:
         service:
-          - { name: heady-brain, port: 3310, min: 1, cpu: always-on, concurrency: 80 }
-          - { name: heady-memory, port: 3316, min: 1, cpu: always-on, concurrency: 80 }
-          - { name: heady-conductor, port: 3323, min: 1, cpu: always-on, concurrency: 80 }
-          - { name: api-gateway, port: 3344, min: 1, cpu: always-on, concurrency: 80 }
-          - { name: auth-session, port: 3360, min: 1, cpu: always-on, concurrency: 89 }
-          - { name: search, port: 3364, min: 0, cpu: throttled, concurrency: 55 }
-          - { name: mcp-server, port: 3346, min: 0, cpu: throttled, concurrency: 34 }
+          # ── HOT Pool: Always-on critical services ──────────────────
+          - { name: heady-brain,     port: 3310, min: 1, cpu: 1, memory: 1Gi, concurrency: 80,  tier: hot }
+          - { name: heady-memory,    port: 3316, min: 1, cpu: 1, memory: 1Gi, concurrency: 80,  tier: hot }
+          - { name: heady-conductor, port: 3323, min: 1, cpu: 1, memory: 1Gi, concurrency: 55,  tier: hot }
+          - { name: api-gateway,     port: 3344, min: 1, cpu: 1, memory: 1Gi, concurrency: 89,  tier: hot }
+          - { name: auth-session,    port: 3360, min: 1, cpu: 1, memory: 512Mi, concurrency: 89, tier: hot }
+          # ── WARM Pool: Scale-to-zero secondary services ────────────
+          - { name: search,          port: 3364, min: 0, cpu: 1, memory: 512Mi, concurrency: 55, tier: warm }
+          - { name: mcp-server,      port: 3346, min: 0, cpu: 1, memory: 512Mi, concurrency: 34, tier: warm }
     steps:
       - uses: google-github-actions/auth@v2
         with:
@@ -105,8 +108,10 @@ jobs:
             --port ${{ matrix.service.port }} \
             --min-instances ${{ matrix.service.min }} \
             --max-instances 13 \
+            --cpu ${{ matrix.service.cpu }} \
+            --memory ${{ matrix.service.memory }} \
             --concurrency ${{ matrix.service.concurrency }} \
-            --cpu-boost \
-            --memory 512Mi \
-            --set-env-vars NODE_ENV=production,HEADY_VERSION=5.1.0 \
+            --startup-cpu-boost \
+            --execution-environment gen2 \
+            --set-env-vars NODE_ENV=production,HEADY_VERSION=5.1.0,GCP_PROJECT=$GCP_PROJECT,GCP_REGION=$GCP_REGION \
             --allow-unauthenticated

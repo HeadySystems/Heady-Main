@@ -145,6 +145,8 @@ steps:
       - --timeout=${_TIMEOUT}s
       - --concurrency=${_CONCURRENCY}
       - --port=3310
+      - --startup-cpu-boost
+      - --execution-environment=gen2
       - --no-allow-unauthenticated
       - --set-env-vars=NODE_ENV=production,HEADY_ROLE=heady-soul,HEADY_PORT=3310,HEADY_FOUNDER=Eric Haywood,PHI=1.6180339887498948,SEED=42,TEMPERATURE=0,GCP_PROJECT=${_GCP_PROJECT},GCP_REGION=${_REGION},CLOUDFLARE_ACCOUNT=${_CLOUDFLARE_ACCOUNT},AUTH_DOMAIN=auth.headysystems.com
       - --labels=founder=eric-haywood,phi=golden-ratio,environment=production
@@ -166,11 +168,13 @@ steps:
       - --platform=managed
       - --min-instances=1
       - --max-instances=21
-      - --memory=144Mi
+      - --memory=512Mi
       - --cpu=1
       - --timeout=${_TIMEOUT}s
       - --concurrency=55
       - --port=3312
+      - --startup-cpu-boost
+      - --execution-environment=gen2
       - --no-allow-unauthenticated
       - --set-env-vars=NODE_ENV=production,HEADY_ROLE=heady-conductor,HEADY_PORT=3312,HEADY_FOUNDER=Eric Haywood,PHI=1.6180339887498948,SEED=42,TEMPERATURE=0,GCP_PROJECT=${_GCP_PROJECT},GCP_REGION=${_REGION}
     timeout: 233s                         # FIB[12]
