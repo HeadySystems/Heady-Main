@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<!--
+  Heady™ Onboarding UI v5.2.0
+  © 2026 HeadySystems Inc. — Eric Haywood — 51 Provisional Patents
+  Sacred Geometry design system: Fibonacci spacing, φ-scaled typography
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Heady™ — Welcome</title>
+  <style>
+    :root {
+      /* Sacred Geometry spacing (Fibonacci) */
+      --space-xs: 5px;  --space-sm: 8px;  --space-md: 13px;
+      --space-lg: 21px; --space-xl: 34px; --space-2xl: 55px; --space-3xl: 89px;
+
+      /* Typography (φ-scaled) */
+      --text-xs: 0.75rem; --text-sm: 0.875rem; --text-base: 1rem;
+      --text-lg: 1.125rem; --text-xl: 1.618rem; --text-2xl: 2.618rem;
+      --text-3xl: 4.236rem;
+
+      /* Dark theme */
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-glass: rgba(255, 255, 255, 0.05);
+      --text-primary: #e8e8f0;
+      --text-secondary: #9898a8;
+      --text-muted: #68687a;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --accent: #00d4aa;
+      --accent-dim: rgba(0, 212, 170, 0.15);
+      --error: #ff4466;
+      --success: #00d4aa;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .onboarding-container {
+      width: 100%;
+      max-width: 610px; /* fib(16) - fib(14) = 610 */
+      padding: var(--space-2xl);
+    }
+
+    .logo {
+      font-size: var(--text-2xl);
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), #00a8e8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: var(--space-xl);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: var(--space-sm);
+      background: var(--bg-glass);
+      border-radius: var(--space-xs);
+      margin-bottom: var(--space-xl);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #00a8e8);
+      border-radius: var(--space-xs);
+      transition: width 0.618s cubic-bezier(0.618, 0, 0.382, 1);
+      width: 0%;
+    }
+
+    .stage-card {
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--space-md);
+      padding: var(--space-xl);
+      margin-bottom: var(--space-lg);
+    }
+
+    .stage-card.active { border-color: var(--accent); }
+    .stage-card.completed { opacity: 0.618; }
+
+    .stage-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-bottom: var(--space-md);
+    }
+
+    .stage-number {
+      width: var(--space-xl);
+      height: var(--space-xl);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: var(--text-sm);
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .stage-card.active .stage-number {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .stage-card.completed .stage-number {
+      background: var(--success);
+      color: var(--bg-primary);
+    }
+
+    .stage-title { font-weight: 600; font-size: var(--text-lg); }
+    .stage-desc { color: var(--text-secondary); font-size: var(--text-sm); margin-bottom: var(--space-lg); }
+
+    .form-group { margin-bottom: var(--space-lg); }
+    .form-label {
+      display: block;
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      margin-bottom: var(--space-sm);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--space-sm);
+      color: var(--text-primary);
+      font-size: var(--text-base);
+      outline: none;
+      transition: border-color 0.3s cubic-bezier(0.618, 0, 0.382, 1);
+    }
+
+    .form-input:focus { border-color: var(--accent); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-md) var(--space-xl);
+      border: none;
+      border-radius: var(--space-sm);
+      font-size: var(--text-base);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.618, 0, 0.382, 1);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg-primary);
+    }
+
+    .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.382; cursor: not-allowed; transform: none; }
+
+    .status-badge {
+      font-size: var(--text-xs);
+      padding: 2px var(--space-sm);
+      border-radius: var(--space-xs);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .status-pending { background: var(--bg-card); color: var(--text-muted); }
+    .status-active { background: var(--accent-dim); color: var(--accent); }
+    .status-completed { background: rgba(0, 212, 170, 0.2); color: var(--success); }
+  </style>
+</head>
+<body>
+  <div class="onboarding-container">
+    <div class="logo">Heady™</div>
+    <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+    <div id="stages"></div>
+  </div>
+  <script>
+    // Onboarding UI — connects to /api/v1/onboarding via API Gateway
+    const API_BASE = window.location.origin + '/api/v1/onboarding';
+    const stages = [
+      { id: 'account_creation', name: 'Create Account', fields: ['email', 'password', 'name'] },
+      { id: 'profile_setup', name: 'Set Up Profile', fields: ['displayName'] },
+      { id: 'workspace_config', name: 'Configure Workspace', fields: ['workspaceName', 'primaryDomain'] },
+      { id: 'integration_connect', name: 'Connect Integrations', fields: [] },
+      { id: 'first_task', name: 'Complete First Task', fields: [] },
+    ];
+
+    let currentStage = 0;
+
+    function render() {
+      const progress = document.getElementById('progress');
+      progress.style.width = (currentStage / stages.length * 100) + '%';
+
+      const container = document.getElementById('stages');
+      container.innerHTML = stages.map((stage, i) => {
+        const status = i < currentStage ? 'completed' : i === currentStage ? 'active' : 'pending';
+        const badge = `<span class="status-badge status-${status}">${status}</span>`;
+        const fields = status === 'active' ? stage.fields.map(f =>
+          `<div class="form-group">
+            <label class="form-label">${f}</label>
+            <input class="form-input" data-field="${f}" placeholder="Enter ${f}" ${f === 'password' ? 'type="password"' : ''}>
+          </div>`
+        ).join('') : '';
+        const btn = status === 'active'
+          ? `<button class="btn btn-primary" onclick="completeStage('${stage.id}')">Continue</button>`
+          : '';
+
+        return `<div class="stage-card ${status}">
+          <div class="stage-header">
+            <div class="stage-number">${i < currentStage ? '✓' : i + 1}</div>
+            <div class="stage-title">${stage.name}</div>
+            ${badge}
+          </div>
+          ${fields}${btn}
+        </div>`;
+      }).join('');
+    }
+
+    async function completeStage(stageId) {
+      const inputs = document.querySelectorAll('.stage-card.active .form-input');
+      const data = {};
+      inputs.forEach(input => { data[input.dataset.field] = input.value; });
+      currentStage++;
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>

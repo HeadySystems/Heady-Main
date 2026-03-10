@@ -1,0 +1,17 @@
+{
+  "name": "@heady/search",
+  "version": "5.1.0",
+  "description": "Heady\u2122 Search Service \u2014 Hybrid BM25 + Vector Search",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node ../../tests/unit/search.test.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  },
+  "author": "HeadySystems Inc. <eric@headysystems.com>"
+}

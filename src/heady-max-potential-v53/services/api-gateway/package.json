@@ -1,0 +1,16 @@
+{
+  "name": "@heady/api-gateway",
+  "version": "5.2.0",
+  "description": "Heady\u2122 Liquid API Gateway \u2014 CSL-gated routing with circuit breakers",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "health": "curl -sf http://0.0.0.0:3370/health"
+  },
+  "author": "Eric Haywood <eric@headysystems.com>",
+  "license": "UNLICENSED",
+  "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

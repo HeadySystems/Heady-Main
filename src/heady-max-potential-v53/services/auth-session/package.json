@@ -1,0 +1,20 @@
+{
+  "name": "@heady/auth-session",
+  "version": "5.1.0",
+  "description": "Heady™ Auth Session Server — Central Authentication with Firebase Admin SDK, httpOnly cookies, cross-domain relay",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node ../../tests/unit/auth-session.test.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "firebase-admin": "^12.0.0"
+  },
+  "author": "Eric Haywood <eric@headysystems.com>",
+  "license": "UNLICENSED",
+  "private": true
+}
