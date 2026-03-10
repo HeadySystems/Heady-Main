@@ -1,11 +1,112 @@
 'use strict';
 
+const https = require('https');
 const { logger } = require('../utils/logger');
 const { rateLimiter } = require('./rate-limiter');
 const { authenticateJWT } = require('./auth');
 
+// Provider-specific API call implementations
+const PROVIDER_DISPATCH = {
+  anthropic: async (prompt, options) => {
+    const key = process.env.ANTHROPIC_API_KEY;
+    if (!key) throw new Error('ANTHROPIC_API_KEY not configured');
+    const model = options.model || 'claude-sonnet-4-20250514';
+    const body = JSON.stringify({
+      model,
+      max_tokens: options.maxTokens || 1024,
+      messages: [{ role: 'user', content: prompt }],
+    });
+    const data = await httpsPost('api.anthropic.com', '/v1/messages', body, {
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+    });
+    const parsed = JSON.parse(data);
+    return {
+      result: parsed.content?.[0]?.text || '',
+      model: parsed.model,
+      tokens: parsed.usage ? parsed.usage.input_tokens + parsed.usage.output_tokens : 0,
+    };
+  },
+
+  openai: async (prompt, options) => {
+    const key = process.env.OPENAI_API_KEY;
+    if (!key) throw new Error('OPENAI_API_KEY not configured');
+    const model = options.model || 'gpt-4o';
+    const body = JSON.stringify({
+      model,
+      max_tokens: options.maxTokens || 1024,
+      messages: [{ role: 'user', content: prompt }],
+    });
+    const data = await httpsPost('api.openai.com', '/v1/chat/completions', body, {
+      Authorization: `Bearer ${key}`,
+      'Content-Type': 'application/json',
+    });
+    const parsed = JSON.parse(data);
+    return {
+      result: parsed.choices?.[0]?.message?.content || '',
+      model: parsed.model,
+      tokens: parsed.usage ? parsed.usage.total_tokens : 0,
+    };
+  },
+
+  groq: async (prompt, options) => {
+    const key = process.env.GROQ_API_KEY;
+    if (!key) throw new Error('GROQ_API_KEY not configured');
+    const model = options.model || 'llama-3.3-70b-versatile';
+    const body = JSON.stringify({
+      model,
+      max_tokens: options.maxTokens || 1024,
+      messages: [{ role: 'user', content: prompt }],
+    });
+    const data = await httpsPost('api.groq.com', '/openai/v1/chat/completions', body, {
+      Authorization: `Bearer ${key}`,
+      'Content-Type': 'application/json',
+    });
+    const parsed = JSON.parse(data);
+    return {
+      result: parsed.choices?.[0]?.message?.content || '',
+      model: parsed.model,
+      tokens: parsed.usage ? parsed.usage.total_tokens : 0,
+    };
+  },
+};
+
+function httpsPost(hostname, path, body, headers) {
+  return new Promise((resolve, reject) => {
+    const req = https.request({ hostname, path, method: 'POST', headers: {
+      ...headers,
+      'Content-Length': Buffer.byteLength(body),
+    }}, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        if (res.statusCode >= 400) {
+          reject(new Error(`Provider returned ${res.statusCode}: ${data.slice(0, 200)}`));
+        } else {
+          resolve(data);
+        }
+      });
+    });
+    req.on('error', reject);
+    req.setTimeout(30000, () => { req.destroy(); reject(new Error('Provider request timed out')); });
+    req.write(body);
+    req.end();
+  });
+}
+
+function selectProvider(task, providers) {
+  const mapping = providers.routing?.taskMapping?.[task] || providers.routing?.fallbackChain || [];
+  for (const providerId of mapping) {
+    const provider = providers.providers.find(p => p.id === providerId);
+    if (provider && process.env[provider.envKey]) {
+      return provider;
+    }
+  }
+  return null;
+}
+
 function setupGateway(app) {
-  // AI Gateway — routes requests to the best provider
   app.post('/api/ai/route', authenticateJWT, rateLimiter, async (req, res, next) => {
     try {
       const { task, prompt, options = {} } = req.body;
@@ -13,26 +114,47 @@ function setupGateway(app) {
         return res.status(400).json({ error: { code: 'BAD_REQUEST', message: 'task and prompt are required' } });
       }
       const providers = require('../../config/providers.json');
-      const mapping = providers.routing.taskMapping[task] || providers.routing.fallbackChain;
-      const selectedProvider = mapping[0]; // In production: smart routing with fallback
+      const selected = selectProvider(task, providers);
 
-      logger.info(`[AIGateway] Routing "${task}" to ${selectedProvider}`);
-      // TODO: Replace with real provider call
+      if (!selected) {
+        return res.status(503).json({ error: { code: 'NO_PROVIDER', message: 'No AI provider available with a configured API key' } });
+      }
+
+      const dispatch = PROVIDER_DISPATCH[selected.id];
+      if (!dispatch) {
+        return res.status(503).json({ error: { code: 'UNSUPPORTED_PROVIDER', message: `Provider "${selected.id}" dispatch not implemented` } });
+      }
+
+      logger.info(`[AIGateway] Routing "${task}" to ${selected.name} (${selected.id})`);
+      const start = Date.now();
+      const result = await dispatch(prompt, options);
+      const latency = Date.now() - start;
+
       res.json({
-        provider: selectedProvider,
+        provider: selected.id,
         task,
-        result: `[STUB] Response from ${selectedProvider} for task "${task}"`,
-        metadata: { latency: 0, model: 'stub', tokens: 0 },
+        result: result.result,
+        metadata: { latency, model: result.model, tokens: result.tokens },
       });
     } catch (err) {
+      logger.error(`[AIGateway] Provider error: ${err.message}`);
       next(err);
     }
   });
 
-  // Provider status
+  // Provider status — never leak env key names
   app.get('/api/ai/providers', (req, res) => {
     const providers = require('../../config/providers.json');
-    res.json(providers);
+    const withStatus = providers.providers.map(p => ({
+      id: p.id,
+      name: p.name,
+      models: p.models,
+      priority: p.priority,
+      strengths: p.strengths,
+      rateLimit: p.rateLimit,
+      available: !!process.env[p.envKey],
+    }));
+    res.json({ providers: withStatus, routing: providers.routing });
   });
 }
 

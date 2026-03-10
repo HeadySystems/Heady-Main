@@ -1,6 +1,9 @@
 'use strict';
 
 const { logger } = require('../utils/logger');
+const { MemoryStore } = require('../memory/memory-store');
+
+const memoryStore = new MemoryStore();
 
 class ToolRegistry {
   constructor() {
@@ -32,10 +35,8 @@ class ToolRegistry {
       },
       required: ['content'],
     }, async (args) => {
-      const { v4: uuidv4 } = require('uuid');
-      const id = uuidv4();
-      // TODO: Wire to actual memory store + embedding pipeline
-      return { success: true, id, message: `Memory stored (stub): ${args.content.slice(0, 50)}...` };
+      const result = await memoryStore.ingest(args.content, args.metadata || {});
+      return { success: result.success, id: result.id };
     });
 
     this.register('memory_query', 'Query the 3D vector memory store', {
@@ -46,8 +47,8 @@ class ToolRegistry {
       },
       required: ['query'],
     }, async (args) => {
-      // TODO: Wire to vector search
-      return { success: true, results: [], message: `Search stub for: "${args.query}"` };
+      const results = await memoryStore.query(args.query, args.limit || 10);
+      return { success: true, results, count: results.length };
     });
 
     this.register('agent_list', 'List all registered agents', {

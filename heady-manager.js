@@ -14,6 +14,7 @@ const { setupGateway } = require('./src/gateway/ai-gateway');
 const { setupMCPRoutes } = require('./src/mcp/mcp-server');
 const { setupAgentRoutes } = require('./src/agents/agent-router');
 const { setupMemoryRoutes } = require('./src/memory/memory-router');
+const { setupDashboardRoutes } = require('./src/gateway/dashboard-router');
 const { AutoSuccessEngine } = require('./src/services/auto-success');
 const { errorHandler } = require('./src/gateway/error-handler');
 const { metricsMiddleware, metricsEndpoint } = require('./src/utils/metrics');
@@ -43,6 +44,7 @@ setupGateway(app);
 setupMCPRoutes(app);
 setupAgentRoutes(app);
 setupMemoryRoutes(app);
+setupDashboardRoutes(app);
 app.get('/metrics', metricsEndpoint);
 
 // ── Error handling (must be last) ──

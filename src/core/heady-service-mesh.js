@@ -489,9 +489,16 @@ class HeadyServiceMesh extends EventEmitter {
     this._probeTimer = null;
     this._started    = false;
 
-    // Seed from built-in registry
+    // Seed from built-in registry, stripping localhost instances in production
+    const isProd = process.env.NODE_ENV === 'production' || process.env.HEADY_ENV === 'production';
     for (const def of SEED_SERVICES) {
-      this._registry.set(def.name, new ServiceEntry(def, this._config));
+      const filtered = isProd
+        ? { ...def, instances: (def.instances || []).filter(i => !i.url.includes('localhost')) }
+        : def;
+      // Skip services with zero instances after filtering
+      if (filtered.instances.length > 0) {
+        this._registry.set(filtered.name, new ServiceEntry(filtered, this._config));
+      }
     }
   }
 
