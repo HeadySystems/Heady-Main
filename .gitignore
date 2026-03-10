@@ -84,3 +84,4 @@ offline-packages/
 audit_logs.jsonl
 .heady_deploy_log.jsonl
 *.jsonl
+in/*.zip
