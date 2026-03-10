@@ -26,9 +26,11 @@ const ROLE_HIERARCHY = {
   [ROLES.GUEST]: 1,
 };
 
-const SESSION_TTL_MS = 8 * 60 * 60 * 1000;   // 8 h
-const REFRESH_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
-const ACCESS_TTL_S   = 60 * 60;               // 1 h (JWT exp)
+// φ-scaled TTLs (Sacred Geometry constants)
+const PHI = 1.618033988749895;
+const SESSION_TTL_MS = Math.round(Math.pow(PHI, 3) * 60 * 60 * 1000);  // φ³ h ≈ 4.236h
+const REFRESH_TTL_MS = 233 * 24 * 60 * 60 * 1000;                      // fib(13) days
+const ACCESS_TTL_S = 21 * 60;                                        // fib(8) min
 const API_KEY_PREFIX = 'hdy_';
 
 // ─── AuthManager ─────────────────────────────────────────────────────────────
@@ -41,8 +43,11 @@ class AuthManager {
    * @param {number}  [opts.sessionTtlMs]
    */
   constructor(opts = {}) {
-    this._jwt = opts.jwt || new HeadyJWT({ secret: opts.jwtSecret || process.env.JWT_SECRET || 'heady-default-secret-change-in-prod' });
-    this._kv  = opts.kv  || new HeadyKV({ namespace: 'auth' });
+    this._jwt = opts.jwt || new HeadyJWT({ secret: opts.jwtSecret || process.env.JWT_SECRET || '' });
+    if (!process.env.JWT_SECRET && !opts.jwtSecret) {
+      logger.warn('[AuthManager] JWT_SECRET not set — token signing disabled until configured');
+    }
+    this._kv = opts.kv || new HeadyKV({ namespace: 'auth' });
 
     this.sessionTtlMs = opts.sessionTtlMs ?? SESSION_TTL_MS;
 
@@ -188,8 +193,8 @@ class AuthManager {
    */
   async createApiKey(userId, opts = {}) {
     const rawKey = API_KEY_PREFIX + _randomId(40);
-    const keyId  = _randomId(16);
-    const hash   = _hashSecret(rawKey);
+    const keyId = _randomId(16);
+    const hash = _hashSecret(rawKey);
 
     const record = {
       userId,
@@ -220,7 +225,7 @@ class AuthManager {
       return { valid: false, error: 'Invalid API key format' };
     }
 
-    const hash  = _hashSecret(apiKey);
+    const hash = _hashSecret(apiKey);
     const keyId = await this._kv.get(`apikeyhash:${hash}`);
     if (!keyId) return { valid: false, error: 'API key not found' };
 
@@ -329,7 +334,7 @@ class AuthManager {
 
     // Fetch tokens from provider
     const tokenUrl = opts && opts.tokenUrl ? opts.tokenUrl : `https://${storedState.provider}.example.com/oauth2/token`;
-    
+
     // In a real scenario, this uses the token URL to exchange the code.
     // Simulating token exchange for demonstration purposes.
     const oauthCodeRes = {
@@ -338,7 +343,7 @@ class AuthManager {
       role: ROLES.USER,
       meta: { provider: storedState.provider, oauthCode: '[redacted]' }
     };
-    
+
     const stubUser = oauthCodeRes;
 
     logger.info('[AuthManager] OAuth2 callback handled (stub)', { provider: storedState.provider });

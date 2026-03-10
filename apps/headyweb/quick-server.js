@@ -24,15 +24,15 @@ const PORT = process.env.PORT || 3300;
 const server = http.createServer((req, res) => {
     let filePath = req.url === '/' ? '/index.html' : req.url;
     filePath = path.join(__dirname, 'public', filePath);
-    
+
     const ext = path.extname(filePath);
     const contentTypes = {
         '.html': 'text/html',
         '.css': 'text/css',
         '.js': 'text/javascript',
-        '.json': 'application/json'
+        '.json': 'application/json',
     };
-    
+
     fs.readFile(filePath, (err, content) => {
         if (err) {
             if (req.url === '/api/health') {
@@ -44,15 +44,14 @@ const server = http.createServer((req, res) => {
             res.end('Not found');
             return;
         }
-        
+
         res.writeHead(200, { 'Content-Type': contentTypes[ext] || 'text/plain' });
         res.end(content);
     });
 });
 
 server.listen(PORT, () => {
-    logger.info(`✅ HeadyManager RUNNING on http://manager.local:${PORT}`);
-    logger.info(`🌐 Website: http://app.local:${PORT}`);
-    logger.info(`📊 Health: http://manager.local:${PORT}/api/health`);
+    logger.info(`\u2705 HeadyManager RUNNING on port ${PORT}`);
+    logger.info('\ud83c\udf10 Website: https://headysystems.com');
+    logger.info('\ud83d\udcca Health: /api/health');
 });
-
