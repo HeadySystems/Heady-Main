@@ -1,3 +1,4 @@
+const logger = require('../utils/logger.js');
 /* ╔══════════════════════════════════════════════════════════════════╗
    ║  ██╗  ██╗███████╗ █████╗ ██████╗ ██╗   ██╗                     ║
    ║  ██║  ██║██╔════╝██╔══██╗██╔══██╗╚██╗ ██╔╝                     ║
@@ -34,7 +35,7 @@ const DEMO_USER = {
   id: 'demo-user-1',
   email: 'eric@headyconnection.org',
   password: 'heady2026', // In production, this would be hashed
-  name: 'Eric Haywood',
+  name: 'Eric Heady',
 };
 
 // Register demo user on startup
@@ -69,31 +70,19 @@ function generateToken() {
 }
 
 /**
- * Extract token from __Host-heady_session cookie or Authorization header.
+ * Extract Bearer token from Authorization header or cookie.
  */
 function extractToken(req) {
-  if (req.cookies && req.cookies['__Host-heady_session']) {
-    return req.cookies['__Host-heady_session'];
-  }
-
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
     return authHeader.substring(7);
   }
-  return null;
-}
 
-/**
- * Helper to set standard secure cookie options for session token.
- */
-function setSessionCookie(res, token) {
-  res.cookie('__Host-heady_session', token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'strict',
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    path: '/'
-  });
+  if (req.cookies && req.cookies.__heady_session) {
+    return req.cookies.__heady_session;
+  }
+
+  return null;
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -195,9 +184,15 @@ router.post('/login', (req, res) => {
         createdAt: new Date(),
       });
 
-      setSessionCookie(res, token);
+      res.cookie('__heady_session', token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        maxAge: 8 * 60 * 60 * 1000 // 8 hours
+      });
 
       return res.status(200).json({
+        token,
         user: adminUser,
       });
     }
@@ -243,9 +238,15 @@ router.post('/login', (req, res) => {
       createdAt: new Date(),
     });
 
-    setSessionCookie(res, token);
+    res.cookie('__heady_session', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: 8 * 60 * 60 * 1000 // 8 hours
+    });
 
     return res.status(200).json({
+      token,
       user: {
         id: user.id,
         email: user.email,
@@ -253,7 +254,7 @@ router.post('/login', (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Login error:', error);
+    logger.error('Login error:', error);
     return res.status(500).json({
       error: 'server_error',
       message: error.message,
@@ -323,9 +324,15 @@ router.post('/register', (req, res) => {
       createdAt: new Date(),
     });
 
-    setSessionCookie(res, token);
+    res.cookie('__heady_session', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: 8 * 60 * 60 * 1000 // 8 hours
+    });
 
     return res.status(201).json({
+      token,
       user: {
         id: newUser.id,
         email: newUser.email,
@@ -333,7 +340,7 @@ router.post('/register', (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Registration error:', error);
+    logger.error('Registration error:', error);
     return res.status(500).json({
       error: 'server_error',
       message: error.message,
@@ -357,18 +364,11 @@ router.post('/logout', requireAuth, (req, res) => {
     const token = req.token;
     sessions.delete(token);
 
-    res.clearCookie('__Host-heady_session', {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      path: '/'
-    });
-
     return res.status(200).json({
       message: 'Logged out successfully',
     });
   } catch (error) {
-    console.error('Logout error:', error);
+    logger.error('Logout error:', error);
     return res.status(500).json({
       error: 'server_error',
       message: error.message,
@@ -393,7 +393,7 @@ router.get('/me', requireAuth, (req, res) => {
       user: req.user,
     });
   } catch (error) {
-    console.error('GET /me error:', error);
+    logger.error('GET /me error:', error);
     return res.status(500).json({
       error: 'server_error',
       message: error.message,
@@ -449,7 +449,7 @@ router.get('/validate', (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Validate error:', error);
+    logger.error('Validate error:', error);
     return res.status(500).json({
       error: 'server_error',
       message: error.message,

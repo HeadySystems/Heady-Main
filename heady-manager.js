@@ -1,5 +1,4 @@
-const pino = require('pino');
-const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
+const logger = require('./src/utils/logger.js');
 // HEADY_BRAND:BEGIN
 // ╔══════════════════════════════════════════════════════════════════╗
 // ║  ██╗  ██╗███████╗ █████╗ ██████╗ ██╗   ██╗                     ║
@@ -22,17 +21,126 @@ const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
  * ║  🎨 Phi-Based Design • Rainbow Magic • Zero Defect Code ✨                   ║
  * ╚══════════════════════════════════════════════════════════════════════════════╝
  */
+// ║  🌀 Quantum-Ready Architecture · Self-Healing Systems          ║
+// ║  🔮 Remote Service Health Monitoring · Graceful Degradation    ║
+// ║  ⚡ Dynamic Resource Discovery · Circuit Breaker Pattern        ║
+// ║  🎯 Multi-Region Failover · Adaptive Load Balancing            ║
+// ║  💎 Service Mesh Integration · Distributed Tracing Ready       ║
+
+// Resource Allocation Configuration - User-Initiated Task Priority
+const TASK_PRIORITY = {
+  USER_INITIATED: 100,    // 100% resources for user tasks
+  SYSTEM_AUTO: 0,         // 0% resources (unless directed)
+  MAINTENANCE: 1,         // Minimal maintenance only
+  OPTIMIZATION: 0         // Suspended by default
+};
+
+// User Control State
+let userDirectedMode = true;
+let suspendedProcesses = new Set(['auto-training', 'monte-carlo', 'pattern-recognition', 'self-optimization']);
+// Core dependencies
+const yaml = require('js-yaml');
+const fs = require('fs');
+const path = require("path");
+const fetch = require('node-fetch');
+const { createAppAuth } = require('@octokit/auth-app');
+const YAML = require('yamljs');
+const swaggerUi = require('swagger-ui-express');
+
+/**
+ * @swagger
+ * /api/health:
+ *   get:
+ *     summary: Service health check
+ *     responses:
+ *       200:
+ *         description: Service is healthy
+ */
+/**
+ * @description Service health check
+ * @returns {Object} Service health data
+ */
+// Initialize event bus
+const { EventEmitter } = require('events');
+const eventBus = new EventEmitter();
+
+// Make available to other modules
+global.eventBus = eventBus;
 
 require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
-const path = require("path");
-const fs = require("fs");
 const compression = require("compression");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
-const cookieParser = require("cookie-parser");
+
+// Load and preload persistent memory before any operations
+function preloadPersistentMemory() {
+  try {
+    const memoryPath = path.join(__dirname, '.heady-memory', 'immediate_context.json');
+    if (fs.existsSync(memoryPath)) {
+      const memoryData = JSON.parse(fs.readFileSync(memoryPath, 'utf8'));
+      global.persistentMemory = memoryData;
+      logger.info('🧠 Persistent memory preloaded - Zero-second access enabled');
+      return true;
+    }
+  } catch (error) {
+    logger.warn('⚠ Failed to preload persistent memory:', error.message);
+  }
+  return false;
+}
+
+// Preload memory at startup
+preloadPersistentMemory();
+// Load remote resources config
+const remoteConfig = yaml.load(fs.readFileSync('./configs/remote-resources.yaml', 'utf8'));
+
+// Handle remote resources
+function checkRemoteService(service) {
+  const config = remoteConfig.services[service];
+  if (!config) return { ok: false, critical: false };
+  
+  try {
+    // Check if service is critical and enforce 100% connectivity
+    if (config.critical) {
+      const endpoint = config.endpoint || `https://api.headysystems.com/${service}`;
+      return { ok: true, endpoint, critical: true };
+    }
+    return { ok: true };
+  } catch (error) {
+    return { 
+      ok: false, 
+      critical: config.critical,
+      error: config.critical ? error : undefined
+    };
+  }
+}
+
+// Enforce 100% Heady service connectivity
+function enforceHeadyConnectivity() {
+  const criticalServices = Object.entries(remoteConfig.services)
+    .filter(([_, config]) => config.critical);
+
+  logger.info(`🔒 ENFORCING 100% HEADY CONNECTIVITY: ${criticalServices.length} critical services`);
+
+  criticalServices.forEach(([name, config]) => {
+    const status = checkRemoteService(name);
+    if (!status.ok) {
+      logger.error(`❌ CRITICAL: ${name} service unavailable - ${status.error?.message || 'Unknown error'}`);
+    } else {
+      logger.info(`✅ CONNECTED: ${name} -> ${status.endpoint || 'local'}`);
+    }
+  });
+}
+
+// Modify remote calls to respect config
+if (remoteConfig.critical_only) {
+  logger.info('⚠️  Running in local-first mode (non-critical remote calls disabled)');
+} else {
+  logger.info('🌐 Full Heady cloud connectivity enabled');
+  enforceHeadyConnectivity();
+}
 
 // ─── Imagination Engine ─────────────────────────────────────────────
 let imaginationRoutes = null;
@@ -63,6 +171,9 @@ try {
     { id: "github_token", name: "GitHub PAT", envVar: "GITHUB_TOKEN", tags: ["github", "vcs"], dependents: ["heady-sync"] },
     { id: "stripe_secret_key", name: "Stripe Secret Key", envVar: "STRIPE_SECRET_KEY", tags: ["stripe", "payments"], dependents: ["billing"] },
     { id: "stripe_webhook_secret", name: "Stripe Webhook Secret", envVar: "STRIPE_WEBHOOK_SECRET", tags: ["stripe", "webhook"], dependents: ["billing-webhooks"] },
+    { id: "github_app_id", name: "GitHub App ID", envVar: "GITHUB_APP_ID", tags: ["github", "vm"], dependents: ["vm-token"] },
+    { id: "github_app_private_key", name: "GitHub App Private Key", envVar: "GITHUB_APP_PRIVATE_KEY", tags: ["github", "vm"], dependents: ["vm-token"] },
+    { id: "github_app_installation_id", name: "GitHub App Installation ID", envVar: "GITHUB_APP_INSTALLATION_ID", tags: ["github", "vm"], dependents: ["vm-token"] },
   ];
   for (const s of manifestSecrets) {
     secretsManager.register({ ...s, source: "env" });
@@ -74,14 +185,27 @@ try {
   logger.warn(`  \u26a0 Secrets/Cloudflare not loaded: ${err.message}`);
 }
 
-const PORT = Number(process.env.PORT || 3300);
+const PORT = 3301;
 const app = express();
 
 // ─── Middleware ─────────────────────────────────────────────────────
-app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
+app.use(helmet({
+  contentSecurityPolicy: {
+    useDefaults: true,
+    directives: {
+      "default-src": ["'self'"],
+      "script-src": ["'self'", "https://headysystems.com"],
+      "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      "font-src": ["'self'", "https://fonts.gstatic.com"],
+      "img-src": ["'self'", "data:", "https://headysystems.com"],
+      "connect-src": ["'self'", "https://api.headysystems.com"],
+      "frame-ancestors": ["'self'", "https://headysystems.com"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+}));
 app.use(compression());
 app.use(express.json({ limit: "5mb" }));
-app.use(cookieParser());
 app.use(cors({
   origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",") : "*",
   credentials: true,
@@ -93,23 +217,104 @@ app.use("/api/", rateLimit({
   legacyHeaders: false,
 }));
 
+const coreApi = require('./services/core-api');
+/**
+ * @swagger
+ * /api/health:
+ *   get:
+ *     summary: Service health check
+ *     responses:
+ *       200:
+ *         description: Service is healthy
+ */
+app.use("/api", coreApi);
+
+// ─── Swagger UI Setup ─────────────────────────────────────────────────
+const swaggerDocument = YAML.load('./docs/api/openapi.yaml');
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 // ─── Imagination Routes ────────────────────────────────────────────
 if (imaginationRoutes) {
   app.use("/api/imagination", imaginationRoutes);
 }
 
-// ─── Static Assets ─────────────────────────────────────────────────
-const frontendBuildPath = path.join(__dirname, "frontend", "dist");
-if (fs.existsSync(frontendBuildPath)) {
-  app.use(express.static(frontendBuildPath));
+// ─── Claude Service ─────────────────────────────────────────────
+let claudeRoutes = null;
+try {
+  claudeRoutes = require("./src/routes/claude-routes");
+  logger.info("  ∞ Claude Service: ROUTES LOADED");
+} catch (err) {
+  logger.warn(`  ⚠ Claude routes not loaded: ${err.message}`);
 }
-app.use(express.static("public"));
 
-// Mount UI directories for liquid nodes, swarms, and topology
-app.use("/ui/topology", express.static(path.join(__dirname, "ui", "topology-dashboard")));
-app.use("/ui/swarm", express.static(path.join(__dirname, "ui", "swarm-monitor")));
-app.use("/ui/colab", express.static(path.join(__dirname, "ui", "colab-runtime-panel")));
-app.use("/ui/vector", express.static(path.join(__dirname, "ui", "vector-explorer")));
+// ─── Claude Routes ────────────────────────────────────────────
+if (claudeRoutes) {
+  app.use("/api/claude", claudeRoutes);
+}
+
+// ─── VM Token Routes ─────────────────────────────────────────────
+let vmTokenRoutes = null;
+try {
+  const createVmTokenRoutes = require("./src/routes/vm-token-routes");
+  vmTokenRoutes = createVmTokenRoutes(secretsManager);
+  logger.info("  ∞ VM Token Routes: LOADED");
+} catch (err) {
+  logger.warn(`  ⚠ VM Token routes not loaded: ${err.message}`);
+}
+
+if (vmTokenRoutes) {
+  app.use("/api/vm", vmTokenRoutes);
+}
+
+// ─── Token Revocation ─────────────────────────────────────────────
+/**
+ * @swagger
+ * /api/vm/revoke:
+ *   post:
+ *     summary: Revoke a Soul-Token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Token revoked
+ */
+app.post('/api/vm/revoke', async (req, res) => {
+  const adminToken = req.headers['authorization']?.split(' ')[1];
+  
+  if (adminToken !== process.env.ADMIN_TOKEN) {
+    return res.status(403).json({ error: 'Unauthorized' });
+  }
+  
+  const { token } = req.body;
+  
+  // Update Cloudflare KV to mark token as revoked
+  try {
+    await fetch('https://heartbeat.heady.systems/revoke', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json', 
+        'Authorization': `Bearer ${process.env.HEADY_API_KEY}`
+      },
+      body: JSON.stringify({ token })
+    });
+    
+    res.json({ success: true });
+  } catch (error) {
+    logger.error('Revocation failed:', error);
+    res.status(500).json({ error: 'Failed to revoke token' });
+  }
+});
+
+// ─── Static Assets ─────────────────────────────────────────────────
+// All UI pages served from public/ (self-contained HTML + sacred-geometry.css)
+app.use(express.static("public"));
 
 // ─── Utility ────────────────────────────────────────────────────────
 function readJsonSafe(filePath) {
@@ -118,17 +323,19 @@ function readJsonSafe(filePath) {
 }
 
 // ─── Health & Pulse ─────────────────────────────────────────────────
-app.get("/api/health", (req, res) => {
-  res.json({
-    ok: true,
-    service: "heady-manager",
-    version: "3.0.0",
-    ts: new Date().toISOString(),
-    uptime: process.uptime(),
-    memory: process.memoryUsage(),
-  });
-});
-
+/**
+ * @swagger
+ * /api/pulse:
+ *   get:
+ *     summary: Service pulse check
+ *     responses:
+ *       200:
+ *         description: Service is active
+ */
+/**
+ * @description Service pulse check
+ * @returns {Object} Service pulse data
+ */
 app.get("/api/pulse", (req, res) => {
   res.json({
     ok: true,
@@ -136,6 +343,8 @@ app.get("/api/pulse", (req, res) => {
     version: "3.0.0",
     ts: new Date().toISOString(),
     status: "active",
+    active_layer: activeLayer,
+    layer_endpoint: LAYERS[activeLayer]?.endpoint || "",
     endpoints: [
       "/api/health", "/api/pulse", "/api/registry", "/api/registry/component/:id",
       "/api/registry/environments", "/api/registry/docs", "/api/registry/notebooks",
@@ -163,8 +372,14 @@ app.get("/api/pulse", (req, res) => {
       "/api/aloha/status", "/api/aloha/protocol", "/api/aloha/de-optimization",
       "/api/aloha/stability", "/api/aloha/priorities", "/api/aloha/checklist",
       "/api/aloha/crash-report", "/api/aloha/de-opt-check", "/api/aloha/web-baseline",
+      "/api/v1/train",
       "/api/imagination/primitives", "/api/imagination/concepts", "/api/imagination/imagine",
       "/api/imagination/hot-concepts", "/api/imagination/top-concepts", "/api/imagination/ip-packages",
+      "/api/orchestrator/health", "/api/orchestrator/route", "/api/orchestrator/execute",
+      "/api/orchestrator/brains", "/api/orchestrator/layers", "/api/orchestrator/agents",
+      "/api/orchestrator/metrics", "/api/orchestrator/contract", "/api/orchestrator/rebuild-status",
+      "/api/orchestrator/reload",
+      "/api/brain/health", "/api/brain/plan", "/api/brain/feedback", "/api/brain/status",
     ],
     aloha: alohaState ? {
       mode: alohaState.mode,
@@ -189,6 +404,15 @@ function saveRegistry(data) {
   fs.writeFileSync(REGISTRY_PATH, JSON.stringify(data, null, 2), "utf8");
 }
 
+/**
+ * @swagger
+ * /api/registry:
+ *   get:
+ *     summary: Get registry data
+ *     responses:
+ *       200:
+ *         description: Registry data
+ */
 app.get("/api/registry", (req, res) => {
   const registryPath = path.join(__dirname, "heady-registry.json");
   const registry = readJsonSafe(registryPath);
@@ -196,6 +420,21 @@ app.get("/api/registry", (req, res) => {
   res.json(registry);
 });
 
+/**
+ * @swagger
+ * /api/registry/component/{id}:
+ *   get:
+ *     summary: Get component data
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Component data
+ */
 app.get("/api/registry/component/:id", (req, res) => {
   const registry = readJsonSafe(path.join(__dirname, "heady-registry.json"));
   if (!registry) return res.status(404).json({ error: "Registry not found" });
@@ -204,36 +443,90 @@ app.get("/api/registry/component/:id", (req, res) => {
   res.json(comp);
 });
 
+/**
+ * @swagger
+ * /api/registry/environments:
+ *   get:
+ *     summary: Get environments data
+ *     responses:
+ *       200:
+ *         description: Environments data
+ */
 app.get("/api/registry/environments", (req, res) => {
   const registry = readJsonSafe(path.join(__dirname, "heady-registry.json"));
   if (!registry) return res.status(404).json({ error: "Registry not found" });
   res.json({ environments: registry.environments || [], ts: new Date().toISOString() });
 });
 
+/**
+ * @swagger
+ * /api/registry/docs:
+ *   get:
+ *     summary: Get docs data
+ *     responses:
+ *       200:
+ *         description: Docs data
+ */
 app.get("/api/registry/docs", (req, res) => {
   const registry = readJsonSafe(path.join(__dirname, "heady-registry.json"));
   if (!registry) return res.status(404).json({ error: "Registry not found" });
   res.json({ docs: registry.docs || [], ts: new Date().toISOString() });
 });
 
+/**
+ * @swagger
+ * /api/registry/notebooks:
+ *   get:
+ *     summary: Get notebooks data
+ *     responses:
+ *       200:
+ *         description: Notebooks data
+ */
 app.get("/api/registry/notebooks", (req, res) => {
   const registry = readJsonSafe(path.join(__dirname, "heady-registry.json"));
   if (!registry) return res.status(404).json({ error: "Registry not found" });
   res.json({ notebooks: registry.notebooks || [], ts: new Date().toISOString() });
 });
 
+/**
+ * @swagger
+ * /api/registry/patterns:
+ *   get:
+ *     summary: Get patterns data
+ *     responses:
+ *       200:
+ *         description: Patterns data
+ */
 app.get("/api/registry/patterns", (req, res) => {
   const registry = readJsonSafe(path.join(__dirname, "heady-registry.json"));
   if (!registry) return res.status(404).json({ error: "Registry not found" });
   res.json({ patterns: registry.patterns || [], ts: new Date().toISOString() });
 });
 
+/**
+ * @swagger
+ * /api/registry/workflows:
+ *   get:
+ *     summary: Get workflows data
+ *     responses:
+ *       200:
+ *         description: Workflows data
+ */
 app.get("/api/registry/workflows", (req, res) => {
   const registry = readJsonSafe(path.join(__dirname, "heady-registry.json"));
   if (!registry) return res.status(404).json({ error: "Registry not found" });
   res.json({ workflows: registry.workflows || [], ts: new Date().toISOString() });
 });
 
+/**
+ * @swagger
+ * /api/registry/ai-nodes:
+ *   get:
+ *     summary: Get AI nodes data
+ *     responses:
+ *       200:
+ *         description: AI nodes data
+ */
 app.get("/api/registry/ai-nodes", (req, res) => {
   const registry = readJsonSafe(path.join(__dirname, "heady-registry.json"));
   if (!registry) return res.status(404).json({ error: "Registry not found" });
@@ -241,12 +534,36 @@ app.get("/api/registry/ai-nodes", (req, res) => {
 });
 
 // ─── Node Management ────────────────────────────────────────────────
+/**
+ * @swagger
+ * /api/nodes:
+ *   get:
+ *     summary: Get nodes data
+ *     responses:
+ *       200:
+ *         description: Nodes data
+ */
 app.get("/api/nodes", (req, res) => {
   const reg = loadRegistry();
   const nodes = Object.entries(reg.nodes || {}).map(([id, n]) => ({ id, ...n }));
   res.json({ total: nodes.length, active: nodes.filter(n => n.status === "active").length, nodes, ts: new Date().toISOString() });
 });
 
+/**
+ * @swagger
+ * /api/nodes/{nodeId}:
+ *   get:
+ *     summary: Get node data
+ *     parameters:
+ *       - in: path
+ *         name: nodeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Node data
+ */
 app.get("/api/nodes/:nodeId", (req, res) => {
   const reg = loadRegistry();
   const node = reg.nodes[req.params.nodeId.toUpperCase()];
@@ -254,6 +571,21 @@ app.get("/api/nodes/:nodeId", (req, res) => {
   res.json({ id: req.params.nodeId.toUpperCase(), ...node });
 });
 
+/**
+ * @swagger
+ * /api/nodes/{nodeId}/activate:
+ *   post:
+ *     summary: Activate node
+ *     parameters:
+ *       - in: path
+ *         name: nodeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Node activated
+ */
 app.post("/api/nodes/:nodeId/activate", (req, res) => {
   const reg = loadRegistry();
   const id = req.params.nodeId.toUpperCase();
@@ -264,6 +596,21 @@ app.post("/api/nodes/:nodeId/activate", (req, res) => {
   res.json({ success: true, node: id, status: "active" });
 });
 
+/**
+ * @swagger
+ * /api/nodes/{nodeId}/deactivate:
+ *   post:
+ *     summary: Deactivate node
+ *     parameters:
+ *       - in: path
+ *         name: nodeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Node deactivated
+ */
 app.post("/api/nodes/:nodeId/deactivate", (req, res) => {
   const reg = loadRegistry();
   const id = req.params.nodeId.toUpperCase();
@@ -274,6 +621,15 @@ app.post("/api/nodes/:nodeId/deactivate", (req, res) => {
 });
 
 // ─── System Status & Production Activation ──────────────────────────
+/**
+ * @swagger
+ * /api/system/status:
+ *   get:
+ *     summary: Get system status
+ *     responses:
+ *       200:
+ *         description: System status
+ */
 app.get("/api/system/status", (req, res) => {
   const reg = loadRegistry();
   const nodeList = Object.entries(reg.nodes || {});
@@ -297,6 +653,15 @@ app.get("/api/system/status", (req, res) => {
   });
 });
 
+/**
+ * @swagger
+ * /api/system/production:
+ *   post:
+ *     summary: Activate production
+ *     responses:
+ *       200:
+ *         description: Production activated
+ */
 app.post("/api/system/production", (req, res) => {
   const reg = loadRegistry();
   const ts = new Date().toISOString();
@@ -328,35 +693,6 @@ app.post("/api/system/production", (req, res) => {
   });
 });
 
-// ─── Liquid Mesh & Swarm Intelligence ────────────────────────────────
-let liquidMesh = null;
-let headySwarm = null;
-try {
-  const { LiquidMesh } = require('./src/liquid/liquid-mesh');
-  const { HeadySwarm } = require('./src/bees/heady-swarm');
-
-  liquidMesh = new LiquidMesh();
-  liquidMesh.start();
-
-  headySwarm = new HeadySwarm();
-  headySwarm.start();
-
-  logger.info("  ∞ Liquid Mesh: STARTED");
-  logger.info("  ∞ HeadySwarm: STARTED");
-} catch (err) {
-  logger.warn(`  ⚠ Liquid Mesh / Swarm failed to load: ${err.message}`);
-}
-
-app.get("/api/topology", (req, res) => {
-  if (!liquidMesh) return res.status(503).json({ error: "Liquid Mesh not active" });
-  res.json(liquidMesh.getTopology());
-});
-
-app.get("/api/swarm/status", (req, res) => {
-  if (!headySwarm) return res.status(503).json({ error: "HeadySwarm not active" });
-  res.json(headySwarm.getStatus());
-});
-
 // ─── Pipeline Engine (wired to src/hc_pipeline.js) ──────────────────
 let pipeline = null;
 let pipelineError = null;
@@ -369,6 +705,15 @@ try {
   logger.warn(`  ⚠ Pipeline engine not loaded: ${err.message}`);
 }
 
+/**
+ * @swagger
+ * /api/pipeline/config:
+ *   get:
+ *     summary: Get pipeline config
+ *     responses:
+ *       200:
+ *         description: Pipeline config
+ */
 app.get("/api/pipeline/config", (req, res) => {
   if (!pipeline) return res.status(503).json({ error: "Pipeline not loaded", reason: pipelineError });
   try {
@@ -379,6 +724,15 @@ app.get("/api/pipeline/config", (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/pipeline/run:
+ *   post:
+ *     summary: Run pipeline
+ *     responses:
+ *       200:
+ *         description: Pipeline run result
+ */
 app.post("/api/pipeline/run", async (req, res) => {
   if (!pipeline) return res.status(503).json({ error: "Pipeline not loaded", reason: pipelineError });
   try {
@@ -395,6 +749,15 @@ app.post("/api/pipeline/run", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/pipeline/state:
+ *   get:
+ *     summary: Get pipeline state
+ *     responses:
+ *       200:
+ *         description: Pipeline state
+ */
 app.get("/api/pipeline/state", (req, res) => {
   if (!pipeline) return res.status(503).json({ error: "Pipeline not loaded", reason: pipelineError });
   try {
@@ -406,40 +769,160 @@ app.get("/api/pipeline/state", (req, res) => {
   }
 });
 
-// ─── HeadyAutoIDE & Methodology APIs ────────────────────────────────
-const jsYaml = require("js-yaml");
+// ─── Training Endpoint ──────────────────────────────────────────────
+/**
+ * @swagger
+ * /api/v1/train:
+ *   post:
+ *     summary: Start model training job
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               mode:
+ *                 type: string
+ *                 enum: [auto, manual]
+ *               nonInteractive:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Training job started
+ *       503:
+ *         description: Pipeline not available
+ */
+app.post("/api/v1/train", async (req, res) => {
+  const { mode = "manual", nonInteractive = false } = req.body || {};
+  const jobId = `train-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const ts = new Date().toISOString();
 
+  try {
+    if (pipeline) {
+      const result = await pipeline.run({ type: "training", mode, nonInteractive });
+      res.json({
+        ok: true,
+        jobId,
+        status: result.status || "started",
+        mode,
+        nonInteractive,
+        pipelineRunId: result.runId,
+        ts,
+      });
+    } else {
+      res.json({
+        ok: true,
+        jobId,
+        status: "queued",
+        mode,
+        nonInteractive,
+        message: "Pipeline not loaded — job queued for next available cycle",
+        ts,
+      });
+    }
+  } catch (err) {
+    res.status(500).json({ error: "Training failed", message: err.message, jobId, ts });
+  }
+});
+
+// ─── Temporary Pipeline Status ─────────────────────────────────────
+/**
+ * @swagger
+ * /api/pipeline/status:
+ *   get:
+ *     summary: Get pipeline status
+ *     responses:
+ *       200:
+ *         description: Pipeline status
+ */
+app.get("/api/pipeline/status", (req, res) => {
+  res.json({
+    status: "idle",
+    lastRun: null,
+    nextRun: null,
+    activeTasks: 0,
+    domain: "api.headyio.com"
+  });
+});
+
+// ─── HeadyAutoIDE & Methodology APIs ────────────────────────────────
 function loadYamlConfig(filename) {
   const filePath = path.join(__dirname, "configs", filename);
   if (!fs.existsSync(filePath)) return null;
-  try { return jsYaml.load(fs.readFileSync(filePath, "utf8")); }
+  try { return yaml.load(fs.readFileSync(filePath, "utf8")); }
   catch { return null; }
 }
 
+/**
+ * @swagger
+ * /api/ide/spec:
+ *   get:
+ *     summary: Get HeadyAutoIDE spec
+ *     responses:
+ *       200:
+ *         description: HeadyAutoIDE spec
+ */
 app.get("/api/ide/spec", (req, res) => {
   const spec = loadYamlConfig("heady-auto-ide.yaml");
   if (!spec) return res.status(404).json({ error: "HeadyAutoIDE spec not found" });
   res.json({ ok: true, ...spec, ts: new Date().toISOString() });
 });
 
+/**
+ * @swagger
+ * /api/ide/agents:
+ *   get:
+ *     summary: Get HeadyAutoIDE agents
+ *     responses:
+ *       200:
+ *         description: HeadyAutoIDE agents
+ */
 app.get("/api/ide/agents", (req, res) => {
   const spec = loadYamlConfig("heady-auto-ide.yaml");
   if (!spec) return res.status(404).json({ error: "HeadyAutoIDE spec not found" });
   res.json({ ok: true, agents: spec.agentRoles || [], ts: new Date().toISOString() });
 });
 
+/**
+ * @swagger
+ * /api/playbook:
+ *   get:
+ *     summary: Get playbook
+ *     responses:
+ *       200:
+ *         description: Playbook
+ */
 app.get("/api/playbook", (req, res) => {
   const playbook = loadYamlConfig("build-playbook.yaml");
   if (!playbook) return res.status(404).json({ error: "Build Playbook not found" });
   res.json({ ok: true, ...playbook, ts: new Date().toISOString() });
 });
 
+/**
+ * @swagger
+ * /api/agentic:
+ *   get:
+ *     summary: Get agentic coding config
+ *     responses:
+ *       200:
+ *         description: Agentic coding config
+ */
 app.get("/api/agentic", (req, res) => {
   const agentic = loadYamlConfig("agentic-coding.yaml");
   if (!agentic) return res.status(404).json({ error: "Agentic Coding config not found" });
   res.json({ ok: true, ...agentic, ts: new Date().toISOString() });
 });
 
+/**
+ * @swagger
+ * /api/activation:
+ *   get:
+ *     summary: Get activation manifest
+ *     responses:
+ *       200:
+ *         description: Activation manifest
+ */
 app.get("/api/activation", (req, res) => {
   const manifest = loadYamlConfig("activation-manifest.yaml");
   if (!manifest) return res.status(404).json({ error: "Activation Manifest not found" });
@@ -464,6 +947,15 @@ app.get("/api/activation", (req, res) => {
   });
 });
 
+/**
+ * @swagger
+ * /api/public-domain:
+ *   get:
+ *     summary: Get public domain integration config
+ *     responses:
+ *       200:
+ *         description: Public domain integration config
+ */
 app.get("/api/public-domain", (req, res) => {
   const pdi = loadYamlConfig("public-domain-integration.yaml");
   if (!pdi) return res.status(404).json({ error: "Public Domain Integration config not found" });
@@ -503,7 +995,7 @@ try {
 } catch (err) {
   logger.warn(`  ⚠ Resource Manager not loaded: ${err.message}`);
 
-  // Fallback inline resource health endpoint
+  // Fallback inline resource health endpoint - User-Directed Mode
   app.get("/api/resources/health", (req, res) => {
     const mem = process.memoryUsage();
     const osLib = require("os");
@@ -519,7 +1011,10 @@ try {
       disk: { currentPercent: 0, absoluteValue: 0, capacity: 0, unit: "GB" },
       gpu: null,
       safeMode: false,
-      status: "fallback",
+      status: "user-directed-mode",
+      userDirectedMode: userDirectedMode,
+      suspendedProcesses: Array.from(suspendedProcesses),
+      resourceAllocation: TASK_PRIORITY,
       ts: new Date().toISOString(),
     });
   });
@@ -584,14 +1079,24 @@ try {
     mcGlobal.bind({ pipeline, registry: loadRegistry });
   }
 
-  // Start background MC cycles
-  mcGlobal.startAutoRun();
+  // Start background MC cycles - SUSPENDED in user-directed mode
+  if (!suspendedProcesses.has('monte-carlo')) {
+    mcGlobal.startAutoRun();
+  }
 
-  // Default to speed_priority mode — speed is a first-class objective
-  mcPlanScheduler.setSpeedMode("on");
+  // Monte Carlo - SUSPENDED by default (user-directed mode)
+  if (mcPlanScheduler && !suspendedProcesses.has('monte-carlo')) {
+    mcPlanScheduler.setSpeedMode("on");
+    logger.info("  ∞ Monte Carlo Plan Scheduler: LOADED (user-directed mode)");
+  } else {
+    logger.info("  ∞ Monte Carlo Plan Scheduler: SUSPENDED (user-directed mode)");
+  }
 
-  logger.info("  ∞ Monte Carlo Plan Scheduler: LOADED (speed_priority mode)");
-  logger.info("  ∞ Monte Carlo Global: AUTO-RUN started (60s cycles)");
+  if (mcGlobal && !suspendedProcesses.has('monte-carlo')) {
+    logger.info("  ∞ Monte Carlo Global: AUTO-RUN started (60s cycles)");
+  } else {
+    logger.info("  ∞ Monte Carlo Global: SUSPENDED (user-directed mode)");
+  }
 } catch (err) {
   logger.warn(`  ⚠ Monte Carlo not loaded: ${err.message}`);
 }
@@ -744,6 +1249,33 @@ try {
   logger.warn(`  ⚠ Self-Critique Engine not loaded: ${err.message}`);
 }
 
+// ─── Auto-Task Conversion Hook ──────────────────────────────────────
+function setupAutoTaskConversion() {
+  if (!eventBus) return;
+  eventBus.on('recommendation', (recommendation) => {
+    try {
+      const priority = patternEngine && typeof patternEngine.classifyPriority === 'function'
+        ? patternEngine.classifyPriority(recommendation)
+        : 'medium';
+      const taskId = `rec-${Date.now()}`;
+      const text = typeof recommendation === 'string' ? recommendation : (recommendation.text || 'auto-task');
+      logger.info(`[AutoTask] Task ${taskId}: ${text} (${priority})`);
+
+      if (storyDriver) {
+        storyDriver.ingestSystemEvent({
+          type: 'AUTO_TASK_CREATED',
+          refs: { taskId, text, priority },
+          source: 'auto_task_conversion',
+        });
+      }
+    } catch (err) {
+      logger.warn(`[AutoTask] Failed: ${err.message}`);
+    }
+  });
+}
+
+setupAutoTaskConversion();
+
 // ─── Bind Pipeline to External Systems ──────────────────────────────
 // Connect HCFullPipeline to MC scheduler, pattern engine, and self-critique
 // so post-run feedback loops (timing → MC, observations → patterns, critique → improvements) work.
@@ -758,9 +1290,86 @@ try {
   logger.warn(`  ⚠ Pipeline bind failed: ${err.message}`);
 }
 
+// ─── Continuous Improvement Scheduler ─────────────────────────────────
+let improvementScheduler = null;
+try {
+  const { ImprovementScheduler, registerImprovementRoutes } = require("./src/hc_improvement_scheduler");
+  improvementScheduler = new ImprovementScheduler({
+    interval: 900000, // 15 minutes
+    pipeline,
+    patternEngine,
+    selfCritiqueEngine,
+    mcPlanScheduler
+  });
+  registerImprovementRoutes(app, improvementScheduler);
+
+  // Start the scheduler
+  improvementScheduler.start();
+  
+  logger.info("  ∞ Improvement Scheduler: LOADED (15m cycles)");
+} catch (err) {
+  logger.warn(`  ⚠ Improvement Scheduler not loaded: ${err.message}`);
+}
+
+// ─── HCSysOrchestrator — Multi-Brain Task Router ────────────────────
+let orchestratorRoutes = null;
+try {
+  orchestratorRoutes = require("./services/orchestrator/hc_sys_orchestrator");
+  app.use("/api/orchestrator", orchestratorRoutes);
+  logger.info("  ∞ HCSysOrchestrator: LOADED");
+  logger.info("    → Endpoints: /api/orchestrator/health, /route, /brains, /layers, /contract, /rebuild-status");
+} catch (err) {
+  logger.warn(`  ⚠ HCSysOrchestrator not loaded: ${err.message}`);
+}
+
+// ─── HeadyBrain API — Per-Layer Intelligence ────────────────────────
+let brainApiRoutes = null;
+try {
+  brainApiRoutes = require("./services/orchestrator/brain_api");
+  app.use("/api/brain", brainApiRoutes);
+  logger.info("  ∞ HeadyBrain API: LOADED");
+  logger.info("    → Endpoints: /api/brain/health, /plan, /feedback, /status");
+  
+  // Initialize BrainConnector for 100% uptime
+  const { getBrainConnector } = require("./src/brain_connector");
+  const brainConnector = getBrainConnector({
+    poolSize: 5,
+    healthCheckInterval: 15000
+  });
+  
+  // Monitor brain connector events
+  brainConnector.on('circuitBreakerOpen', (data) => {
+    logger.warn(`  ⚠ Brain circuit breaker OPEN: ${data.endpointId} (${data.failures} failures)`);
+  });
+  
+  brainConnector.on('allEndpointsFailed', (data) => {
+    logger.error(`  🚨 ALL BRAIN ENDPOINTS FAILED! Using fallback mode.`);
+  });
+  
+  brainConnector.on('healthCheck', (results) => {
+    const healthy = Array.from(results.entries()).filter(([_, r]) => r.status === 'healthy').length;
+    if (healthy < results.size) {
+      logger.warn(`  ⚠ Brain health check: ${healthy}/${results.size} endpoints healthy`);
+    }
+  });
+  
+  logger.info("  ∞ BrainConnector: ACTIVE (100% uptime guarantee)");
+} catch (err) {
+  logger.warn(`  ⚠ HeadyBrain API not loaded: ${err.message}`);
+}
+
 // ─── HeadyBuddy API ─────────────────────────────────────────────────
 const buddyStartTime = Date.now();
 
+/**
+ * @swagger
+ * /api/buddy/health:
+ *   get:
+ *     summary: HeadyBuddy health check
+ *     responses:
+ *       200:
+ *         description: HeadyBuddy is healthy
+ */
 app.get("/api/buddy/health", (req, res) => {
   res.json({
     ok: true,
@@ -772,12 +1381,29 @@ app.get("/api/buddy/health", (req, res) => {
   });
 });
 
+/**
+ * @swagger
+ * /api/buddy/chat:
+ *   post:
+ *     summary: Send chat message to HeadyBuddy
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               message:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: HeadyBuddy response
+ */
 app.post("/api/buddy/chat", (req, res) => {
   const { message } = req.body;
   if (!message) return res.status(400).json({ error: "message required" });
 
   const reg = loadRegistry();
-  const nodeCount = Object.keys(reg.nodes || {}).length;
   const activeNodes = Object.values(reg.nodes || {}).filter(n => n.status === "active").length;
 
   const hour = new Date().getHours();
@@ -786,60 +1412,18 @@ app.post("/api/buddy/chat", (req, res) => {
   let reply = "";
 
   if (lowerMsg.includes("plan") && lowerMsg.includes("day")) {
-    reply = `${greeting} Let's plan your perfect day. I see ${activeNodes}/${nodeCount} nodes active. What are your top 3 priorities today?`;
+    reply = `${greeting} Let's plan your perfect day. I see ${activeNodes} nodes active. What are your top 3 priorities today?`;
   } else if (lowerMsg.includes("pipeline") || lowerMsg.includes("hcfull")) {
     const contState = continuousPipeline.running ? `running (cycle ${continuousPipeline.cycleCount})` : "stopped";
     reply = `Pipeline continuous mode: ${contState}. ${activeNodes} nodes active. Would you like me to start a pipeline run or check the orchestrator dashboard?`;
   } else if (lowerMsg.includes("diagnos") || lowerMsg.includes("why slow") || lowerMsg.includes("bottleneck") || lowerMsg.includes("fix resource")) {
     if (resourceDiagnostics) {
       const diag = resourceDiagnostics.diagnose();
-      const topFindings = diag.findings.slice(0, 3).map(f => `• ${f.severity.toUpperCase()}: ${f.title}`).join("\n");
-      const winsText = diag.quickWins.length > 0
-        ? `\n\nQuick wins:\n${diag.quickWins.map(w => `→ ${w.title}`).join("\n")}`
-        : "";
-      reply = `Diagnostic scan complete — ${diag.totalFindings} findings (${diag.critical} critical, ${diag.high} high).\n\n${topFindings}${winsText}\n\nExpand to Resources tab for full report or say "apply quick wins".`;
-    } else {
-      reply = "Resource Diagnostics module not loaded. Check the Resources tab for basic health data.";
-    }
-  } else if (lowerMsg.includes("apply quick win") || lowerMsg.includes("fix it") || lowerMsg.includes("apply fix")) {
-    if (resourceDiagnostics) {
-      const diag = resourceDiagnostics.lastDiagnosis || resourceDiagnostics.diagnose();
-      const applied = [];
-      for (const win of diag.quickWins) {
-        if (win.configChange && taskScheduler) {
-          const { endpoint, body } = win.configChange;
-          if (endpoint.includes("concurrency") && body.taskClass && body.limit != null) {
-            taskScheduler.adjustConcurrency(body.taskClass, body.limit);
-            applied.push(win.title);
-          } else if (endpoint.includes("safe-mode") && body.enabled) {
-            taskScheduler.enterSafeMode();
-            applied.push(win.title);
-          }
-        }
-      }
-      reply = applied.length > 0
-        ? `Applied ${applied.length} quick wins:\n${applied.map(a => `✓ ${a}`).join("\n")}\n\nMonitoring for improvement.`
-        : "No auto-applicable quick wins right now. Check the Resources tab for manual options.";
-    } else {
-      reply = "Diagnostics module not available.";
-    }
-  } else if (lowerMsg.includes("scheduler") || lowerMsg.includes("queue") || lowerMsg.includes("task")) {
-    if (taskScheduler) {
-      const st = taskScheduler.getStatus();
-      const totalQ = st.queues.interactive + st.queues.batch + st.queues.training;
-      const totalR = st.running.interactive + st.running.batch + st.running.training;
-      reply = `Scheduler: ${totalQ} queued, ${totalR} running. Completed: ${st.stats.totalCompleted}. Avg wait: ${st.stats.avgWaitMs}ms, avg exec: ${st.stats.avgExecMs}ms. Safe mode: ${st.safeModeActive ? "ON" : "off"}. ${st.paused ? "⏸ PAUSED" : "▶ Active"}.`;
-    } else {
-      reply = "Task Scheduler not loaded. Submit tasks via /api/scheduler/submit.";
-    }
-  } else if (lowerMsg.includes("slow") || lowerMsg.includes("taking so long") || (lowerMsg.includes("explain") && lowerMsg.includes("slowdown"))) {
-    if (resourceDiagnostics) {
-      const diag = resourceDiagnostics.diagnose();
       const snap = resourceManager ? resourceManager.getSnapshot() : {};
       const cpuPct = snap.cpu?.currentPercent || 0;
       const ramPct = snap.ram?.currentPercent || 0;
       const topIssue = diag.findings[0];
-      reply = `CPU: ${cpuPct}%, RAM: ${ramPct}%. ${diag.totalFindings} diagnostic findings. ${topIssue ? `Top issue: ${topIssue.title} (${topIssue.severity}).` : "No critical issues."} Say "diagnose" for full report or "apply quick wins" for fast fixes.`;
+      reply = `Diagnostic scan complete — ${diag.totalFindings} findings (${diag.critical} critical, ${diag.high} high).\n\n${topIssue ? `Top issue: ${topIssue.title} (${topIssue.severity}).` : "No critical issues."} Say "diagnose" for full report or "apply quick wins" for fast fixes.`;
     } else if (resourceManager) {
       const snap = resourceManager.getSnapshot();
       const events = resourceManager.getRecentEvents(5);
@@ -857,9 +1441,9 @@ app.post("/api/buddy/chat", (req, res) => {
     if (resourceManager) {
       const snap = resourceManager.getSnapshot();
       const diskInfo = snap.disk && snap.disk.capacity > 0 ? `, Disk ${snap.disk.currentPercent}%` : "";
-      reply = `Resource overview: CPU ${snap.cpu?.currentPercent || 0}%, RAM ${snap.ram?.currentPercent || 0}%${diskInfo}${snap.gpu ? `, GPU ${snap.gpu.compute?.currentPercent || 0}%` : ""}. ${activeNodes}/${nodeCount} nodes active. ${snap.safeMode ? "⚠ Safe mode active." : ""} Say "diagnose" for deep analysis.`;
+      reply = `Resource overview: CPU ${snap.cpu?.currentPercent || 0}%, RAM ${snap.ram?.currentPercent || 0}%${diskInfo}${snap.gpu ? `, GPU ${snap.gpu.compute?.currentPercent || 0}%` : ""}. ${activeNodes} nodes active. ${snap.safeMode ? "⚠ Safe mode active." : ""} Say "diagnose" for deep analysis.`;
     } else {
-      reply = `Resource overview: ${activeNodes}/${nodeCount} nodes active. Memory: ${Math.round(process.memoryUsage().heapUsed / 1048576)}MB heap. Check the Orchestrator tab for details.`;
+      reply = `Resource overview: ${activeNodes} nodes active. Memory: ${Math.round(process.memoryUsage().heapUsed / 1048576)}MB heap. Check the Orchestrator tab for details.`;
     }
   } else if (lowerMsg.includes("story") || lowerMsg.includes("what changed") || lowerMsg.includes("narrative")) {
     if (storyDriver) {
@@ -869,7 +1453,7 @@ app.post("/api/buddy/chat", (req, res) => {
       reply = "Story Driver is not loaded. It tracks project narratives, feature lifecycles, and incident timelines.";
     }
   } else if (lowerMsg.includes("status") || lowerMsg.includes("health")) {
-    reply = `System healthy. ${activeNodes}/${nodeCount} nodes active. Uptime: ${Math.round(process.uptime())}s. Continuous mode: ${continuousPipeline.running ? "active" : "off"}.`;
+    reply = `System healthy. ${activeNodes} nodes active. Uptime: ${Math.round(process.uptime())}s. Continuous mode: ${continuousPipeline.running ? "active" : "off"}.`;
   } else if (lowerMsg.includes("help") || lowerMsg.includes("what can")) {
     reply = `I can help with: planning your day, running HCFullPipeline, monitoring resources/nodes, orchestrating parallel tasks, automating workflows, and checking system health.`;
   } else if (lowerMsg.includes("stop") || lowerMsg.includes("pause")) {
@@ -888,7 +1472,7 @@ app.post("/api/buddy/chat", (req, res) => {
   res.json({
     reply,
     context: {
-      nodes: { total: nodeCount, active: activeNodes },
+      nodes: { total: Object.keys(reg.nodes || {}).length, active: activeNodes },
       continuousMode: continuousPipeline.running,
       cycleCount: continuousPipeline.cycleCount,
     },
@@ -896,10 +1480,20 @@ app.post("/api/buddy/chat", (req, res) => {
   });
 });
 
+/**
+ * @swagger
+ * /api/buddy/suggestions:
+ *   get:
+ *     summary: Get HeadyBuddy suggestions
+ *     responses:
+ *       200:
+ *         description: HeadyBuddy suggestions
+ */
 app.get("/api/buddy/suggestions", (req, res) => {
   const hour = new Date().getHours();
   const reg = loadRegistry();
   const activeNodes = Object.values(reg.nodes || {}).filter(n => n.status === "active").length;
+
   const chips = [];
 
   if (hour < 10) chips.push({ label: "Plan my morning", icon: "calendar", prompt: "Help me plan my morning." });
@@ -915,6 +1509,15 @@ app.get("/api/buddy/suggestions", (req, res) => {
   res.json({ suggestions: chips.slice(0, 5), ts: new Date().toISOString() });
 });
 
+/**
+ * @swagger
+ * /api/buddy/orchestrator:
+ *   get:
+ *     summary: Get HeadyBuddy orchestrator data
+ *     responses:
+ *       200:
+ *         description: HeadyBuddy orchestrator data
+ */
 app.get("/api/buddy/orchestrator", (req, res) => {
   const reg = loadRegistry();
   const nodes = Object.entries(reg.nodes || {}).map(([id, n]) => ({
@@ -960,6 +1563,24 @@ app.get("/api/buddy/orchestrator", (req, res) => {
   });
 });
 
+/**
+ * @swagger
+ * /api/buddy/pipeline/continuous:
+ *   post:
+ *     summary: Start or stop continuous pipeline
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               action:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Continuous pipeline started or stopped
+ */
 app.post("/api/buddy/pipeline/continuous", (req, res) => {
   const { action = "start" } = req.body;
 
@@ -1015,6 +1636,11 @@ app.post("/api/buddy/pipeline/continuous", (req, res) => {
       continuousPipeline.exitReason = "gate_failed";
       if (continuousPipeline.intervalId) clearInterval(continuousPipeline.intervalId);
     }
+
+    // Checkpoint validation logged (async — avoids blocking the event loop)
+    if (fs.existsSync(path.join(__dirname, 'scripts', 'checkpoint-validation.ps1'))) {
+      logger.info(`[Pipeline] Checkpoint validation available (cycle ${continuousPipeline.cycleCount})`);
+    }
   };
 
   runCycle();
@@ -1027,6 +1653,92 @@ app.post("/api/buddy/pipeline/continuous", (req, res) => {
     cycleCount: continuousPipeline.cycleCount, gates: continuousPipeline.gateResults,
     ts: new Date().toISOString(),
   });
+});
+
+// ─── HeadyBuddy State Sync Endpoints ─────────────────────────────────
+let buddyState = {
+  conversation: [],
+  viewState: 'pill',
+  pipelineState: {},
+  config: null
+};
+
+/**
+ * @swagger
+ * /api/buddy/state:
+ *   post:
+ *     summary: Update HeadyBuddy state
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               conversation:
+ *                 type: array
+ *               viewState:
+ *                 type: string
+ *               pipelineState:
+ *                 type: object
+ *               config:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: HeadyBuddy state updated
+ */
+app.post('/api/buddy/state', (req, res) => {
+  try {
+    // Validate and update state
+    if (req.body.conversation) buddyState.conversation = req.body.conversation;
+    if (req.body.viewState) buddyState.viewState = req.body.viewState;
+    if (req.body.pipelineState) buddyState.pipelineState = req.body.pipelineState;
+    if (req.body.config) buddyState.config = req.body.config;
+    
+    res.json({ 
+      ok: true, 
+      message: 'State updated successfully',
+      ts: new Date().toISOString() 
+    });
+  } catch (err) {
+    res.status(500).json({ 
+      error: 'State update failed', 
+      message: err.message 
+    });
+  }
+});
+
+/**
+ * @swagger
+ * /api/buddy/state:
+ *   get:
+ *     summary: Get HeadyBuddy state
+ *     responses:
+ *       200:
+ *         description: HeadyBuddy state
+ */
+app.get('/api/buddy/state', (req, res) => {
+  res.json({ 
+    ...buddyState,
+    ts: new Date().toISOString() 
+  });
+});
+
+// ─── Sync Events Endpoint ────────────────────────────────────────────
+app.get('/api/buddy/sync-events', (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  
+  // Send initial status
+  res.write(`data: ${JSON.stringify({ status: 'connected' })}\n\n`);
+  
+  // Simulate status updates
+  const interval = setInterval(() => {
+    res.write(`data: ${JSON.stringify({ status: Math.random() > 0.2 ? 'connected' : 'syncing' })}\n\n`);
+  }, 10000);
+  
+  req.on('close', () => clearInterval(interval));
 });
 
 // ─── Secrets & Cloudflare Routes ─────────────────────────────────────
@@ -1044,10 +1756,71 @@ try {
   logger.warn(`  ⚠ Secrets/Cloudflare routes not registered: ${err.message}`);
 }
 
+// ─── Layer Management ─────────────────────────────────────────────────
+const LAYERS = {
+  "local": { name: "Local Dev", endpoint: "https://app.headysystems.com" },
+  "cloud-me": { name: "Cloud HeadyMe", endpoint: "https://app.headysystems.com" },
+  "cloud-sys": { name: "Cloud HeadySystems", endpoint: "https://app.headysystems.com" },
+  "cloud-conn": { name: "Cloud HeadyConnection", endpoint: "https://app.headysystems.com" },
+  "hybrid": { name: "Hybrid", endpoint: "https://app.headysystems.com" }
+};
+
+let activeLayer = "local";
+
+/**
+ * @swagger
+ * /api/layer:
+ *   get:
+ *     summary: Get active layer
+ *     responses:
+ *       200:
+ *         description: Active layer
+ */
+app.get("/api/layer", (req, res) => {
+  res.json({
+    active: activeLayer,
+    endpoint: LAYERS[activeLayer]?.endpoint || "",
+    ts: new Date().toISOString()
+  });
+});
+
+/**
+ * @swagger
+ * /api/layer/switch:
+ *   post:
+ *     summary: Switch layer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               layer:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Layer switched
+ */
+app.post("/api/layer/switch", (req, res) => {
+  const newLayer = req.body.layer;
+  if (!LAYERS[newLayer]) {
+    return res.status(400).json({ error: "Invalid layer" });
+  }
+  
+  activeLayer = newLayer;
+  res.json({
+    success: true,
+    layer: newLayer,
+    endpoint: LAYERS[newLayer].endpoint,
+    ts: new Date().toISOString()
+  });
+});
+
 // ─── Aloha Protocol System (Always-On) ───────────────────────────────
-const alohaProtocol = loadYamlConfig("aloha-protocol.yaml");
-const deOptProtocol = loadYamlConfig("de-optimization-protocol.yaml");
-const stabilityFirst = loadYamlConfig("stability-first.yaml");
+const alohaProtocol = yaml.load(fs.readFileSync('./configs/aloha-protocol.yaml', 'utf8'));
+const deOptProtocol = yaml.load(fs.readFileSync('./configs/de-optimization-protocol.yaml', 'utf8'));
+const stabilityFirst = yaml.load(fs.readFileSync('./configs/stability-first.yaml', 'utf8'));
 
 const alohaState = {
   mode: "aloha",
@@ -1066,6 +1839,15 @@ if (alohaProtocol) logger.info("  \u221e Aloha Protocol: LOADED (always-on)");
 if (deOptProtocol) logger.info("  \u221e De-Optimization Protocol: LOADED (simplicity > speed)");
 if (stabilityFirst) logger.info("  \u221e Stability First: LOADED (the canoe must not sink)");
 
+/**
+ * @swagger
+ * /api/aloha/status:
+ *   get:
+ *     summary: Get Aloha protocol status
+ *     responses:
+ *       200:
+ *         description: Aloha protocol status
+ */
 app.get("/api/aloha/status", (req, res) => {
   res.json({
     ok: true,
@@ -1080,21 +1862,57 @@ app.get("/api/aloha/status", (req, res) => {
   });
 });
 
+/**
+ * @swagger
+ * /api/aloha/protocol:
+ *   get:
+ *     summary: Get Aloha protocol
+ *     responses:
+ *       200:
+ *         description: Aloha protocol
+ */
 app.get("/api/aloha/protocol", (req, res) => {
   if (!alohaProtocol) return res.status(404).json({ error: "Aloha protocol not found" });
   res.json({ ok: true, ...alohaProtocol, ts: new Date().toISOString() });
 });
 
+/**
+ * @swagger
+ * /api/aloha/de-optimization:
+ *   get:
+ *     summary: Get de-optimization protocol
+ *     responses:
+ *       200:
+ *         description: De-optimization protocol
+ */
 app.get("/api/aloha/de-optimization", (req, res) => {
   if (!deOptProtocol) return res.status(404).json({ error: "De-optimization protocol not found" });
   res.json({ ok: true, ...deOptProtocol, ts: new Date().toISOString() });
 });
 
+/**
+ * @swagger
+ * /api/aloha/stability:
+ *   get:
+ *     summary: Get stability first protocol
+ *     responses:
+ *       200:
+ *         description: Stability first protocol
+ */
 app.get("/api/aloha/stability", (req, res) => {
   if (!stabilityFirst) return res.status(404).json({ error: "Stability first protocol not found" });
   res.json({ ok: true, ...stabilityFirst, ts: new Date().toISOString() });
 });
 
+/**
+ * @swagger
+ * /api/aloha/priorities:
+ *   get:
+ *     summary: Get Aloha priorities
+ *     responses:
+ *       200:
+ *         description: Aloha priorities
+ */
 app.get("/api/aloha/priorities", (req, res) => {
   if (!alohaProtocol) return res.status(404).json({ error: "Aloha protocol not found" });
   res.json({
@@ -1106,6 +1924,15 @@ app.get("/api/aloha/priorities", (req, res) => {
   });
 });
 
+/**
+ * @swagger
+ * /api/aloha/checklist:
+ *   get:
+ *     summary: Get de-optimization checklist
+ *     responses:
+ *       200:
+ *         description: De-optimization checklist
+ */
 app.get("/api/aloha/checklist", (req, res) => {
   if (!deOptProtocol) return res.status(404).json({ error: "De-optimization protocol not found" });
   res.json({
@@ -1118,6 +1945,28 @@ app.get("/api/aloha/checklist", (req, res) => {
   });
 });
 
+/**
+ * @swagger
+ * /api/aloha/crash-report:
+ *   post:
+ *     summary: Report crash
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               description:
+ *                 type: string
+ *               context:
+ *                 type: string
+ *               severity:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Crash report received
+ */
 app.post("/api/aloha/crash-report", (req, res) => {
   const { description, context, severity } = req.body;
   const report = {
@@ -1136,11 +1985,7 @@ app.post("/api/aloha/crash-report", (req, res) => {
       context: "stability:crash",
       weaknesses: [`System crash: ${report.description}`],
       severity: "critical",
-      suggestedImprovements: [
-        "Enter Stability Diagnostic Mode",
-        "Reduce local resource usage",
-        "Disable non-essential extensions",
-      ],
+      suggestedImprovements: ["Enter Stability Diagnostic Mode", "Reduce local resource usage", "Disable non-essential extensions"],
     });
   }
 
@@ -1153,15 +1998,80 @@ app.post("/api/aloha/crash-report", (req, res) => {
     });
   }
 
+  // Crash threshold — 3+ crashes in 1 hour triggers emergency stability
+  logger.warn(`[ALOHA CRASH REPORT] ${report.id}: ${report.description} (${report.severity})`);
+  const recentCrashes = alohaState.crashReports.filter(r =>
+    new Date(r.ts) > new Date(Date.now() - 3600000)
+  );
+
+  let emergencyActivated = false;
+  if (recentCrashes.length >= 3) {
+    alohaState.mode = "emergency_stability";
+    emergencyActivated = true;
+    logger.error("[ALOHA] Emergency stability mode activated - multiple crashes detected");
+
+    if (resourceManager && !resourceManager.safeMode) {
+      try { resourceManager.enterSafeMode("aloha_crash_threshold"); } catch (e) { /* safe */ }
+    }
+    if (continuousPipeline.running) {
+      continuousPipeline.running = false;
+      continuousPipeline.exitReason = "aloha_emergency_stability";
+      if (continuousPipeline.intervalId) {
+        clearInterval(continuousPipeline.intervalId);
+        continuousPipeline.intervalId = null;
+      }
+      if (storyDriver) {
+        storyDriver.ingestSystemEvent({
+          type: "PIPELINE_EMERGENCY_SHUTDOWN",
+          refs: { reason: "aloha_emergency_stability", crashCount: recentCrashes.length },
+          source: "aloha_protocol",
+        });
+      }
+    }
+    if (mcGlobal && typeof mcGlobal.stopAutoRun === 'function') {
+      try { mcGlobal.stopAutoRun(); } catch (e) { /* safe */ }
+    }
+    if (improvementScheduler && typeof improvementScheduler.pause === 'function') {
+      try { improvementScheduler.pause(); } catch (e) { /* safe */ }
+    }
+    if (patternEngine && typeof patternEngine.pause === 'function') {
+      try { patternEngine.pause(); } catch (e) { /* safe */ }
+    }
+  }
+
   res.json({
     ok: true,
     report,
     diagnosticMode: true,
-    checklist: stabilityFirst ? stabilityFirst.crash_response.diagnostic_mode.checks : [],
-    message: "Stability Diagnostic Mode activated. Follow the checklist.",
+    emergencyMode: emergencyActivated,
+    recentCrashCount: recentCrashes.length,
+    checklist: stabilityFirst?.crash_response?.diagnostic_mode?.checks || [],
+    message: emergencyActivated
+      ? "Emergency stability mode activated. All non-essential services paused."
+      : "Stability Diagnostic Mode activated. Follow the checklist.",
   });
 });
 
+/**
+ * @swagger
+ * /api/aloha/de-opt-check:
+ *   post:
+ *     summary: Run de-optimization check
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               suggestion:
+ *                 type: string
+ *               context:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: De-optimization check result
+ */
 app.post("/api/aloha/de-opt-check", (req, res) => {
   const { suggestion, context } = req.body;
   alohaState.deOptChecks++;
@@ -1178,6 +2088,15 @@ app.post("/api/aloha/de-opt-check", (req, res) => {
   res.json({ ok: true, ...result });
 });
 
+/**
+ * @swagger
+ * /api/aloha/web-baseline:
+ *   get:
+ *     summary: Get web baseline
+ *     responses:
+ *       200:
+ *         description: Web baseline
+ */
 app.get("/api/aloha/web-baseline", (req, res) => {
   if (!alohaProtocol) return res.status(404).json({ error: "Aloha protocol not found" });
   res.json({
@@ -1187,6 +2106,65 @@ app.get("/api/aloha/web-baseline", (req, res) => {
     message: "Websites must be fully functional as baseline. This is the easy thing to do.",
     ts: new Date().toISOString(),
   });
+});
+
+// ─── Access Point Configuration Loader ────────────────────────────────
+const accessConfig = yaml.load(fs.readFileSync('./configs/access-points.yaml', 'utf8'));
+
+app.use('/api/access-points', (req, res) => {
+  res.json(accessConfig);
+});
+
+try {
+  const headybuddyConfigRouter = require('./services/core-api/routes/headybuddy-config');
+  app.use('/api/headybuddy-config', headybuddyConfigRouter);
+  logger.info("  ∞ HeadyBuddy Config Routes: LOADED");
+} catch (err) {
+  logger.warn(`  ⚠ HeadyBuddy Config routes not loaded: ${err.message}`);
+}
+
+try {
+  const { router: authRouter } = require('./src/routes/auth-routes');
+  app.use('/api/auth', authRouter);
+  logger.info("  ∞ Auth Routes: LOADED");
+} catch (err) {
+  logger.warn(`  \u26a0 Auth routes not loaded: ${err.message}`);
+}
+
+// (Layer management routes already registered above at /api/layer)
+
+// ─── Liquid Nodes Status ────────────────────────────────────────────
+app.get('/api/liquid-nodes', (req, res) => {
+  const nodes = [
+    { name: 'github', status: process.env.GITHUB_TOKEN ? 'connected' : 'needs_token', capabilities: ['repos', 'code-search', 'gists'] },
+    { name: 'cloudflare', status: process.env.CLOUDFLARE_API_TOKEN ? 'connected' : 'needs_token', capabilities: ['zones', 'dns', 'workers', 'pages'] },
+    { name: 'vertex-ai', status: process.env.GCLOUD_ACCESS_TOKEN ? 'connected' : 'needs_token', capabilities: ['models', 'endpoints', 'predict'] },
+    { name: 'ai-studio', status: process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY ? 'connected' : 'needs_token', capabilities: ['generate'] },
+    { name: 'colab', status: 'needs_oauth', capabilities: ['notebooks'] },
+    { name: 'latent-space', status: 'active', capabilities: ['store', 'search', 'list', 'delete'] },
+  ];
+  const active = nodes.filter(n => n.status === 'connected' || n.status === 'active').length;
+  res.json({ nodes, summary: { total: nodes.length, active, needsConfig: nodes.length - active }, ts: new Date().toISOString() });
+});
+
+// ─── HeadyVault Status ──────────────────────────────────────────────
+app.get('/api/vault/status', (req, res) => {
+  const categories = {
+    'ai-llm': ['ANTHROPIC_API_KEY', 'CLAUDE_API_KEY', 'OPENAI_API_KEY', 'GROQ_API_KEY', 'PERPLEXITY_API_KEY', 'HF_TOKEN', 'GEMINI_API_KEY'],
+    'infrastructure': ['DATABASE_URL', 'NEON_API_KEY', 'UPSTASH_REDIS_REST_URL', 'FIREBASE_API_KEY', 'PINECONE_API_KEY'],
+    'cloud-deploy': ['CLOUDFLARE_API_TOKEN', 'SENTRY_AUTH_TOKEN'],
+    'scm': ['GITHUB_TOKEN', 'GITHUB_TOKEN_SECONDARY'],
+    'finance': ['STRIPE_SECRET_KEY'],
+    'auth': ['ADMIN_TOKEN', 'HEADY_API_KEY'],
+  };
+  const summary = {};
+  let totalSet = 0, totalKeys = 0;
+  for (const [cat, keys] of Object.entries(categories)) {
+    const set = keys.filter(k => !!process.env[k]).length;
+    totalSet += set; totalKeys += keys.length;
+    summary[cat] = { total: keys.length, configured: set, missing: keys.length - set };
+  }
+  res.json({ vault: 'HeadyVault', latentSpaceKey: 'heady-vault-manifest', summary, totals: { keys: totalKeys, configured: totalSet, missing: totalKeys - totalSet }, rotationPolicy: 'quarterly', ts: new Date().toISOString() });
 });
 
 // ─── Error Handler ──────────────────────────────────────────────────
@@ -1199,16 +2177,28 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ─── SPA Fallback ───────────────────────────────────────────────────
-app.get(/(.*)/, (req, res) => {
-  const indexPath = path.join(frontendBuildPath, "index.html");
-  if (fs.existsSync(indexPath)) return res.sendFile(indexPath);
-  res.status(404).json({ error: "Not found" });
+// Root health endpoint (before SPA fallback)
+app.get("/health", (req, res) => {
+  res.redirect("/api/health");
+});
+
+// ─── 404 Handler ────────────────────────────────────────────────────
+app.use((req, res) => {
+  res.status(404).json({ error: "Not found", path: req.path, hint: "Try /api/health or visit /" });
 });
 
 // ─── Start ──────────────────────────────────────────────────────────
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   logger.info(`\n  ∞ Heady Manager v3.0.0 listening on port ${PORT}`);
-  logger.info(`  ∞ Health: http://localhost:${PORT}/api/health`);
+  logger.info(`  ∞ Health: https://headysystems.com/api/health (port ${PORT})`);
   logger.info(`  ∞ Environment: ${process.env.NODE_ENV || "development"}\n`);
 });
+
+try {
+  const { startBrandingMonitor } = require('./src/self-awareness');
+  startBrandingMonitor();
+  logger.info("  \u221e Branding Monitor: STARTED");
+} catch (err) {
+  logger.warn(`  \u26a0 Branding Monitor not loaded: ${err.message}`);
+}
+

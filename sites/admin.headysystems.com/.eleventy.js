@@ -9,16 +9,13 @@
 // ║                                                                  ║
 // ║  ∞ SACRED GEOMETRY ∞  Organic Systems · Breathing Interfaces    ║
 // ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
-// ║  FILE: websites/sites/admin.headysystems.com/.eleventy.js
-// ║  LAYER: root                                                  ║
+// ║  FILE: frontend/postcss.config.js                                                    ║
+// ║  LAYER: ui/frontend                                                  ║
 // ╚══════════════════════════════════════════════════════════════════╝
 // HEADY_BRAND:END
-module.exports = function(eleventyConfig) {
-  // Heady Admin specific config
-  return {
-    dir: {
-      input: ".",
-      output: "_site"
-    }
-  };
+export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
 };

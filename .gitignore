@@ -56,13 +56,12 @@ pipeline-output/
 # Standalone repos (separate git projects)
 windsurf-next/
 
+
 # Personal notebooks (experimental, not tracked)
 notebooks/personal/*
 !notebooks/personal/.gitkeep
 
 # Secrets
-configs/secrets/
-config/secrets/
 .heady/memory.db
 .heady/*.db
 *.db
@@ -78,14 +77,10 @@ offline-packages/
 # Local Netlify folder
 .netlify
 
-# Security — sensitive files
+# Security — sensitive files (added by deep scan remediation)
 .env.hybrid
 *.pid
 *.bak
 audit_logs.jsonl
 .heady_deploy_log.jsonl
 *.jsonl
-*.shit
-
-# In-folder (ingest zips - too large for GitHub)
-in/
