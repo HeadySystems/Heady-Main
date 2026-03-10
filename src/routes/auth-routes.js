@@ -16,75 +16,29 @@
 
 const express = require('express');
 const crypto = require('crypto');
-const { createLogger } = require('../../packages/structured-logger');
 
 const router = express.Router();
-const log = createLogger('auth', 'authentication');
-
-// ═════════════════════════════════════════════════════════════════════════════
-// PASSWORD HASHING (bcrypt-like using PBKDF2)
-// ═════════════════════════════════════════════════════════════════════════════
-
-const HASH_ITERATIONS = 100000;
-const HASH_KEYLEN = 64;
-const HASH_DIGEST = 'sha512';
-
-function hashPassword(password) {
-  const salt = crypto.randomBytes(16).toString('hex');
-  const hash = crypto.pbkdf2Sync(password, salt, HASH_ITERATIONS, HASH_KEYLEN, HASH_DIGEST).toString('hex');
-  return `${salt}:${hash}`;
-}
-
-function verifyPassword(password, stored) {
-  if (!stored || !stored.includes(':')) return false;
-  const [salt, hash] = stored.split(':');
-  const verify = crypto.pbkdf2Sync(password, salt, HASH_ITERATIONS, HASH_KEYLEN, HASH_DIGEST).toString('hex');
-  return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(verify, 'hex'));
-}
-
-// ═════════════════════════════════════════════════════════════════════════════
-// SESSION CONFIG
-// ═════════════════════════════════════════════════════════════════════════════
-
-const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
-const MAX_SESSIONS_PER_USER = 5;
-const SESSION_CLEANUP_INTERVAL = 60 * 60 * 1000; // 1 hour
 
 // ═════════════════════════════════════════════════════════════════════════════
 // IN-MEMORY STORAGE (demo only; replace with DB in production)
 // ═════════════════════════════════════════════════════════════════════════════
 
-// Map<token, { userId, email, name, createdAt, expiresAt }>
+// Map<token, { userId, email, name, createdAt }>
 const sessions = new Map();
 
-// Map<userId, { email, passwordHash, name, createdAt }>
+// Map<userId, { email, password (hashed in prod), name, createdAt }>
 const users = new Map();
 
-// Rate limiting for login attempts
-const loginAttempts = new Map(); // email -> { count, lastAttempt }
-const MAX_LOGIN_ATTEMPTS = 5;
-const LOGIN_LOCKOUT_MS = 15 * 60 * 1000; // 15 minutes
-
-// Demo user seed — password hashed at startup
+// Demo user seed
 const DEMO_USER = {
   id: 'demo-user-1',
   email: 'eric@headyconnection.org',
-  passwordHash: hashPassword('heady2026'),
+  password: 'heady2026', // In production, this would be hashed
   name: 'Eric Haywood',
 };
 
 // Register demo user on startup
 users.set(DEMO_USER.id, DEMO_USER);
-
-// Periodic session cleanup
-setInterval(() => {
-  const now = Date.now();
-  for (const [token, session] of sessions) {
-    if (session.expiresAt && now > session.expiresAt) {
-      sessions.delete(token);
-    }
-  }
-}, SESSION_CLEANUP_INTERVAL);
 
 // ═════════════════════════════════════════════════════════════════════════════
 // UTILITIES
@@ -115,13 +69,31 @@ function generateToken() {
 }
 
 /**
- * Extract Bearer token from Authorization header.
+ * Extract token from __Host-heady_session cookie or Authorization header.
  */
-function extractToken(authHeader) {
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return null;
+function extractToken(req) {
+  if (req.cookies && req.cookies['__Host-heady_session']) {
+    return req.cookies['__Host-heady_session'];
   }
-  return authHeader.substring(7);
+
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.substring(7);
+  }
+  return null;
+}
+
+/**
+ * Helper to set standard secure cookie options for session token.
+ */
+function setSessionCookie(res, token) {
+  res.cookie('__Host-heady_session', token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    path: '/'
+  });
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -133,7 +105,7 @@ function extractToken(authHeader) {
  * Returns 401 if token is invalid or missing.
  */
 function requireAuth(req, res, next) {
-  const token = extractToken(req.headers.authorization);
+  const token = extractToken(req);
 
   if (!token) {
     return res.status(401).json({
@@ -147,15 +119,6 @@ function requireAuth(req, res, next) {
     return res.status(401).json({
       error: 'unauthorized',
       message: 'Invalid or expired session token',
-    });
-  }
-
-  // Check session expiry
-  if (session.expiresAt && Date.now() > session.expiresAt) {
-    sessions.delete(token);
-    return res.status(401).json({
-      error: 'session_expired',
-      message: 'Session has expired. Please log in again.',
     });
   }
 
@@ -209,6 +172,7 @@ router.post('/login', (req, res) => {
         });
       }
 
+      // Timing-safe comparison to prevent timing attacks
       if (!timingSafeEqual(apiKey, adminToken)) {
         return res.status(401).json({
           error: 'unauthorized',
@@ -216,6 +180,7 @@ router.post('/login', (req, res) => {
         });
       }
 
+      // Create admin session
       const token = generateToken();
       const adminUser = {
         id: 'admin-system',
@@ -228,10 +193,13 @@ router.post('/login', (req, res) => {
         email: adminUser.email,
         name: adminUser.name,
         createdAt: new Date(),
-        expiresAt: Date.now() + SESSION_TTL_MS,
       });
 
-      return res.status(200).json({ token, user: adminUser });
+      setSessionCookie(res, token);
+
+      return res.status(200).json({
+        user: adminUser,
+      });
     }
 
     // Email/password authentication
@@ -242,78 +210,50 @@ router.post('/login', (req, res) => {
       });
     }
 
-    // Sanitize email
-    const cleanEmail = String(email).toLowerCase().trim();
-
-    // Check login rate limiting
-    const attempts = loginAttempts.get(cleanEmail);
-    if (attempts && attempts.count >= MAX_LOGIN_ATTEMPTS) {
-      const timeSince = Date.now() - attempts.lastAttempt;
-      if (timeSince < LOGIN_LOCKOUT_MS) {
-        return res.status(429).json({
-          error: 'too_many_attempts',
-          message: 'Too many login attempts. Try again later.',
-          retryAfter: Math.ceil((LOGIN_LOCKOUT_MS - timeSince) / 1000),
-        });
-      }
-      loginAttempts.delete(cleanEmail); // Reset after lockout
-    }
-
     // Find user by email
     let user = null;
     for (const [, u] of users) {
-      if (u.email === cleanEmail) {
+      if (u.email === email) {
         user = u;
         break;
       }
     }
 
-    if (!user || !verifyPassword(password, user.passwordHash)) {
-      // Track failed attempt
-      const current = loginAttempts.get(cleanEmail) || { count: 0, lastAttempt: 0 };
-      loginAttempts.set(cleanEmail, { count: current.count + 1, lastAttempt: Date.now() });
-
+    if (!user) {
       return res.status(401).json({
         error: 'unauthorized',
         message: 'Invalid email or password',
       });
     }
 
-    // Clear failed attempts on success
-    loginAttempts.delete(cleanEmail);
-
-    // Enforce max sessions per user
-    let userSessionCount = 0;
-    let oldestToken = null;
-    let oldestTime = Infinity;
-    for (const [tok, sess] of sessions) {
-      if (sess.userId === user.id) {
-        userSessionCount++;
-        if (sess.createdAt < oldestTime) {
-          oldestTime = sess.createdAt;
-          oldestToken = tok;
-        }
-      }
-    }
-    if (userSessionCount >= MAX_SESSIONS_PER_USER && oldestToken) {
-      sessions.delete(oldestToken);
+    // Validate password (timing-safe comparison)
+    if (!timingSafeEqual(password, user.password)) {
+      return res.status(401).json({
+        error: 'unauthorized',
+        message: 'Invalid email or password',
+      });
     }
 
+    // Create session
     const token = generateToken();
     sessions.set(token, {
       userId: user.id,
       email: user.email,
       name: user.name,
-      createdAt: Date.now(),
-      expiresAt: Date.now() + SESSION_TTL_MS,
+      createdAt: new Date(),
     });
 
+    setSessionCookie(res, token);
+
     return res.status(200).json({
-      token,
-      user: { id: user.id, email: user.email, name: user.name },
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
     });
   } catch (error) {
-    log.error('Login error', { errorMessage: error.message, errorStack: error.stack });
+    console.error('Login error:', error);
     return res.status(500).json({
       error: 'server_error',
       message: error.message,
@@ -362,13 +302,13 @@ router.post('/register', (req, res) => {
       }
     }
 
-    // Create new user with hashed password
+    // Create new user
     const userId = `user-${crypto.randomBytes(8).toString('hex')}`;
     const newUser = {
       id: userId,
-      email: String(email).toLowerCase().trim(),
-      passwordHash: hashPassword(password),
-      name: String(name).trim().substring(0, 100),
+      email,
+      password, // In production, hash with bcrypt or similar
+      name,
       createdAt: new Date(),
     };
 
@@ -380,12 +320,12 @@ router.post('/register', (req, res) => {
       userId: newUser.id,
       email: newUser.email,
       name: newUser.name,
-      createdAt: Date.now(),
-      expiresAt: Date.now() + SESSION_TTL_MS,
+      createdAt: new Date(),
     });
 
+    setSessionCookie(res, token);
+
     return res.status(201).json({
-      token,
       user: {
         id: newUser.id,
         email: newUser.email,
@@ -393,7 +333,7 @@ router.post('/register', (req, res) => {
       },
     });
   } catch (error) {
-    log.error('Registration error', { errorMessage: error.message, errorStack: error.stack });
+    console.error('Registration error:', error);
     return res.status(500).json({
       error: 'server_error',
       message: error.message,
@@ -417,11 +357,18 @@ router.post('/logout', requireAuth, (req, res) => {
     const token = req.token;
     sessions.delete(token);
 
+    res.clearCookie('__Host-heady_session', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      path: '/'
+    });
+
     return res.status(200).json({
       message: 'Logged out successfully',
     });
   } catch (error) {
-    log.error('Logout error', { errorMessage: error.message, errorStack: error.stack });
+    console.error('Logout error:', error);
     return res.status(500).json({
       error: 'server_error',
       message: error.message,
@@ -446,7 +393,7 @@ router.get('/me', requireAuth, (req, res) => {
       user: req.user,
     });
   } catch (error) {
-    log.error('GET /me error', { errorMessage: error.message, errorStack: error.stack });
+    console.error('GET /me error:', error);
     return res.status(500).json({
       error: 'server_error',
       message: error.message,
@@ -468,7 +415,7 @@ router.get('/me', requireAuth, (req, res) => {
  */
 router.get('/validate', (req, res) => {
   try {
-    let token = extractToken(req.headers.authorization);
+    let token = extractToken(req);
     if (!token) {
       token = req.query.token;
     }
@@ -502,7 +449,7 @@ router.get('/validate', (req, res) => {
       },
     });
   } catch (error) {
-    log.error('Validate error', { errorMessage: error.message, errorStack: error.stack });
+    console.error('Validate error:', error);
     return res.status(500).json({
       error: 'server_error',
       message: error.message,
@@ -517,7 +464,7 @@ router.get('/validate', (req, res) => {
 router.post('/preferences', requireAuth, (req, res) => {
   try {
     const { workspace, integrations } = req.body;
-    const user = users.get(req.user.id);
+    const user = users.get(req.user.email);
     if (user) {
       user.preferences = { workspace, integrations, onboardedAt: new Date().toISOString() };
     }
