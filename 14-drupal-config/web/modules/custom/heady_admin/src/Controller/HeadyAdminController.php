@@ -28,7 +28,7 @@ class HeadyAdminController extends ControllerBase implements ContainerInjectionI
 
   public static function create(ContainerInterface $container)
   {
-    return new static ($container->get('database'));
+    return new static($container->get('database'));
   }
 
   /**
@@ -178,7 +178,7 @@ class HeadyAdminController extends ControllerBase implements ContainerInjectionI
       ['name' => 'HeadySoul', 'type' => 'Decision', 'status' => 'online', 'domain' => 'internal', 'port' => 0],
       ['name' => 'HeadyBattle Engine', 'type' => 'Security', 'status' => 'online', 'domain' => 'internal', 'port' => 0],
       ['name' => 'Realtime Monitor', 'type' => 'Monitoring', 'status' => 'online', 'domain' => 'manager.headysystems.com', 'port' => 3301],
-      ['name' => 'Drupal CMS', 'type' => 'CMS', 'status' => $this->checkServiceStatus('localhost', 8081), 'domain' => 'admin.headysystems.com', 'port' => 8081],
+      ['name' => 'Drupal CMS', 'type' => 'CMS', 'status' => $this->checkServiceStatus('admin.headysystems.com', 443), 'domain' => 'admin.headysystems.com', 'port' => 443],
     ];
   }
 

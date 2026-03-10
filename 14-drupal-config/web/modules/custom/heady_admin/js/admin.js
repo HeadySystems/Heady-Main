@@ -15,7 +15,7 @@
             el.offsetHeight; // trigger reflow
             el.style.animation = 'pulse-value 0.5s ease';
           });
-          console.log('✅ Status refreshed:', data);
+          // Status refreshed — data visible in admin panel
           alert('✅ All statuses refreshed successfully.');
         })
         .catch(e => console.error('Status refresh failed:', e));

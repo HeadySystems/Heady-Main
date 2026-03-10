@@ -77,7 +77,7 @@
             ws = new WebSocket(WS_URL);
             ws.onopen = () => {
                 if (statusEl) statusEl.innerHTML = '<span style="color:#22c55e;">● Connected</span>';
-                console.log('🔭 HeadyLens WebSocket connected');
+                // HeadyLens WebSocket connected — metrics reporting active
             };
             ws.onmessage = (event) => {
                 try {

@@ -11,12 +11,14 @@ use Symfony\Component\HttpFoundation\JsonResponse;
  * Exposes AI model registry, routing rules, and health check
  * for the HeadyConductor intelligence layer.
  */
-class HeadyConfigController extends ControllerBase {
+class HeadyConfigController extends ControllerBase
+{
 
   /**
    * Returns the full Heady system configuration.
    */
-  public function getConfig(): JsonResponse {
+  public function getConfig(): JsonResponse
+  {
     $config = [
       'version' => '2.0.0',
       'architecture' => 'HeadyConductor — Distributed Dynamic Resource Allocation',
@@ -74,7 +76,7 @@ class HeadyConfigController extends ControllerBase {
       ],
       'services' => [
         'manager' => 'http://heady-manager-local:3301',
-        'hcfp' => 'http://localhost:8080',
+        'hcfp' => getenv('HCFP_URL') ?: 'https://api.headysystems.com/hcfp',
         'ai_gateway' => 'http://heady-ai-gateway:80',
         'python_worker' => 'http://heady-python-worker-local:5000',
         'vector_db' => 'http://heady-qdrant-local:6333',
@@ -91,7 +93,7 @@ class HeadyConfigController extends ControllerBase {
     ];
 
     return new JsonResponse($config, 200, [
-      'Access-Control-Allow-Origin' => '*',
+      'Access-Control-Allow-Origin' => in_array($this->getCurrentOrigin(), $this->getAllowedOrigins()) ? $this->getCurrentOrigin() : 'https://headysystems.com',
       'Cache-Control' => 'public, max-age=300',
     ]);
   }
@@ -99,7 +101,8 @@ class HeadyConfigController extends ControllerBase {
   /**
    * Returns a health check for all Heady services.
    */
-  public function getHealth(): JsonResponse {
+  public function getHealth(): JsonResponse
+  {
     $health = [
       'status' => 'operational',
       'timestamp' => date('c'),
@@ -118,8 +121,34 @@ class HeadyConfigController extends ControllerBase {
     ];
 
     return new JsonResponse($health, 200, [
-      'Access-Control-Allow-Origin' => '*',
+      'Access-Control-Allow-Origin' => in_array($this->getCurrentOrigin(), $this->getAllowedOrigins()) ? $this->getCurrentOrigin() : 'https://headysystems.com',
     ]);
+  }
+
+  /**
+   * Returns the list of allowed CORS origins (Heady™ domains only).
+   */
+  private function getAllowedOrigins(): array
+  {
+    return [
+      'https://headysystems.com',
+      'https://headyme.com',
+      'https://headyconnection.com',
+      'https://headyio.com',
+      'https://headybuddy.org',
+      'https://headymcp.com',
+      'https://admin.headysystems.com',
+      'https://manager.headysystems.com',
+      'https://headyos.com',
+    ];
+  }
+
+  /**
+   * Returns the current request Origin header.
+   */
+  private function getCurrentOrigin(): string
+  {
+    return \Drupal::request()->headers->get('Origin', '');
   }
 
 }
