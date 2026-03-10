@@ -1,0 +1,58 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [".env", ".env.example", "tsconfig.base.json"],
+  "globalEnv": ["NODE_ENV", "HEADY_ENV", "HEADY_VERSION", "LOG_LEVEL"],
+  "pipeline": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "build/**"],
+      "cache": true,
+      "env": ["NODE_ENV"]
+    },
+    "build:production": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "build/**"],
+      "cache": true,
+      "env": ["NODE_ENV", "HEADY_VERSION"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "interactiveUI": true
+    },
+    "lint": {
+      "dependsOn": [],
+      "cache": true,
+      "outputs": []
+    },
+    "lint:fix": {
+      "dependsOn": [],
+      "cache": false,
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "outputs": ["coverage/**"],
+      "cache": true,
+      "env": ["NODE_ENV"]
+    },
+    "test:watch": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "persistent": true,
+      "interactiveUI": true
+    },
+    "typecheck": {
+      "dependsOn": [],
+      "cache": true,
+      "outputs": []
+    },
+    "clean": {
+      "cache": false
+    },
+    "deploy": {
+      "dependsOn": ["build:production", "test", "lint"],
+      "cache": false
+    }
+  }
+}

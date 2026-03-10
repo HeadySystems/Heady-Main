@@ -1,0 +1,38 @@
+# Package File Structure
+
+HeadyCSL_Finance_Pack/
+├── README.md
+├── TASK-CHECKLIST.md
+├── specs/
+│   └── 01-csl-global-finance-apex.md (placeholder - copy from thread)
+├── reference-docs/
+│   ├── Heady_Service_Reference.docx (placeholder)
+│   ├── Heady_System_Architecture_Overview.docx (placeholder)
+│   └── Heady_Development_Deployment_Guide.docx (placeholder)
+├── datasets/
+│   ├── DATASET-INFO.md
+│   └── download-datasets.sh
+├── papers/
+│   └── links/
+│       └── PAPERS-INFO.md
+├── src/
+│   ├── core/
+│   │   ├── csl-engine/
+│   │   │   └── csl-gates-extended.js
+│   │   ├── monte-carlo-engine-csl.js
+│   │   └── vsa-csl-bridge.js
+│   ├── trading/
+│   │   └── apex-csl-risk-gates.js
+│   ├── migration/
+│   │   └── ternary-to-csl-migrator.js
+│   ├── integration/
+│   │   └── csl-service-integration.js
+│   └── tests/
+│       ├── unit/csl-unit.test.js
+│       ├── integration/csl-integration.test.js
+│       ├── trading/csl-trading.test.js
+│       └── determinism/csl-determinism.test.js
+└── scripts/
+    └── build-pack.py
+
+All source files are fully scaffolded and ready for implementation!

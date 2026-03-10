@@ -1,0 +1,169 @@
+version: "3.9"
+# Docker Compose for local development of the Heady backend stack
+# Start: docker compose -f docker-compose.dev.yml up
+# All services run with AutoContext available at heady-auto-context:8907
+
+services:
+  # ── Infrastructure layer ─────────────────────────────────────────────────
+
+  consul:
+    image: hashicorp/consul:1.17
+    command: agent -server -bootstrap-expect=1 -ui -client=0.0.0.0
+    ports: ["8500:8500", "8600:8600/udp"]
+    environment:
+      CONSUL_BIND_INTERFACE: eth0
+    healthcheck:
+      test: ["CMD", "consul", "members"]
+      interval: 21s
+      timeout: 8s
+      retries: 3
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.96.0
+    command: ["--config=/etc/otel/otel-collector.yaml"]
+    volumes:
+      - ../otel/otel-collector.yaml:/etc/otel/otel-collector.yaml:ro
+    ports: ["4317:4317", "4318:4318", "8889:8889"]
+    depends_on: [consul]
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB:       heady
+      POSTGRES_USER:     heady
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    ports: ["5432:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U heady"]
+      interval: 13s
+      timeout: 5s
+      retries: 3
+
+  # ── Core services ─────────────────────────────────────────────────────────
+
+  heady-auto-context:
+    build:
+      context: ../../services/specialized/heady-auto-context
+    ports: ["8907:8907"]
+    environment:
+      SERVICE_NAME:    heady-auto-context
+      PORT:            "8907"
+      CONSUL_URL:      http://consul:8500
+      OTEL_ENDPOINT:   http://otel-collector:4318
+      POSTGRES_URL:    postgres://heady:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@postgres:5432/heady
+    depends_on:
+      postgres:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- \"http://$$HOSTNAME:8907/health\" >/dev/null || exit 1"]
+      interval: 13s
+      start_period: 21s
+      retries: 3
+
+  heady-memory:
+    build:
+      context: ../../services/core-intelligence/heady-memory
+    ports: ["8106:8106"]
+    environment:
+      SERVICE_NAME:      heady-memory
+      PORT:              "8106"
+      AUTOCONTEXT_URL:   http://heady-auto-context:8907
+      POSTGRES_URL:      postgres://heady:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@postgres:5432/heady
+      CONSUL_URL:        http://consul:8500
+      OTEL_ENDPOINT:     http://otel-collector:4318
+    depends_on:
+      heady-auto-context:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- \"http://$$HOSTNAME:8106/health\" >/dev/null || exit 1"]
+      interval: 13s
+      start_period: 13s
+      retries: 3
+
+  heady-soul:
+    build:
+      context: ../../services/core-intelligence/heady-soul
+    ports: ["8102:8102"]
+    environment:
+      SERVICE_NAME:    heady-soul
+      PORT:            "8102"
+      AUTOCONTEXT_URL: http://heady-auto-context:8907
+      CONSUL_URL:      http://consul:8500
+      OTEL_ENDPOINT:   http://otel-collector:4318
+    depends_on:
+      heady-auto-context:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- \"http://$$HOSTNAME:8102/health\" >/dev/null || exit 1"]
+      interval: 21s
+      start_period: 13s
+      retries: 3
+
+  heady-orchestration:
+    build:
+      context: ../../services/agent-bee/heady-orchestration
+    ports: ["8202:8202"]
+    environment:
+      SERVICE_NAME:    heady-orchestration
+      PORT:            "8202"
+      AUTOCONTEXT_URL: http://heady-auto-context:8907
+      CONSUL_URL:      http://consul:8500
+      OTEL_ENDPOINT:   http://otel-collector:4318
+    depends_on:
+      heady-auto-context:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- \"http://$$HOSTNAME:8202/health\" >/dev/null || exit 1"]
+      interval: 21s
+      start_period: 13s
+      retries: 3
+
+  drupal-sync:
+    build:
+      context: ../../services/external-integrations/drupal-sync
+    ports: ["8809:8809"]
+    environment:
+      SERVICE_NAME:          drupal-sync
+      PORT:                  "8809"
+      DRUPAL_BASE_URL:       ${DRUPAL_BASE_URL:-https://cms.headysystems.com}
+      DRUPAL_WEBHOOK_SECRET: ${DRUPAL_WEBHOOK_SECRET:?set DRUPAL_WEBHOOK_SECRET}
+      AUTOCONTEXT_URL:       http://heady-auto-context:8907
+      VECTOR_MEMORY_URL:     http://heady-memory:8106
+      CONSUL_URL:            http://consul:8500
+      OTEL_ENDPOINT:         http://otel-collector:4318
+    depends_on:
+      heady-auto-context:
+        condition: service_healthy
+      heady-memory:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- \"http://$$HOSTNAME:8809/health\" >/dev/null || exit 1"]
+      interval: 21s
+      start_period: 13s
+      retries: 3
+
+  api-gateway:
+    build:
+      context: ../../services/ai-routing/api-gateway
+    ports: ["8701:8701", "80:8701"]
+    environment:
+      SERVICE_NAME:    api-gateway
+      PORT:            "8701"
+      AUTOCONTEXT_URL: http://heady-auto-context:8907
+      CONSUL_URL:      http://consul:8500
+      OTEL_ENDPOINT:   http://otel-collector:4318
+    depends_on:
+      heady-auto-context:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- \"http://$$HOSTNAME:8701/health\" >/dev/null || exit 1"]
+      interval: 13s
+      start_period: 8s
+      retries: 3
+
+networks:
+  default:
+    name: heady-network
+    driver: bridge

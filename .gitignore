@@ -1,0 +1,15 @@
+
+artifacts/*-report.json
+artifacts/*.zip
+configs/secrets/
+coverage
+dist
+.DS_Store
+.env
+.env.*
+.idea
+node_modules
+# Rebuild artifacts
+.turbo
+.vscode/settings.local.json
+.wrangler

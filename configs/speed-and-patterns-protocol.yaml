@@ -1,0 +1,10 @@
+version: 1
+policy:
+  thoroughnessOverSpeed: true
+  quickFixesForbidden: true
+  localhostForbiddenInProduction: true
+patternEngine:
+  enabled: true
+  writeToWisdomJson: true
+  similarityThreshold: 0.809
+  promoteThreshold: 0.882

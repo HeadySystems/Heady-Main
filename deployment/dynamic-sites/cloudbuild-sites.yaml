@@ -1,0 +1,77 @@
+# ── Cloud Build: Dynamic Sites ──────────────────────────────
+# Build, push, deploy to Cloud Run, verify health, map domains.
+
+substitutions:
+  _SERVICE_NAME: 'heady-dynamic-sites'
+  _REGION: 'us-central1'
+  _AR_REPO: 'heady-images'
+
+steps:
+  # 1. Build container
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE_NAME}:$SHORT_SHA'
+      - '-f'
+      - 'deployment/dynamic-sites/Dockerfile'
+      - '.'
+
+  # 2. Push to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE_NAME}:$SHORT_SHA'
+
+  # 3. Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - '${_SERVICE_NAME}'
+      - '--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE_NAME}:$SHORT_SHA'
+      - '--region=${_REGION}'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--port=8080'
+      - '--cpu=1'
+      - '--memory=512Mi'
+      - '--min-instances=1'
+      - '--max-instances=10'
+      - '--concurrency=250'
+      - '--timeout=60s'
+      - '--set-env-vars=NODE_ENV=production,PORT=8080'
+      - '--labels=service=dynamic-sites,version=$SHORT_SHA'
+
+  # 4. Verify health
+  - name: 'gcr.io/cloud-builders/curl'
+    entrypoint: bash
+    args:
+      - '-c'
+      - |
+        SERVICE_URL=$(gcloud run services describe ${_SERVICE_NAME} --region=${_REGION} --format='value(status.url)')
+        echo "Checking $${SERVICE_URL}/health/ready"
+        curl -sf "$${SERVICE_URL}/health/ready" || exit 1
+        echo "Health check passed"
+
+  # 5. Map custom domains (manual step — logged for reference)
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: bash
+    args:
+      - '-c'
+      - |
+        echo "Custom domain mapping should be done via:"
+        echo "  gcloud run domain-mappings create --service=${_SERVICE_NAME} --domain=DOMAIN --region=${_REGION}"
+        echo ""
+        echo "Domains to map:"
+        echo "  headyme.com, headysystems.com, headyai.me, headyio.com"
+        echo "  headybot.com, headyapi.com, headysense.com, heady-ai.com"
+        echo "  perfecttrader.com, headyos.com, headyex.com"
+        echo "  headyfinance.com, headyconnection.com"
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+images:
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE_NAME}:$SHORT_SHA'

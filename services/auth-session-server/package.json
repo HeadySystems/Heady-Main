@@ -1,0 +1,32 @@
+{
+  "name": "@heady/auth-session-server",
+  "version": "1.0.0",
+  "description": "Central authentication session service for cross-domain SSO across all 9 Heady websites",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "keywords": [
+    "authentication",
+    "session",
+    "firebase",
+    "sso",
+    "cross-domain"
+  ],
+  "author": "Heady Systems",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2",
+    "firebase-admin": "^12.0.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "pino": "^8.17.2",
+    "pino-http": "^8.6.1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
