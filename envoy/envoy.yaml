@@ -1,0 +1,1406 @@
+# Heady Envoy Proxy Configuration
+# Author: Eric Haywood / HeadySystems Inc.
+# All numeric constants derived from φ (1.618) or Fibonacci sequence
+# φ¹=1.618  φ²=2.618  φ³=4.236  φ⁴=6.854  φ⁵=11.09  φ⁶=17.944  φ⁷=29.034
+
+admin:
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 9901
+
+static_resources:
+  listeners:
+    # HTTP listener — redirects to HTTPS in production
+    - name: http_listener
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 8080
+      filter_chains:
+        - filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: http_ingress
+                codec_type: AUTO
+                route_config:
+                  name: local_route
+                  virtual_hosts:
+                    - name: heady_redirect
+                      domains: ["*"]
+                      routes:
+                        - match:
+                            prefix: "/health"
+                          direct_response:
+                            status: 200
+                            body:
+                              inline_string: '{"status":"healthy","proxy":"envoy","phi":"1.618"}'
+                        - match:
+                            prefix: "/"
+                          redirect:
+                            https_redirect: true
+                http_filters:
+                  - name: envoy.filters.http.router
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+
+    # HTTPS listener — mTLS edge proxy
+    - name: https_listener
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 8443
+      filter_chains:
+        - transport_socket:
+            name: envoy.transport_sockets.tls
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
+              require_client_certificate: true
+              common_tls_context:
+                tls_certificates:
+                  - certificate_chain:
+                      filename: /etc/envoy/certs/server.crt
+                    private_key:
+                      filename: /etc/envoy/certs/server.key
+                validation_context:
+                  trusted_ca:
+                    filename: /etc/envoy/certs/ca.crt
+                alpn_protocols: ["h2", "http/1.1"]
+          filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: https_ingress
+                codec_type: AUTO
+                common_http_protocol_options:
+                  idle_timeout: 4236s  # φ³ × 1000 seconds
+                  max_headers_count: 89  # fib(11)
+                access_log:
+                  - name: envoy.access_loggers.stdout
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.access_loggers.stream.v3.StdoutAccessLog
+                route_config:
+                  name: heady_routes
+                  virtual_hosts:
+                    # CORS for all 9 Heady domains
+                    - name: heady_services
+                      domains:
+                        - "heady.app"
+                        - "*.heady.app"
+                        - "heady.dev"
+                        - "*.heady.dev"
+                        - "heady.ai"
+                        - "*.heady.ai"
+                        - "headysystems.com"
+                        - "*.headysystems.com"
+                        - "heady.io"
+                        - "*.heady.io"
+                        - "heady.cloud"
+                        - "*.heady.cloud"
+                        - "heady.systems"
+                        - "*.heady.systems"
+                        - "heady.tech"
+                        - "*.heady.tech"
+                        - "heady.works"
+                        - "*.heady.works"
+                      cors:
+                        allow_origin_string_match:
+                          - safe_regex:
+                              regex: "https://.*\\.heady\\.(app|dev|ai|io|cloud|systems|tech|works)$"
+                          - exact: "https://headysystems.com"
+                        allow_methods: "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+                        allow_headers: "Content-Type, Authorization, X-Request-ID, X-Heady-Session, X-CSL-Score"
+                        expose_headers: "X-Request-ID, X-Heady-Trace, X-CSL-Score"
+                        max_age: "2584"  # fib(18) seconds
+                        allow_credentials: true
+                      routes:
+                        # API Gateway — main entry point
+                        - match:
+                            prefix: "/api/"
+                          route:
+                            cluster: api-gateway
+                            timeout: 4.236s  # φ³
+                            retry_policy:
+                              retry_on: "5xx,connect-failure,retriable-4xx"
+                              num_retries: 3  # fib(4)
+                              per_try_timeout: 2.618s  # φ²
+                              retry_back_off:
+                                base_interval: 0.1618s  # φ/10
+                                max_interval: 1.618s    # φ
+
+                        # Brain services
+                        - match:
+                            prefix: "/brain/"
+                          route:
+                            cluster: heady-brain
+                            timeout: 6.854s  # φ⁴
+
+                        # Inference
+                        - match:
+                            prefix: "/infer/"
+                          route:
+                            cluster: heady-infer
+                            timeout: 6.854s  # φ⁴
+
+                        # Model gateway
+                        - match:
+                            prefix: "/models/"
+                          route:
+                            cluster: model-gateway
+                            timeout: 11.09s  # φ⁵
+
+                        # Memory operations
+                        - match:
+                            prefix: "/memory/"
+                          route:
+                            cluster: heady-memory
+                            timeout: 4.236s  # φ³
+
+                        # Vector search
+                        - match:
+                            prefix: "/search/"
+                          route:
+                            cluster: search-service
+                            timeout: 4.236s  # φ³
+
+                        # Agent operations
+                        - match:
+                            prefix: "/agents/"
+                          route:
+                            cluster: heady-hive
+                            timeout: 11.09s  # φ⁵
+
+                        # Pipeline execution
+                        - match:
+                            prefix: "/pipeline/"
+                          route:
+                            cluster: hcfullpipeline-executor
+                            timeout: 29.034s  # φ⁷
+
+                        # Auth
+                        - match:
+                            prefix: "/auth/"
+                          route:
+                            cluster: auth-session-server
+                            timeout: 4.236s  # φ³
+
+                        # MCP tools
+                        - match:
+                            prefix: "/mcp/"
+                          route:
+                            cluster: mcp-server
+                            timeout: 6.854s  # φ⁴
+
+                        # WebSocket notifications
+                        - match:
+                            prefix: "/ws/"
+                          route:
+                            cluster: notification-service
+                            timeout: 0s  # no timeout for websocket
+                            upgrade_configs:
+                              - upgrade_type: websocket
+
+                        # Web app — catch-all
+                        - match:
+                            prefix: "/"
+                          route:
+                            cluster: heady-web
+                            timeout: 4.236s  # φ³
+
+                http_filters:
+                  - name: envoy.filters.http.cors
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.cors.v3.Cors
+                  - name: envoy.filters.http.local_ratelimit
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit
+                      stat_prefix: http_local_rate_limiter
+                      token_bucket:
+                        max_tokens: 144          # fib(12)
+                        tokens_per_fill: 2       # fib(3)
+                        fill_interval: 1s
+                      filter_enabled:
+                        runtime_key: local_rate_limit_enabled
+                        default_value:
+                          numerator: 100
+                          denominator: HUNDRED
+                      filter_enforced:
+                        runtime_key: local_rate_limit_enforced
+                        default_value:
+                          numerator: 100
+                          denominator: HUNDRED
+                      response_headers_to_add:
+                        - append_action: OVERWRITE_IF_EXISTS_OR_ADD
+                          header:
+                            key: x-heady-rate-limit
+                            value: "144"
+                  - name: envoy.filters.http.router
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+
+  clusters:
+    # ========================================================================
+    # CORE service clusters
+    # ========================================================================
+
+    - name: api-gateway
+      connect_timeout: 1.618s  # φ
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 144         # fib(12)
+            max_pending_requests: 55     # fib(10)
+            max_requests: 233            # fib(13)
+            max_retries: 5               # fib(5)
+            retry_budget:
+              budget_percent:
+                value: 38.2              # 1 - 1/φ percentage
+              min_retry_concurrency: 3   # fib(4)
+          - priority: HIGH
+            max_connections: 233         # fib(13)
+            max_pending_requests: 89     # fib(11)
+            max_requests: 377            # fib(14)
+            max_retries: 8               # fib(6)
+      load_assignment:
+        cluster_name: api-gateway
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: api-gateway
+                      port_value: 3315
+      health_checks:
+        - timeout: 2.618s           # φ²
+          interval: 5s              # fib(5)
+          unhealthy_threshold: 3    # fib(4)
+          healthy_threshold: 2      # fib(3)
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: heady-brain
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 144
+            max_pending_requests: 55
+            max_requests: 233
+            max_retries: 5
+      load_assignment:
+        cluster_name: heady-brain
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: heady-brain
+                      port_value: 3310
+      health_checks:
+        - timeout: 2.618s
+          interval: 8s              # fib(6)
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: heady-infer
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 144
+            max_pending_requests: 55
+            max_requests: 233
+            max_retries: 5
+      load_assignment:
+        cluster_name: heady-infer
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: heady-infer
+                      port_value: 3312
+      health_checks:
+        - timeout: 2.618s
+          interval: 8s
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: model-gateway
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 89       # fib(11) — external API, fewer connections
+            max_pending_requests: 34  # fib(9)
+            max_requests: 144         # fib(12)
+            max_retries: 3            # fib(4)
+      load_assignment:
+        cluster_name: model-gateway
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: model-gateway
+                      port_value: 3314
+      health_checks:
+        - timeout: 2.618s
+          interval: 13s             # fib(7)
+          unhealthy_threshold: 5    # fib(5)
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: heady-memory
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 144
+            max_pending_requests: 55
+            max_requests: 233
+            max_retries: 5
+      load_assignment:
+        cluster_name: heady-memory
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: heady-memory
+                      port_value: 3321
+      health_checks:
+        - timeout: 2.618s
+          interval: 8s
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: search-service
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 144
+            max_pending_requests: 55
+            max_requests: 233
+            max_retries: 5
+      load_assignment:
+        cluster_name: search-service
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: search-service
+                      port_value: 3325
+      health_checks:
+        - timeout: 2.618s
+          interval: 8s
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: heady-hive
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 89
+            max_pending_requests: 34
+            max_requests: 144
+            max_retries: 5
+      load_assignment:
+        cluster_name: heady-hive
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: heady-hive
+                      port_value: 3327
+      health_checks:
+        - timeout: 2.618s
+          interval: 13s
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: hcfullpipeline-executor
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 55      # fib(10) — long-running pipelines
+            max_pending_requests: 21 # fib(8)
+            max_requests: 89         # fib(11)
+            max_retries: 3
+      load_assignment:
+        cluster_name: hcfullpipeline-executor
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: hcfullpipeline-executor
+                      port_value: 3319
+      health_checks:
+        - timeout: 4.236s           # φ³ — longer timeout for pipeline service
+          interval: 21s             # fib(8)
+          unhealthy_threshold: 5
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: auth-session-server
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 144
+            max_pending_requests: 55
+            max_requests: 233
+            max_retries: 5
+      load_assignment:
+        cluster_name: auth-session-server
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: auth-session-server
+                      port_value: 3337
+      health_checks:
+        - timeout: 2.618s
+          interval: 5s
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: mcp-server
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 89
+            max_pending_requests: 34
+            max_requests: 144
+            max_retries: 3
+      load_assignment:
+        cluster_name: mcp-server
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: mcp-server
+                      port_value: 3353
+      health_checks:
+        - timeout: 2.618s
+          interval: 8s
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: notification-service
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 233     # fib(13) — high for websocket connections
+            max_pending_requests: 89
+            max_requests: 377
+            max_retries: 3
+      load_assignment:
+        cluster_name: notification-service
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: notification-service
+                      port_value: 3344
+      health_checks:
+        - timeout: 2.618s
+          interval: 8s
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: heady-web
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 144
+            max_pending_requests: 55
+            max_requests: 233
+            max_retries: 5
+      load_assignment:
+        cluster_name: heady-web
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: heady-web
+                      port_value: 3345
+      health_checks:
+        - timeout: 2.618s
+          interval: 8s
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    # ========================================================================
+    # Additional service clusters (health-checked, mTLS)
+    # ========================================================================
+
+    - name: heady-brains
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 144
+            max_pending_requests: 55
+            max_requests: 233
+            max_retries: 5
+      load_assignment:
+        cluster_name: heady-brains
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: heady-brains
+                      port_value: 3311
+      health_checks:
+        - timeout: 2.618s
+          interval: 8s
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: ai-router
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 144
+            max_pending_requests: 55
+            max_requests: 233
+            max_retries: 5
+      load_assignment:
+        cluster_name: ai-router
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: ai-router
+                      port_value: 3313
+      health_checks:
+        - timeout: 2.618s
+          interval: 8s
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: domain-router
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 144
+            max_pending_requests: 55
+            max_requests: 233
+            max_retries: 5
+      load_assignment:
+        cluster_name: domain-router
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: domain-router
+                      port_value: 3316
+      health_checks:
+        - timeout: 2.618s
+          interval: 8s
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: heady-manager
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 89
+            max_pending_requests: 34
+            max_requests: 144
+            max_retries: 3
+      load_assignment:
+        cluster_name: heady-manager
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: heady-manager
+                      port_value: 3317
+      health_checks:
+        - timeout: 4.236s
+          interval: 13s
+          unhealthy_threshold: 5
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: heady-conductor
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 89
+            max_pending_requests: 34
+            max_requests: 144
+            max_retries: 3
+      load_assignment:
+        cluster_name: heady-conductor
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: heady-conductor
+                      port_value: 3318
+      health_checks:
+        - timeout: 4.236s
+          interval: 13s
+          unhealthy_threshold: 5
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: heady-embed
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 144
+            max_pending_requests: 55
+            max_requests: 233
+            max_retries: 5
+      load_assignment:
+        cluster_name: heady-embed
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: heady-embed
+                      port_value: 3320
+      health_checks:
+        - timeout: 2.618s
+          interval: 8s
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: heady-vector
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 144
+            max_pending_requests: 55
+            max_requests: 233
+            max_retries: 5
+      load_assignment:
+        cluster_name: heady-vector
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: heady-vector
+                      port_value: 3322
+      health_checks:
+        - timeout: 2.618s
+          interval: 8s
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: heady-projection
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 89
+            max_pending_requests: 34
+            max_requests: 144
+            max_retries: 3
+      load_assignment:
+        cluster_name: heady-projection
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: heady-projection
+                      port_value: 3323
+      health_checks:
+        - timeout: 2.618s
+          interval: 13s
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: heady-cache
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 233
+            max_pending_requests: 89
+            max_requests: 377
+            max_retries: 5
+      load_assignment:
+        cluster_name: heady-cache
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: heady-cache
+                      port_value: 3324
+      health_checks:
+        - timeout: 1.618s
+          interval: 5s
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: heady-bee-factory
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 89
+            max_pending_requests: 34
+            max_requests: 144
+            max_retries: 3
+      load_assignment:
+        cluster_name: heady-bee-factory
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: heady-bee-factory
+                      port_value: 3326
+      health_checks:
+        - timeout: 2.618s
+          interval: 8s
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: heady-federation
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 55
+            max_pending_requests: 21
+            max_requests: 89
+            max_retries: 3
+      load_assignment:
+        cluster_name: heady-federation
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: heady-federation
+                      port_value: 3328
+      health_checks:
+        - timeout: 4.236s
+          interval: 13s
+          unhealthy_threshold: 5
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: heady-soul
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 89
+            max_pending_requests: 34
+            max_requests: 144
+            max_retries: 3
+      load_assignment:
+        cluster_name: heady-soul
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: heady-soul
+                      port_value: 3329
+      health_checks:
+        - timeout: 2.618s
+          interval: 13s
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: heady-guard
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 233
+            max_pending_requests: 89
+            max_requests: 377
+            max_retries: 5
+      load_assignment:
+        cluster_name: heady-guard
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: heady-guard
+                      port_value: 3333
+      health_checks:
+        - timeout: 1.618s
+          interval: 5s
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: heady-security
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 144
+            max_pending_requests: 55
+            max_requests: 233
+            max_retries: 5
+      load_assignment:
+        cluster_name: heady-security
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: heady-security
+                      port_value: 3334
+      health_checks:
+        - timeout: 2.618s
+          interval: 8s
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: heady-health
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 89
+            max_pending_requests: 34
+            max_requests: 144
+            max_retries: 3
+      load_assignment:
+        cluster_name: heady-health
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: heady-health
+                      port_value: 3339
+      health_checks:
+        - timeout: 2.618s
+          interval: 8s
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt
+
+    - name: observability-kernel
+      connect_timeout: 1.618s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 144
+            max_pending_requests: 55
+            max_requests: 233
+            max_retries: 5
+      load_assignment:
+        cluster_name: observability-kernel
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: observability-kernel
+                      port_value: 3343
+      health_checks:
+        - timeout: 2.618s
+          interval: 8s
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          http_health_check:
+            path: /health
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/certs/client.crt
+                private_key:
+                  filename: /etc/envoy/certs/client.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/envoy/certs/ca.crt

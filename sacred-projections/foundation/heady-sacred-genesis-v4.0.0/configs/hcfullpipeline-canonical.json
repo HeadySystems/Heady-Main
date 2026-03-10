@@ -1,0 +1,81 @@
+{
+  "id": "hcfullpipeline-v4",
+  "stageCount": 21,
+  "variants": {
+    "FAST_PATH": [
+      0,
+      1,
+      2,
+      7,
+      12,
+      13,
+      20
+    ],
+    "FULL_PATH": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "ARENA_PATH": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      8,
+      9,
+      10,
+      20
+    ],
+    "LEARNING_PATH": [
+      0,
+      1,
+      16,
+      17,
+      18,
+      19,
+      20
+    ]
+  },
+  "stages": [
+    "CHANNEL_ENTRY",
+    "RECON",
+    "INTAKE",
+    "CLASSIFY",
+    "TRIAGE",
+    "DECOMPOSE",
+    "TRIAL_AND_ERROR",
+    "ORCHESTRATE",
+    "MONTE_CARLO",
+    "ARENA",
+    "JUDGE",
+    "APPROVE",
+    "EXECUTE",
+    "VERIFY",
+    "SELF_AWARENESS",
+    "SELF_CRITIQUE",
+    "MISTAKE_ANALYSIS",
+    "OPTIMIZATION_OPS",
+    "CONTINUOUS_SEARCH",
+    "EVOLUTION",
+    "RECEIPT"
+  ]
+}

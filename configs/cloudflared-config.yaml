@@ -14,15 +14,43 @@
 # ╚══════════════════════════════════════════════════════════════════╝
 # HEADY_BRAND:END
 tunnel: heady-tunnel
-credentials-file: /path/to/credentials.json
+credentials-file: /etc/cloudflare/credentials.json
 
 ingress:
-  # NOTE: api.headysystems.com targets are required — cloudflared forwards tunnel traffic to local ports
+  # Heady Manager API — primary API gateway (port 3300)
   - hostname: api.headysystems.com
-    service: http://api.headysystems.com:3300
+    service: http://localhost:3300
+    originRequest:
+      noTLSVerify: true
+      connectTimeout: 30s
+
+  # Heady Manager Admin — management console (port 3400)
   - hostname: manager.headysystems.com
-    service: http://api.headysystems.com:3400
+    service: http://localhost:3400
+    originRequest:
+      noTLSVerify: true
+      connectTimeout: 30s
+
+  # Heady Registry — service registry (port 3200)
   - hostname: registry.headysystems.com
-    service: http://api.headysystems.com:3200
+    service: http://localhost:3200
+    originRequest:
+      noTLSVerify: true
+      connectTimeout: 30s
+
+  # Heady App — main application interface (port 3100)
+  - hostname: app.headysystems.com
+    service: http://localhost:3100
+    originRequest:
+      noTLSVerify: true
+
+  # MCP Protocol endpoint (port 3001)
+  - hostname: mcp.headymcp.com
+    service: http://localhost:3001
+    originRequest:
+      noTLSVerify: true
+      connectTimeout: 30s
+
+  # Catch-all: return 404 for unmatched hostnames
   - service: http_status:404
 

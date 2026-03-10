@@ -1,0 +1,71 @@
+{
+  "version": "4.0.0",
+  "codename": "Sacred Genesis",
+  "hostShell": "apps/headyweb-projection-host",
+  "foundationPath": "foundation/heady-sacred-genesis-v4.0.0",
+  "surfaces": [
+    {
+      "repo": "headyme-core",
+      "domain": "headyme.com",
+      "title": "HeadyMe",
+      "surfacePath": "projections/headyme-core/site",
+      "targetRepoOverlay": "overlays/Heady-pre-production-9f2f0642/apps/remotes/headyme-core"
+    },
+    {
+      "repo": "headysystems-core",
+      "domain": "headysystems.com",
+      "title": "HeadySystems",
+      "surfacePath": "projections/headysystems-core/site",
+      "targetRepoOverlay": "overlays/Heady-pre-production-9f2f0642/apps/remotes/headysystems-core"
+    },
+    {
+      "repo": "headyos-core",
+      "domain": "headyos.com",
+      "title": "HeadyOS",
+      "surfacePath": "projections/headyos-core/site",
+      "targetRepoOverlay": "overlays/Heady-pre-production-9f2f0642/apps/remotes/headyos-core"
+    },
+    {
+      "repo": "headybuddy-core",
+      "domain": "headybuddy.com",
+      "title": "HeadyBuddy",
+      "surfacePath": "projections/headybuddy-core/site",
+      "targetRepoOverlay": "overlays/Heady-pre-production-9f2f0642/apps/remotes/headybuddy-core"
+    },
+    {
+      "repo": "headymcp-core",
+      "domain": "headymcp.com",
+      "title": "HeadyMCP",
+      "surfacePath": "projections/headymcp-core/site",
+      "targetRepoOverlay": "overlays/Heady-pre-production-9f2f0642/apps/remotes/headymcp-core"
+    },
+    {
+      "repo": "headyapi-core",
+      "domain": "headyapi.com",
+      "title": "HeadyAPI",
+      "surfacePath": "projections/headyapi-core/site",
+      "targetRepoOverlay": "overlays/Heady-pre-production-9f2f0642/apps/remotes/headyapi-core"
+    },
+    {
+      "repo": "headyio-core",
+      "domain": "heady.io",
+      "title": "Heady IO",
+      "surfacePath": "projections/headyio-core/site",
+      "targetRepoOverlay": "overlays/Heady-pre-production-9f2f0642/apps/remotes/headyio-core"
+    },
+    {
+      "repo": "headyconnection-core",
+      "domain": "headyconnection.com",
+      "title": "HeadyConnection",
+      "surfacePath": "projections/headyconnection-core/site",
+      "targetRepoOverlay": "overlays/Heady-pre-production-9f2f0642/apps/remotes/headyconnection-core"
+    },
+    {
+      "repo": "headybot-core",
+      "domain": "headybot.com",
+      "title": "HeadyBot",
+      "surfacePath": "projections/headybot-core/site",
+      "targetRepoOverlay": "overlays/Heady-pre-production-9f2f0642/apps/remotes/headybot-core"
+    }
+  ]
+}

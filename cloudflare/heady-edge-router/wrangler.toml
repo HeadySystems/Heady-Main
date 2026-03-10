@@ -1,0 +1,89 @@
+# HEADY_BRAND:BEGIN
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║  ██╗  ██╗███████╗ █████╗ ██████╗ ██╗   ██╗                     ║
+# ║  ██║  ██║██╔════╝██╔══██╗██╔══██╗╚██╗ ██╔╝                     ║
+# ║  ███████║█████╗  ███████║██║  ██║ ╚████╔╝                      ║
+# ║  ██╔══██║██╔══╝  ██╔══██║██║  ██║  ╚██╔╝                       ║
+# ║  ██║  ██║███████╗██║  ██║██████╔╝   ██║                        ║
+# ║  ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝    ╚═╝                        ║
+# ║                                                                  ║
+# ║  ∞ SACRED GEOMETRY ∞  Organic Systems · Breathing Interfaces    ║
+# ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+# ║  FILE: cloudflare/heady-edge-router/wrangler.toml               ║
+# ║  LAYER: edge                                                    ║
+# ╚══════════════════════════════════════════════════════════════════╝
+# HEADY_BRAND:END
+
+name = "heady-edge-router"
+main = "src/index.js"
+compatibility_date = "2024-12-01"
+account_id = "8b1fa38f282c691423c6399247d53323"
+
+# ─── Production Routes ─────────────────────────────────────────────
+# All 9 Heady domains route through this single edge router.
+# The worker inspects hostname + path to select the correct origin.
+
+[env.production]
+workers_dev = false
+routes = [
+  { pattern = "headysystems.com/*",        zone_name = "headysystems.com" },
+  { pattern = "*.headysystems.com/*",      zone_name = "headysystems.com" },
+  { pattern = "headyme.com/*",             zone_name = "headyme.com" },
+  { pattern = "*.headyme.com/*",           zone_name = "headyme.com" },
+  { pattern = "headyconnection.org/*",     zone_name = "headyconnection.org" },
+  { pattern = "*.headyconnection.org/*",   zone_name = "headyconnection.org" },
+  { pattern = "headyweb.com/*",            zone_name = "headyweb.com" },
+  { pattern = "*.headyweb.com/*",          zone_name = "headyweb.com" },
+  { pattern = "headymcp.com/*",            zone_name = "headymcp.com" },
+  { pattern = "*.headymcp.com/*",          zone_name = "headymcp.com" },
+  { pattern = "headyio.com/*",             zone_name = "headyio.com" },
+  { pattern = "*.headyio.com/*",           zone_name = "headyio.com" },
+  { pattern = "headybuddy.com/*",          zone_name = "headybuddy.com" },
+  { pattern = "*.headybuddy.com/*",        zone_name = "headybuddy.com" },
+  { pattern = "headyapi.com/*",            zone_name = "headyapi.com" },
+  { pattern = "*.headyapi.com/*",          zone_name = "headyapi.com" },
+  { pattern = "headyos.com/*",             zone_name = "headyos.com" },
+  { pattern = "*.headyos.com/*",           zone_name = "headyos.com" },
+]
+
+# ─── Environment Variables ──────────────────────────────────────────
+[vars]
+ORIGIN_URL = "https://heady-liquid-latent-os-849135684797.us-central1.run.app"
+ORIGIN_PORT = "3300"
+GATEWAY_VERSION = "1.0.0"
+NODE_ENV = "production"
+ENABLE_METRICS = "true"
+ENABLE_CORS = "true"
+CORS_ORIGINS = "*"
+REQUEST_TIMEOUT = "30000"
+HEADY_EDGE_ROUTER_VERSION = "1.0.0"
+
+# ─── KV Namespace Bindings ──────────────────────────────────────────
+# Edge cache for response caching and rate limiting
+[[kv_namespaces]]
+binding = "EDGE_CACHE"
+id = "edge-cache-kv-prod"
+preview_id = "edge-cache-kv-preview"
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "edge-rate-limit-kv-prod"
+preview_id = "edge-rate-limit-kv-preview"
+
+[[kv_namespaces]]
+binding = "ROUTE_CONFIG"
+id = "edge-route-config-kv-prod"
+preview_id = "edge-route-config-kv-preview"
+
+# ─── Analytics ───────────────────────────────────────────────────────
+[[analytics_engine_datasets]]
+binding = "EDGE_METRICS"
+
+# ─── Observability ──────────────────────────────────────────────────
+[observability]
+enabled = true
+head_sampling_rate = 1.0
+
+# ─── Limits ─────────────────────────────────────────────────────────
+[limits]
+cpu_ms = 50

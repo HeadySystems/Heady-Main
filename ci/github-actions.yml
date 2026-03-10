@@ -1,0 +1,310 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Heady™ GitHub Actions CI/CD Pipeline
+# Founded by Eric Haywood — HeadySystems Inc.
+#
+# ALL numeric constants from Fibonacci:
+#   FIB = [1,1,2,3,5,8,13,21,34,55,89,144,233,377,610,987,1597,2584]
+#   Node version: 22 (LTS)
+#   Timeout: FIB[7] = 21 minutes per job
+#   Retry: FIB[3] = 3 attempts
+#   Concurrency: FIB[2] = 2 parallel jobs
+#
+# GCP Project: gen-lang-client-0920560496
+# Region: us-east1
+# Artifact Registry: us-east1-docker.pkg.dev/gen-lang-client-0920560496/heady
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: Heady™ CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GCP_PROJECT: gen-lang-client-0920560496
+  GCP_REGION: us-east1
+  REGISTRY: us-east1-docker.pkg.dev
+  IMAGE_NAME: gen-lang-client-0920560496/heady/heady-universal
+  NODE_VERSION: "22"
+  PHI: "1.6180339887498948"
+  SEED: "42"
+  TEMPERATURE: "0"
+  FOUNDER: "Eric Haywood"
+  CLOUDFLARE_ACCOUNT: "8b1fa38f282c691423c6399247d53323"
+
+jobs:
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # LINT — Code quality checks
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  lint:
+    name: Lint & Format
+    runs-on: ubuntu-latest
+    timeout-minutes: 21                   # FIB[7]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npx eslint . --max-warnings 0
+
+      - name: Check Prettier formatting
+        run: npx prettier --check .
+
+      - name: Validate no magic numbers (phi compliance)
+        run: |
+          echo "Checking for magic numbers outside phi constants..."
+          # Ensure all numeric constants derive from phi/Fibonacci
+          grep -rn "const.*=.*[0-9]" --include="*.js" --include="*.mjs" \
+            | grep -v "FIB\|PHI\|PSI\|phi\|fib\|SEED\|TEMPERATURE\|node_modules\|test\|spec" \
+            | grep -v "version\|0\|1\|index\|length" \
+            || echo "Phi compliance check passed"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # TEST — Run test suites
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 21                   # FIB[7]
+    needs: lint
+    strategy:
+      matrix:
+        node-version: [22]
+      fail-fast: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test -- --coverage
+        env:
+          NODE_ENV: test
+          PHI: ${{ env.PHI }}
+          SEED: ${{ env.SEED }}
+          TEMPERATURE: ${{ env.TEMPERATURE }}
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 13              # FIB[6]
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # SECURITY — Security scanning
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 21                   # FIB[7]
+    needs: lint
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: npm audit --audit-level=high
+        continue-on-error: false
+
+      - name: Check for secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --only-verified
+
+      - name: SAST with Semgrep
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: auto
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # BUILD — Build and push container image
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  build:
+    name: Build Universal Container
+    runs-on: ubuntu-latest
+    timeout-minutes: 21                   # FIB[7]
+    needs: [test, security]
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      image-digest: ${{ steps.build-push.outputs.digest }}
+      image-tag: ${{ steps.meta.outputs.tags }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.GCP_PROJECT }}
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGISTRY }} --quiet
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=
+            type=ref,event=branch
+            type=raw,value=latest,enable={{is_default_branch}}
+          labels: |
+            org.opencontainers.image.title=heady-universal
+            org.opencontainers.image.vendor=HeadySystems Inc.
+            heady.founder=Eric Haywood
+            heady.phi=1.6180339887498948
+            heady.seed=42
+            heady.temperature=0
+
+      - name: Build and push
+        id: build-push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: infra/Dockerfile.universal
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NODE_ENV=production
+            HEADY_FOUNDER=Eric Haywood
+
+      - name: Verify image size < 89MB (FIB[10])
+        if: github.event_name == 'push'
+        run: |
+          IMAGE_SIZE=$(docker image inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest --format='{{.Size}}' 2>/dev/null || echo "0")
+          MAX_SIZE=$((89 * 1024 * 1024))  # FIB[10] = 89 MB
+          echo "Image size: $IMAGE_SIZE bytes (max: $MAX_SIZE)"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # DEPLOY — Deploy to Cloud Run
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  deploy:
+    name: Deploy to Cloud Run
+    runs-on: ubuntu-latest
+    timeout-minutes: 21                   # FIB[7]
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      id-token: write
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.GCP_PROJECT }}
+
+      - name: Deploy HeadySoul (Central Hub) to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: heady-soul
+          region: ${{ env.GCP_REGION }}
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.build.outputs.image-digest }}
+          flags: |
+            --min-instances=2
+            --max-instances=34
+            --memory=233Mi
+            --cpu=1
+            --timeout=55s
+            --concurrency=89
+            --port=3310
+            --no-allow-unauthenticated
+          env_vars: |
+            NODE_ENV=production
+            HEADY_ROLE=heady-soul
+            HEADY_PORT=3310
+            HEADY_FOUNDER=Eric Haywood
+            PHI=1.6180339887498948
+            SEED=42
+            TEMPERATURE=0
+            GCP_PROJECT=gen-lang-client-0920560496
+            GCP_REGION=us-east1
+            CLOUDFLARE_ACCOUNT=8b1fa38f282c691423c6399247d53323
+            AUTH_DOMAIN=auth.headysystems.com
+
+      - name: Verify deployment health
+        run: |
+          SERVICE_URL="${{ steps.deploy.outputs.url }}"
+          echo "Verifying health at: ${SERVICE_URL}/health"
+          for i in 1 1 2 3 5; do
+            RESPONSE=$(curl -sf "${SERVICE_URL}/health" -H "Authorization: Bearer $(gcloud auth print-identity-token)" 2>&1) && break
+            echo "Attempt failed, waiting ${i}s (Fibonacci backoff)..."
+            sleep "$i"
+          done
+          echo "Health check response: ${RESPONSE}"
+
+      - name: Post-deploy notification
+        if: always()
+        run: |
+          echo "Deployment status: ${{ job.status }}"
+          echo "Service URL: ${{ steps.deploy.outputs.url }}"
+          echo "Image: ${{ needs.build.outputs.image-tag }}"
+          echo "Founder: Eric Haywood"

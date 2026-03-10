@@ -1,0 +1,17 @@
+{
+  "name": "@heady/notification",
+  "version": "5.1.0",
+  "description": "Heady\u2122 Notification Service \u2014 Real-time Notifications",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node ../../tests/unit/notification.test.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  },
+  "author": "HeadySystems Inc. <eric@headysystems.com>"
+}

@@ -1,0 +1,1094 @@
+{
+  "datacenter": "heady-dc1",
+  "data_dir": "/consul/data",
+  "log_level": "INFO",
+  "node_name": "heady-consul-server",
+  "server": true,
+  "bootstrap_expect": 1,
+  "ui_config": {
+    "enabled": true
+  },
+  "addresses": {
+    "http": "0.0.0.0"
+  },
+  "ports": {
+    "http": 8500,
+    "dns": 8600,
+    "grpc": 8502
+  },
+  "connect": {
+    "enabled": true
+  },
+  "services": [
+    {
+      "id": "postgres",
+      "name": "postgres",
+      "port": 5432,
+      "tags": ["infrastructure", "database", "csl:storage"],
+      "check": {
+        "tcp": "postgres:5432",
+        "interval": "8s",
+        "timeout": "3s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "infrastructure",
+        "version": "16",
+        "phi_priority": "1.0"
+      }
+    },
+    {
+      "id": "redis",
+      "name": "redis",
+      "port": 6379,
+      "tags": ["infrastructure", "cache", "pubsub", "csl:cache"],
+      "check": {
+        "tcp": "redis:6379",
+        "interval": "8s",
+        "timeout": "3s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "infrastructure",
+        "phi_priority": "1.0"
+      }
+    },
+    {
+      "id": "nats",
+      "name": "nats",
+      "port": 4222,
+      "tags": ["infrastructure", "messaging", "jetstream", "csl:events"],
+      "check": {
+        "http": "http://nats:8222/healthz",
+        "interval": "8s",
+        "timeout": "3s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "infrastructure",
+        "phi_priority": "1.0"
+      }
+    },
+    {
+      "id": "envoy-proxy",
+      "name": "envoy-proxy",
+      "port": 8443,
+      "tags": ["infrastructure", "proxy", "mtls", "csl:edge"],
+      "check": {
+        "http": "http://envoy-proxy:9901/ready",
+        "interval": "5s",
+        "timeout": "3s",
+        "deregister_critical_service_after": "55s"
+      },
+      "meta": {
+        "domain": "infrastructure",
+        "phi_priority": "1.0"
+      }
+    },
+    {
+      "id": "pgbouncer",
+      "name": "pgbouncer",
+      "port": 6432,
+      "tags": ["infrastructure", "connection-pool", "csl:storage"],
+      "check": {
+        "tcp": "pgbouncer:6432",
+        "interval": "8s",
+        "timeout": "3s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "infrastructure",
+        "pool_size": "34",
+        "max_connections": "233"
+      }
+    },
+    {
+      "id": "heady-brain",
+      "name": "heady-brain",
+      "port": 3310,
+      "tags": ["core", "inference", "primary", "csl:intelligence"],
+      "check": {
+        "http": "http://heady-brain:3310/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "core",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "heady-brains",
+      "name": "heady-brains",
+      "port": 3311,
+      "tags": ["core", "context", "preprocessing", "csl:intelligence"],
+      "check": {
+        "http": "http://heady-brains:3311/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "core",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "heady-infer",
+      "name": "heady-infer",
+      "port": 3312,
+      "tags": ["core", "inference", "dispatch", "csl:intelligence"],
+      "check": {
+        "http": "http://heady-infer:3312/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "core",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "ai-router",
+      "name": "ai-router",
+      "port": 3313,
+      "tags": ["core", "routing", "csl-scoring", "csl:intelligence"],
+      "check": {
+        "http": "http://ai-router:3313/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "core",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "model-gateway",
+      "name": "model-gateway",
+      "port": 3314,
+      "tags": ["core", "models", "api", "csl:intelligence"],
+      "check": {
+        "http": "http://model-gateway:3314/health",
+        "interval": "21s",
+        "timeout": "8s",
+        "deregister_critical_service_after": "144s"
+      },
+      "meta": {
+        "domain": "core",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "api-gateway",
+      "name": "api-gateway",
+      "port": 3315,
+      "tags": ["core", "gateway", "auth", "rate-limit", "csl:edge"],
+      "check": {
+        "http": "http://api-gateway:3315/health",
+        "interval": "8s",
+        "timeout": "3s",
+        "deregister_critical_service_after": "55s"
+      },
+      "meta": {
+        "domain": "core",
+        "phi_priority": "2.618"
+      }
+    },
+    {
+      "id": "domain-router",
+      "name": "domain-router",
+      "port": 3316,
+      "tags": ["core", "routing", "domain", "csl:edge"],
+      "check": {
+        "http": "http://domain-router:3316/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "core",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "heady-manager",
+      "name": "heady-manager",
+      "port": 3317,
+      "tags": ["core", "management", "boot", "csl:orchestration"],
+      "check": {
+        "http": "http://heady-manager:3317/health",
+        "interval": "21s",
+        "timeout": "8s",
+        "deregister_critical_service_after": "144s"
+      },
+      "meta": {
+        "domain": "core",
+        "boot_phases": "12",
+        "phi_priority": "2.618"
+      }
+    },
+    {
+      "id": "heady-conductor",
+      "name": "heady-conductor",
+      "port": 3318,
+      "tags": ["core", "orchestration", "central", "csl:orchestration"],
+      "check": {
+        "http": "http://heady-conductor:3318/health",
+        "interval": "21s",
+        "timeout": "8s",
+        "deregister_critical_service_after": "144s"
+      },
+      "meta": {
+        "domain": "core",
+        "phi_priority": "2.618"
+      }
+    },
+    {
+      "id": "hcfullpipeline-executor",
+      "name": "hcfullpipeline-executor",
+      "port": 3319,
+      "tags": ["core", "pipeline", "execution", "csl:orchestration"],
+      "check": {
+        "http": "http://hcfullpipeline-executor:3319/health",
+        "interval": "34s",
+        "timeout": "13s",
+        "deregister_critical_service_after": "233s"
+      },
+      "meta": {
+        "domain": "core",
+        "pipeline_stages": "21",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "heady-embed",
+      "name": "heady-embed",
+      "port": 3320,
+      "tags": ["memory", "embedding", "ml", "csl:memory"],
+      "check": {
+        "http": "http://heady-embed:3320/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "memory",
+        "model": "all-MiniLM-L6-v2",
+        "dimensions": "384",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "heady-memory",
+      "name": "heady-memory",
+      "port": 3321,
+      "tags": ["memory", "crud", "vector", "csl:memory"],
+      "check": {
+        "http": "http://heady-memory:3321/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "memory",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "heady-vector",
+      "name": "heady-vector",
+      "port": 3322,
+      "tags": ["memory", "vector-search", "hnsw", "csl:memory"],
+      "check": {
+        "http": "http://heady-vector:3322/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "memory",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "heady-projection",
+      "name": "heady-projection",
+      "port": 3323,
+      "tags": ["memory", "spatial", "3d", "csl:memory"],
+      "check": {
+        "http": "http://heady-projection:3323/health",
+        "interval": "21s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "memory",
+        "source_dim": "384",
+        "target_dim": "3"
+      }
+    },
+    {
+      "id": "heady-cache",
+      "name": "heady-cache",
+      "port": 3324,
+      "tags": ["memory", "cache", "lru", "phi-scaled", "csl:cache"],
+      "check": {
+        "http": "http://heady-cache:3324/health",
+        "interval": "8s",
+        "timeout": "3s",
+        "deregister_critical_service_after": "55s"
+      },
+      "meta": {
+        "domain": "memory",
+        "tiers": "3",
+        "tier_sizes": "89,144,233"
+      }
+    },
+    {
+      "id": "search-service",
+      "name": "search-service",
+      "port": 3325,
+      "tags": ["memory", "search", "bm25", "hybrid", "csl:memory"],
+      "check": {
+        "http": "http://search-service:3325/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "memory",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "heady-bee-factory",
+      "name": "heady-bee-factory",
+      "port": 3326,
+      "tags": ["agents", "bee", "spawner", "csl:agents"],
+      "check": {
+        "http": "http://heady-bee-factory:3326/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "agents",
+        "max_bees": "6765",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "heady-hive",
+      "name": "heady-hive",
+      "port": 3327,
+      "tags": ["agents", "swarm", "coordination", "csl:agents"],
+      "check": {
+        "http": "http://heady-hive:3327/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "agents",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "heady-federation",
+      "name": "heady-federation",
+      "port": 3328,
+      "tags": ["agents", "federation", "cross-swarm", "csl:agents"],
+      "check": {
+        "http": "http://heady-federation:3328/health",
+        "interval": "21s",
+        "timeout": "8s",
+        "deregister_critical_service_after": "144s"
+      },
+      "meta": {
+        "domain": "agents",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "heady-soul",
+      "name": "heady-soul",
+      "port": 3329,
+      "tags": ["agents", "awareness", "archetype", "csl:consciousness"],
+      "check": {
+        "http": "http://heady-soul:3329/health",
+        "interval": "21s",
+        "timeout": "8s",
+        "deregister_critical_service_after": "144s"
+      },
+      "meta": {
+        "domain": "agents",
+        "archetypes": "7",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "auto-success-engine",
+      "name": "auto-success-engine",
+      "port": 3330,
+      "tags": ["agents", "success", "heartbeat", "phi7", "csl:agents"],
+      "check": {
+        "http": "http://auto-success-engine:3330/health",
+        "interval": "34s",
+        "timeout": "13s",
+        "deregister_critical_service_after": "233s"
+      },
+      "meta": {
+        "domain": "agents",
+        "heartbeat_ms": "29034",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "heady-chain",
+      "name": "heady-chain",
+      "port": 3331,
+      "tags": ["agents", "chaining", "task", "csl:orchestration"],
+      "check": {
+        "http": "http://heady-chain:3331/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "agents",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "prompt-manager",
+      "name": "prompt-manager",
+      "port": 3332,
+      "tags": ["agents", "prompts", "catalogue", "csl:intelligence"],
+      "check": {
+        "http": "http://prompt-manager:3332/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "agents",
+        "catalogue_size": "55",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "heady-guard",
+      "name": "heady-guard",
+      "port": 3333,
+      "tags": ["security", "validation", "zod", "csl:security"],
+      "check": {
+        "http": "http://heady-guard:3333/health",
+        "interval": "8s",
+        "timeout": "3s",
+        "deregister_critical_service_after": "55s"
+      },
+      "meta": {
+        "domain": "security",
+        "phi_priority": "2.618"
+      }
+    },
+    {
+      "id": "heady-security",
+      "name": "heady-security",
+      "port": 3334,
+      "tags": ["security", "owasp", "csp", "injection", "csl:security"],
+      "check": {
+        "http": "http://heady-security:3334/health",
+        "interval": "8s",
+        "timeout": "3s",
+        "deregister_critical_service_after": "55s"
+      },
+      "meta": {
+        "domain": "security",
+        "phi_priority": "2.618"
+      }
+    },
+    {
+      "id": "heady-governance",
+      "name": "heady-governance",
+      "port": 3335,
+      "tags": ["security", "policy", "compliance", "csl:security"],
+      "check": {
+        "http": "http://heady-governance:3335/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "security",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "secret-gateway",
+      "name": "secret-gateway",
+      "port": 3336,
+      "tags": ["security", "secrets", "gcp", "csl:security"],
+      "check": {
+        "http": "http://secret-gateway:3336/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "security",
+        "phi_priority": "2.618"
+      }
+    },
+    {
+      "id": "auth-session-server",
+      "name": "auth-session-server",
+      "port": 3337,
+      "tags": ["security", "auth", "firebase", "session", "csl:security"],
+      "check": {
+        "http": "http://auth-session-server:3337/health",
+        "interval": "8s",
+        "timeout": "3s",
+        "deregister_critical_service_after": "55s"
+      },
+      "meta": {
+        "domain": "security",
+        "session_ttl": "2584",
+        "phi_priority": "2.618"
+      }
+    },
+    {
+      "id": "heady-check",
+      "name": "heady-check",
+      "port": 3338,
+      "tags": ["security", "quality", "verification", "csl:security"],
+      "check": {
+        "http": "http://heady-check:3338/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "security",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "heady-health",
+      "name": "heady-health",
+      "port": 3339,
+      "tags": ["monitoring", "health", "matrix", "csl:observability"],
+      "check": {
+        "http": "http://heady-health:3339/health",
+        "interval": "8s",
+        "timeout": "3s",
+        "deregister_critical_service_after": "55s"
+      },
+      "meta": {
+        "domain": "monitoring",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "heady-eval",
+      "name": "heady-eval",
+      "port": 3340,
+      "tags": ["monitoring", "evaluation", "quality", "csl:observability"],
+      "check": {
+        "http": "http://heady-eval:3340/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "monitoring",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "heady-maintenance",
+      "name": "heady-maintenance",
+      "port": 3341,
+      "tags": ["monitoring", "maintenance", "cleanup", "csl:observability"],
+      "check": {
+        "http": "http://heady-maintenance:3341/health",
+        "interval": "34s",
+        "timeout": "8s",
+        "deregister_critical_service_after": "144s"
+      },
+      "meta": {
+        "domain": "monitoring",
+        "phi_priority": "1.0"
+      }
+    },
+    {
+      "id": "heady-testing",
+      "name": "heady-testing",
+      "port": 3342,
+      "tags": ["monitoring", "testing", "integration", "csl:observability"],
+      "check": {
+        "http": "http://heady-testing:3342/health",
+        "interval": "21s",
+        "timeout": "8s",
+        "deregister_critical_service_after": "144s"
+      },
+      "meta": {
+        "domain": "monitoring",
+        "phi_priority": "1.0"
+      }
+    },
+    {
+      "id": "observability-kernel",
+      "name": "observability-kernel",
+      "port": 3343,
+      "tags": ["monitoring", "logging", "tracing", "metrics", "csl:observability"],
+      "check": {
+        "http": "http://observability-kernel:3343/health",
+        "interval": "8s",
+        "timeout": "3s",
+        "deregister_critical_service_after": "55s"
+      },
+      "meta": {
+        "domain": "monitoring",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "notification-service",
+      "name": "notification-service",
+      "port": 3344,
+      "tags": ["monitoring", "websocket", "sse", "push", "csl:communication"],
+      "check": {
+        "http": "http://notification-service:3344/health",
+        "interval": "8s",
+        "timeout": "3s",
+        "deregister_critical_service_after": "55s"
+      },
+      "meta": {
+        "domain": "monitoring",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "heady-web",
+      "name": "heady-web",
+      "port": 3345,
+      "tags": ["web", "frontend", "main", "csl:presentation"],
+      "check": {
+        "http": "http://heady-web:3345/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "web",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "heady-buddy",
+      "name": "heady-buddy",
+      "port": 3346,
+      "tags": ["web", "chat", "companion", "csl:presentation"],
+      "check": {
+        "http": "http://heady-buddy:3346/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "web",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "heady-ui",
+      "name": "heady-ui",
+      "port": 3347,
+      "tags": ["web", "components", "shared", "csl:presentation"],
+      "check": {
+        "http": "http://heady-ui:3347/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "web",
+        "phi_priority": "1.0"
+      }
+    },
+    {
+      "id": "heady-onboarding",
+      "name": "heady-onboarding",
+      "port": 3348,
+      "tags": ["web", "onboarding", "user", "csl:presentation"],
+      "check": {
+        "http": "http://heady-onboarding:3348/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "web",
+        "steps": "8"
+      }
+    },
+    {
+      "id": "heady-pilot-onboarding",
+      "name": "heady-pilot-onboarding",
+      "port": 3349,
+      "tags": ["web", "onboarding", "pilot", "csl:presentation"],
+      "check": {
+        "http": "http://heady-pilot-onboarding:3349/health",
+        "interval": "21s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "web",
+        "cohort_size": "34"
+      }
+    },
+    {
+      "id": "heady-task-browser",
+      "name": "heady-task-browser",
+      "port": 3350,
+      "tags": ["web", "tasks", "discovery", "csl:presentation"],
+      "check": {
+        "http": "http://heady-task-browser:3350/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "web",
+        "phi_priority": "1.0"
+      }
+    },
+    {
+      "id": "analytics-service",
+      "name": "analytics-service",
+      "port": 3351,
+      "tags": ["web", "analytics", "privacy-first", "csl:observability"],
+      "check": {
+        "http": "http://analytics-service:3351/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "web",
+        "phi_priority": "1.0"
+      }
+    },
+    {
+      "id": "billing-service",
+      "name": "billing-service",
+      "port": 3352,
+      "tags": ["web", "billing", "stripe", "csl:business"],
+      "check": {
+        "http": "http://billing-service:3352/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "web",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "mcp-server",
+      "name": "mcp-server",
+      "port": 3353,
+      "tags": ["integration", "mcp", "tools", "csl:integration"],
+      "check": {
+        "http": "http://mcp-server:3353/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "integration",
+        "tool_count": "34",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "google-mcp",
+      "name": "google-mcp",
+      "port": 3354,
+      "tags": ["integration", "mcp", "google", "csl:integration"],
+      "check": {
+        "http": "http://google-mcp:3354/health",
+        "interval": "21s",
+        "timeout": "8s",
+        "deregister_critical_service_after": "144s"
+      },
+      "meta": {
+        "domain": "integration",
+        "phi_priority": "1.0"
+      }
+    },
+    {
+      "id": "memory-mcp",
+      "name": "memory-mcp",
+      "port": 3355,
+      "tags": ["integration", "mcp", "memory", "csl:integration"],
+      "check": {
+        "http": "http://memory-mcp:3355/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "integration",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "perplexity-mcp",
+      "name": "perplexity-mcp",
+      "port": 3356,
+      "tags": ["integration", "mcp", "search", "sonar", "csl:integration"],
+      "check": {
+        "http": "http://perplexity-mcp:3356/health",
+        "interval": "21s",
+        "timeout": "8s",
+        "deregister_critical_service_after": "144s"
+      },
+      "meta": {
+        "domain": "integration",
+        "model": "sonar-pro"
+      }
+    },
+    {
+      "id": "jules-mcp",
+      "name": "jules-mcp",
+      "port": 3357,
+      "tags": ["integration", "mcp", "code-agent", "csl:integration"],
+      "check": {
+        "http": "http://jules-mcp:3357/health",
+        "interval": "34s",
+        "timeout": "13s",
+        "deregister_critical_service_after": "233s"
+      },
+      "meta": {
+        "domain": "integration",
+        "phi_priority": "1.0"
+      }
+    },
+    {
+      "id": "huggingface-gateway",
+      "name": "huggingface-gateway",
+      "port": 3358,
+      "tags": ["integration", "ml", "huggingface", "csl:integration"],
+      "check": {
+        "http": "http://huggingface-gateway:3358/health",
+        "interval": "21s",
+        "timeout": "8s",
+        "deregister_critical_service_after": "144s"
+      },
+      "meta": {
+        "domain": "integration",
+        "phi_priority": "1.0"
+      }
+    },
+    {
+      "id": "colab-gateway",
+      "name": "colab-gateway",
+      "port": 3359,
+      "tags": ["integration", "compute", "colab", "csl:integration"],
+      "check": {
+        "http": "http://colab-gateway:3359/health",
+        "interval": "34s",
+        "timeout": "13s",
+        "deregister_critical_service_after": "233s"
+      },
+      "meta": {
+        "domain": "integration",
+        "phi_priority": "1.0"
+      }
+    },
+    {
+      "id": "silicon-bridge",
+      "name": "silicon-bridge",
+      "port": 3360,
+      "tags": ["integration", "gpu", "compute", "csl:integration"],
+      "check": {
+        "http": "http://silicon-bridge:3360/health",
+        "interval": "34s",
+        "timeout": "13s",
+        "deregister_critical_service_after": "233s"
+      },
+      "meta": {
+        "domain": "integration",
+        "gpu_pool": "8"
+      }
+    },
+    {
+      "id": "discord-bot",
+      "name": "discord-bot",
+      "port": 3361,
+      "tags": ["integration", "discord", "bot", "csl:communication"],
+      "check": {
+        "http": "http://discord-bot:3361/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "integration",
+        "phi_priority": "1.0"
+      }
+    },
+    {
+      "id": "scheduler-service",
+      "name": "scheduler-service",
+      "port": 3362,
+      "tags": ["integration", "scheduler", "cron", "phi-scaled", "csl:orchestration"],
+      "check": {
+        "http": "http://scheduler-service:3362/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "integration",
+        "phi_scale": "1.618"
+      }
+    },
+    {
+      "id": "migration-service",
+      "name": "migration-service",
+      "port": 3363,
+      "tags": ["integration", "database", "migration", "csl:storage"],
+      "check": {
+        "http": "http://migration-service:3363/health",
+        "interval": "21s",
+        "timeout": "8s",
+        "deregister_critical_service_after": "144s"
+      },
+      "meta": {
+        "domain": "integration",
+        "phi_priority": "1.0"
+      }
+    },
+    {
+      "id": "asset-pipeline",
+      "name": "asset-pipeline",
+      "port": 3364,
+      "tags": ["integration", "assets", "cdn", "image", "csl:presentation"],
+      "check": {
+        "http": "http://asset-pipeline:3364/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "integration",
+        "phi_priority": "1.0"
+      }
+    },
+    {
+      "id": "heady-vinci",
+      "name": "heady-vinci",
+      "port": 3365,
+      "tags": ["specialized", "pattern", "recognition", "csl:intelligence"],
+      "check": {
+        "http": "http://heady-vinci:3365/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "specialized",
+        "phi_priority": "1.618"
+      }
+    },
+    {
+      "id": "heady-autobiographer",
+      "name": "heady-autobiographer",
+      "port": 3366,
+      "tags": ["specialized", "narrative", "events", "csl:intelligence"],
+      "check": {
+        "http": "http://heady-autobiographer:3366/health",
+        "interval": "21s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "specialized",
+        "phi_priority": "1.0"
+      }
+    },
+    {
+      "id": "heady-midi",
+      "name": "heady-midi",
+      "port": 3367,
+      "tags": ["specialized", "midi", "hardware", "csl:hardware"],
+      "check": {
+        "http": "http://heady-midi:3367/health",
+        "interval": "8s",
+        "timeout": "3s",
+        "deregister_critical_service_after": "55s"
+      },
+      "meta": {
+        "domain": "specialized",
+        "latency_target_ms": "8"
+      }
+    },
+    {
+      "id": "budget-tracker",
+      "name": "budget-tracker",
+      "port": 3368,
+      "tags": ["specialized", "budget", "cost", "ai-provider", "csl:business"],
+      "check": {
+        "http": "http://budget-tracker:3368/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "specialized",
+        "phi_priority": "1.0"
+      }
+    },
+    {
+      "id": "cli-service",
+      "name": "cli-service",
+      "port": 3369,
+      "tags": ["specialized", "cli", "terminal", "csl:presentation"],
+      "check": {
+        "http": "http://cli-service:3369/health",
+        "interval": "13s",
+        "timeout": "5s",
+        "deregister_critical_service_after": "89s"
+      },
+      "meta": {
+        "domain": "specialized",
+        "phi_priority": "1.0"
+      }
+    },
+    {
+      "id": "heady-orchestration",
+      "name": "heady-orchestration",
+      "port": 3370,
+      "tags": ["specialized", "workflow", "orchestration", "csl:orchestration"],
+      "check": {
+        "http": "http://heady-orchestration:3370/health",
+        "interval": "21s",
+        "timeout": "8s",
+        "deregister_critical_service_after": "144s"
+      },
+      "meta": {
+        "domain": "specialized",
+        "phi_priority": "1.618"
+      }
+    }
+  ]
+}

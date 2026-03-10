@@ -1,0 +1,948 @@
+{
+  "_comment": [
+    "╔══════════════════════════════════════════════════════════════════╗",
+    "║  ██╗  ██╗███████╗ █████╗ ██████╗ ██╗   ██╗                     ║",
+    "║  ██║  ██║██╔════╝██╔══██╗██╔══██╗╚██╗ ██╔╝                     ║",
+    "║  ███████║█████╗  ███████║██║  ██║ ╚████╔╝                      ║",
+    "║  ██╔══██║██╔══╝  ██╔══██║██║  ██║  ╚██╔╝                       ║",
+    "║  ██║  ██║███████╗██║  ██║██████╔╝   ██║                        ║",
+    "║  ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝    ╚═╝                        ║",
+    "║                                                                  ║",
+    "║  LIQUID-OS-MANIFEST.JSON                                        ║",
+    "║  Single Source of Truth for Heady Liquid Dynamic Latent OS       ║",
+    "║  ∞ SACRED GEOMETRY ∞  Organic Systems · Breathing Interfaces    ║",
+    "║  © 2024-2026 HeadySystems Inc. All Rights Reserved.             ║",
+    "║  60+ Provisional Patents · 59 Claims · 1 Trademark Filing       ║",
+    "╚══════════════════════════════════════════════════════════════════╝"
+  ],
+
+  "system": {
+    "name": "Heady Liquid Dynamic Latent OS",
+    "codename": "heady-latent-os",
+    "version": "3.1.0",
+    "architecture": "Liquid Architecture v3.1",
+    "description": "Self-aware, self-improving sovereign AI operating system with Sacred Geometry orchestration, Continuous Semantic Logic gates, 384D vector space memory, phi-scaled everything.",
+    "creator": "Eric Haywood",
+    "organization": "HeadySystems Inc.",
+    "contact": "eric@headyconnection.org",
+    "github_org": "HeadyMe",
+    "primary_domain": "headyme.com",
+    "patents": {
+      "provisional": 60,
+      "claims": 59,
+      "trademarks": 1,
+      "coverage": [
+        "Continuous Semantic Logic (CSL) gate operations",
+        "Sacred Geometry orchestration patterns",
+        "Phi-based dynamic resource allocation",
+        "3D vector memory with drift detection",
+        "Self-healing lifecycle with quarantine/respawn",
+        "Multi-model MoE cosine routing",
+        "Semantic backpressure with SRE throttling"
+      ]
+    },
+    "generatedAt": "2026-03-10T00:00:00.000Z",
+    "configHashSources": [
+      "configs/hcfullpipeline.yaml",
+      "configs/resource-policies.yaml",
+      "configs/service-catalog.yaml",
+      "configs/governance-policies.yaml",
+      "configs/concepts-index.yaml",
+      "configs/sacred-geometry.yaml",
+      "configs/system.yaml",
+      "configs/domains.yaml",
+      "configs/domain-registry.yaml",
+      "configs/deployment-matrix.yaml"
+    ]
+  },
+
+  "sacredGeometry": {
+    "_comment": "ZERO magic numbers. Every value derives from phi or Fibonacci. Source: shared/phi-math.js",
+    "constants": {
+      "PHI": 1.6180339887498948,
+      "PSI": 0.6180339887498949,
+      "PHI_SQ": 2.618033988749895,
+      "PHI_CUBED": 4.23606797749979,
+      "PHI_4": 6.854101966249685,
+      "PHI_5": 11.09016994374948,
+      "PHI_6": 17.944271909999157,
+      "PHI_7": 29.034441853748627,
+      "PHI_8": 46.97871376374778,
+      "PHI_9": 76.0131556174964,
+      "PHI_10": 122.99186938124418,
+      "SQRT5": 2.23606797749979
+    },
+    "fibonacci": [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, 6765],
+    "fibonacciMappings": {
+      "fib_4_MAX_RETRIES_CYCLE": 3,
+      "fib_5_BEE_PRE_WARM_0": 5,
+      "fib_6_MAX_RETRIES_TOTAL": 8,
+      "fib_6_PIPELINE_MAX_CONCURRENT": 8,
+      "fib_7_AUTO_SUCCESS_CATEGORIES": 13,
+      "fib_8_PIPELINE_STAGES": 21,
+      "fib_10_MAX_LISTENERS": 55,
+      "fib_11_BEE_TYPES": 89,
+      "fib_12_AUTO_SUCCESS_TASKS": 144,
+      "fib_16_LOG_BUFFER_CAPACITY": 987
+    },
+    "phiTiming_ms": {
+      "phi_1": 1618,
+      "phi_2": 2618,
+      "phi_3": 4236,
+      "phi_4": 6854,
+      "phi_5": 11090,
+      "phi_6": 17944,
+      "phi_7": 29034,
+      "phi_8": 46979,
+      "phi_9": 75025,
+      "phi_10": 121393
+    },
+    "backoffSequence_ms": [1618, 2618, 4236, 6854, 11090, 17944, 29034],
+    "principles": [
+      "Golden Ratio Everywhere: every scaling constant derives from phi = 1.618",
+      "Fibonacci Sizing: caches, queues, batches, pools use Fibonacci numbers",
+      "Phi-Continuous Thresholds: no arbitrary values, use phiThreshold(level)",
+      "Self-Similar Structure: system topology mirrors fractal Sacred Geometry patterns",
+      "3D Vector Space: all semantic state exists in continuous 384D to 3D projected space",
+      "Harmonic Timing: all intervals follow phi-geometric progression"
+    ]
+  },
+
+  "cslGateThresholds": {
+    "_comment": "Continuous Semantic Logic thresholds: phiThreshold(n) = 1 - PSI^n * 0.5",
+    "formula": "1 - psi^level * 0.5",
+    "gates": {
+      "MINIMUM": { "level": 0, "value": 0.500, "use": "Noise floor" },
+      "LOW":     { "level": 1, "value": 0.691, "use": "Weak alignment / ALIVE gate" },
+      "MEDIUM":  { "level": 2, "value": 0.809, "use": "Moderate alignment / drift detection / READY gate" },
+      "HIGH":    { "level": 3, "value": 0.882, "use": "Strong alignment" },
+      "CRITICAL":{ "level": 4, "value": 0.927, "use": "Near-certain alignment" },
+      "DEDUP":   { "level": null, "value": 0.972, "use": "Semantic identity threshold" },
+      "DEFAULT": { "level": null, "value": 0.618, "use": "PSI standard CSL gate" }
+    },
+    "operations": ["AND", "OR", "NOT", "IMPLY", "XOR", "CONSENSUS", "GATE", "BLEND"],
+    "description": "CSL replaces boolean logic with continuous [0.0, 1.0] semantic values"
+  },
+
+  "vectorSpace": {
+    "dimensions": 384,
+    "embeddingModels": ["all-MiniLM-L6", "Nomic", "Jina", "Cohere", "Voyage", "Ollama"],
+    "projection": 3,
+    "projectionDescription": "384D embeddings projected to 3D spatial XYZ octant space for agent positioning",
+    "hnswParams": {
+      "M": 13,
+      "efConstruction": 144,
+      "efSearch": 89
+    },
+    "driftThreshold": 0.809,
+    "dedupThreshold": 0.972,
+    "minRetrievalScore": 0.618,
+    "tokenBudgets": {
+      "working": 8192,
+      "session": 21504,
+      "memory": 56000,
+      "artifacts": 152000
+    },
+    "evictionWeights": {
+      "importance": 0.486,
+      "recency": 0.300,
+      "relevance": 0.214
+    }
+  },
+
+  "computeNodes": {
+    "_comment": "3 Google Colab Pro+ A100 runtimes as latent space compute nodes",
+    "nodes": [
+      {
+        "id": "colab-us-east",
+        "region": "us-east1",
+        "provider": "Google Colab Pro+",
+        "gpu": "NVIDIA A100 40GB",
+        "gpuMemory_GB": 40,
+        "ram_GB": 83,
+        "vCPUs": 8,
+        "role": "primary_inference",
+        "pool": "hot",
+        "cslGate": 0.927,
+        "heartbeat_ms": 29034,
+        "status": "active"
+      },
+      {
+        "id": "colab-us-west",
+        "region": "us-west1",
+        "provider": "Google Colab Pro+",
+        "gpu": "NVIDIA A100 40GB",
+        "gpuMemory_GB": 40,
+        "ram_GB": 83,
+        "vCPUs": 8,
+        "role": "redundant_inference",
+        "pool": "warm",
+        "cslGate": 0.882,
+        "heartbeat_ms": 29034,
+        "status": "active"
+      },
+      {
+        "id": "colab-eu-west",
+        "region": "europe-west1",
+        "provider": "Google Colab Pro+",
+        "gpu": "NVIDIA A100 40GB",
+        "gpuMemory_GB": 40,
+        "ram_GB": 83,
+        "vCPUs": 8,
+        "role": "geo_redundancy",
+        "pool": "warm",
+        "cslGate": 0.882,
+        "heartbeat_ms": 29034,
+        "status": "active"
+      }
+    ],
+    "scalingPolicy": {
+      "scaleUpThreshold": 1.618,
+      "scaleDownThreshold": 0.382,
+      "preWarmLevels": [5, 8, 13, 21]
+    }
+  },
+
+  "infrastructure": {
+    "origin": {
+      "provider": "Google Cloud Run",
+      "service": "heady-liquid-latent-os",
+      "region": "us-central1",
+      "port": 3300,
+      "instances": { "min": 1, "max": 8 },
+      "url": "https://heady-liquid-latent-os-*.run.app"
+    },
+    "edge": {
+      "provider": "Cloudflare",
+      "accountId": "8b1fa38f282c691423c6399247d53323",
+      "workers": [
+        { "name": "heady-edge-router", "role": "Global edge router for all domains" },
+        { "name": "heady-mcp-worker", "role": "MCP protocol edge handler" },
+        { "name": "liquid-gateway-worker", "role": "Liquid gateway edge handler" },
+        { "name": "heady-buddy-worker", "role": "Companion AI edge handler" },
+        { "name": "edge-auth-worker", "role": "Edge authentication" }
+      ],
+      "pagesProjects": [
+        "headyapi", "headyos", "headyconnection", "headybuddy",
+        "headyme-com", "headyme", "headysystems-com", "headysystems",
+        "heady-headyweb", "heady-1ime1"
+      ]
+    },
+    "database": {
+      "provider": "Neon Postgres",
+      "project": "green-water-91851995",
+      "extensions": ["pgvector"],
+      "layers": {
+        "vectorMemory": "vector_memory",
+        "graphRag": "graph_rag",
+        "auditStore": "audit_store"
+      }
+    },
+    "cache": {
+      "provider": "Upstash Redis",
+      "project": "finer-sole-64861",
+      "stores": {
+        "sessions": "Session state and cross-device sync",
+        "rateLimits": "Rate limiting counters",
+        "providerHealth": "AI provider health status"
+      }
+    },
+    "monitoring": {
+      "provider": "Sentry",
+      "organization": "headyconnection-inc",
+      "project": "heady-manager"
+    }
+  },
+
+  "services": [
+    {
+      "name": "heady-manager",
+      "role": "API Gateway & MCP Server",
+      "type": "web",
+      "port": 3300,
+      "healthCheck": "/api/health",
+      "cslGate": 0.927,
+      "pool": "hot",
+      "criticality": "critical",
+      "cslDomainTags": ["api-gateway", "mcp-protocol", "static-serving", "rate-limiting", "auth"]
+    },
+    {
+      "name": "heady-conductor",
+      "role": "Python Orchestration Worker",
+      "type": "worker",
+      "port": 8080,
+      "healthCheck": "/health",
+      "cslGate": 0.882,
+      "pool": "hot",
+      "criticality": "critical",
+      "cslDomainTags": ["audit", "build", "lint", "test", "concept-extraction"]
+    },
+    {
+      "name": "heady-brain",
+      "role": "System Brain Meta-Controller",
+      "type": "internal",
+      "port": 8081,
+      "healthCheck": "module-loaded",
+      "cslGate": 0.927,
+      "pool": "hot",
+      "criticality": "critical",
+      "cslDomainTags": ["meta-control", "readiness-eval", "concept-alignment", "auto-tuning", "governance"]
+    },
+    {
+      "name": "hc-supervisor",
+      "role": "Multi-Agent Supervisor",
+      "type": "internal",
+      "port": 8082,
+      "healthCheck": "module-loaded",
+      "cslGate": 0.927,
+      "pool": "hot",
+      "criticality": "critical",
+      "cslDomainTags": ["agent-routing", "parallel-fanout", "result-aggregation", "direct-routing"]
+    },
+    {
+      "name": "heady-sync",
+      "role": "Multi-Remote Git Synchronization",
+      "type": "script",
+      "port": 8083,
+      "healthCheck": "script-runnable",
+      "cslGate": 0.809,
+      "pool": "warm",
+      "criticality": "high",
+      "cslDomainTags": ["git-sync", "worktree-management", "multi-remote-push"]
+    },
+    {
+      "name": "hcautobuild",
+      "role": "Automated Build Pipeline",
+      "type": "script",
+      "port": 8084,
+      "healthCheck": "script-runnable",
+      "cslGate": 0.809,
+      "pool": "warm",
+      "criticality": "high",
+      "cslDomainTags": ["auto-build", "worktree-discovery", "checkpoint-save", "deploy-trigger"]
+    },
+    {
+      "name": "domain-router",
+      "role": "Domain Routing Engine",
+      "type": "execution",
+      "port": 3301,
+      "healthCheck": "/health",
+      "cslGate": 0.882,
+      "pool": "hot",
+      "criticality": "critical",
+      "cslDomainTags": ["domain-routing", "csl-routing", "cross-domain"]
+    },
+    {
+      "name": "observability-kernel",
+      "role": "System Observability & Metrics",
+      "type": "execution",
+      "port": 3302,
+      "healthCheck": "/health",
+      "cslGate": 0.809,
+      "pool": "warm",
+      "criticality": "high",
+      "cslDomainTags": ["metrics", "tracing", "logging", "alerting"]
+    },
+    {
+      "name": "budget-tracker",
+      "role": "Cost Governance Engine",
+      "type": "execution",
+      "port": 3303,
+      "healthCheck": "/health",
+      "cslGate": 0.882,
+      "pool": "governance",
+      "criticality": "high",
+      "cslDomainTags": ["cost-tracking", "budget-enforcement", "spend-analytics"]
+    },
+    {
+      "name": "heady-memory",
+      "role": "Vector Memory & Persistent State",
+      "type": "execution",
+      "port": 3304,
+      "healthCheck": "/health",
+      "cslGate": 0.927,
+      "pool": "hot",
+      "criticality": "critical",
+      "cslDomainTags": ["vector-store", "context-window", "embedding-routing", "persistent-state"]
+    },
+    {
+      "name": "heady-health",
+      "role": "Health Check Orchestrator",
+      "type": "execution",
+      "port": 3305,
+      "healthCheck": "/health",
+      "cslGate": 0.809,
+      "pool": "governance",
+      "criticality": "high",
+      "cslDomainTags": ["health-probes", "readiness-scoring", "slo-monitoring"]
+    },
+    {
+      "name": "heady-governance",
+      "role": "Governance Gate & Policy Enforcement",
+      "type": "execution",
+      "port": 3306,
+      "healthCheck": "/health",
+      "cslGate": 0.927,
+      "pool": "governance",
+      "criticality": "critical",
+      "cslDomainTags": ["access-control", "policy-enforcement", "semantic-backpressure"]
+    },
+    {
+      "name": "heady-guard",
+      "role": "Security & PQC Cryptography",
+      "type": "execution",
+      "port": 3307,
+      "healthCheck": "/health",
+      "cslGate": 0.927,
+      "pool": "hot",
+      "criticality": "critical",
+      "cslDomainTags": ["security", "pqc", "encryption", "key-rotation"]
+    },
+    {
+      "name": "heady-bee-factory",
+      "role": "Bee Spawn & Lifecycle Manager",
+      "type": "execution",
+      "port": 3308,
+      "healthCheck": "/health",
+      "cslGate": 0.882,
+      "pool": "warm",
+      "criticality": "high",
+      "cslDomainTags": ["bee-spawn", "swarm-coordination", "lifecycle-management"]
+    },
+    {
+      "name": "hcfullpipeline-executor",
+      "role": "Pipeline Stage Executor",
+      "type": "execution",
+      "port": 3309,
+      "healthCheck": "/health",
+      "cslGate": 0.927,
+      "pool": "hot",
+      "criticality": "critical",
+      "cslDomainTags": ["pipeline-execution", "stage-orchestration", "dag-resolution"]
+    },
+    {
+      "name": "auto-success-engine",
+      "role": "Continuous Improvement Engine",
+      "type": "execution",
+      "port": 3310,
+      "healthCheck": "/health",
+      "cslGate": 0.882,
+      "pool": "warm",
+      "criticality": "critical",
+      "cslDomainTags": ["auto-improvement", "battle-arena", "continuous-learning"]
+    },
+    {
+      "name": "heady-soul",
+      "role": "Identity & Persona Core",
+      "type": "execution",
+      "port": 3311,
+      "healthCheck": "/health",
+      "cslGate": 0.882,
+      "pool": "warm",
+      "criticality": "high",
+      "cslDomainTags": ["persona", "identity", "empathic-masking"]
+    },
+    {
+      "name": "heady-vinci",
+      "role": "Creative Intelligence Engine",
+      "type": "execution",
+      "port": 3312,
+      "healthCheck": "/health",
+      "cslGate": 0.809,
+      "pool": "warm",
+      "criticality": "high",
+      "cslDomainTags": ["creativity", "imagination", "generative-design"]
+    },
+    {
+      "name": "heady-autobiographer",
+      "role": "Narrative & Story Engine",
+      "type": "execution",
+      "port": 3313,
+      "healthCheck": "/health",
+      "cslGate": 0.691,
+      "pool": "cold",
+      "criticality": "medium",
+      "cslDomainTags": ["narrative", "story-generation", "timeline", "decision-context"]
+    },
+    {
+      "name": "heady-brains",
+      "role": "Multi-Model AI Council",
+      "type": "execution",
+      "port": 3314,
+      "healthCheck": "/health",
+      "cslGate": 0.882,
+      "pool": "hot",
+      "criticality": "critical",
+      "cslDomainTags": ["multi-model", "moe-routing", "competitive-inference", "council"]
+    }
+  ],
+
+  "websites": [
+    {
+      "name": "headyme",
+      "domain": "headyme.com",
+      "url": "https://headyme.com",
+      "role": "command_center",
+      "purpose": "Primary user-facing dashboard — manages all Heady sessions, agents, and outputs",
+      "runtime": "cloudflare_pages",
+      "cslGate": 0.809,
+      "pool": "hot",
+      "services": ["session-manager", "dashboard-api", "user-auth", "notification-service"]
+    },
+    {
+      "name": "headysystems",
+      "domain": "headysystems.com",
+      "url": "https://headysystems.com",
+      "role": "architecture_engine",
+      "purpose": "Core platform engineering — deploys and scales the Heady Latent OS",
+      "runtime": "cloudflare_pages",
+      "cslGate": 0.882,
+      "pool": "warm",
+      "services": ["infra-provisioner", "swarm-coordinator", "liquid-scheduler", "deployment-api"]
+    },
+    {
+      "name": "headyconnection",
+      "domain": "headyconnection.org",
+      "url": "https://headyconnection.org",
+      "role": "nonprofit",
+      "purpose": "Nonprofit community platform — education, outreach, and open initiatives",
+      "runtime": "cloudflare_pages",
+      "cslGate": 0.618,
+      "pool": "warm",
+      "services": ["content-cms", "community-api", "donation-service", "volunteer-portal"]
+    },
+    {
+      "name": "headybuddy",
+      "domain": "headybuddy.org",
+      "url": "https://headybuddy.org",
+      "role": "companion",
+      "purpose": "AI companion layer — empathic interaction, emotional support, personal assistant",
+      "runtime": "cloudflare_worker",
+      "cslGate": 0.809,
+      "pool": "hot",
+      "services": ["companion-agent", "emotional-model", "memory-bridge", "voice-interface"]
+    },
+    {
+      "name": "headyio",
+      "domain": "headyio.com",
+      "url": "https://headyio.com",
+      "role": "developer_platform",
+      "purpose": "SDK, CLI tools, and developer experience for the Heady ecosystem",
+      "runtime": "cloudflare_pages",
+      "cslGate": 0.691,
+      "pool": "warm",
+      "services": ["sdk-registry", "cli-service", "docs-api", "sandbox-runner"]
+    },
+    {
+      "name": "headymcp",
+      "domain": "headymcp.com",
+      "url": "https://headymcp.com",
+      "role": "mcp_layer",
+      "purpose": "Model Context Protocol gateway — routes tool calls and model context across the OS",
+      "runtime": "cloudflare_worker",
+      "cslGate": 0.927,
+      "pool": "hot",
+      "services": ["mcp-gateway", "tool-registry", "context-router", "json-rpc-dispatcher"]
+    },
+    {
+      "name": "headyapi",
+      "domain": "headyapi.com",
+      "url": "https://headyapi.com",
+      "role": "api_gateway",
+      "purpose": "Unified API gateway — rate limiting, auth, versioning, and routing",
+      "runtime": "cloudflare_worker",
+      "cslGate": 0.927,
+      "pool": "hot",
+      "services": ["api-proxy", "rate-limiter", "auth-middleware", "api-analytics"]
+    },
+    {
+      "name": "headybot",
+      "domain": "headybot.com",
+      "url": "https://headybot.com",
+      "role": "automation",
+      "purpose": "Workflow automation hub — n8n-style pipelines, bots, scheduled tasks",
+      "runtime": "cloud_run",
+      "cslGate": 0.809,
+      "pool": "warm",
+      "services": ["workflow-engine", "bot-registry", "trigger-service", "scheduler"]
+    },
+    {
+      "name": "headyos",
+      "domain": "headyos.com",
+      "url": "https://headyos.com",
+      "role": "os_distribution",
+      "purpose": "OS distribution portal — download, install, and configure Heady Latent OS",
+      "runtime": "cloudflare_pages",
+      "cslGate": 0.691,
+      "pool": "cold",
+      "services": ["download-service", "installer-api", "config-wizard"]
+    }
+  ],
+
+  "swarmMatrix": {
+    "_comment": "17-Swarm Matrix — HeadyBee distributed compute fabric",
+    "totalSwarms": 17,
+    "beeTypes": 89,
+    "maxBees": 10000,
+    "preWarmLevels": [5, 8, 13, 21],
+    "scaleUpFactor": 1.618,
+    "scaleDownFactor": 0.382,
+    "staleBeeTimeout_ms": 60000,
+    "swarms": [
+      { "id": 1,  "name": "inference-swarm",       "role": "AI model inference routing",         "pool": "hot",        "cslGate": 0.927 },
+      { "id": 2,  "name": "embedding-swarm",       "role": "Vector embedding generation",       "pool": "hot",        "cslGate": 0.882 },
+      { "id": 3,  "name": "pipeline-swarm",        "role": "Pipeline stage execution",          "pool": "hot",        "cslGate": 0.927 },
+      { "id": 4,  "name": "builder-swarm",         "role": "Build and deployment tasks",        "pool": "warm",       "cslGate": 0.809 },
+      { "id": 5,  "name": "researcher-swarm",      "role": "Knowledge ingestion and analysis",  "pool": "warm",       "cslGate": 0.691 },
+      { "id": 6,  "name": "auditor-swarm",         "role": "Code audit and compliance",         "pool": "cold",       "cslGate": 0.809 },
+      { "id": 7,  "name": "observer-swarm",        "role": "Health monitoring and alerting",     "pool": "governance", "cslGate": 0.882 },
+      { "id": 8,  "name": "governance-swarm",      "role": "Policy enforcement and budgets",    "pool": "governance", "cslGate": 0.927 },
+      { "id": 9,  "name": "memory-swarm",          "role": "Vector memory operations",          "pool": "hot",        "cslGate": 0.882 },
+      { "id": 10, "name": "sync-swarm",            "role": "Cross-device and git sync",         "pool": "warm",       "cslGate": 0.809 },
+      { "id": 11, "name": "companion-swarm",       "role": "HeadyBuddy empathic processing",    "pool": "hot",        "cslGate": 0.809 },
+      { "id": 12, "name": "creative-swarm",        "role": "Imagination and generative tasks",  "pool": "warm",       "cslGate": 0.691 },
+      { "id": 13, "name": "security-swarm",        "role": "PQC crypto and threat detection",   "pool": "hot",        "cslGate": 0.927 },
+      { "id": 14, "name": "narrative-swarm",        "role": "Story generation and journaling",   "pool": "cold",       "cslGate": 0.618 },
+      { "id": 15, "name": "optimization-swarm",    "role": "Monte Carlo and pattern engine",    "pool": "warm",       "cslGate": 0.882 },
+      { "id": 16, "name": "deployment-swarm",      "role": "Infrastructure provisioning",       "pool": "warm",       "cslGate": 0.809 },
+      { "id": 17, "name": "self-healing-swarm",    "role": "Drift detection and auto-repair",   "pool": "reserve",    "cslGate": 0.882 }
+    ]
+  },
+
+  "hcFullPipeline": {
+    "version": "3.1.0",
+    "totalStages": 21,
+    "maxConcurrent": 8,
+    "maxRetries": 3,
+    "contextGate": 0.92,
+    "deterministic": true,
+    "seed": "heady-sacred-geometry-seed",
+    "monteCarloEnabled": true,
+    "selfCritiqueEnabled": true,
+    "patternEngineEnabled": true,
+    "stages": [
+      { "id": 0,  "name": "channel-entry",        "description": "Multi-channel gateway and identity resolution",      "checkpoint": false, "parallel": true,  "pool": "hot" },
+      { "id": 1,  "name": "ingest",               "description": "Raw data ingestion from all sources",                "checkpoint": true,  "parallel": true,  "pool": "cold" },
+      { "id": 2,  "name": "plan",                 "description": "Monte Carlo UCB1 task decomposition and planning",   "checkpoint": true,  "parallel": false, "pool": "warm" },
+      { "id": 3,  "name": "execute-major-phase",  "description": "Agent fan-out via Supervisor pattern",               "checkpoint": true,  "parallel": true,  "pool": "hot" },
+      { "id": 4,  "name": "recover",              "description": "Saga compensation and circuit breaker recovery",     "checkpoint": true,  "parallel": false, "pool": "warm" },
+      { "id": 5,  "name": "self-critique",        "description": "Post-execution self-awareness and bottleneck diagnostics", "checkpoint": true, "parallel": false, "pool": "warm" },
+      { "id": 6,  "name": "optimize",             "description": "Apply improvements from self-critique and pattern mining", "checkpoint": true, "parallel": true, "pool": "warm" },
+      { "id": 7,  "name": "finalize",             "description": "Persist results, sync registries and docs",          "checkpoint": true,  "parallel": false, "pool": "warm" },
+      { "id": 8,  "name": "monitor-feedback",     "description": "Continuous monitoring and MC scheduler feedback",    "checkpoint": true,  "parallel": true,  "pool": "cold" },
+      { "id": 9,  "name": "cross-device-sync",    "description": "Synchronize state across all devices",               "checkpoint": true,  "parallel": true,  "pool": "cold" },
+      { "id": 10, "name": "sync-priority-changes","description": "Sync priority changes to deployment targets",        "checkpoint": true,  "parallel": true,  "pool": "warm" },
+      { "id": 11, "name": "deploy-priority",      "description": "Deploy priority changes immediately",                "checkpoint": true,  "parallel": true,  "pool": "hot" },
+      { "id": 12, "name": "pqc-operations",       "description": "Post-quantum cryptography key lifecycle",            "checkpoint": true,  "parallel": true,  "pool": "hot" },
+      { "id": 13, "name": "crypto",               "description": "Hybrid PQC + classical cryptographic operations",    "checkpoint": true,  "parallel": true,  "pool": "hot" },
+      { "id": 14, "name": "recon",                "description": "Environmental reconnaissance and state discovery",   "checkpoint": true,  "parallel": true,  "pool": "cold" },
+      { "id": 15, "name": "awareness",            "description": "System self-awareness and introspection",            "checkpoint": true,  "parallel": false, "pool": "warm" },
+      { "id": 16, "name": "search",               "description": "Semantic search and knowledge retrieval",            "checkpoint": true,  "parallel": true,  "pool": "warm" },
+      { "id": 17, "name": "evolution",            "description": "Genetic algorithm-style system evolution",           "checkpoint": true,  "parallel": false, "pool": "cold" },
+      { "id": 18, "name": "intake",               "description": "Structured data intake and validation",              "checkpoint": true,  "parallel": true,  "pool": "cold" },
+      { "id": 19, "name": "trial",                "description": "Sandboxed trial execution for risky operations",     "checkpoint": true,  "parallel": true,  "pool": "reserve" },
+      { "id": 20, "name": "receipt",              "description": "Completion receipt and run archival",                "checkpoint": true,  "parallel": false, "pool": "cold" }
+    ],
+    "timeouts_ms": {
+      "recon": 6854,
+      "intake": 4236,
+      "trial": 17944,
+      "execute": 120000,
+      "awareness": 11090,
+      "search": 29034,
+      "evolution": 29034,
+      "receipt": 6854,
+      "default": 29034
+    },
+    "stopRule": {
+      "description": "Build aggressively when healthy; repair first when not.",
+      "conditions": [
+        { "type": "error_rate",            "threshold": 0.15,       "action": "enter_recovery" },
+        { "type": "readiness_score",       "threshold": 60,         "action": "enter_recovery" },
+        { "type": "critical_alarm",        "count": 1,              "action": "pause_and_escalate" },
+        { "type": "data_integrity_failure","threshold": null,       "action": "halt_immediately" },
+        { "type": "bottleneck_severity",   "threshold": "critical", "action": "pause_and_escalate" },
+        { "type": "user_queue_not_empty",  "threshold": null,       "action": "throttle_background" },
+        { "type": "user_queue_empty",      "threshold": null,       "action": "allow_background" }
+      ]
+    }
+  },
+
+  "autoSuccessEngine": {
+    "cycle_ms": 29034,
+    "cycleDerivation": "PHI^7 * 1000ms",
+    "taskTimeout_ms": 4236,
+    "taskTimeoutDerivation": "PHI^3 * 1000ms",
+    "categories": 13,
+    "tasksTotal": 144,
+    "tasksPerCategory": 11,
+    "maxRetriesCycle": 3,
+    "maxRetriesTotal": 8,
+    "battleArenaMode": true,
+    "categoryNames": [
+      "CodeQuality",
+      "Security",
+      "Performance",
+      "Availability",
+      "Compliance",
+      "Learning",
+      "Communication",
+      "Infrastructure",
+      "Intelligence",
+      "DataSync",
+      "CostOptimization",
+      "SelfAwareness",
+      "Evolution"
+    ]
+  },
+
+  "cognitiveArchetypes": {
+    "_comment": "All 7 archetypes must fire before any output is emitted",
+    "archetypes": [
+      {
+        "name": "Owl",
+        "domain": "wisdom",
+        "function": "First-principles reasoning and deep analysis",
+        "firingOrder": 1,
+        "cslGate": 0.882
+      },
+      {
+        "name": "Eagle",
+        "domain": "omniscience",
+        "function": "Blast-radius assessment and system-wide awareness",
+        "firingOrder": 2,
+        "cslGate": 0.927
+      },
+      {
+        "name": "Dolphin",
+        "domain": "creativity",
+        "function": "Creative problem solving and lateral thinking",
+        "firingOrder": 3,
+        "cslGate": 0.691
+      },
+      {
+        "name": "Rabbit",
+        "domain": "multiplication",
+        "function": "Generate alternatives and parallel solution paths",
+        "firingOrder": 4,
+        "cslGate": 0.809
+      },
+      {
+        "name": "Ant",
+        "domain": "zero-skip-batch",
+        "function": "Exhaustive coverage ensuring nothing is skipped",
+        "firingOrder": 5,
+        "cslGate": 0.882
+      },
+      {
+        "name": "Elephant",
+        "domain": "memory",
+        "function": "Memory continuity and historical context preservation",
+        "firingOrder": 6,
+        "cslGate": 0.882
+      },
+      {
+        "name": "Beaver",
+        "domain": "structured-build",
+        "function": "Structured implementation and methodical construction",
+        "firingOrder": 7,
+        "cslGate": 0.809
+      }
+    ]
+  },
+
+  "masterDirectives": [
+    {
+      "id": 1,
+      "name": "Omnipresent Contextual Awareness",
+      "description": "Maintain full awareness of all system state, user context, and environmental signals at all times"
+    },
+    {
+      "id": 2,
+      "name": "Instant App Generation",
+      "description": "Silversertile Orchestrator enables immediate application scaffolding and deployment"
+    },
+    {
+      "id": 3,
+      "name": "Zero-Trust Auto-Sanitization",
+      "description": "All inputs sanitized, all outputs validated, no implicit trust between components"
+    },
+    {
+      "id": 4,
+      "name": "Low-Latency Deterministic Orchestration",
+      "description": "Given same inputs and configs, produce identical plan graphs and routing decisions"
+    },
+    {
+      "id": 5,
+      "name": "Graceful Lifecycle Management",
+      "description": "LIFO cleanup, health probes, graceful startup and shutdown for all services"
+    },
+    {
+      "id": 6,
+      "name": "Empathic Masking & Persona Fidelity",
+      "description": "HeadyBuddy companion maintains consistent persona with empathic interaction"
+    },
+    {
+      "id": 7,
+      "name": "HCFullPipeline Cognitive State Machine",
+      "description": "21-stage pipeline as the single source of truth for all execution flows"
+    },
+    {
+      "id": 8,
+      "name": "Continuous Learning & Pattern Evolution",
+      "description": "Monte Carlo plan selection, pattern engine, and self-critique feed continuous improvement"
+    },
+    {
+      "id": 9,
+      "name": "Multi-Model Council",
+      "description": "Competitive AI routing across multiple providers with MoE cosine routing"
+    },
+    {
+      "id": 10,
+      "name": "Sacred Geometry Orchestration",
+      "description": "Phi-scaled everything: timing, pools, thresholds, budgets, backoff, scaling"
+    }
+  ],
+
+  "unbreakableLaws": [
+    {
+      "id": 1,
+      "law": "Thoroughness Over Speed",
+      "mandate": "ALWAYS prioritize completeness and correctness over execution speed"
+    },
+    {
+      "id": 2,
+      "law": "Solutions Only",
+      "mandate": "No workarounds, no band-aids — deliver proper solutions or escalate"
+    },
+    {
+      "id": 3,
+      "law": "Context Maximization",
+      "mandate": "Enrich context before every action — never operate on partial information"
+    },
+    {
+      "id": 4,
+      "law": "Implementation Completeness",
+      "mandate": "Deployable or do not deliver — no half-built features"
+    },
+    {
+      "id": 5,
+      "law": "Cross-Environment Purity",
+      "mandate": "Zero localhost contamination — all paths, URLs, and configs are cloud-first"
+    },
+    {
+      "id": 6,
+      "law": "10,000-Bee Scale Readiness",
+      "mandate": "Every component must handle 10,000 concurrent bees without degradation"
+    },
+    {
+      "id": 7,
+      "law": "Auto-Success Engine Integrity",
+      "mandate": "Dynamic phi-scaled heartbeat at 29,034ms must never be interrupted"
+    },
+    {
+      "id": 8,
+      "law": "Arena Mode",
+      "mandate": "Competitive excellence as default — every output competes in the Battle Arena"
+    }
+  ],
+
+  "resourcePools": {
+    "_comment": "Fibonacci-adjacent percentages summing to 81% (PSI normalized), 19% unallocated headroom",
+    "hot":        { "allocation": 0.34, "purpose": "User-facing, latency-critical",        "priority": "critical", "maxLatency_ms": 2000 },
+    "warm":       { "allocation": 0.21, "purpose": "Important background processes",       "priority": "high",     "maxLatency_ms": 10000 },
+    "cold":       { "allocation": 0.13, "purpose": "Batch processing, analytics",          "priority": "low",      "maxLatency_ms": 60000 },
+    "reserve":    { "allocation": 0.08, "purpose": "Burst capacity",                       "priority": "medium",   "maxLatency_ms": 29034 },
+    "governance": { "allocation": 0.05, "purpose": "HeadyCheck/HeadyAssure always-on",     "priority": "high",     "maxLatency_ms": 11090 }
+  },
+
+  "pressureLevels": {
+    "NOMINAL":  { "min": 0.000, "max": 0.382, "trigger": "Normal operation" },
+    "ELEVATED": { "min": 0.382, "max": 0.618, "trigger": "Increased load" },
+    "HIGH":     { "min": 0.618, "max": 0.854, "trigger": "Active backpressure" },
+    "CRITICAL": { "min": 0.910, "max": 1.000, "trigger": "Emergency load shedding" }
+  },
+
+  "scoringWeights": {
+    "judge": {
+      "correctness": 0.34,
+      "safety": 0.21,
+      "performance": 0.21,
+      "quality": 0.13,
+      "elegance": 0.11
+    },
+    "cost": {
+      "time": 0.382,
+      "money": 0.382,
+      "quality": 0.236
+    },
+    "eviction": {
+      "importance": 0.486,
+      "recency": 0.300,
+      "relevance": 0.214
+    }
+  },
+
+  "deploymentLayers": {
+    "edge": {
+      "provider": "cloudflare",
+      "assets": ["heady-mcp-worker", "liquid-gateway-worker", "heady-buddy-worker", "edge-auth-worker"]
+    },
+    "execution": {
+      "provider": "cloud-run",
+      "assets": [
+        "domain-router", "observability-kernel", "budget-tracker", "heady-memory",
+        "heady-health", "heady-conductor", "heady-brains", "heady-soul",
+        "heady-vinci", "heady-governance", "heady-guard", "heady-autobiographer",
+        "heady-bee-factory", "hcfullpipeline-executor", "auto-success-engine"
+      ]
+    },
+    "memory": {
+      "provider": "postgres_pgvector",
+      "assets": ["vector_memory", "graph_rag", "audit_store"]
+    },
+    "cache": {
+      "provider": "redis",
+      "assets": ["sessions", "rate_limits", "provider_health"]
+    }
+  },
+
+  "agents": [
+    { "name": "builder",    "role": "Build & Deploy Agent",          "skills": ["build", "deploy", "test", "lint"],     "routing": "direct", "criticality": "high" },
+    { "name": "researcher", "role": "Knowledge & News Agent",        "skills": ["news-ingestion", "concept-extraction"], "routing": "direct", "criticality": "medium" },
+    { "name": "deployer",   "role": "Infrastructure Deployment Agent","skills": ["render-deploy", "docker-build"],       "routing": "direct", "criticality": "high" },
+    { "name": "auditor",    "role": "Audit & Compliance Agent",      "skills": ["code-audit", "security-scan"],         "routing": "direct", "criticality": "medium" },
+    { "name": "observer",   "role": "Monitoring & Health Agent",     "skills": ["health-check", "metrics-collection"],  "routing": "direct", "criticality": "critical" },
+    { "name": "claude-code","role": "AI Code Agent (Claude Code CLI)","skills": ["code-analysis", "security-audit", "architecture"], "routing": "direct", "criticality": "high" }
+  ],
+
+  "budgets": {
+    "dailyCost_USD": 50.00,
+    "perRequest_USD": 0.001,
+    "rateLimitPerMinute": 120
+  },
+
+  "logging": {
+    "level": "INFO",
+    "bufferCapacity": 987,
+    "rotationRatio": 0.618
+  },
+
+  "operationalReadiness": {
+    "scoring": {
+      "full_parallelism":  { "min": 85, "max": 100, "mode": "Aggressive building and optimization" },
+      "normal_operation":  { "min": 70, "max": 85,  "mode": "Standard parallelism" },
+      "maintenance_mode":  { "min": 50, "max": 70,  "mode": "Reduced load, no new large builds" },
+      "recovery_mode":     { "min": 0,  "max": 50,  "mode": "Repair only, escalate to owner" }
+    }
+  },
+
+  "_manifest_integrity": {
+    "fileVersion": "1.0.0",
+    "generatedBy": "Heady Liquid Dynamic Latent OS Build System",
+    "checksum_algorithm": "sha256",
+    "sacredGeometryCompliant": true,
+    "zeroMagicNumbers": true,
+    "sourceOfTruth": true
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "domains": {
+    "headyme.com": {
+      "role": "personal_hub"
+    },
+    "headysystems.com": {
+      "role": "infrastructure"
+    },
+    "headyos.com": {
+      "role": "operating_system"
+    },
+    "headybuddy.com": {
+      "role": "companion"
+    },
+    "headymcp.com": {
+      "role": "mcp_gateway"
+    },
+    "headyapi.com": {
+      "role": "api_gateway"
+    },
+    "heady.io": {
+      "role": "developer_sdk"
+    },
+    "headyconnection.com": {
+      "role": "community"
+    },
+    "headybot.com": {
+      "role": "bot_framework"
+    }
+  }
+}

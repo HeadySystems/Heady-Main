@@ -1,0 +1,931 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Heady™ Envoy Sidecar Configuration
+# Founded by Eric Haywood — HeadySystems Inc.
+#
+# ALL numeric constants from Fibonacci/φ:
+#   PHI = 1.6180339887498948, PHI3 = 4.2360679775
+#   FIB = [1,1,2,3,5,8,13,21,34,55,89,144,233,377,610,987,1597,2584]
+#
+# mTLS between all services, phi-scaled timeouts:
+#   connect_timeout: 1.618s (PHI)
+#   request_timeout: 4.236s (PHI3)
+# Fibonacci circuit breakers:
+#   consecutive_5xx: 89 (FIB[10])
+#   interval: 55s (FIB[9])
+#   base_ejection_time: 144s (FIB[11])
+#
+# GCP Project: gen-lang-client-0920560496
+# Region: us-east1
+# Cloudflare Account: 8b1fa38f282c691423c6399247d53323
+# ─────────────────────────────────────────────────────────────────────────────
+
+node:
+  id: heady-envoy-sidecar
+  cluster: heady-mesh
+  metadata:
+    founder: "Eric Haywood"
+    phi: "1.6180339887498948"
+    seed: "42"
+    temperature: "0"
+    gcp_project: "gen-lang-client-0920560496"
+    region: "us-east1"
+
+admin:
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 9901
+  access_log:
+    - name: envoy.access_loggers.file
+      typed_config:
+        "@type": type.googleapis.com/envoy.extensions.access_loggers.file.v3.FileAccessLog
+        path: /dev/stdout
+
+static_resources:
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # LISTENERS
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  listeners:
+
+    # ─── Main ingress listener ───────────────────────────────────────────
+    - name: heady_ingress
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 10000
+      filter_chains:
+        - transport_socket:
+            name: envoy.transport_sockets.tls
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
+              require_client_certificate: true
+              common_tls_context:
+                tls_params:
+                  tls_minimum_protocol_version: TLSv1_3
+                  tls_maximum_protocol_version: TLSv1_3
+                  cipher_suites:
+                    - TLS_AES_256_GCM_SHA384
+                    - TLS_CHACHA20_POLY1305_SHA256
+                    - TLS_AES_128_GCM_SHA256
+                tls_certificates:
+                  - certificate_chain:
+                      filename: /etc/envoy/certs/server-cert.pem
+                    private_key:
+                      filename: /etc/envoy/certs/server-key.pem
+                validation_context:
+                  trusted_ca:
+                    filename: /etc/envoy/certs/ca-cert.pem
+          filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: heady_ingress
+                codec_type: AUTO
+                request_timeout: 4.236s              # PHI3 = 2*PHI + 1
+                stream_idle_timeout: 55s             # FIB[9]
+                max_request_headers_kb: 8            # FIB[5]
+                use_remote_address: true
+                generate_request_id: true
+                preserve_external_request_id: true
+
+                access_log:
+                  - name: envoy.access_loggers.file
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.access_loggers.file.v3.FileAccessLog
+                      path: /dev/stdout
+                      log_format:
+                        json_format:
+                          timestamp: "%START_TIME%"
+                          method: "%REQ(:METHOD)%"
+                          path: "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%"
+                          protocol: "%PROTOCOL%"
+                          response_code: "%RESPONSE_CODE%"
+                          response_flags: "%RESPONSE_FLAGS%"
+                          duration_ms: "%DURATION%"
+                          upstream_host: "%UPSTREAM_HOST%"
+                          request_id: "%REQ(X-REQUEST-ID)%"
+                          heady_domain: "%REQ(X-HEADY-DOMAIN)%"
+                          correlation_id: "%REQ(X-CORRELATION-ID)%"
+
+                http_filters:
+
+                  # ─── Rate limiting ─────────────────────────────────────
+                  - name: envoy.filters.http.local_ratelimit
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit
+                      stat_prefix: heady_rate_limit
+                      token_bucket:
+                        max_tokens: 233              # FIB[12]
+                        tokens_per_fill: 144         # FIB[11]
+                        fill_interval: 55s           # FIB[9]
+                      filter_enabled:
+                        runtime_key: local_rate_limit_enabled
+                        default_value:
+                          numerator: 100
+                          denominator: HUNDRED
+                      filter_enforced:
+                        runtime_key: local_rate_limit_enforced
+                        default_value:
+                          numerator: 100
+                          denominator: HUNDRED
+                      response_headers_to_add:
+                        - append_action: OVERWRITE_IF_EXISTS_OR_ADD
+                          header:
+                            key: x-heady-rate-limit
+                            value: "phi-gated"
+                        - append_action: OVERWRITE_IF_EXISTS_OR_ADD
+                          header:
+                            key: x-heady-founder
+                            value: "Eric Haywood"
+
+                  # ─── Health check ──────────────────────────────────────
+                  - name: envoy.filters.http.health_check
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.health_check.v3.HealthCheck
+                      pass_through_mode: false
+                      headers:
+                        - name: ":path"
+                          string_match:
+                            exact: "/envoy-health"
+
+                  # ─── Router ────────────────────────────────────────────
+                  - name: envoy.filters.http.router
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+
+                route_config:
+                  name: heady_routes
+                  virtual_hosts:
+
+                    # ─── Inference routes ────────────────────────────────
+                    - name: inference_services
+                      domains: ["inference.*", "*.inference.heady.local"]
+                      routes:
+                        - match: { prefix: "/soul" }
+                          route: { cluster: heady-soul, timeout: 4.236s }
+                        - match: { prefix: "/brains" }
+                          route: { cluster: heady-brains, timeout: 4.236s }
+                        - match: { prefix: "/conductor" }
+                          route: { cluster: heady-conductor, timeout: 4.236s }
+                        - match: { prefix: "/vinci" }
+                          route: { cluster: heady-vinci, timeout: 4.236s }
+                        - match: { prefix: "/llm" }
+                          route: { cluster: llm-router, timeout: 4.236s }
+                        - match: { prefix: "/embedding" }
+                          route: { cluster: embedding-router, timeout: 4.236s }
+                        - match: { prefix: "/moe" }
+                          route: { cluster: moe-csl-router, timeout: 4.236s }
+                        - match: { prefix: "/executor" }
+                          route: { cluster: prompt-executor, timeout: 4.236s }
+
+                    # ─── Memory routes ───────────────────────────────────
+                    - name: memory_services
+                      domains: ["memory.*", "*.memory.heady.local"]
+                      routes:
+                        - match: { prefix: "/vector" }
+                          route: { cluster: vector-memory, timeout: 4.236s }
+                        - match: { prefix: "/graph" }
+                          route: { cluster: graph-rag, timeout: 4.236s }
+                        - match: { prefix: "/search" }
+                          route: { cluster: hybrid-search, timeout: 4.236s }
+                        - match: { prefix: "/context" }
+                          route: { cluster: context-window, timeout: 4.236s }
+                        - match: { prefix: "/state" }
+                          route: { cluster: durable-state, timeout: 4.236s }
+
+                    # ─── Agents routes ───────────────────────────────────
+                    - name: agent_services
+                      domains: ["agents.*", "*.agents.heady.local"]
+                      routes:
+                        - match: { prefix: "/bees" }
+                          route: { cluster: bee-factory, timeout: 4.236s }
+                        - match: { prefix: "/swarm" }
+                          route: { cluster: swarm-coordinator, timeout: 4.236s }
+                        - match: { prefix: "/jules" }
+                          route: { cluster: jules-agent, timeout: 4.236s }
+                        - match: { prefix: "/builder" }
+                          route: { cluster: builder-agent, timeout: 4.236s }
+                        - match: { prefix: "/observer" }
+                          route: { cluster: observer-agent, timeout: 4.236s }
+                        - match: { prefix: "/murphy" }
+                          route: { cluster: murphy-agent, timeout: 4.236s }
+                        - match: { prefix: "/atlas" }
+                          route: { cluster: atlas-agent, timeout: 4.236s }
+                        - match: { prefix: "/pythia" }
+                          route: { cluster: pythia-agent, timeout: 4.236s }
+
+                    # ─── Orchestration routes ────────────────────────────
+                    - name: orchestration_services
+                      domains: ["orchestration.*", "*.orchestration.heady.local"]
+                      routes:
+                        - match: { prefix: "/pipeline" }
+                          route: { cluster: hcfp-runner, timeout: 4.236s }
+                        - match: { prefix: "/arena" }
+                          route: { cluster: arena-engine, timeout: 4.236s }
+                        - match: { prefix: "/socratic" }
+                          route: { cluster: socratic-loop, timeout: 4.236s }
+                        - match: { prefix: "/decompose" }
+                          route: { cluster: task-decomposition, timeout: 4.236s }
+
+                    # ─── Security routes ─────────────────────────────────
+                    - name: security_services
+                      domains: ["security.*", "*.security.heady.local"]
+                      routes:
+                        - match: { prefix: "/gate" }
+                          route: { cluster: security-gate, timeout: 1.618s }
+                        - match: { prefix: "/sandbox" }
+                          route: { cluster: zero-trust, timeout: 1.618s }
+
+                    # ─── Default catch-all ───────────────────────────────
+                    - name: default
+                      domains: ["*"]
+                      routes:
+                        - match: { prefix: "/health" }
+                          route: { cluster: heady-soul, timeout: 1.618s }
+                        - match: { prefix: "/" }
+                          route: { cluster: heady-soul, timeout: 4.236s }
+                      response_headers_to_add:
+                        - header: { key: X-Heady-Founder, value: "Eric Haywood" }
+                          append_action: OVERWRITE_IF_EXISTS_OR_ADD
+                        - header: { key: Strict-Transport-Security, value: "max-age=6765; includeSubDomains" }
+                          append_action: OVERWRITE_IF_EXISTS_OR_ADD
+                        - header: { key: X-Content-Type-Options, value: "nosniff" }
+                          append_action: OVERWRITE_IF_EXISTS_OR_ADD
+                        - header: { key: X-Frame-Options, value: "DENY" }
+                          append_action: OVERWRITE_IF_EXISTS_OR_ADD
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # CLUSTERS — All 50 upstream services with mTLS + circuit breakers
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  clusters:
+
+    # ─── Cluster template applied to all services ────────────────────────
+    # Each cluster uses:
+    #   connect_timeout: 1.618s (PHI)
+    #   health_checks: interval=34s(FIB[8]), timeout=8s(FIB[5])
+    #   circuit_breakers: max_conn=89(FIB[10]), max_pending=144(FIB[11]),
+    #                     max_requests=233(FIB[12]), max_retries=5(FIB[4])
+    #   outlier_detection: consecutive_5xx=89(FIB[10]), interval=55s(FIB[9]),
+    #                      base_ejection_time=144s(FIB[11]),
+    #                      max_ejection_percent=34(FIB[8])
+
+    # ─── Inference (ports 3310–3317) ─────────────────────────────────────
+
+    - name: heady-soul
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: heady-soul
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: heady-soul, port_value: 3310 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 89
+            max_pending_requests: 144
+            max_requests: 233
+            max_retries: 5
+      outlier_detection:
+        consecutive_5xx: 89
+        interval: 55s
+        base_ejection_time: 144s
+        max_ejection_percent: 34
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_params:
+              tls_minimum_protocol_version: TLSv1_3
+            tls_certificates:
+              - certificate_chain: { filename: /etc/envoy/certs/client-cert.pem }
+                private_key: { filename: /etc/envoy/certs/client-key.pem }
+            validation_context:
+              trusted_ca: { filename: /etc/envoy/certs/ca-cert.pem }
+
+    - name: heady-brains
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: heady-brains
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: heady-brains, port_value: 3311 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+    - name: heady-conductor
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: heady-conductor
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: heady-conductor, port_value: 3312 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+    - name: heady-vinci
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: heady-vinci
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: heady-vinci, port_value: 3313 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+    - name: llm-router
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: llm-router
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: llm-router, port_value: 3314 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+    - name: embedding-router
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: embedding-router
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: embedding-router, port_value: 3315 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+    - name: moe-csl-router
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: moe-csl-router
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: moe-csl-router, port_value: 3316 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+    - name: prompt-executor
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: prompt-executor
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: prompt-executor, port_value: 3317 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+    # ─── Memory (ports 3318–3323) ────────────────────────────────────────
+
+    - name: vector-memory
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: vector-memory
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: vector-memory, port_value: 3318 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+    - name: graph-rag
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: graph-rag
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: graph-rag, port_value: 3319 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+    - name: hybrid-search
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: hybrid-search
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: hybrid-search, port_value: 3320 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+    - name: context-window
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: context-window
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: context-window, port_value: 3321 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+    - name: durable-state
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: durable-state
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: durable-state, port_value: 3322 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+    # ─── Agents (ports 3324–3331) ────────────────────────────────────────
+
+    - name: bee-factory
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: bee-factory
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: bee-factory, port_value: 3324 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+    - name: swarm-coordinator
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: swarm-coordinator
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: swarm-coordinator, port_value: 3325 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+    - name: jules-agent
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: jules-agent
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: jules-agent, port_value: 3326 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+    - name: builder-agent
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: builder-agent
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: builder-agent, port_value: 3327 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+    - name: observer-agent
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: observer-agent
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: observer-agent, port_value: 3328 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+    - name: murphy-agent
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: murphy-agent
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: murphy-agent, port_value: 3329 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+    - name: atlas-agent
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: atlas-agent
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: atlas-agent, port_value: 3330 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+    - name: pythia-agent
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: pythia-agent
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: pythia-agent, port_value: 3331 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+    # ─── Orchestration (ports 3332–3338) ─────────────────────────────────
+
+    - name: task-decomposition
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: task-decomposition
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: task-decomposition, port_value: 3332 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+    - name: hcfp-runner
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: hcfp-runner
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: hcfp-runner, port_value: 3335 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+    - name: arena-engine
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: arena-engine
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: arena-engine, port_value: 3336 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+    - name: socratic-loop
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: socratic-loop
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: socratic-loop, port_value: 3337 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+    # ─── Security (ports 3339–3340) ──────────────────────────────────────
+
+    - name: security-gate
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: security-gate
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: security-gate, port_value: 3339 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+    - name: zero-trust
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1.618s
+      load_assignment:
+        cluster_name: zero-trust
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: zero-trust, port_value: 3340 }
+      health_checks:
+        - timeout: 8s
+          interval: 34s
+          unhealthy_threshold: 5
+          healthy_threshold: 3
+          http_health_check: { path: /health }
+      circuit_breakers:
+        thresholds:
+          - { priority: DEFAULT, max_connections: 89, max_pending_requests: 144, max_requests: 233, max_retries: 5 }
+      outlier_detection:
+        { consecutive_5xx: 89, interval: 55s, base_ejection_time: 144s, max_ejection_percent: 34 }
+
+layered_runtime:
+  layers:
+    - name: static_layer
+      static_layer:
+        envoy.reloadable_features.strict_header_validation: true
+        local_rate_limit_enabled: true
+        local_rate_limit_enforced: true

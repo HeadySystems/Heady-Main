@@ -1,0 +1,77 @@
+{
+  "_meta": {
+    "description": "Grafana dashboard provisioning configuration for all Heady services",
+    "author": "Eric Haywood — HeadySystems",
+    "generated": "2026-03-10T03:43:38.764Z",
+    "phi": 1.6180339887,
+    "note": "Import these via Grafana API or place in /etc/grafana/provisioning/dashboards/"
+  },
+  "apiVersion": 1,
+  "providers": [
+    {
+      "name": "heady-dashboards",
+      "orgId": 1,
+      "folder": "Heady Platform",
+      "type": "file",
+      "disableDeletion": false,
+      "editable": true,
+      "updateIntervalSeconds": 34,
+      "options": {
+        "path": "/var/lib/grafana/dashboards/heady",
+        "foldersFromFilesStructure": true
+      }
+    }
+  ],
+  "datasources": [
+    {
+      "name": "Prometheus",
+      "type": "prometheus",
+      "url": "http://prometheus:9090",
+      "access": "proxy",
+      "isDefault": true,
+      "jsonData": {
+        "timeInterval": "34s",
+        "queryTimeout": "3s"
+      }
+    },
+    {
+      "name": "Loki",
+      "type": "loki",
+      "url": "http://loki:3100",
+      "access": "proxy",
+      "jsonData": {
+        "maxLines": 987,
+        "timeout": "4s"
+      }
+    }
+  ],
+  "alertRules": [
+    {
+      "name": "Service Down",
+      "condition": "up == 0",
+      "for": "89s",
+      "severity": "critical",
+      "annotations": {
+        "summary": "{{ $labels.service }} is DOWN"
+      }
+    },
+    {
+      "name": "High Error Rate",
+      "condition": "rate(http_requests_total{status=~\"5..\"}[5m]) / rate(http_requests_total[5m]) > 0.118",
+      "for": "55s",
+      "severity": "warning",
+      "annotations": {
+        "summary": "{{ $labels.service }} error rate above threshold"
+      }
+    },
+    {
+      "name": "High Latency",
+      "condition": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1.6180339887",
+      "for": "89s",
+      "severity": "warning",
+      "annotations": {
+        "summary": "{{ $labels.service }} p95 latency above φ seconds"
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "heady-sacred-genesis",
+  "version": "4.0.0",
+  "description": "Heady Sacred Genesis v4 foundation rebuild — liquid orchestration, phi-math, CSL, bee factory, resilience, memory, and pipeline runtime.",
+  "main": "heady-manager.js",
+  "type": "commonjs",
+  "license": "UNLICENSED",
+  "author": {
+    "name": "HeadySystems Inc.",
+    "email": "eric@headyconnection.org",
+    "url": "https://headysystems.com"
+  },
+  "scripts": {
+    "start": "node heady-manager.js",
+    "test": "node --test tests/*.test.js",
+    "bundle:summary": "node scripts/bundle-summary.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

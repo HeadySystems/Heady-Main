@@ -9,49 +9,139 @@
 # ║                                                                  ║
 # ║  ∞ SACRED GEOMETRY ∞  Organic Systems · Breathing Interfaces    ║
 # ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
-# ║  FILE: configs/domain-mappings.yaml                                                    ║
-# ║  LAYER: config                                                  ║
+# ║  FILE: configs/domain-mappings.yaml                               ║
+# ║  LAYER: config                                                    ║
+# ║  STATUS: CANONICAL — Dev/Staging Domain Mappings ONLY             ║
 # ╚══════════════════════════════════════════════════════════════════╝
 # HEADY_BRAND:END
-# HEADY DOMAIN MAPPING CONFIGURATION
-# Version: 1.0.0
-# Last Updated: 2026-02-09
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+# HEADY LIQUID LATENT OS — DEV/STAGING DOMAIN MAPPINGS
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Version:      3.0.0
+# Last Updated: 2026-03-10
+# Purpose:      Development and staging domain mappings ONLY.
+#               For production domains, see: configs/domains.yaml (CANONICAL)
+#
+# (c) 2024-2026 HeadySystems Inc. All Rights Reserved.
+#
+# GOVERNANCE:
+#   - Production domains are defined EXCLUSIVELY in configs/domains.yaml
+#   - This file covers staging and development environments only
+#   - No localhost, 127.0.0.1, 0.0.0.0, or .local references permitted
+#   - All dev/staging use cloud-hosted domains — no local domain mapping
+# ═══════════════════════════════════════════════════════════════════════════════
 
-# Production Domains
-production:
-  headysystems:
-    api: "api.headysystems.com"
-    app: "app.headysystems.com"
-    admin: "admin.headysystems.com"
-  headyconnection:
-    api: "api.headyconnection.org"
-    app: "app.headyconnection.org"
-  headybuddy:
-    api: "api.headybuddy.org"
-    app: "app.headybuddy.org"
+# ─────────────────────────────────────────────────────────────────────────────
+# STAGING DOMAINS
+# ─────────────────────────────────────────────────────────────────────────────
+# Staging mirrors production with staging. prefix.
+# All staging traffic routes through Cloudflare to staging Cloud Run revisions.
 
-# Staging Domains
 staging:
   headysystems:
-    api: "api.staging.headysystems.com"
-    app: "app.staging.headysystems.com"
+    api:             https://api.staging.headysystems.com
+    app:             https://app.staging.headysystems.com
+    admin:           https://admin.staging.headysystems.com
+
   headyconnection:
-    api: "api.staging.headyconnection.org"
+    api:             https://api.staging.headyconnection.org
+    app:             https://app.staging.headyconnection.org
 
-# Development Domains
+  headybuddy:
+    api:             https://api.staging.headybuddy.org
+    app:             https://app.staging.headybuddy.org
+
+  headymcp:
+    api:             https://api.staging.headymcp.com
+    mcp:             https://mcp.staging.headymcp.com
+
+  headyapi:
+    gateway:         https://staging.headyapi.com
+
+  headyme:
+    api:             https://api.staging.headyme.com
+    app:             https://app.staging.headyme.com
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DEVELOPMENT DOMAINS
+# ─────────────────────────────────────────────────────────────────────────────
+# Dev environments use dev. prefix.
+# These resolve via Cloudflare DNS to dev Cloud Run revisions.
+
 development:
-  default: "dev.headysystems.local"
-  headyconnection: "dev.headyconnection.local"
+  headysystems:
+    api:             https://dev.headysystems.com
+    app:             https://dev-app.headysystems.com
 
-# Cloud Service Endpoints (branded)
+  headyconnection:
+    api:             https://dev.headyconnection.org
+
+  headymcp:
+    api:             https://dev.headymcp.com
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CLOUD RUN STAGING ORIGINS (Internal — Never user-facing)
+# ─────────────────────────────────────────────────────────────────────────────
+# These are the actual Cloud Run revision URLs for staging.
+# They are proxied through Cloudflare and NEVER exposed to users.
+
 cloud_origins:
-  heady-manager-headysystems: "api.headysystems.com"
-  heady-manager-headyme: "me.headysystems.com"
-  heady-manager-headyconnection: "api.headyconnection.org"
+  staging:
+    heady-manager:   https://heady-liquid-latent-os-staging-XXXXXXXXXX-uc.a.run.app
+    description:     "Cloud Run staging revision — proxied via Cloudflare"
 
-# Domain Governance Rules
-governing_rules:
-  - "No .headysystems.com references anywhere — use branded domains only"
-  - "All production traffic must use HTTPS"
-  - "Custom domains must be configured in Cloudflare"
-  - "All endpoints use branded headysystems.com / headyconnection.org domains"
+  development:
+    heady-manager:   https://heady-liquid-latent-os-dev-XXXXXXXXXX-uc.a.run.app
+    description:     "Cloud Run dev revision — proxied via Cloudflare"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# OAUTH CALLBACK URLs (Non-Production)
+# ─────────────────────────────────────────────────────────────────────────────
+
+oauth_callbacks:
+  staging:
+    - https://app.staging.headysystems.com/oauth/callback
+    - https://app.staging.headyconnection.org/oauth/callback
+
+  development:
+    - https://dev.headysystems.com/oauth/callback
+    - https://dev.headyconnection.org/oauth/callback
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DOCKER / KUBERNETES (Local orchestration)
+# ─────────────────────────────────────────────────────────────────────────────
+# For local development with Docker Compose or K8s,
+# services use internal DNS names within the container network.
+
+container_dns:
+  docker_compose:
+    network:         heady_internal
+    services:
+      heady-manager: manager.heady.svc.local
+      heady-buddy:   buddy.heady.svc.local
+      postgres:      db.heady.svc.local
+      redis:         cache.heady.svc.local
+
+  kubernetes:
+    namespace:       heady-systems
+    pattern:         "{service}.heady-systems.svc.cluster.local"
+    ingress_class:   nginx-internal
+
+# ─────────────────────────────────────────────────────────────────────────────
+# GOVERNANCE RULES
+# ─────────────────────────────────────────────────────────────────────────────
+
+governance:
+  rules:
+    - "Production domains are defined in configs/domains.yaml — NOT here"
+    - "No localhost, 127.0.0.1, 0.0.0.0 references anywhere"
+    - "All dev/staging traffic must use HTTPS"
+    - "All endpoints use branded headysystems.com / headyconnection.org domains"
+    - "Custom domains must be configured in Cloudflare"
+    - "Container-internal DNS is permitted only within Docker/K8s networks"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# END OF DEV/STAGING DOMAIN MAPPINGS
+# ═══════════════════════════════════════════════════════════════════════════════

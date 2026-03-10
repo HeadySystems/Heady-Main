@@ -393,6 +393,38 @@ pipeline:
       tasks:
         - run: scripts/deploy-priority.ps1
 
+    # ── STAGE 12: Auto-Commit-Push-Deploy ─────────────────────────────
+    - id: auto-commit-push-deploy
+      name: Auto-Commit-Push-Deploy
+      description: >
+        Automatically stages all working tree changes, creates a commit
+        with auto-generated message (includes pipeline version, file counts,
+        timestamp), and pushes to all remotes (heady-testing, staging,
+        production). Runs after every task completion, file integration,
+        and config update. Ensures GitHub notifications fire continuously
+        and all work is immediately backed up and deployed.
+      checkpoint: true
+      parallel: false
+      dependsOn: [finalize]
+      runAfterEveryStage: true
+      tasks:
+        - stage_all_changes
+        - generate_commit_message
+        - commit_changes
+        - push_to_all_remotes
+        - verify_push_success
+        - trigger_deploy_hooks
+      config:
+        script: scripts/auto-commit-push.sh
+        remotes: [heady-testing, staging, production]
+        branch: main
+        commitPrefix: "feat: HCFullPipeline"
+        skipCI: false
+        retryOnFailure: true
+        maxRetries: 3
+        notifyOnSuccess: true
+        notifyOnFailure: true
+
     # New PQC stage
     - id: pqc-operations
       name: Post-Quantum Cryptography
@@ -463,6 +495,43 @@ pipeline:
         - invalidate_stale_caches
         - adjust_worker_pool_concurrency
         - update_channel_optimizations
+    auto_commit:
+      description: >
+        Auto-commit-push after any pipeline stage completion. Ensures all
+        changes are immediately committed and pushed to GitHub, triggering
+        notifications and keeping remote repos in sync.
+      triggers:
+        - on_stage_complete: "*"  # After ANY stage completes
+        - file_change: "**/*"    # Any file change in repo
+        - api_call: POST /api/pipeline/commit
+      stages:
+        - auto-commit-push-deploy
+      config:
+        debounceMs: 5000          # Wait 5s for batch changes
+        skipIfClean: true         # Skip if nothing to commit
+        commitMessageFormat: "feat: HCFullPipeline v{version} — {count} files [{timestamp}]"
+    in_folder_watcher:
+      description: >
+        Watches in/ folder for new zip files. When detected, extracts,
+        scans for tasks, integrates net-new files into the repo, updates
+        hcfullpipeline.yaml task backlog, then triggers auto-commit-push.
+      triggers:
+        - file_change: in/*.zip
+        - schedule: "*/5 * * * *"  # Check every 5 minutes
+        - api_call: POST /api/pipeline/scan-in
+      stages:
+        - scan_in_folder
+        - extract_new_zips
+        - diff_against_repo
+        - integrate_net_new_files
+        - update_task_backlog
+        - auto-commit-push-deploy
+      config:
+        inFolder: in/
+        extractTo: /tmp/heady-in-extract/
+        preserveExisting: true    # Never overwrite existing files
+        autoDeleteProcessedZips: false
+        scanScript: scripts/scan-in-folder.sh
 
   # ─── CHECKPOINT PROTOCOL ────────────────────────────────────────────────
   checkpointProtocol:
@@ -533,9 +602,9 @@ pipeline:
 
   # ─── TASK BACKLOG (scanned from in/ 2026-03-10T07:30Z) ─────────────────────
   taskBacklog:
-    scanDate: "2026-03-10T07:38:00Z"
-    source: "in/jules_session_139…014.zip, in/jules_session_162…328.zip, in/jules_session_158…046.zip, in/heady-perplexity-full-system-context.zip"
-    version: "5.5.0"
+    scanDate: "2026-03-10T14:27:00Z"
+    source: "in/*.zip (10 unique packages: 4 jules sessions, heady-max-potential, heady-max-potential-v5.1.0, heady-liquid-latent-os-bundle, heady-perplexity-full-system-context, heady_bounded_security_pass, heady_system_build_current_state)"
+    version: "7.0.0"
 
     # ── CRITICAL ─────────────────────────────────────────────────────────────
     critical:
@@ -926,3 +995,436 @@ pipeline:
         source: IMPROVEMENTS.md
         status: done
         completedDate: "2026-03-10"
+
+      - id: TB-C10
+        task: "Liquid latent OS bundle — 12 directives integrated"
+        description: >
+          Animal archetype layers (Ant, Beaver, Dolphin, Eagle, Elephant, Owl, Rabbit),
+          SYSTEM_PRIME_DIRECTIVE, UNBREAKABLE_LAWS, MASTER_DIRECTIVES, LAW-07,
+          RECONCILIATION_DECISIONS copied to directives/.
+        source: "in/heady-liquid-latent-os-bundle.zip"
+        status: done
+        completedDate: "2026-03-10"
+
+      - id: TB-C11
+        task: "Platform-v3 — 26 new services integrated"
+        description: >
+          26 net-new services added from platform-v3 (358 files, 47K+ lines).
+          32 existing services preserved. Services cover billing, analytics,
+          voice-service, heady-autobiographer, content-pipeline, and more.
+        source: "in/heady-max-potential.zip (platform-v3)"
+        status: done
+        completedDate: "2026-03-10"
+
+      - id: TB-C12
+        task: "Max-potential Wave 7 — production readiness files integrated"
+        description: >
+          9 test suites (chaos, compliance, contract, integration, load, scaling,
+          security, services, shared), CI configs (cloudbuild, github-actions),
+          edge modules, i18n, accessibility, middleware (bulkhead, compression,
+          rate-limiter, graceful-shutdown, auto-context).
+        source: "in/heady-max-potential.zip (max-potential-4)"
+        status: done
+        completedDate: "2026-03-10"
+
+      - id: TB-C13
+        task: "System-build — docs, reports, tests integrated"
+        description: >
+          9 reports (backend-build-summary, perfect-agentic-system, deployment-directives,
+          service-regeneration, auth-runtime, external-skills, sites-build-summary),
+          docs (ADRs, architecture, onboarding, operations, runbooks, security),
+          contract tests.
+        source: "in/heady_system_build_current_state.zip"
+        status: done
+        completedDate: "2026-03-10"
+
+      - id: TB-C14
+        task: "Sacred projections v4.0 — 93 site projections integrated"
+        description: >
+          Full 9-site projection engine with per-site index.html, app.js, styles.css,
+          sitemap.xml, robots.txt for headybot, headyconnection, headyio, headyos,
+          headysystems, headyweb, headybuddy, headycloud, heady-ai domains.
+        source: "in/heady_bounded_security_pass.zip (sacred-proj)"
+        status: done
+        completedDate: "2026-03-10"
+
+      - id: TB-C15
+        task: "Bounded security pass — governance files integrated"
+        description: >
+          SECURITY.md, CONTRIBUTING.md, certs, compliance-templates, circuit-breaker,
+          credential-rotation, benchmarks, branch-protection, CI pipelines selectively
+          copied from 14K-file genesis repo.
+        source: "in/heady_bounded_security_pass.zip"
+        status: done
+        completedDate: "2026-03-10"
+
+    # ── NEW OPEN TASKS (from 2026-03-10 full in/ scan) ───────────────────────
+    newBacklog:
+      - id: TB-027
+        task: "Wire 26 new platform-v3 services into docker-compose and turbo.json"
+        description: >
+          26 new services added from platform-v3 need their entries in
+          docker-compose.yml, turbo.json workspace includes, and service-catalog.yaml.
+        targets: [docker-compose.yml, turbo.json, configs/service-catalog.yaml]
+        stage: execute-major-phase
+        status: open
+        priority: critical
+
+      - id: TB-028
+        task: "Validate and run 9 new test suites from Wave 7"
+        description: >
+          New test files in tests/: chaos-engineering, compliance, contract,
+          integration, load-test-k6, scaling, security, services, shared.
+          Need npm test setup and CI integration.
+        targets: [tests/, package.json, ci/]
+        stage: self-critique
+        status: open
+        priority: medium
+
+      - id: TB-029
+        task: "Merge Wave 7 Dockerfile with existing and validate build"
+        description: >
+          max-potential-4 Dockerfile uses multi-stage distroless build with SBOM labels.
+          Compare with existing Dockerfile and produce best-of-both, then validate
+          docker build.
+        targets: [Dockerfile]
+        stage: execute-major-phase
+        status: open
+        priority: medium
+
+      - id: TB-030
+        task: "Deploy sacred projections v4.0 to live domains via projection engine"
+        description: >
+          93 projection files in sacred-projections/ ready for deployment.
+          Wire into site-registry.json and dynamic-site-server.js for live serving.
+        targets: [sacred-projections/, configs/site-registry.json]
+        stage: deploy_priority
+        status: open
+        priority: medium
+
+      - id: TB-031
+        task: "Audit bounded-security-pass for additional net-new code worth merging"
+        description: >
+          14K-file genesis repo only partially integrated (governance, certs,
+          compliance). Remaining: adapters, backend, colab, desktop-overlay,
+          enterprise, examples, heady-10-10, heady-a2a-protocol, heady-academic-research.
+          Selective audit needed to avoid bloat.
+        targets: [bounded-security-pass audit]
+        stage: optimize
+        status: open
+        priority: minor
+
+      - id: TB-032
+        task: "Integrate GitHub Actions deploy workflow from platform-v3"
+        description: >
+          .github/workflows/deploy.yml added from platform-v3. Needs review
+          for correct service account, region, project ID, and secret references
+          before enabling in CI.
+        targets: [.github/workflows/deploy.yml]
+        stage: execute-major-phase
+        status: open
+        priority: medium
+
+      - id: TB-033
+        task: "Wire v2.0.0 core engines (async-engine, swarm-engine, vector-ops, liquid-nodes) into runtime"
+        description: >
+          160 new files from maximum-potential-v2.0.0: 4 core packages (health-probes,
+          phi-math-foundation, schema-registry, structured-logger), 4 core engines
+          (async-engine, liquid-nodes, swarm-engine, vector-ops), 4 UI panels
+          (colab-runtime, swarm-monitor, topology-dashboard, vector-explorer).
+          Needs package.json workspace wiring and import path validation.
+        targets: [core/, packages/, ui/, services/]
+        stage: execute-major-phase
+        status: open
+        priority: critical
+
+      - id: TB-034
+        task: "Wire v5.1.0 src modules and wave5 liquid mesh into orchestration"
+        description: >
+          82 new files from v5.1.0 (src/auto-success, bees, bootstrap, core, csl,
+          governance, memory, orchestration, pipeline, resilience), 18 new files
+          from wave5 (liquid-mesh, liquid-node, liquid-task-executor, colab runtime,
+          heady-conductor). Integration tests in tests/e2e, tests/integration,
+          tests/unit need npm test setup.
+        targets: [src/, shared/, tests/, infrastructure/]
+        stage: execute-major-phase
+        status: open
+        priority: critical
+
+    # ── COMPLETED (latest round — 2026-03-10T08:13Z) ────────────────────────
+    latestCompleted:
+      - id: TB-C16
+        task: "Maximum-potential v2.0.0 — 160 files integrated"
+        description: >
+          Core engines (async-engine, liquid-nodes, swarm-engine, vector-ops),
+          4 packages (health-probes, phi-math, schema-registry, structured-logger),
+          4 UI panels, 10 services, 7 test dirs, scripts, infra.
+        source: "in/heady-maximum-potential-v2.0.0.zip"
+        status: done
+        completedDate: "2026-03-10"
+
+      - id: TB-C17
+        task: "Max-potential v5.1.0 — 82 files integrated"
+        description: >
+          Full src module tree (auto-success, bees, bootstrap, core, csl,
+          governance, memory, orchestration, pipeline, resilience), observability,
+          security configs, colab-integration, shared utils, e2e/integration/unit tests.
+        source: "in/heady-max-potential-v5.1.0.zip"
+        status: done
+        completedDate: "2026-03-10"
+
+      - id: TB-C18
+        task: "System wave5 — 18 files integrated"
+        description: >
+          Liquid mesh (mesh, node, task-executor), colab modules (notebook-templates,
+          runtime-manager, vector-space-ops), heady-conductor orchestration,
+          3 bees (heady-bee, heady-swarm, swarm-intelligence), shared utilities,
+          infra (docker, envoy, grafana, prometheus, CI).
+        source: "in/heady-system-wave5.zip"
+        status: done
+        completedDate: "2026-03-10"
+
+    # ── NEW OPEN TASKS (from 2026-03-10T14:27Z deep in/ scan) ─────────────────
+    deepScanBacklog:
+
+      # ── CRITICAL ──────────────────────────────────────────────────────────────
+
+      - id: TB-035
+        task: "Replace generic /process handlers with real domain-specific logic"
+        description: >
+          50 services still use generic scaffold /process handlers that echo
+          input without real business logic. Replace with actual domain-specific
+          implementations for each service (e.g., analytics should aggregate,
+          search should query vector store, scheduler should cron-dispatch).
+        source: "heady_system_build_current_state/GAPS_FOUND.md, heady-max-potential-v5.1.0/GAPS_FOUND.md"
+        targets: ["services/*/src/index.js"]
+        stage: execute-major-phase
+        status: open
+        priority: critical
+
+      - id: TB-036
+        task: "Replace 13 placeholder public HeadyMe repos with real implementations"
+        description: >
+          All 13 public HeadyMe repos contain only a minimal Express landing server,
+          basic package.json, single-stage Dockerfile, and cosmetic site-config.json.
+          No actual service implementation, no tests, no shared phi-math.js.
+          Each repo needs real code pushed from the monorepo.
+        source: "heady-max-potential-v5.1.0/GAPS_FOUND.md"
+        targets: ["https://github.com/HeadyMe/*"]
+        stage: deploy_priority
+        status: open
+        priority: critical
+
+      # ── MEDIUM ────────────────────────────────────────────────────────────────
+
+      - id: TB-037
+        task: "Sanitize forbidden ranking/priority language from generators and shared platform"
+        description: >
+          Remove PRIORITY enums, CRITICAL/HIGH/MEDIUM/LOW constants, priority queues,
+          tier-based classification from: gen-services.py, packages/platform,
+          packages/web-shared, seventeen-swarm-orchestrator.js, bee-factory.js,
+          swarm-coordinator.js, auto-success-engine, HCFullPipeline Stage 4 TRIAGE.
+          Replace with CSL relevance gates and concurrent execution.
+        source: "heady_system_build_current_state/NEXT_STEPS_FOR_HEADY.md, heady-perplexity-full-system-context/00-THIS-PROMPT.md"
+        targets:
+          - scripts/gen-services.py
+          - packages/platform/
+          - packages/web-shared/
+          - src/seventeen-swarm-orchestrator.js
+          - src/bees/bee-factory.js
+          - src/swarm-coordinator.js
+        stage: execute-major-phase
+        status: open
+        priority: medium
+
+      - id: TB-038
+        task: "Regenerate all services and sites after ranking language cleanup"
+        description: >
+          After TB-037 cleanup, re-run build-sites.py and gen-services.py.
+          Recheck generated outputs under apps/sites, services, packages/platform,
+          packages/web-shared, skills, docs.
+        source: "heady_system_build_current_state/NEXT_STEPS_FOR_HEADY.md"
+        targets: [apps/sites/, services/, packages/]
+        stage: execute-major-phase
+        dependsOn: [TB-037]
+        status: open
+        priority: medium
+
+      - id: TB-039
+        task: "Create database migration scripts"
+        description: >
+          No database migration scripts exist. Create migrations for pgvector,
+          Postgres schemas, Redis data structures. Include up/down migrations
+          and seed data for development.
+        source: "heady-max-potential-v5.1.0/GAPS_FOUND.md"
+        targets: [db/migrations/]
+        stage: execute-major-phase
+        status: open
+        priority: medium
+
+      - id: TB-040
+        task: "Generate SBOM (Software Bill of Materials)"
+        description: >
+          No SBOM generation exists. Add CycloneDX or SPDX SBOM generation
+          to CI pipeline for supply-chain transparency across all services.
+        source: "heady-max-potential-v5.1.0/GAPS_FOUND.md"
+        targets: [ci/, package.json]
+        stage: finalize
+        status: open
+        priority: medium
+
+      - id: TB-041
+        task: "Automate SSL/TLS certificate provisioning and rotation"
+        description: >
+          No SSL/TLS certificate automation exists. Configure Let's Encrypt
+          or Cloudflare Origin CA auto-provisioning for all 11 public domains
+          and Cloud Run custom domain mappings.
+        source: "heady-max-potential-v5.1.0/GAPS_FOUND.md"
+        targets: [infra/pki/, configs/]
+        stage: execute-major-phase
+        status: open
+        priority: medium
+
+      - id: TB-042
+        task: "Expand contract testing beyond buddy-chat"
+        description: >
+          Only buddy-chat-contract.test.js exists. Create API contract tests
+          for all inter-service communication channels, MCP tool contracts,
+          and service mesh validation.
+        source: "heady_bounded_security_pass/test-inventory-and-patterns.md"
+        targets: [tests/contract/]
+        stage: self-critique
+        status: open
+        priority: medium
+
+      - id: TB-043
+        task: "Create stack-wide environment templates for secrets and mesh certs"
+        description: >
+          Create comprehensive .env templates for all environments (dev, staging,
+          production) covering auth relay domains, service mesh certificates,
+          API keys, and database connection strings.
+        source: "heady_system_build_current_state/IMPROVEMENTS.md"
+        targets: [".env.template", ".env.staging.template", ".env.production.template"]
+        stage: finalize
+        status: open
+        priority: medium
+
+      - id: TB-044
+        task: "Execute full docker compose stack bring-up and validate"
+        description: >
+          The full 50-service docker compose up --build has never been executed.
+          Bring up the stack, verify healthchecks, fix any startup failures,
+          and document the working configuration.
+        source: "heady_system_build_current_state/GAPS_FOUND.md"
+        targets: [docker-compose.yml]
+        stage: execute-major-phase
+        status: open
+        priority: medium
+
+      - id: TB-045
+        task: "Validate browser-based auth propagation across all public sites"
+        description: >
+          Full end-to-end browser auth propagation, Drupal webhook verification,
+          and live mesh certificate validation remain untested. Run browser
+          tests across all 9+ public sites to verify cross-site auth relay.
+        source: "heady_system_build_current_state/GAPS_FOUND.md, IMPROVEMENTS.md"
+        targets: [tests/e2e/]
+        stage: self-critique
+        status: open
+        priority: medium
+
+      # ── MINOR / ENHANCEMENTS ──────────────────────────────────────────────────
+
+      - id: TB-046
+        task: "Complete full i18n string extraction"
+        description: >
+          i18n infrastructure (locale-manager.js, string-extractor.js) exists
+          in max-potential bundle but full extraction across all user-facing
+          strings has not been performed.
+        source: "heady-max-potential-v5.1.0/GAPS_FOUND.md"
+        targets: [i18n/]
+        stage: optimize
+        status: open
+        priority: minor
+
+      - id: TB-047
+        task: "Run accessibility audit (WCAG 2.1 AA compliance)"
+        description: >
+          Accessibility infrastructure exists (aria-injector.js, wcag-checker.js)
+          but no formal audit has been performed across all 9 public sites.
+        source: "heady-max-potential-v5.1.0/GAPS_FOUND.md"
+        targets: [accessibility/]
+        stage: self-critique
+        status: open
+        priority: minor
+
+      - id: TB-048
+        task: "Create per-service runbook documentation"
+        description: >
+          Deeper per-service docs and runbooks tied to local stack commands
+          needed for all 50+ services. Currently only auth-session and colab
+          gateway have runbooks.
+        source: "heady_system_build_current_state/IMPROVEMENTS.md"
+        targets: [docs/runbooks/]
+        stage: finalize
+        status: open
+        priority: minor
+
+      - id: TB-049
+        task: "Create centralized test data management (fixtures + generators)"
+        description: >
+          Create centralized fixtures directory, standardize mock data patterns,
+          and implement test data generators to reduce test fragility and
+          improve test maintainability.
+        source: "heady_bounded_security_pass/test-inventory-and-patterns.md"
+        targets: [tests/fixtures/, tests/generators/]
+        stage: optimize
+        status: open
+        priority: minor
+
+      - id: TB-050
+        task: "Add automated SAST/DAST and dependency vulnerability scanning"
+        description: >
+          Integrate automated static analysis (SAST), dynamic application
+          security testing (DAST), and dependency vulnerability scanning
+          (npm audit, Snyk, or Trivy) into CI pipeline.
+        source: "heady_bounded_security_pass/test-inventory-and-patterns.md"
+        targets: [ci/, .github/workflows/]
+        stage: execute-major-phase
+        status: open
+        priority: minor
+
+      - id: TB-051
+        task: "Add telemetry and observability validation tests"
+        description: >
+          Create tests that validate telemetry data emission, log aggregation
+          correctness, and metrics collection accuracy across all services.
+        source: "heady_bounded_security_pass/test-inventory-and-patterns.md"
+        targets: [tests/observability/]
+        stage: self-critique
+        status: open
+        priority: minor
+
+      - id: TB-052
+        task: "Implement documentation-driven testing"
+        description: >
+          Validate API documentation accuracy, test example code from docs,
+          and implement documentation coverage metrics to prevent doc rot.
+        source: "heady_bounded_security_pass/test-inventory-and-patterns.md"
+        targets: [tests/docs/, docs/]
+        stage: optimize
+        status: open
+        priority: minor
+
+      - id: TB-053
+        task: "Audit and enforce reconciliation decisions in runtime configs"
+        description: >
+          Animal archetypes reconciliation specifies: pipeline=21 stages,
+          bee capacity=6765 (Fibonacci), auto-success base cycle=29034ms
+          (phi-derived). Audit heady-cognitive-config.json and all pipeline
+          configs to enforce these canonical values.
+        source: "heady-perplexity-full-system-context/13-animal-archetypes/RECONCILIATION_DECISIONS.md"
+        targets: [configs/heady-cognitive-config.json, configs/hcfullpipeline.yaml]
+        stage: self-critique
+        status: open
+        priority: minor

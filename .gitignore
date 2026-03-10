@@ -31,7 +31,6 @@ logs/
 Thumbs.db
 
 # Python
-<<<<<<< HEAD
 __pycache__/
 *.py[cod]
 *.pyo
@@ -47,27 +46,23 @@ venv/
 # Data (raw and external, to avoid huge files in git)
 data/raw/
 data/external/
-=======
-.pytest_cache/
-*.egg-info/
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
 
 # Generated
 heady-manifest.json
 HeadyAcademy/Content_Forge/Visualizations/
 pipeline-output/
 .heady_cache/
-<<<<<<< HEAD
 
 # Standalone repos (separate git projects)
 windsurf-next/
-
 
 # Personal notebooks (experimental, not tracked)
 notebooks/personal/*
 !notebooks/personal/.gitkeep
 
 # Secrets
+configs/secrets/
+config/secrets/
 .heady/memory.db
 .heady/*.db
 *.db
@@ -83,15 +78,11 @@ offline-packages/
 # Local Netlify folder
 .netlify
 
-# Security — sensitive files (added by deep scan remediation)
+# Security — sensitive files
 .env.hybrid
 *.pid
 *.bak
 audit_logs.jsonl
 .heady_deploy_log.jsonl
 *.jsonl
-=======
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
-configs/secrets/
 *.shit
-config/secrets/

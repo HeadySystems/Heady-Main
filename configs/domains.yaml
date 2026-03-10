@@ -1,0 +1,628 @@
+# HEADY_BRAND:BEGIN
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║  ██╗  ██╗███████╗ █████╗ ██████╗ ██╗   ██╗                     ║
+# ║  ██║  ██║██╔════╝██╔══██╗██╔══██╗╚██╗ ██╔╝                     ║
+# ║  ███████║█████╗  ███████║██║  ██║ ╚████╔╝                      ║
+# ║  ██╔══██║██╔══╝  ██╔══██║██║  ██║  ╚██╔╝                       ║
+# ║  ██║  ██║███████╗██║  ██║██████╔╝   ██║                        ║
+# ║  ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝    ╚═╝                        ║
+# ║                                                                  ║
+# ║  ∞ SACRED GEOMETRY ∞  Organic Systems · Breathing Interfaces    ║
+# ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+# ║  FILE: configs/domains.yaml                                      ║
+# ║  LAYER: config                                                    ║
+# ║  STATUS: CANONICAL — Single Source of Truth for ALL Production    ║
+# ╚══════════════════════════════════════════════════════════════════╝
+# HEADY_BRAND:END
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+# HEADY LIQUID LATENT OS — CANONICAL DOMAIN CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Version:      3.0.0
+# Last Updated: 2026-03-10
+# Maintainer:   Eric Haywood <eric@headyconnection.org>
+# Purpose:      SINGLE AUTHORITATIVE production domain config for the entire
+#               Heady ecosystem. All other domain files are DEPRECATED.
+#
+# (c) 2024-2026 HeadySystems Inc. All Rights Reserved.
+# 60+ Provisional Patents. 59 Claims. 1 Trademark Filing.
+#
+# GOVERNANCE:
+#   - This is the ONLY file that defines production domain routing.
+#   - For dev/staging, see: configs/domain-mappings.yaml
+#   - For architecture reference, see: configs/domain-architecture.yaml
+#   - All other *-domains.yaml files are .deprecated and must NOT be used.
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ─────────────────────────────────────────────────────────────────────────────
+# INFRASTRUCTURE
+# ─────────────────────────────────────────────────────────────────────────────
+
+infrastructure:
+  origin:
+    service:       heady-liquid-latent-os
+    provider:      google_cloud_run
+    region:        us-central1
+    port:          3300
+    instances:     1-8
+    url:           https://heady-liquid-latent-os-XXXXXXXXXX-uc.a.run.app
+
+  edge:
+    worker:        heady-edge-router
+    provider:      cloudflare_workers
+    account_id:    8b1fa38f282c691423c6399247d53323
+
+  runtimes:
+    colab_pro_plus:
+      - region:    us-east
+        gpu:       A100
+      - region:    us-west
+        gpu:       A100
+      - region:    eu-west
+        gpu:       A100
+
+  databases:
+    postgres:
+      provider:    neon
+      project:     green-water-91851995
+      pooler:      true
+    redis:
+      provider:    upstash
+      instance:    finer-sole-64861
+
+  monitoring:
+    provider:      sentry
+    org:           headyconnection-inc
+    project:       heady-manager
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CLOUDFLARE ZONE MAPPINGS
+# ─────────────────────────────────────────────────────────────────────────────
+
+cloudflare_zones:
+  headyme.com:
+    type:          primary
+    ssl:           full_strict
+    proxy:         enabled
+    pages_project: headyme-com
+
+  headysystems.com:
+    type:          primary
+    ssl:           full_strict
+    proxy:         enabled
+    pages_project: headysystems-com
+
+  headyconnection.org:
+    type:          primary
+    ssl:           full_strict
+    proxy:         enabled
+    pages_project: headyconnection
+
+  headybuddy.org:
+    type:          primary
+    ssl:           full_strict
+    proxy:         enabled
+    pages_project: headybuddy
+
+  headymcp.com:
+    type:          primary
+    ssl:           full_strict
+    proxy:         enabled
+
+  headyapi.com:
+    type:          primary
+    ssl:           full_strict
+    proxy:         enabled
+    pages_project: headyapi
+
+  headyio.com:
+    type:          primary
+    ssl:           full_strict
+    proxy:         enabled
+    pages_project: headyio
+
+  headybot.com:
+    type:          primary
+    ssl:           full_strict
+    proxy:         enabled
+
+  headyai.com:
+    type:          primary
+    ssl:           full_strict
+    proxy:         enabled
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 9 PRODUCTION WEBSITES
+# ─────────────────────────────────────────────────────────────────────────────
+# All traffic flows: User -> Cloudflare Edge (heady-edge-router Worker)
+#                         -> Cloud Run origin (port 3300) OR Cloudflare Pages
+#
+# CSL gate thresholds govern routing alignment requirements:
+#   PSI (0.618)      — standard gate
+#   LOW (0.691)      — low alignment
+#   MEDIUM (0.809)   — moderate alignment
+#   HIGH (0.882)     — strong alignment
+#   CRITICAL (0.927) — near-certain alignment
+
+domains:
+
+  # ─── 1. Command Center ─────────────────────────────────────────────────────
+  headyme:
+    url:             https://headyme.com
+    www_redirect:    https://www.headyme.com -> https://headyme.com
+    role:            command_center
+    description:     "Primary user-facing dashboard — manages all Heady sessions, agents, and outputs"
+    runtime:         cloudflare_pages
+    pages_project:   headyme-com
+    origin:          cloud_run
+    services:
+      - session-manager
+      - dashboard-api
+      - user-auth
+      - notification-service
+    csl_gate:        0.809
+    pool:            hot
+    subdomains:
+      app:           https://app.headyme.com
+      api:           https://api.headyme.com
+
+  # ─── 2. Architecture Engine ────────────────────────────────────────────────
+  headysystems:
+    url:             https://headysystems.com
+    www_redirect:    https://www.headysystems.com -> https://headysystems.com
+    role:            architecture_engine
+    description:     "Core platform engineering — deploys and scales the Heady Latent OS"
+    runtime:         cloudflare_pages
+    pages_project:   headysystems-com
+    origin:          cloud_run
+    services:
+      - infra-provisioner
+      - swarm-coordinator
+      - liquid-scheduler
+      - deployment-api
+    csl_gate:        0.882
+    pool:            warm
+    subdomains:
+      app:           https://app.headysystems.com
+      api:           https://api.headysystems.com
+      admin:         https://admin.headysystems.com
+      status:        https://status.headysystems.com
+      cdn:           https://cdn.headysystems.com
+
+  # ─── 3. Nonprofit Hub ──────────────────────────────────────────────────────
+  headyconnection:
+    url:             https://headyconnection.org
+    www_redirect:    https://www.headyconnection.org -> https://headyconnection.org
+    role:            nonprofit
+    description:     "Nonprofit community platform — education, outreach, and open initiatives"
+    runtime:         cloudflare_pages
+    pages_project:   headyconnection
+    origin:          cloud_run
+    brand:           "HeadyConnection"
+    tagline:         "AI for social impact and global happiness"
+    services:
+      - content-cms
+      - community-api
+      - donation-service
+      - volunteer-portal
+    csl_gate:        0.618
+    pool:            warm
+    subdomains:
+      app:           https://app.headyconnection.org
+      api:           https://api.headyconnection.org
+      analytics:     https://analytics.headyconnection.org
+
+  # ─── 4. Companion AI ───────────────────────────────────────────────────────
+  headybuddy:
+    url:             https://headybuddy.org
+    www_redirect:    https://www.headybuddy.org -> https://headybuddy.org
+    role:            companion
+    description:     "AI companion layer — empathic interaction, emotional support, personal assistant"
+    runtime:         cloudflare_worker
+    origin:          cloud_run
+    brand:           "HeadyBuddy — A program of HeadyConnection"
+    tagline:         "Peer support for AI-powered social impact"
+    services:
+      - companion-agent
+      - emotional-model
+      - memory-bridge
+      - voice-interface
+    csl_gate:        0.809
+    pool:            hot
+    subdomains:
+      app:           https://app.headybuddy.org
+      api:           https://api.headybuddy.org
+      health:        https://health.headybuddy.org
+
+  # ─── 5. MCP Layer ──────────────────────────────────────────────────────────
+  headymcp:
+    url:             https://headymcp.com
+    www_redirect:    https://www.headymcp.com -> https://headymcp.com
+    role:            mcp_layer
+    description:     "Model Context Protocol gateway — routes tool calls and model context across the OS"
+    runtime:         cloudflare_worker
+    origin:          cloud_run
+    services:
+      - mcp-gateway
+      - tool-registry
+      - context-router
+      - json-rpc-dispatcher
+    csl_gate:        0.927
+    pool:            hot
+    subdomains:
+      app:           https://app.headymcp.com
+      api:           https://api.headymcp.com
+      mcp:           https://mcp.headymcp.com
+
+  # ─── 6. Developer Platform ─────────────────────────────────────────────────
+  headyio:
+    url:             https://headyio.com
+    www_redirect:    https://www.headyio.com -> https://headyio.com
+    role:            developer_platform
+    description:     "SDK, CLI tools, and developer experience for the Heady ecosystem"
+    runtime:         cloudflare_pages
+    pages_project:   headyio
+    origin:          cloud_run
+    services:
+      - sdk-registry
+      - cli-service
+      - docs-api
+      - sandbox-runner
+    csl_gate:        0.691
+    pool:            warm
+
+  # ─── 7. Automation Platform ────────────────────────────────────────────────
+  headybot:
+    url:             https://headybot.com
+    www_redirect:    https://www.headybot.com -> https://headybot.com
+    role:            automation
+    description:     "Workflow automation hub — pipelines, bots, scheduled tasks"
+    runtime:         cloud_run
+    origin:          cloud_run
+    services:
+      - workflow-engine
+      - bot-registry
+      - trigger-service
+      - scheduler
+    csl_gate:        0.809
+    pool:            warm
+
+  # ─── 8. API Gateway ────────────────────────────────────────────────────────
+  headyapi:
+    url:             https://headyapi.com
+    www_redirect:    https://www.headyapi.com -> https://headyapi.com
+    role:            api_gateway
+    description:     "Unified API gateway — rate limiting, auth, versioning, and routing"
+    runtime:         cloudflare_worker
+    pages_project:   headyapi
+    origin:          cloud_run
+    services:
+      - api-proxy
+      - rate-limiter
+      - auth-middleware
+      - api-analytics
+    csl_gate:        0.927
+    pool:            hot
+    rate_limits:
+      free:          100/hour
+      pro:           1000/hour
+      enterprise:    10000/hour
+
+  # ─── 9. Intelligence Hub ───────────────────────────────────────────────────
+  headyai:
+    url:             https://headyai.com
+    www_redirect:    https://www.headyai.com -> https://headyai.com
+    role:            intelligence_hub
+    description:     "AI model orchestration — inference, fine-tuning, vector search, and learning loops"
+    runtime:         cloud_run
+    origin:          cloud_run
+    services:
+      - inference-router
+      - vector-store
+      - fine-tune-manager
+      - monte-carlo-validator
+    csl_gate:        0.882
+    pool:            hot
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SERVICE ENDPOINTS (Branded — NO internal domains in user-facing config)
+# ─────────────────────────────────────────────────────────────────────────────
+# All service endpoints use branded domains routed through Cloudflare.
+# Internal Cloud Run URLs are NEVER exposed in user-facing configuration.
+
+service_endpoints:
+
+  # Core orchestration
+  heady-manager:
+    branded_url:     https://api.headysystems.com
+    port:            3300
+    protocols:       [https, websocket]
+    auth:            JWT + API Key
+    health_check:    /api/health
+
+  heady-buddy:
+    branded_url:     https://app.headybuddy.org
+    port:            5174
+    protocols:       [https, websocket]
+    auth:            JWT
+
+  heady-conductor:
+    branded_url:     https://api.headybot.com
+    port:            3305
+    protocols:       [https]
+    auth:            JWT
+
+  # MCP services
+  mcp-gateway:
+    branded_url:     https://mcp.headymcp.com
+    port:            3001
+    protocols:       [https, mcp_protocol]
+    auth:            API Key
+
+  # API gateway
+  api-gateway:
+    branded_url:     https://headyapi.com
+    port:            443
+    protocols:       [https, http2]
+    auth:            JWT + API Key
+
+  # Webhooks
+  webhook-receiver:
+    branded_url:     https://api.headysystems.com/webhooks
+    port:            443
+    protocols:       [https]
+    auth:            webhook_signatures
+
+# ─────────────────────────────────────────────────────────────────────────────
+# EDGE ROUTER CONFIG (heady-edge-router Worker)
+# ─────────────────────────────────────────────────────────────────────────────
+
+edge_router:
+  worker_name:       heady-edge-router
+  source:            /home/headyme/Heady/cloudflare/wrangler.toml
+  strategy:          host_header
+
+  routing_rules:
+    # Each incoming Host header is matched and routed to the appropriate origin
+    - host_pattern:  "headyme.com"
+      target:        cloud_run_origin
+      fallback:      cloudflare_pages:headyme-com
+
+    - host_pattern:  "headysystems.com"
+      target:        cloud_run_origin
+      fallback:      cloudflare_pages:headysystems-com
+
+    - host_pattern:  "headyconnection.org"
+      target:        cloud_run_origin
+      fallback:      cloudflare_pages:headyconnection
+
+    - host_pattern:  "headybuddy.org"
+      target:        cloud_run_origin
+      fallback:      cloudflare_pages:headybuddy
+
+    - host_pattern:  "headymcp.com"
+      target:        cloud_run_origin
+
+    - host_pattern:  "headyapi.com"
+      target:        cloud_run_origin
+      fallback:      cloudflare_pages:headyapi
+
+    - host_pattern:  "headyio.com"
+      target:        cloud_run_origin
+      fallback:      cloudflare_pages:headyio
+
+    - host_pattern:  "headybot.com"
+      target:        cloud_run_origin
+
+    - host_pattern:  "headyai.com"
+      target:        cloud_run_origin
+
+  # Subdomain routing (*.headysystems.com, *.headyconnection.org, etc.)
+  subdomain_rules:
+    - pattern:       "api.headysystems.com"
+      target:        cloud_run_origin
+      path_prefix:   /api
+
+    - pattern:       "app.headysystems.com"
+      target:        cloud_run_origin
+      path_prefix:   /app
+
+    - pattern:       "admin.headysystems.com"
+      target:        cloud_run_origin
+      path_prefix:   /admin
+      auth:          Basic + JWT
+
+    - pattern:       "api.headyconnection.org"
+      target:        cloud_run_origin
+      path_prefix:   /api/connection
+      auth:          API Key
+
+    - pattern:       "app.headyconnection.org"
+      target:        cloud_run_origin
+      path_prefix:   /app/connection
+
+    - pattern:       "api.headybuddy.org"
+      target:        cloud_run_origin
+      path_prefix:   /api/buddy
+
+    - pattern:       "app.headybuddy.org"
+      target:        cloud_run_origin
+      path_prefix:   /app/buddy
+
+    - pattern:       "mcp.headymcp.com"
+      target:        cloud_run_origin
+      path_prefix:   /mcp
+
+    - pattern:       "api.headymcp.com"
+      target:        cloud_run_origin
+      path_prefix:   /api/mcp
+
+    - pattern:       "api.headyme.com"
+      target:        cloud_run_origin
+      path_prefix:   /api/me
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CSL ROUTING ENGINE
+# ─────────────────────────────────────────────────────────────────────────────
+# Applied by csl-router.js when dispatching cross-domain requests.
+# All numeric parameters are phi-scaled per Sacred Geometry principles.
+
+routing:
+  default_csl_gate:  0.618          # PSI — fallback gate for unregistered domains
+  inter_domain_log:  true           # log all cross-domain routing decisions
+  max_hops:          8              # fib(6) — maximum routing hops before reject
+  timeout_ms:        6854           # phi^4 x 1000ms — cross-domain request timeout
+  heartbeat_ms:      29034          # phi^7 — dynamic heartbeat interval
+
+  csl_thresholds:
+    PSI:             0.618          # standard gate (phi inverse)
+    LOW:             0.691          # low alignment
+    MEDIUM:          0.809          # moderate alignment
+    HIGH:            0.882          # strong alignment
+    CRITICAL:        0.927          # near-certain alignment
+
+  pool_config:
+    hot:
+      description:   "Latency-critical services — sub-100ms target"
+      members:       [headyme, headybuddy, headymcp, headyapi, headyai]
+      max_latency:   100
+
+    warm:
+      description:   "Standard services — sub-500ms target"
+      members:       [headysystems, headyconnection, headyio, headybot]
+      max_latency:   500
+
+# ─────────────────────────────────────────────────────────────────────────────
+# LEGACY REDIRECTS
+# ─────────────────────────────────────────────────────────────────────────────
+
+redirects:
+  permanent_301:
+    - from:          heady.io
+      to:            headysystems.com
+    - from:          heady.ai
+      to:            headyai.com
+    - from:          heady.tech
+      to:            headysystems.com
+    - from:          headyio.com
+      to:            headyio.com          # self (canonical)
+
+  # Campaign vanity domains -> branded destinations
+  campaign_redirects:
+    - from:          headyi.com
+      to:            headysystems.com/get-started
+    - from:          aheady.com
+      to:            headysystems.com/get-started
+    - from:          beheady.com
+      to:            headysystems.com/get-started
+    - from:          headyup.com
+      to:            headysystems.com/get-started
+    - from:          headyon.com
+      to:            headymcp.com/app
+    - from:          headygo.com
+      to:            headymcp.com/app
+    - from:          headynow.com
+      to:            headymcp.com/app
+    - from:          headypro.com
+      to:            headysystems.com/pricing?plan=pro
+    - from:          headyenterprise.com
+      to:            headysystems.com/pricing?plan=enterprise
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CDN & STATIC ASSETS
+# ─────────────────────────────────────────────────────────────────────────────
+
+cdn:
+  primary:           cdn.headysystems.com
+  assets:            assets.headysystems.com
+  static_nonprofit:  static.headyconnection.org
+  provider:          cloudflare
+
+# ─────────────────────────────────────────────────────────────────────────────
+# EMAIL DOMAINS
+# ─────────────────────────────────────────────────────────────────────────────
+
+email:
+  commercial:
+    - headysystems.com
+    - noreply@headysystems.com
+  nonprofit:
+    - headyconnection.org
+    - noreply@headyconnection.org
+  program:
+    - headybuddy.org
+    - hello@headybuddy.org
+
+# ─────────────────────────────────────────────────────────────────────────────
+# OAUTH CALLBACK URLs
+# ─────────────────────────────────────────────────────────────────────────────
+
+oauth_callbacks:
+  production:
+    - https://app.headysystems.com/oauth/callback
+    - https://app.headyconnection.org/oauth/callback
+    - https://headybuddy.org/oauth/callback
+    - https://app.headymcp.com/oauth/callback
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECURITY POLICIES
+# ─────────────────────────────────────────────────────────────────────────────
+
+policies:
+  https_everywhere:
+    description:     "All production domains must use HTTPS with valid certificates"
+    applies_to:      all
+
+  no_internal_exposure:
+    description:     "Never expose internal Cloud Run URLs, IPs, or api.headysystems.com in user-facing content"
+    applies_to:      [docs, configs, examples, screenshots, error_messages]
+
+  security_headers:
+    description:     "All domains must include security headers via Cloudflare"
+    headers:
+      - Strict-Transport-Security
+      - Content-Security-Policy
+      - X-Frame-Options
+      - X-Content-Type-Options
+      - Referrer-Policy
+      - Permissions-Policy
+
+  zero_localhost:
+    description:     "No localhost, 127.0.0.1, 0.0.0.0, or .local references in production config"
+    enforcement:     strict
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CLOUDFLARE PAGES PROJECTS (10 total)
+# ─────────────────────────────────────────────────────────────────────────────
+
+pages_projects:
+  - headyapi
+  - headyos
+  - headyconnection
+  - headybuddy
+  - headyme-com
+  - headyme
+  - headysystems-com
+  - headysystems
+  - heady-headyweb
+  - heady-1ime1
+
+# ─────────────────────────────────────────────────────────────────────────────
+# MONITORING
+# ─────────────────────────────────────────────────────────────────────────────
+
+monitoring:
+  status_pages:
+    - https://status.headysystems.com
+    - https://analytics.headyconnection.org
+    - https://health.headybuddy.org
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# END OF CANONICAL DOMAIN CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════════
+# This file consolidates ALL production domain routing for the Heady ecosystem.
+# Any changes to domain routing MUST be made here and only here.
+# All deprecated domain files have been renamed to *.yaml.deprecated.
+# ═══════════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,224 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Heady™ Google Cloud Build Configuration
+# Founded by Eric Haywood — HeadySystems Inc.
+#
+# ALL numeric constants from Fibonacci:
+#   FIB = [1,1,2,3,5,8,13,21,34,55,89,144,233,377,610,987,1597,2584]
+#   Build timeout: FIB[14] = 610s
+#   Machine type: N1_HIGHCPU_8 (FIB[5] = 8 CPUs)
+#
+# GCP Project: gen-lang-client-0920560496
+# Region: us-east1
+# Artifact Registry: us-east1-docker.pkg.dev/gen-lang-client-0920560496/heady
+# ─────────────────────────────────────────────────────────────────────────────
+
+timeout: 610s                             # FIB[14]
+
+options:
+  machineType: N1_HIGHCPU_8               # FIB[5] = 8 CPUs
+  diskSizeGb: 89                          # FIB[10]
+  logging: CLOUD_LOGGING_ONLY
+  substitution_option: ALLOW_LOOSE
+  dynamic_substitutions: true
+  env:
+    - "PHI=1.6180339887498948"
+    - "SEED=42"
+    - "TEMPERATURE=0"
+    - "FOUNDER=Eric Haywood"
+
+substitutions:
+  _GCP_PROJECT: gen-lang-client-0920560496
+  _REGION: us-east1
+  _REGISTRY: us-east1-docker.pkg.dev
+  _REPO: gen-lang-client-0920560496/heady
+  _IMAGE: heady-universal
+  _CLOUDFLARE_ACCOUNT: 8b1fa38f282c691423c6399247d53323
+  _MIN_INSTANCES: "2"                     # FIB[2]
+  _MAX_INSTANCES: "34"                    # FIB[8]
+  _MEMORY: "233Mi"                        # FIB[12]
+  _CONCURRENCY: "89"                      # FIB[10]
+  _TIMEOUT: "55"                          # FIB[9]
+
+steps:
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # STEP 1: Install dependencies
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: install
+    name: node:22-alpine
+    entrypoint: npm
+    args: ["ci", "--omit=dev"]
+    timeout: 144s                         # FIB[11]
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # STEP 2: Run linting
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: lint
+    name: node:22-alpine
+    entrypoint: npx
+    args: ["eslint", ".", "--max-warnings", "0"]
+    timeout: 89s                          # FIB[10]
+    waitFor: ["install"]
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # STEP 3: Run tests
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: test
+    name: node:22-alpine
+    entrypoint: npm
+    args: ["test"]
+    env:
+      - "NODE_ENV=test"
+      - "PHI=1.6180339887498948"
+      - "SEED=42"
+      - "TEMPERATURE=0"
+    timeout: 144s                         # FIB[11]
+    waitFor: ["install"]
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # STEP 4: Security audit
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: audit
+    name: node:22-alpine
+    entrypoint: npm
+    args: ["audit", "--audit-level=high"]
+    timeout: 89s                          # FIB[10]
+    waitFor: ["install"]
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # STEP 5: Build universal container image
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: build
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - --file=infra/Dockerfile.universal
+      - --tag=${_REGISTRY}/${_REPO}/${_IMAGE}:${SHORT_SHA}
+      - --tag=${_REGISTRY}/${_REPO}/${_IMAGE}:latest
+      - --label=heady.founder=Eric Haywood
+      - --label=heady.phi=1.6180339887498948
+      - --label=heady.seed=42
+      - --label=heady.temperature=0
+      - --label=heady.commit=${COMMIT_SHA}
+      - --label=heady.branch=${BRANCH_NAME}
+      - --build-arg=NODE_ENV=production
+      - --cache-from=${_REGISTRY}/${_REPO}/${_IMAGE}:latest
+      - .
+    timeout: 233s                         # FIB[12]
+    waitFor: ["lint", "test", "audit"]
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # STEP 6: Push to Artifact Registry
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: push
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - --all-tags
+      - ${_REGISTRY}/${_REPO}/${_IMAGE}
+    timeout: 144s                         # FIB[11]
+    waitFor: ["build"]
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # STEP 7: Deploy HeadySoul (central hub) to Cloud Run
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: deploy-soul
+    name: gcr.io/cloud-builders/gcloud
+    args:
+      - run
+      - deploy
+      - heady-soul
+      - --image=${_REGISTRY}/${_REPO}/${_IMAGE}:${SHORT_SHA}
+      - --region=${_REGION}
+      - --platform=managed
+      - --min-instances=${_MIN_INSTANCES}
+      - --max-instances=${_MAX_INSTANCES}
+      - --memory=${_MEMORY}
+      - --cpu=1
+      - --timeout=${_TIMEOUT}s
+      - --concurrency=${_CONCURRENCY}
+      - --port=3310
+      - --no-allow-unauthenticated
+      - --set-env-vars=NODE_ENV=production,HEADY_ROLE=heady-soul,HEADY_PORT=3310,HEADY_FOUNDER=Eric Haywood,PHI=1.6180339887498948,SEED=42,TEMPERATURE=0,GCP_PROJECT=${_GCP_PROJECT},GCP_REGION=${_REGION},CLOUDFLARE_ACCOUNT=${_CLOUDFLARE_ACCOUNT},AUTH_DOMAIN=auth.headysystems.com
+      - --labels=founder=eric-haywood,phi=golden-ratio,environment=production
+    timeout: 233s                         # FIB[12]
+    waitFor: ["push"]
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # STEP 8: Deploy HeadyConductor to Cloud Run
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: deploy-conductor
+    name: gcr.io/cloud-builders/gcloud
+    args:
+      - run
+      - deploy
+      - heady-conductor
+      - --image=${_REGISTRY}/${_REPO}/${_IMAGE}:${SHORT_SHA}
+      - --region=${_REGION}
+      - --platform=managed
+      - --min-instances=1
+      - --max-instances=21
+      - --memory=144Mi
+      - --cpu=1
+      - --timeout=${_TIMEOUT}s
+      - --concurrency=55
+      - --port=3312
+      - --no-allow-unauthenticated
+      - --set-env-vars=NODE_ENV=production,HEADY_ROLE=heady-conductor,HEADY_PORT=3312,HEADY_FOUNDER=Eric Haywood,PHI=1.6180339887498948,SEED=42,TEMPERATURE=0,GCP_PROJECT=${_GCP_PROJECT},GCP_REGION=${_REGION}
+    timeout: 233s                         # FIB[12]
+    waitFor: ["push"]
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # STEP 9: Health verification
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: verify
+    name: gcr.io/cloud-builders/gcloud
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        echo "=== Heady™ Post-Deploy Verification ==="
+        echo "Founder: Eric Haywood"
+        echo "PHI: 1.6180339887498948"
+        echo "Commit: ${COMMIT_SHA}"
+        echo ""
+        echo "Verifying heady-soul..."
+        SOUL_URL=$(gcloud run services describe heady-soul --region=${_REGION} --format='value(status.url)' 2>/dev/null)
+        echo "Soul URL: $SOUL_URL"
+        for WAIT in 1 1 2 3 5 8; do
+          curl -sf "$SOUL_URL/health" -H "Authorization: Bearer $(gcloud auth print-identity-token)" && break
+          echo "Retrying in ${WAIT}s (Fibonacci backoff)..."
+          sleep "$WAIT"
+        done
+        echo ""
+        echo "Verifying heady-conductor..."
+        CONDUCTOR_URL=$(gcloud run services describe heady-conductor --region=${_REGION} --format='value(status.url)' 2>/dev/null)
+        echo "Conductor URL: $CONDUCTOR_URL"
+        for WAIT in 1 1 2 3 5 8; do
+          curl -sf "$CONDUCTOR_URL/health" -H "Authorization: Bearer $(gcloud auth print-identity-token)" && break
+          echo "Retrying in ${WAIT}s (Fibonacci backoff)..."
+          sleep "$WAIT"
+        done
+        echo ""
+        echo "=== Deployment Complete ==="
+    timeout: 89s                          # FIB[10]
+    waitFor: ["deploy-soul", "deploy-conductor"]
+
+images:
+  - ${_REGISTRY}/${_REPO}/${_IMAGE}:${SHORT_SHA}
+  - ${_REGISTRY}/${_REPO}/${_IMAGE}:latest
+
+artifacts:
+  objects:
+    location: gs://${_GCP_PROJECT}-build-artifacts/
+    paths:
+      - "coverage/**"

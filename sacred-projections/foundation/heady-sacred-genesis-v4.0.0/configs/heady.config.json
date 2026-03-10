@@ -1,0 +1,31 @@
+{
+  "system": {
+    "name": "Heady Sacred Genesis",
+    "version": "4.0.0",
+    "codename": "Sacred Genesis",
+    "environmentVariable": "HEADY_ENVIRONMENT",
+    "primaryDomainEnv": "HEADY_PRIMARY_DOMAIN"
+  },
+  "architecture": {
+    "pipelineStages": 21,
+    "pipelineVariants": [
+      "FAST_PATH",
+      "FULL_PATH",
+      "ARENA_PATH",
+      "LEARNING_PATH"
+    ],
+    "swarmCount": 17,
+    "beeTypeTarget": 89,
+    "maxConcurrentBees": 10000,
+    "memoryVectorDimensions": 384
+  },
+  "routing": {
+    "providers": [
+      "CloudflareWorkers",
+      "CloudRun",
+      "ColabBurst"
+    ],
+    "receiptSigning": "Ed25519",
+    "vectorMemory": "DeterministicHashEmbedding"
+  }
+}

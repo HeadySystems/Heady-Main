@@ -1,0 +1,58 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [
+    "**/.env.*local",
+    "shared/**"
+  ],
+  "pipeline": {
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "dist/**",
+        ".next/**",
+        "build/**"
+      ],
+      "cache": true
+    },
+    "lint": {
+      "outputs": [],
+      "cache": true
+    },
+    "test": {
+      "dependsOn": [
+        "build"
+      ],
+      "outputs": [],
+      "cache": false
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "typecheck": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [],
+      "cache": true
+    },
+    "deploy": {
+      "dependsOn": [
+        "build",
+        "test",
+        "lint"
+      ],
+      "outputs": [],
+      "cache": false
+    }
+  },
+  "globalEnv": [
+    "NODE_ENV",
+    "HEADY_DOMAIN",
+    "GCP_PROJECT",
+    "CLOUDFLARE_ACCOUNT_ID",
+    "FIREBASE_PROJECT_ID"
+  ]
+}

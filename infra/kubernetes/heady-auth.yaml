@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: heady-auth
+  labels:
+    app: heady-auth
+    heady.io/domain: auth
+    heady.io/autocontext: "true"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: heady-auth
+  template:
+    metadata:
+      labels:
+        app: heady-auth
+        heady.io/domain: auth
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8510"
+    spec:
+      containers:
+      - name: heady-auth
+        image: gcr.io/gen-lang-client-0920560496/heady-auth:latest
+        ports:
+        - containerPort: 8510
+          name: http
+        envFrom:
+        - configMapRef:
+            name: heady-global-config
+        - secretRef:
+            name: heady-secrets
+        env:
+        - name: AUTH_BASE_URL
+          value: "https://auth.headysystems.com"
+        - name: FIREBASE_PROJECT_ID
+          value: "gen-lang-client-0920560496"
+        - name: PORT
+          value: "8510"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8510
+          initialDelaySeconds: 13
+          periodSeconds: 21
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8510
+          initialDelaySeconds: 8
+          periodSeconds: 13
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: heady-auth
+spec:
+  selector:
+    app: heady-auth
+  ports:
+  - name: http
+    port: 8510
+    targetPort: 8510

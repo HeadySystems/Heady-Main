@@ -1,0 +1,26 @@
+{
+  "rings": {
+    "CENTER": {
+      "radius": 1.0,
+      "threshold": "HIGH"
+    },
+    "INNER": {
+      "radius": 1.6180339887,
+      "threshold": "HIGH"
+    },
+    "MIDDLE": {
+      "radius": 2.6180339887,
+      "threshold": "MEDIUM"
+    },
+    "OUTER": {
+      "radius": 4.2360679775,
+      "threshold": "LOW"
+    },
+    "GOVERNANCE": {
+      "radius": 6.8541019662,
+      "threshold": "HIGH"
+    }
+  },
+  "goldenAngleDegrees": 137.50776405003785,
+  "coherenceStandard": 0.6909830056
+}

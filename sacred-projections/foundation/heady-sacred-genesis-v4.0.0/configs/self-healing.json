@@ -1,0 +1,18 @@
+{
+  "states": [
+    "healthy",
+    "degraded",
+    "suspect",
+    "quarantined",
+    "recovering"
+  ],
+  "recoveryOrder": [
+    "retry",
+    "isolate",
+    "quarantine",
+    "respawn",
+    "rollback",
+    "escalate"
+  ],
+  "attestationRequiredAfterRecovery": true
+}

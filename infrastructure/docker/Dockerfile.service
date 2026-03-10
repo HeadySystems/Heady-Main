@@ -1,0 +1,42 @@
+# Heady™ Service Dockerfile — Multi-stage build
+# © 2026 HeadySystems Inc. — Eric Haywood — 51 Provisional Patents
+# Target: < 100MB distroless image
+
+ARG SERVICE_NAME=heady-service
+
+# ─── Stage 1: Builder ──────────────────────────────────────────
+FROM node:20-slim AS builder
+WORKDIR /build
+
+# Copy shared dependencies first for layer caching
+COPY shared/ ./shared/
+COPY package*.json ./
+
+# Copy service-specific files
+ARG SERVICE_NAME
+COPY services/${SERVICE_NAME}/package*.json ./services/${SERVICE_NAME}/
+
+RUN npm ci --production --workspace=services/${SERVICE_NAME} 2>/dev/null || npm ci --production
+
+COPY services/${SERVICE_NAME}/ ./services/${SERVICE_NAME}/
+COPY src/ ./src/
+COPY configs/ ./configs/
+
+# ─── Stage 2: Production ───────────────────────────────────────
+FROM gcr.io/distroless/nodejs20-debian12
+
+WORKDIR /app
+COPY --from=builder /build/ .
+
+ENV NODE_ENV=production
+ENV HEADY_VERSION=5.1.0
+
+ARG SERVICE_NAME
+ENV SERVICE_NAME=${SERVICE_NAME}
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=4s --timeout=3s --retries=3 --start-period=7s \
+  CMD ["node", "-e", "require('http').get('http://localhost:' + (process.env.SERVICE_PORT || 8080) + '/health', r => { r.statusCode === 200 ? process.exit(0) : process.exit(1) }).on('error', () => process.exit(1))"]
+
+CMD ["node", "services/${SERVICE_NAME}/index.js"]

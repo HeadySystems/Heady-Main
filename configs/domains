@@ -1,8 +1,38 @@
-tunnel: YOUR_ACTUAL_TUNNEL_ID  # Replace with your Cloudflare Tunnel ID
+# HEADY_BRAND:BEGIN
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║  ██╗  ██╗███████╗ █████╗ ██████╗ ██╗   ██╗                     ║
+# ║  ██║  ██║██╔════╝██╔══██╗██╔══██╗╚██╗ ██╔╝                     ║
+# ║  ███████║█████╗  ███████║██║  ██║ ╚████╔╝                      ║
+# ║  ██╔══██║██╔══╝  ██╔══██║██║  ██║  ╚██╔╝                       ║
+# ║  ██║  ██║███████╗██║  ██║██████╔╝   ██║                        ║
+# ║  ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝    ╚═╝                        ║
+# ║                                                                  ║
+# ║  ∞ SACRED GEOMETRY ∞  Organic Systems · Breathing Interfaces    ║
+# ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+# ║  FILE: configs/domains                                          ║
+# ║  LAYER: tunnel-config                                           ║
+# ╚══════════════════════════════════════════════════════════════════╝
+# HEADY_BRAND:END
+
+# TODO: Replace with actual Cloudflare Tunnel ID from dashboard
+# Run: cloudflared tunnel list   — to find your tunnel ID
+tunnel: REPLACE_WITH_ACTUAL_TUNNEL_ID
 credentials-file: /etc/cloudflare/credentials.json
+
 ingress:
+  # HeadyIO API — primary headyio.com API endpoint
   - hostname: api.headyio.com
-    service: http://manager.eadyio.com:3300
+    service: http://localhost:3300
+    originRequest:
+      noTLSVerify: true
+      connectTimeout: 30s
+
+  # HeadyMCP — MCP protocol endpoint
   - hostname: mcp.headymcp.com
-    service: http://tero.com:3001
+    service: http://localhost:3001
+    originRequest:
+      noTLSVerify: true
+      connectTimeout: 30s
+
+  # Catch-all: return 404 for unmatched hostnames
   - service: http_status:404

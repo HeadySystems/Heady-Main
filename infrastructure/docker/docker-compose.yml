@@ -1,0 +1,1730 @@
+# Heady™ Docker Compose — 55 Services + Infrastructure
+# © 2026 HeadySystems Inc. — Eric Haywood — 51 Provisional Patents
+# φ-scaled health checks: interval=4236ms(φ³×1000), timeout=2618ms(φ²×1000), retries=3(fib(4))
+
+version: "3.9"
+
+x-heady-healthcheck: &heady-healthcheck
+  interval: 4236ms      # φ³ × 1000
+  timeout: 2618ms       # φ² × 1000
+  retries: 3            # fib(4)
+  start_period: 6854ms  # φ⁴ × 1000
+
+x-heady-service: &heady-service
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options:
+      max-size: "13m"   # fib(7)
+      max-file: "5"     # fib(5)
+  deploy:
+    resources:
+      limits:
+        memory: 233M    # fib(13)
+      reservations:
+        memory: 89M     # fib(11)
+
+services:
+
+  # ═══ Infrastructure ═══════════════════════════════════════════════════
+
+  pgvector:
+    image: pgvector/pgvector:pg16
+    ports: ["5432:5432"]
+    environment:
+      POSTGRES_DB: heady
+      POSTGRES_USER: heady
+      POSTGRES_PASSWORD: ${PGVECTOR_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U heady"]
+      <<: *heady-healthcheck
+    networks: [heady-internal]
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+    command: redis-server --maxmemory 233mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      <<: *heady-healthcheck
+    networks: [heady-internal]
+
+  nats:
+    image: nats:2-alpine
+    ports: ["4222:4222", "8222:8222"]
+    command: --jetstream --store_dir /data --max_mem 233MB
+    volumes:
+      - natsdata:/data
+    healthcheck:
+      test: ["CMD", "nats-server", "--signal", "ldm"]
+      <<: *heady-healthcheck
+    networks: [heady-internal]
+
+  envoy:
+    image: envoyproxy/envoy:v1.29-latest
+    ports: ["8080:8080", "8443:8443", "9901:9901"]
+    volumes:
+      - ./infrastructure/envoy/envoy.yaml:/etc/envoy/envoy.yaml:ro
+    networks: [heady-internal, heady-external]
+
+  consul:
+    image: hashicorp/consul:1.17
+    ports: ["8500:8500"]
+    command: agent -server -bootstrap-expect=1 -ui -client=0.0.0.0
+    networks: [heady-internal]
+
+  prometheus:
+    image: prom/prometheus:v2.49.0
+    ports: ["9090:9090"]
+    volumes:
+      - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks: [heady-internal]
+
+  grafana:
+    image: grafana/grafana:10.3.0
+    ports: ["3000:3000"]
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+    volumes:
+      - ./infrastructure/grafana/dashboards:/var/lib/grafana/dashboards
+    networks: [heady-internal]
+
+  # ═══ INFERENCE ═══════════════════════════════════════════════════
+
+  heady-brain:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-brain
+    ports: ["3310:3310"]
+    environment:
+      SERVICE_NAME: heady-brain
+      SERVICE_PORT: "3310"
+      HEADY_DOMAIN: inference
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3310/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 610M
+
+  heady-brains:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-brains
+    ports: ["3311:3311"]
+    environment:
+      SERVICE_NAME: heady-brains
+      SERVICE_PORT: "3311"
+      HEADY_DOMAIN: inference
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3311/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 610M
+
+  heady-infer:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-infer
+    ports: ["3312:3312"]
+    environment:
+      SERVICE_NAME: heady-infer
+      SERVICE_PORT: "3312"
+      HEADY_DOMAIN: inference
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3312/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  ai-router:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: ai-router
+    ports: ["3313:3313"]
+    environment:
+      SERVICE_NAME: ai-router
+      SERVICE_PORT: "3313"
+      HEADY_DOMAIN: inference
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3313/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  model-gateway:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: model-gateway
+    ports: ["3314:3314"]
+    environment:
+      SERVICE_NAME: model-gateway
+      SERVICE_PORT: "3314"
+      HEADY_DOMAIN: inference
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3314/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+
+  # ═══ MEMORY ═══════════════════════════════════════════════════
+
+  heady-embed:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-embed
+    ports: ["3315:3315"]
+    environment:
+      SERVICE_NAME: heady-embed
+      SERVICE_PORT: "3315"
+      HEADY_DOMAIN: memory
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3315/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 610M
+
+  heady-memory:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-memory
+    ports: ["3316:3316"]
+    environment:
+      SERVICE_NAME: heady-memory
+      SERVICE_PORT: "3316"
+      HEADY_DOMAIN: memory
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3316/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 610M
+
+  heady-vector:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-vector
+    ports: ["3317:3317"]
+    environment:
+      SERVICE_NAME: heady-vector
+      SERVICE_PORT: "3317"
+      HEADY_DOMAIN: memory
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3317/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  heady-projection:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-projection
+    ports: ["3318:3318"]
+    environment:
+      SERVICE_NAME: heady-projection
+      SERVICE_PORT: "3318"
+      HEADY_DOMAIN: memory
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3318/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+
+  # ═══ AGENTS ═══════════════════════════════════════════════════
+
+  heady-bee-factory:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-bee-factory
+    ports: ["3319:3319"]
+    environment:
+      SERVICE_NAME: heady-bee-factory
+      SERVICE_PORT: "3319"
+      HEADY_DOMAIN: agents
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3319/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  heady-hive:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-hive
+    ports: ["3320:3320"]
+    environment:
+      SERVICE_NAME: heady-hive
+      SERVICE_PORT: "3320"
+      HEADY_DOMAIN: agents
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3320/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  heady-federation:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-federation
+    ports: ["3321:3321"]
+    environment:
+      SERVICE_NAME: heady-federation
+      SERVICE_PORT: "3321"
+      HEADY_DOMAIN: agents
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3321/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+
+  # ═══ ORCHESTRATION ═══════════════════════════════════════════════════
+
+  heady-soul:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-soul
+    ports: ["3322:3322"]
+    environment:
+      SERVICE_NAME: heady-soul
+      SERVICE_PORT: "3322"
+      HEADY_DOMAIN: orchestration
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3322/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  heady-conductor:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-conductor
+    ports: ["3323:3323"]
+    environment:
+      SERVICE_NAME: heady-conductor
+      SERVICE_PORT: "3323"
+      HEADY_DOMAIN: orchestration
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3323/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  heady-orchestration:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-orchestration
+    ports: ["3324:3324"]
+    environment:
+      SERVICE_NAME: heady-orchestration
+      SERVICE_PORT: "3324"
+      HEADY_DOMAIN: orchestration
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3324/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  auto-success-engine:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: auto-success-engine
+    ports: ["3325:3325"]
+    environment:
+      SERVICE_NAME: auto-success-engine
+      SERVICE_PORT: "3325"
+      HEADY_DOMAIN: orchestration
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3325/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  hcfullpipeline-executor:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: hcfullpipeline-executor
+    ports: ["3326:3326"]
+    environment:
+      SERVICE_NAME: hcfullpipeline-executor
+      SERVICE_PORT: "3326"
+      HEADY_DOMAIN: orchestration
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3326/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  heady-chain:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-chain
+    ports: ["3327:3327"]
+    environment:
+      SERVICE_NAME: heady-chain
+      SERVICE_PORT: "3327"
+      HEADY_DOMAIN: orchestration
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3327/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  prompt-manager:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: prompt-manager
+    ports: ["3328:3328"]
+    environment:
+      SERVICE_NAME: prompt-manager
+      SERVICE_PORT: "3328"
+      HEADY_DOMAIN: orchestration
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3328/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+
+  # ═══ SECURITY ═══════════════════════════════════════════════════
+
+  heady-guard:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-guard
+    ports: ["3329:3329"]
+    environment:
+      SERVICE_NAME: heady-guard
+      SERVICE_PORT: "3329"
+      HEADY_DOMAIN: security
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3329/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  heady-security:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-security
+    ports: ["3330:3330"]
+    environment:
+      SERVICE_NAME: heady-security
+      SERVICE_PORT: "3330"
+      HEADY_DOMAIN: security
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3330/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  heady-governance:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-governance
+    ports: ["3331:3331"]
+    environment:
+      SERVICE_NAME: heady-governance
+      SERVICE_PORT: "3331"
+      HEADY_DOMAIN: security
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3331/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  secret-gateway:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: secret-gateway
+    ports: ["3332:3332"]
+    environment:
+      SERVICE_NAME: secret-gateway
+      SERVICE_PORT: "3332"
+      HEADY_DOMAIN: security
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3332/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+
+  # ═══ MONITORING ═══════════════════════════════════════════════════
+
+  heady-health:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-health
+    ports: ["3333:3333"]
+    environment:
+      SERVICE_NAME: heady-health
+      SERVICE_PORT: "3333"
+      HEADY_DOMAIN: monitoring
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3333/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  heady-eval:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-eval
+    ports: ["3334:3334"]
+    environment:
+      SERVICE_NAME: heady-eval
+      SERVICE_PORT: "3334"
+      HEADY_DOMAIN: monitoring
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3334/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  heady-maintenance:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-maintenance
+    ports: ["3335:3335"]
+    environment:
+      SERVICE_NAME: heady-maintenance
+      SERVICE_PORT: "3335"
+      HEADY_DOMAIN: monitoring
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3335/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  heady-testing:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-testing
+    ports: ["3336:3336"]
+    environment:
+      SERVICE_NAME: heady-testing
+      SERVICE_PORT: "3336"
+      HEADY_DOMAIN: monitoring
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3336/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+
+  # ═══ WEB ═══════════════════════════════════════════════════
+
+  heady-web:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-web
+    ports: ["3337:3337"]
+    environment:
+      SERVICE_NAME: heady-web
+      SERVICE_PORT: "3337"
+      HEADY_DOMAIN: web
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3337/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  heady-buddy:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-buddy
+    ports: ["3338:3338"]
+    environment:
+      SERVICE_NAME: heady-buddy
+      SERVICE_PORT: "3338"
+      HEADY_DOMAIN: web
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3338/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  heady-ui:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-ui
+    ports: ["3339:3339"]
+    environment:
+      SERVICE_NAME: heady-ui
+      SERVICE_PORT: "3339"
+      HEADY_DOMAIN: web
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3339/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  heady-onboarding:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-onboarding
+    ports: ["3340:3340"]
+    environment:
+      SERVICE_NAME: heady-onboarding
+      SERVICE_PORT: "3340"
+      HEADY_DOMAIN: web
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3340/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  heady-pilot-onboarding:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-pilot-onboarding
+    ports: ["3341:3341"]
+    environment:
+      SERVICE_NAME: heady-pilot-onboarding
+      SERVICE_PORT: "3341"
+      HEADY_DOMAIN: web
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3341/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  heady-task-browser:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-task-browser
+    ports: ["3342:3342"]
+    environment:
+      SERVICE_NAME: heady-task-browser
+      SERVICE_PORT: "3342"
+      HEADY_DOMAIN: web
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3342/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+
+  # ═══ DATA ═══════════════════════════════════════════════════
+
+  heady-cache:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-cache
+    ports: ["3343:3343"]
+    environment:
+      SERVICE_NAME: heady-cache
+      SERVICE_PORT: "3343"
+      HEADY_DOMAIN: data
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3343/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+
+  # ═══ INTEGRATION ═══════════════════════════════════════════════════
+
+  api-gateway:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: api-gateway
+    ports: ["3344:3344"]
+    environment:
+      SERVICE_NAME: api-gateway
+      SERVICE_PORT: "3344"
+      HEADY_DOMAIN: integration
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3344/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  domain-router:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: domain-router
+    ports: ["3345:3345"]
+    environment:
+      SERVICE_NAME: domain-router
+      SERVICE_PORT: "3345"
+      HEADY_DOMAIN: integration
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3345/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  mcp-server:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: mcp-server
+    ports: ["3346:3346"]
+    environment:
+      SERVICE_NAME: mcp-server
+      SERVICE_PORT: "3346"
+      HEADY_DOMAIN: integration
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3346/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  google-mcp:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: google-mcp
+    ports: ["3347:3347"]
+    environment:
+      SERVICE_NAME: google-mcp
+      SERVICE_PORT: "3347"
+      HEADY_DOMAIN: integration
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3347/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  memory-mcp:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: memory-mcp
+    ports: ["3348:3348"]
+    environment:
+      SERVICE_NAME: memory-mcp
+      SERVICE_PORT: "3348"
+      HEADY_DOMAIN: integration
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3348/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  perplexity-mcp:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: perplexity-mcp
+    ports: ["3349:3349"]
+    environment:
+      SERVICE_NAME: perplexity-mcp
+      SERVICE_PORT: "3349"
+      HEADY_DOMAIN: integration
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3349/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  jules-mcp:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: jules-mcp
+    ports: ["3350:3350"]
+    environment:
+      SERVICE_NAME: jules-mcp
+      SERVICE_PORT: "3350"
+      HEADY_DOMAIN: integration
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3350/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  huggingface-gateway:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: huggingface-gateway
+    ports: ["3351:3351"]
+    environment:
+      SERVICE_NAME: huggingface-gateway
+      SERVICE_PORT: "3351"
+      HEADY_DOMAIN: integration
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3351/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  colab-gateway:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: colab-gateway
+    ports: ["3352:3352"]
+    environment:
+      SERVICE_NAME: colab-gateway
+      SERVICE_PORT: "3352"
+      HEADY_DOMAIN: integration
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3352/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  silicon-bridge:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: silicon-bridge
+    ports: ["3353:3353"]
+    environment:
+      SERVICE_NAME: silicon-bridge
+      SERVICE_PORT: "3353"
+      HEADY_DOMAIN: integration
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3353/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  discord-bot:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: discord-bot
+    ports: ["3354:3354"]
+    environment:
+      SERVICE_NAME: discord-bot
+      SERVICE_PORT: "3354"
+      HEADY_DOMAIN: integration
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3354/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+
+  # ═══ SPECIALIZED ═══════════════════════════════════════════════════
+
+  heady-vinci:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-vinci
+    ports: ["3355:3355"]
+    environment:
+      SERVICE_NAME: heady-vinci
+      SERVICE_PORT: "3355"
+      HEADY_DOMAIN: specialized
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3355/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  heady-autobiographer:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-autobiographer
+    ports: ["3356:3356"]
+    environment:
+      SERVICE_NAME: heady-autobiographer
+      SERVICE_PORT: "3356"
+      HEADY_DOMAIN: specialized
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3356/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  heady-midi:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: heady-midi
+    ports: ["3357:3357"]
+    environment:
+      SERVICE_NAME: heady-midi
+      SERVICE_PORT: "3357"
+      HEADY_DOMAIN: specialized
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3357/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  budget-tracker:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: budget-tracker
+    ports: ["3358:3358"]
+    environment:
+      SERVICE_NAME: budget-tracker
+      SERVICE_PORT: "3358"
+      HEADY_DOMAIN: specialized
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3358/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  cli-service:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: cli-service
+    ports: ["3359:3359"]
+    environment:
+      SERVICE_NAME: cli-service
+      SERVICE_PORT: "3359"
+      HEADY_DOMAIN: specialized
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3359/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+
+  # ═══ NEW ═══════════════════════════════════════════════════
+
+  auth-session:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: auth-session
+    ports: ["3360:3360"]
+    environment:
+      SERVICE_NAME: auth-session
+      SERVICE_PORT: "3360"
+      HEADY_DOMAIN: new
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3360/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  notification:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: notification
+    ports: ["3361:3361"]
+    environment:
+      SERVICE_NAME: notification
+      SERVICE_PORT: "3361"
+      HEADY_DOMAIN: new
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3361/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  analytics:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: analytics
+    ports: ["3362:3362"]
+    environment:
+      SERVICE_NAME: analytics
+      SERVICE_PORT: "3362"
+      HEADY_DOMAIN: new
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3362/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  scheduler:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: scheduler
+    ports: ["3363:3363"]
+    environment:
+      SERVICE_NAME: scheduler
+      SERVICE_PORT: "3363"
+      HEADY_DOMAIN: new
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3363/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+  search:
+    <<: *heady-service
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: search
+    ports: ["3364:3364"]
+    environment:
+      SERVICE_NAME: search
+      SERVICE_PORT: "3364"
+      HEADY_DOMAIN: new
+      NODE_ENV: production
+      PGVECTOR_URL: postgresql://heady:${PGVECTOR_PASSWORD}@pgvector:5432/heady
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3364/health',r=>{r.statusCode===200?process.exit(0):process.exit(1)}).on('error',()=>process.exit(1))"]
+      <<: *heady-healthcheck
+    depends_on:
+      pgvector: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      nats: { condition: service_healthy }
+    networks: [heady-internal]
+    deploy:
+      resources:
+        limits:
+          memory: 233M
+
+
+volumes:
+  pgdata:
+  natsdata:
+
+networks:
+  heady-internal:
+    driver: bridge
+  heady-external:
+    driver: bridge

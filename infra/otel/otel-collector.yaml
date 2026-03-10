@@ -1,0 +1,155 @@
+# OpenTelemetry Collector configuration for Heady platform
+# Receives spans from all 52 services, processes, and exports to backends
+# Correlation IDs propagated across all Heady service calls
+
+receivers:
+  # ── OTLP receiver (gRPC + HTTP) ───────────────────────────────────────────
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+        cors:
+          allowed_origins: ["*"]
+
+  # ── Prometheus scraper for Heady service metrics ─────────────────────────
+  prometheus:
+    config:
+      scrape_configs:
+      - job_name: heady-services
+        scrape_interval: 21s    # fib(8) seconds
+        scrape_timeout: 8s
+        static_configs:
+        - targets:
+          # Core Intelligence
+          - heady-brain:8100
+          - heady-brains:8101
+          - heady-soul:8102
+          - heady-conductor:8103
+          - heady-infer:8104
+          - heady-embed:8105
+          - heady-memory:8106
+          - heady-vector:8107
+          - heady-projection:8108
+          # Agent & Bee
+          - heady-bee-factory:8200
+          - heady-hive:8201
+          - heady-orchestration:8202
+          - heady-federation:8203
+          # Security & Governance
+          - heady-guard:8300
+          - heady-security:8301
+          - heady-governance:8302
+          # Monitoring & Health
+          - heady-health:8400
+          - heady-eval:8401
+          - heady-maintenance:8402
+          - heady-testing:8403
+          # User-Facing
+          - heady-web:8500
+          - heady-buddy:8501
+          - heady-ui:8502
+          - heady-onboarding:8503
+          - heady-task-browser:8505
+          # Pipeline & Workflow
+          - auto-success-engine:8600
+          - hcfullpipeline-executor:8601
+          - heady-chain:8602
+          - heady-cache:8603
+          # AI Routing & Gateway
+          - ai-router:8700
+          - api-gateway:8701
+          - model-gateway:8702
+          - domain-router:8703
+          # External Integrations
+          - mcp-server:8800
+          - google-mcp:8801
+          - memory-mcp:8802
+          - perplexity-mcp:8803
+          - jules-mcp:8804
+          - drupal-sync:8809
+          # Specialized
+          - heady-vinci:8900
+          - heady-autobiographer:8901
+          - heady-midi:8902
+          - budget-tracker:8903
+          - prompt-manager:8905
+          - heady-auto-context:8907
+
+  # ── Health check receiver ─────────────────────────────────────────────────
+  healthcheck:
+    endpoint: 0.0.0.0:13133
+
+processors:
+  # ── Batch processor (phi-scaled timing) ──────────────────────────────────
+  batch:
+    timeout: 2618ms      # φ² × 1000ms
+    send_batch_size: 144 # fib(12)
+    send_batch_max_size: 233  # fib(13)
+
+  # ── Memory limiter ────────────────────────────────────────────────────────
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 512
+    spike_limit_mib: 128
+
+  # ── Resource attributes (add Heady ecosystem context) ────────────────────
+  resource:
+    attributes:
+    - key: heady.ecosystem
+      value: "heady-system"
+      action: insert
+    - key: heady.version
+      value: "2.1.0"
+      action: insert
+
+  # ── Attribute processor (add correlation context) ─────────────────────────
+  attributes:
+    actions:
+    - key: heady.phi
+      value: "1.618033988749895"
+      action: insert
+
+exporters:
+  # ── Stdout (for log pipeline pickup in Cloud Run) ─────────────────────────
+  debug:
+    verbosity: basic
+    sampling_initial: 13    # fib(7)
+    sampling_thereafter: 5  # fib(5)
+
+  # ── OTLP export to Google Cloud Trace ────────────────────────────────────
+  otlp/gcp:
+    endpoint: cloudtrace.googleapis.com:443
+    headers:
+      x-goog-user-project: gen-lang-client-0920560496
+
+  # ── Prometheus metrics export ─────────────────────────────────────────────
+  prometheus:
+    endpoint: 0.0.0.0:8889
+    namespace: heady
+    const_labels:
+      ecosystem: heady-system
+      version: "2.1.0"
+
+service:
+  pipelines:
+    traces:
+      receivers:  [otlp]
+      processors: [memory_limiter, batch, resource, attributes]
+      exporters:  [otlp/gcp, debug]
+    metrics:
+      receivers:  [otlp, prometheus]
+      processors: [memory_limiter, batch, resource]
+      exporters:  [prometheus, debug]
+    logs:
+      receivers:  [otlp]
+      processors: [memory_limiter, batch, resource]
+      exporters:  [debug]
+
+  extensions: [healthcheck]
+  telemetry:
+    logs:
+      level: info
+    metrics:
+      address: 0.0.0.0:8888

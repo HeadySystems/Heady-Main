@@ -1,0 +1,210 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Heady™ OpenTelemetry Collector Configuration
+# Founded by Eric Haywood — HeadySystems Inc.
+#
+# Receives telemetry from all 50 services, exports to Prometheus + Jaeger.
+# Correlation IDs via heady.domain span attributes.
+#
+# Fibonacci constants:
+#   FIB[7]=21   → batch timeout (seconds)
+#   FIB[8]=34   → queue retry initial interval (seconds)
+#   FIB[9]=55   → queue retry max interval (seconds)
+#   FIB[10]=89  → queue retry max elapsed time (seconds)
+#   FIB[11]=144 → batch send size
+#   FIB[12]=233 → queue size
+#   FIB[13]=377 → memory limiter hard limit (MiB)
+#   FIB[4]=5    → num workers
+#   FIB[6]=13   → scrape interval (seconds)
+# ─────────────────────────────────────────────────────────────────────────────
+
+receivers:
+
+  # OTLP gRPC receiver — all 50 services send telemetry here
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+        max_recv_msg_size_mib: 34        # FIB[8]=34
+        max_concurrent_streams: 89       # FIB[10]=89
+      http:
+        endpoint: 0.0.0.0:4318
+
+  # Prometheus scraper for self-monitoring
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: otel-collector
+          scrape_interval: 13s           # FIB[6]=13
+          static_configs:
+            - targets: ["localhost:8888"]
+
+  # Host metrics for infrastructure visibility
+  hostmetrics:
+    collection_interval: 21s             # FIB[7]=21
+    scrapers:
+      cpu: {}
+      memory: {}
+      disk: {}
+      network: {}
+
+processors:
+
+  # Memory limiter to prevent OOM
+  memory_limiter:
+    check_interval: 5s                   # FIB[4]=5
+    limit_mib: 377                       # FIB[13]=377
+    spike_limit_mib: 89                  # FIB[10]=89
+
+  # Batch processor for efficient export
+  batch:
+    send_batch_size: 144                 # FIB[11]=144
+    send_batch_max_size: 233             # FIB[12]=233
+    timeout: 21s                         # FIB[7]=21
+
+  # Resource detection for GCP metadata
+  resourcedetection:
+    detectors: [env, gcp]
+    timeout: 5s                          # FIB[4]=5
+    override: false
+
+  # Add Heady-specific attributes to all telemetry
+  attributes:
+    actions:
+      - key: heady.founder
+        value: "Eric Haywood"
+        action: upsert
+      - key: heady.phi
+        value: "1.6180339887498948"
+        action: upsert
+      - key: heady.seed
+        value: "42"
+        action: upsert
+      - key: heady.temperature
+        value: "0"
+        action: upsert
+      - key: gcp.project
+        value: "gen-lang-client-0920560496"
+        action: upsert
+      - key: gcp.region
+        value: "us-east1"
+        action: upsert
+
+  # Filter out health check noise
+  filter:
+    error_mode: ignore
+    traces:
+      span:
+        - 'attributes["http.target"] == "/health"'
+        - 'attributes["http.target"] == "/ready"'
+
+  # Tail-based sampling for efficiency
+  tail_sampling:
+    decision_wait: 21s                   # FIB[7]=21
+    num_traces: 233                      # FIB[12]=233
+    policies:
+      # Always sample errors
+      - name: errors-policy
+        type: status_code
+        status_code:
+          status_codes: [ERROR]
+      # Always sample slow traces (> PHI3 seconds = 4.236s)
+      - name: latency-policy
+        type: latency
+        latency:
+          threshold_ms: 4236             # PHI3 * 1000
+      # Sample security domain traces at higher rate
+      - name: security-domain
+        type: string_attribute
+        string_attribute:
+          key: heady.domain
+          values: [security, governance]
+      # Probabilistic sampling for the rest (PSI ≈ 0.618)
+      - name: probabilistic-default
+        type: probabilistic
+        probabilistic:
+          sampling_percentage: 61.8      # PSI * 100
+
+exporters:
+
+  # Prometheus exporter for metrics
+  prometheus:
+    endpoint: 0.0.0.0:8889
+    namespace: heady
+    const_labels:
+      founder: eric_haywood
+      system: heady_max_potential
+    resource_to_telemetry_conversion:
+      enabled: true
+    enable_open_metrics: true
+
+  # OTLP exporter to Jaeger for traces
+  otlp/jaeger:
+    endpoint: jaeger:4317
+    tls:
+      insecure: true
+    retry_on_failure:
+      enabled: true
+      initial_interval: 34s             # FIB[8]=34
+      max_interval: 55s                 # FIB[9]=55
+      max_elapsed_time: 89s             # FIB[10]=89
+    sending_queue:
+      enabled: true
+      num_consumers: 5                   # FIB[4]=5
+      queue_size: 233                    # FIB[12]=233
+
+  # Debug exporter for local development
+  debug:
+    verbosity: basic
+    sampling_initial: 5                  # FIB[4]=5
+    sampling_thereafter: 34              # FIB[8]=34
+
+  # Logging exporter for structured logs
+  logging:
+    verbosity: normal
+    sampling_initial: 5                  # FIB[4]=5
+    sampling_thereafter: 34              # FIB[8]=34
+
+extensions:
+
+  # Health check endpoint
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+  # Performance profiling
+  pprof:
+    endpoint: 0.0.0.0:1777
+
+  # zPages for debugging
+  zpages:
+    endpoint: 0.0.0.0:55679
+
+service:
+
+  extensions: [health_check, pprof, zpages]
+
+  pipelines:
+
+    # Traces pipeline
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, resourcedetection, attributes, filter, tail_sampling, batch]
+      exporters: [otlp/jaeger, debug]
+
+    # Metrics pipeline
+    metrics:
+      receivers: [otlp, prometheus, hostmetrics]
+      processors: [memory_limiter, resourcedetection, attributes, batch]
+      exporters: [prometheus, debug]
+
+    # Logs pipeline
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, resourcedetection, attributes, batch]
+      exporters: [logging]
+
+  telemetry:
+    logs:
+      level: info
+    metrics:
+      level: detailed
+      address: 0.0.0.0:8888

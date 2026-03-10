@@ -1,0 +1,22 @@
+{
+  "name": "@heady/colab-gateway",
+  "version": "1.0.0",
+  "description": "Heady Colab Pro+ GPU Gateway \u2014 3 Runtimes as Latent Space Ops",
+  "author": "Eric Haywood <eric@headyconnection.org>",
+  "license": "PROPRIETARY",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "pino": "^9.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "tsx": "^4.7.0",
+    "@types/node": "^20.11.0"
+  }
+}

@@ -1,0 +1,185 @@
+syntax = "proto3";
+
+package heady;
+
+option go_package = "github.com/HeadyMe/heady-proto/heady";
+
+// ═══════════════════════════════════════════════════════
+// Heady Inter-Service gRPC Definitions
+// Author: Eric Haywood / HeadySystems Inc. — 51 Provisional Patents
+// ═══════════════════════════════════════════════════════
+
+// Health checking service (standard gRPC health check)
+service HealthService {
+  rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
+  rpc Watch(HealthCheckRequest) returns (stream HealthCheckResponse);
+}
+
+message HealthCheckRequest {
+  string service = 1;
+}
+
+message HealthCheckResponse {
+  enum ServingStatus {
+    UNKNOWN = 0;
+    SERVING = 1;
+    NOT_SERVING = 2;
+    SERVICE_UNKNOWN = 3;
+  }
+  ServingStatus status = 1;
+  double coherence_score = 2;
+  double uptime_seconds = 3;
+}
+
+// Embedding service
+service EmbeddingService {
+  rpc Embed(EmbedRequest) returns (EmbedResponse);
+  rpc EmbedBatch(EmbedBatchRequest) returns (EmbedBatchResponse);
+  rpc StreamEmbed(stream EmbedRequest) returns (stream EmbedResponse);
+}
+
+message EmbedRequest {
+  string text = 1;
+  string model = 2;
+  int32 dimensions = 3; // 384 default
+}
+
+message EmbedResponse {
+  repeated float embedding = 1;
+  int32 dimensions = 2;
+  double latency_ms = 3;
+}
+
+message EmbedBatchRequest {
+  repeated string texts = 1;
+  string model = 2;
+  int32 batch_size = 3; // FIB[8] = 21 default
+}
+
+message EmbedBatchResponse {
+  repeated EmbedResponse embeddings = 1;
+  int32 total_count = 2;
+  double total_latency_ms = 3;
+}
+
+// Vector memory service
+service VectorMemoryService {
+  rpc Store(StoreRequest) returns (StoreResponse);
+  rpc Search(SearchRequest) returns (SearchResponse);
+  rpc Delete(DeleteRequest) returns (DeleteResponse);
+}
+
+message StoreRequest {
+  string id = 1;
+  repeated float vector = 2;
+  map<string, string> metadata = 3;
+  string namespace = 4;
+}
+
+message StoreResponse {
+  bool success = 1;
+  string id = 2;
+}
+
+message SearchRequest {
+  repeated float query_vector = 1;
+  int32 top_k = 2; // FIB[8] = 21 default
+  double similarity_threshold = 3; // CSL_THRESHOLD = 0.618
+  string namespace = 4;
+  map<string, string> filters = 5;
+}
+
+message SearchResponse {
+  repeated SearchResult results = 1;
+  double latency_ms = 2;
+}
+
+message SearchResult {
+  string id = 1;
+  double score = 2;
+  map<string, string> metadata = 3;
+}
+
+message DeleteRequest {
+  string id = 1;
+  string namespace = 2;
+}
+
+message DeleteResponse {
+  bool success = 1;
+}
+
+// Conductor routing service
+service ConductorService {
+  rpc Route(RouteRequest) returns (RouteResponse);
+  rpc GetPipelineStatus(PipelineStatusRequest) returns (PipelineStatusResponse);
+  rpc StreamPipeline(PipelineRequest) returns (stream PipelineStageResult);
+}
+
+message RouteRequest {
+  string task_description = 1;
+  string priority = 2; // hot, warm, cold
+  map<string, string> context = 3;
+}
+
+message RouteResponse {
+  string target_node = 1;
+  string pool = 2;
+  double confidence = 3;
+  double csl_score = 4;
+}
+
+message PipelineRequest {
+  string task = 1;
+  string code = 2;
+  string context = 3;
+}
+
+message PipelineStatusRequest {
+  string pipeline_id = 1;
+}
+
+message PipelineStatusResponse {
+  string pipeline_id = 1;
+  string status = 2;
+  int32 current_stage = 3;
+  int32 total_stages = 4;
+  double coherence_score = 5;
+}
+
+message PipelineStageResult {
+  string stage_name = 1;
+  string status = 2;
+  string output = 3;
+  double duration_ms = 4;
+  int32 stage_number = 5;
+}
+
+// Notification service
+service NotificationService {
+  rpc Send(NotifyRequest) returns (NotifyResponse);
+  rpc SendBatch(NotifyBatchRequest) returns (NotifyBatchResponse);
+}
+
+message NotifyRequest {
+  string user_id = 1;
+  string channel = 2; // email, sms, push, in_app, webhook
+  string template = 3;
+  map<string, string> variables = 4;
+  string priority = 5;
+}
+
+message NotifyResponse {
+  string notification_id = 1;
+  string status = 2;
+}
+
+message NotifyBatchRequest {
+  repeated NotifyRequest notifications = 1;
+}
+
+message NotifyBatchResponse {
+  repeated NotifyResponse results = 1;
+  int32 sent_count = 2;
+  int32 failed_count = 3;
+}

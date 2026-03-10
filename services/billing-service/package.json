@@ -1,0 +1,30 @@
+{
+  "name": "billing-service",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Stripe integration for subscriptions and marketplace with φ-scaled pricing tiers",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "PORT=3400 node --watch index.js",
+    "health": "curl -s http://localhost:3400/health | jq ."
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "stripe": "^15.0.0",
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/sdk-node": "^0.52.0",
+    "@opentelemetry/exporter-trace-otlp-grpc": "^0.52.0",
+    "@opentelemetry/instrumentation-express": "^0.41.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "heady": {
+    "domain": "integration",
+    "port": 3400,
+    "architecture": "concurrent-equals",
+    "phiScaled": true,
+    "autoContext": "mandatory"
+  }
+}

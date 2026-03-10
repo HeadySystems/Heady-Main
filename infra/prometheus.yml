@@ -1,0 +1,250 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Heady™ Prometheus Scrape Configuration
+# Founded by Eric Haywood — HeadySystems Inc.
+#
+# Scrapes all 50 services at ports 3310–3372.
+# scrape_interval: FIB[7]=21s
+# evaluation_interval: FIB[8]=34s
+# scrape_timeout: FIB[6]=13s
+#
+# ALL numeric constants from Fibonacci sequence.
+# ─────────────────────────────────────────────────────────────────────────────
+
+global:
+  scrape_interval: 21s           # FIB[7]=21 seconds
+  evaluation_interval: 34s       # FIB[8]=34 seconds
+  scrape_timeout: 13s            # FIB[6]=13 seconds
+  external_labels:
+    cluster: heady-max-potential
+    founder: eric-haywood
+    gcp_project: gen-lang-client-0920560496
+    region: us-east1
+
+# ─── ALERTING ────────────────────────────────────────────────────────────────
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+# ─── RULES ───────────────────────────────────────────────────────────────────
+
+rule_files: []
+
+# ─── SCRAPE CONFIGS ──────────────────────────────────────────────────────────
+
+scrape_configs:
+
+  # ─── SELF-MONITORING ─────────────────────────────────────────────────────
+  - job_name: prometheus
+    scrape_interval: 21s
+    static_configs:
+      - targets: ["localhost:9090"]
+        labels:
+          domain: infrastructure
+          ring: monitoring
+
+  # ─── OTEL COLLECTOR ──────────────────────────────────────────────────────
+  - job_name: otel-collector
+    scrape_interval: 21s
+    static_configs:
+      - targets: ["otel-collector:8889"]
+        labels:
+          domain: infrastructure
+          ring: monitoring
+
+  # ─── INFRASTRUCTURE SERVICES ─────────────────────────────────────────────
+
+  - job_name: consul
+    scrape_interval: 21s
+    consul_sd_configs:
+      - server: consul:8500
+    relabel_configs:
+      - source_labels: [__meta_consul_service]
+        target_label: service
+      - source_labels: [__meta_consul_tags]
+        regex: .*,csl-domain:([^,]+),.*
+        target_label: heady_domain
+      - source_labels: [__meta_consul_tags]
+        regex: .*,ring:([^,]+),.*
+        target_label: heady_ring
+
+  - job_name: nats
+    scrape_interval: 21s
+    static_configs:
+      - targets: ["nats:8222"]
+        labels:
+          domain: infrastructure
+          ring: infra
+          service: nats
+
+  - job_name: redis
+    scrape_interval: 21s
+    static_configs:
+      - targets: ["redis:6379"]
+        labels:
+          domain: infrastructure
+          ring: infra
+          service: redis
+
+  - job_name: envoy
+    scrape_interval: 21s
+    static_configs:
+      - targets: ["envoy:9901"]
+        labels:
+          domain: infrastructure
+          ring: infra
+          service: envoy
+
+  # ─── GROUP 1: INFERENCE (3310–3317) ──────────────────────────────────────
+
+  - job_name: heady-inference
+    scrape_interval: 21s
+    static_configs:
+      - targets:
+          - "heady-soul:3310"
+          - "heady-brains:3311"
+          - "heady-conductor:3312"
+          - "heady-vinci:3313"
+          - "llm-router:3314"
+          - "embedding-router:3315"
+          - "moe-csl-router:3316"
+          - "prompt-executor:3317"
+        labels:
+          domain: inference
+
+  # ─── GROUP 2: MEMORY (3318–3323) ────────────────────────────────────────
+
+  - job_name: heady-memory
+    scrape_interval: 21s
+    static_configs:
+      - targets:
+          - "vector-memory:3318"
+          - "graph-rag:3319"
+          - "hybrid-search:3320"
+          - "context-window:3321"
+          - "durable-state:3322"
+          - "pattern-store:3323"
+        labels:
+          domain: memory
+
+  # ─── GROUP 3: AGENTS (3324–3331) ────────────────────────────────────────
+
+  - job_name: heady-agents
+    scrape_interval: 21s
+    static_configs:
+      - targets:
+          - "bee-factory:3324"
+          - "swarm-coordinator:3325"
+          - "jules-agent:3326"
+          - "builder-agent:3327"
+          - "observer-agent:3328"
+          - "murphy-agent:3329"
+          - "atlas-agent:3330"
+          - "pythia-agent:3331"
+        labels:
+          domain: agents
+
+  # ─── GROUP 4: ORCHESTRATION (3332–3338) ─────────────────────────────────
+
+  - job_name: heady-orchestration
+    scrape_interval: 21s
+    static_configs:
+      - targets:
+          - "task-decomposition:3332"
+          - "liquid-gateway:3333"
+          - "backpressure:3334"
+          - "hcfp-runner:3335"
+          - "arena-engine:3336"
+          - "socratic-loop:3337"
+          - "monte-carlo:3338"
+        labels:
+          domain: orchestration
+
+  # ─── GROUP 5: SECURITY (3339–3345) ──────────────────────────────────────
+
+  - job_name: heady-security
+    scrape_interval: 21s
+    static_configs:
+      - targets:
+          - "security-gate:3339"
+          - "zero-trust:3340"
+          - "heady-check:3341"
+          - "heady-assure:3342"
+          - "heady-aware:3343"
+          - "heady-risk:3344"
+          - "heady-mc:3345"
+        labels:
+          domain: security
+
+  # ─── GROUP 6: MONITORING (3346–3349) ────────────────────────────────────
+
+  - job_name: heady-monitoring
+    scrape_interval: 21s
+    static_configs:
+      - targets:
+          - "heady-patterns:3346"
+          - "circuit-breaker:3347"
+          - "self-healing:3348"
+          - "phi-backoff:3349"
+        labels:
+          domain: monitoring
+
+  # ─── GROUP 7: WEB (3350–3358) ───────────────────────────────────────────
+
+  - job_name: heady-web
+    scrape_interval: 21s
+    static_configs:
+      - targets:
+          - "web-headyme:3350"
+          - "web-headysystems:3351"
+          - "web-heady-ai:3352"
+          - "web-headyos:3353"
+          - "web-connection-org:3354"
+          - "web-connection-com:3355"
+          - "web-headyex:3356"
+          - "web-headyfinance:3357"
+          - "web-admin:3358"
+        labels:
+          domain: web
+
+  # ─── GROUP 8: DATA (3359–3362) ──────────────────────────────────────────
+
+  - job_name: heady-data
+    scrape_interval: 21s
+    static_configs:
+      - targets:
+          - "edge-origin-router:3359"
+          - "audit-logger:3360"
+          - "rate-limiter:3361"
+          - "mcp-gateway:3362"
+        labels:
+          domain: data
+
+  # ─── GROUP 9: INTEGRATION (3363–3367) ───────────────────────────────────
+
+  - job_name: heady-integration
+    scrape_interval: 21s
+    static_configs:
+      - targets:
+          - "bridge-agent:3363"
+          - "muse-agent:3364"
+          - "sentinel-agent:3365"
+          - "nova-agent:3366"
+          - "janitor-agent:3367"
+        labels:
+          domain: integration
+
+  # ─── GROUP 10: SPECIALIZED (3368–3372) ──────────────────────────────────
+
+  - job_name: heady-specialized
+    scrape_interval: 21s
+    static_configs:
+      - targets:
+          - "generative-ui:3368"
+          - "patent-registry:3369"
+          - "sophia-agent:3370"
+          - "cipher-agent:3371"
+          - "lens-agent:3372"
+        labels:
+          domain: specialized

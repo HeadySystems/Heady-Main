@@ -1,0 +1,112 @@
+# Heady™ CI/CD — Build, Test, Deploy
+# © 2026 HeadySystems Inc. — Eric Haywood — 51 Provisional Patents
+name: Heady Deploy Pipeline
+
+on:
+  push:
+    branches: [main, production]
+  pull_request:
+    branches: [main]
+
+env:
+  GCP_PROJECT: gen-lang-client-0920560496
+  GCP_REGION: us-east1
+  REGISTRY: gcr.io/gen-lang-client-0920560496
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run test:unit
+      - run: node scripts/phi-compliance-check.js
+
+  phi-compliance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: node scripts/phi-compliance-check.js
+      - name: Verify zero magic numbers
+        run: |
+          SCORE=$(node scripts/phi-compliance-check.js 2>&1 | grep "Score:" | grep -oP '\d+(?=/)')
+          if [ "$SCORE" != "100" ]; then
+            echo "φ-Compliance failed: $SCORE/100"
+            exit 1
+          fi
+
+  build-and-push:
+    needs: [lint-and-test, phi-compliance]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/production'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - heady-brain
+          - heady-memory
+          - heady-conductor
+          - api-gateway
+          - auth-session
+          - search
+          - notification
+          - mcp-server
+          - heady-buddy
+          - auto-success-engine
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - run: gcloud auth configure-docker
+      - name: Build and push ${{ matrix.service }}
+        run: |
+          docker build \
+            --build-arg SERVICE_NAME=${{ matrix.service }} \
+            -f infrastructure/docker/Dockerfile.service \
+            -t $REGISTRY/${{ matrix.service }}:${{ github.sha }} \
+            -t $REGISTRY/${{ matrix.service }}:latest \
+            .
+          docker push $REGISTRY/${{ matrix.service }}:${{ github.sha }}
+          docker push $REGISTRY/${{ matrix.service }}:latest
+
+  deploy-cloud-run:
+    needs: build-and-push
+    if: github.ref == 'refs/heads/production'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - { name: heady-brain, port: 3310, min: 1, cpu: always-on, concurrency: 80 }
+          - { name: heady-memory, port: 3316, min: 1, cpu: always-on, concurrency: 80 }
+          - { name: heady-conductor, port: 3323, min: 1, cpu: always-on, concurrency: 80 }
+          - { name: api-gateway, port: 3344, min: 1, cpu: always-on, concurrency: 80 }
+          - { name: auth-session, port: 3360, min: 1, cpu: always-on, concurrency: 89 }
+          - { name: search, port: 3364, min: 0, cpu: throttled, concurrency: 55 }
+          - { name: mcp-server, port: 3346, min: 0, cpu: throttled, concurrency: 34 }
+    steps:
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Deploy ${{ matrix.service.name }}
+        run: |
+          gcloud run deploy ${{ matrix.service.name }} \
+            --image $REGISTRY/${{ matrix.service.name }}:${{ github.sha }} \
+            --region $GCP_REGION \
+            --port ${{ matrix.service.port }} \
+            --min-instances ${{ matrix.service.min }} \
+            --max-instances 13 \
+            --concurrency ${{ matrix.service.concurrency }} \
+            --cpu-boost \
+            --memory 512Mi \
+            --set-env-vars NODE_ENV=production,HEADY_VERSION=5.1.0 \
+            --allow-unauthenticated

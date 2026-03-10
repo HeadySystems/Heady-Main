@@ -1,0 +1,215 @@
+{
+  "__inputs": [],
+  "__requires": [
+    { "type": "datasource", "id": "prometheus", "name": "Prometheus" }
+  ],
+  "annotations": { "list": [] },
+  "description": "Heady™ Platform — Service Health Dashboard. All services concurrent equals. φ-scaled refresh.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Service Health Status (All 58 Services)",
+      "type": "stat",
+      "gridPos": { "h": 5, "w": 24, "x": 0, "y": 0 },
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "count(up == 1)",
+          "legendFormat": "Healthy"
+        },
+        {
+          "expr": "count(up == 0)",
+          "legendFormat": "Unhealthy"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": 0 },
+              { "color": "yellow", "value": 50 },
+              { "color": "green", "value": 58 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Services by Domain",
+      "type": "piechart",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 5 },
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "count by (domain) (up)",
+          "legendFormat": "{{domain}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Request Rate (All Services)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 16, "x": 8, "y": 5 },
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total[5m])) by (job)",
+          "legendFormat": "{{job}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Response Latency p99 (by Domain)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 13 },
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, domain))",
+          "legendFormat": "{{domain}} p99"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Circuit Breaker States",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 13 },
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "heady_circuit_breaker_state",
+          "format": "table",
+          "legendFormat": "{{service}}"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Bulkhead Utilization",
+      "type": "gauge",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 21 },
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "heady_bulkhead_active / 55 * 100",
+          "legendFormat": "{{service}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": 0 },
+              { "color": "yellow", "value": 61.8 },
+              { "color": "red", "value": 85 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 7,
+      "title": "Error Rate (5xx by Service)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 21 },
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m])) by (job)",
+          "legendFormat": "{{job}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "id": 8,
+      "title": "PostgreSQL Connections",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 29 },
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "pg_stat_activity_count",
+          "legendFormat": "Active Connections"
+        },
+        {
+          "expr": "233",
+          "legendFormat": "Max (FIB[12])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "title": "Vector Operations (pgvector)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 29 },
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(rate(heady_vector_operations_total[5m])) by (operation)",
+          "legendFormat": "{{operation}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        }
+      }
+    }
+  ],
+  "refresh": "13s",
+  "schemaVersion": 39,
+  "tags": ["heady", "platform", "phi-scaled"],
+  "templating": {
+    "list": [
+      {
+        "name": "domain",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(up, domain)",
+        "multi": true,
+        "includeAll": true,
+        "current": { "text": "All", "value": "$__all" }
+      }
+    ]
+  },
+  "time": { "from": "now-1h", "to": "now" },
+  "timezone": "browser",
+  "title": "Heady™ Platform Health",
+  "uid": "heady-platform-health",
+  "version": 1
+}

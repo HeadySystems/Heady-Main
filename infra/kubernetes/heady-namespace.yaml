@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: heady
+  labels:
+    name: heady
+    heady.io/ecosystem: "true"
+    heady.io/version: "2.1.0"
+---
+# ConfigMap with global Heady constants
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: heady-global-config
+  namespace: heady
+data:
+  PHI: "1.618033988749895"
+  PSI: "0.618033988749895"
+  VECTOR_DIM: "384"
+  CSL_GATE_INCLUDE: "0.382"
+  CSL_GATE_BOOST: "0.618"
+  CSL_GATE_INJECT: "0.718"
+  AUTOCONTEXT_URL: "http://heady-auto-context.heady.svc.cluster.local:8907"
+  CONSUL_URL: "http://consul.heady.svc.cluster.local:8500"
+  OTEL_ENDPOINT: "http://otel-collector.heady.svc.cluster.local:4318"
+  VECTOR_MEMORY_URL: "http://heady-memory.heady.svc.cluster.local:8106"
+  DRUPAL_BASE_URL: "https://cms.headysystems.com"
+  FIREBASE_PROJECT_ID: "gen-lang-client-0920560496"
+  AUTH_BASE_URL: "https://auth.headysystems.com"
+  ALLOWED_REDIRECT_HOSTS: "headyme.com,headysystems.com,heady-ai.com,headyos.com,headyconnection.org,headyconnection.com,headyex.com,headyfinance.com,admin.headysystems.com,auth.headysystems.com"
+---
+# Secret object is intentionally key-empty in source control.
+# Populate required keys through your secret manager or CI/CD before rollout.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: heady-secrets
+  namespace: heady
+  annotations:
+    heady.io/required-keys: "DRUPAL_WEBHOOK_SECRET,FIREBASE_SERVICE_ACCOUNT_KEY,FIREBASE_API_KEY,AUTH_COOKIE_SECRET,POSTGRES_URL"
+type: Opaque
+stringData: {}
+---
+# Baseline autoscaling policy for the core AutoContext service
+# Scale-up trigger: CPU > PSI (61.8%)
+# Scale-down stabilization: 89s (fib(11))
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: heady-auto-context-hpa
+  namespace: heady
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: heady-auto-context
+  minReplicas: 2
+  maxReplicas: 21  # fib(8)
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 61  # ≈ PSI × 100
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 34   # fib(9)
+      policies:
+      - type: Pods
+        value: 3                        # fib(4)
+        periodSeconds: 13              # fib(7)
+    scaleDown:
+      stabilizationWindowSeconds: 89   # fib(11)
+      policies:
+      - type: Pods
+        value: 1
+        periodSeconds: 34              # fib(9)
+---
+# PodDisruptionBudget — maintain minimum availability during rolling updates
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: heady-services-pdb
+  namespace: heady
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      heady.io/autocontext: "true"
