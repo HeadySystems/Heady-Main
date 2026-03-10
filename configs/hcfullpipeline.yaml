@@ -602,9 +602,9 @@ pipeline:
 
   # ─── TASK BACKLOG (scanned from in/ 2026-03-10T07:30Z) ─────────────────────
   taskBacklog:
-    scanDate: "2026-03-10T14:27:00Z"
-    source: "in/*.zip (10 unique packages: 4 jules sessions, heady-max-potential, heady-max-potential-v5.1.0, heady-liquid-latent-os-bundle, heady-perplexity-full-system-context, heady_bounded_security_pass, heady_system_build_current_state)"
-    version: "7.0.0"
+    scanDate: "2026-03-10T16:34:00Z"
+    source: "in/*.zip (24 unique packages extracted, 4 duplicates skipped: 11 Heady system bundles + 17 Jules session exports)"
+    version: "8.0.0"
 
     # ── CRITICAL ─────────────────────────────────────────────────────────────
     critical:
@@ -1440,8 +1440,10 @@ pipeline:
         source: "in/jules_session_3042080524948389498/GAPS_FOUND.md"
         targets: [services/auth-session-server/index.js, services/heady-onboarding/]
         stage: execute
-        status: open
+        status: done
+        completedAt: "2026-03-10T16:45:00Z"
         priority: critical
+        resolution: "Firebase Admin SDK already wired; CORS whitelist expanded to 11 Heady domains"
 
       - id: TB-055
         task: "Structured logging migration — remaining 50+ service files"
@@ -1464,8 +1466,10 @@ pipeline:
         source: "in/jules_session_16844719546955948096/GAPS_FOUND.md"
         targets: [src/middleware/cors-policy.js, src/middleware/security/cors-policy.js]
         stage: execute
-        status: open
+        status: done
+        completedAt: "2026-03-10T16:45:00Z"
         priority: minor
+        resolution: "Removed duplicate dist/middleware/cors-policy.js; canonical copy at dist/middleware/security/cors-policy.js"
 
       - id: TB-057
         task: "Implement session storage backend with httpOnly cookies"
@@ -1620,8 +1624,10 @@ pipeline:
         source: "in/jules_session_3042080524948389498/GAPS_FOUND.md"
         targets: [src/, services/]
         stage: execute
-        status: open
+        status: done
+        completedAt: "2026-03-10T16:45:00Z"
         priority: major
+        resolution: "Replaced wildcard CORS in 6 dist/ files with origin-whitelisted CORS (11 Heady domains)"
 
       - id: TB-070
         task: "Map Colab Pro+ memberships as latent space operators"
@@ -1634,3 +1640,192 @@ pipeline:
         stage: execute
         status: open
         priority: minor
+
+    # ── NEW BACKLOG (from 2026-03-10T16:34Z full in/ extraction — 24 packages) ──
+    inFolderScan_20260310T1634:
+
+      # ── CRITICAL ──────────────────────────────────────────────────────────────
+
+      - id: TB-071
+        task: "Wire heady-cognition modules into orchestration runtime"
+        description: >
+          heady-cognition/ integrated from jules_session_2030306490357698989
+          (819-file package). Contains enforcement rules, persona definitions,
+          law modules, and WIRING_GUIDE.md. Wire into boot sequence and agent
+          persona resolution.
+        source: "in/jules_session_2030306490357698989.zip"
+        targets: [heady-cognition/]
+        stage: execute-major-phase
+        status: open
+        priority: critical
+
+      - id: TB-072
+        task: "Wire heady-max infra stack (NATS, PgBouncer, Consul, Envoy) into deployment"
+        description: >
+          Full infrastructure stack from heady-liquid-latent-os-v2.0.0 integrated
+          to infra/heady-max/. Includes docker-compose.yml (50K lines), NATS server
+          config, PgBouncer pooling, Consul service discovery, Envoy proxy,
+          colab-gateway TypeScript service, scaling configs, and security policies.
+          Port assignments: NATS 4222/8222/6222, Envoy 3310, Consul 8500, PgBouncer 6432.
+          Wire into deployment manifests and reconcile with existing docker-compose.yml.
+        source: "in/heady-liquid-latent-os-v2.0.0.zip"
+        targets: [infra/heady-max/, docker-compose.yml]
+        stage: execute-major-phase
+        status: open
+        priority: critical
+
+      - id: TB-073
+        task: "Run and validate heady-patent-implementations test suite"
+        description: >
+          Patent implementation tests integrated from jules_session_2030306490357698989.
+          Contains run-tests.js runner and tests/ directory with CSL engine, phi-math,
+          VSA, and spatial computing patent validation tests. Execute and fix failures.
+        source: "in/jules_session_2030306490357698989.zip"
+        targets: [heady-patent-implementations/]
+        stage: self-critique
+        status: open
+        priority: critical
+
+      # ── MEDIUM ────────────────────────────────────────────────────────────────
+
+      - id: TB-074
+        task: "Archive 00-HEADY-FULL-REBUILD-PROMPT as canonical build spec"
+        description: >
+          Full rebuild prompt (32K lines) archived to docs/heady-full-rebuild/.
+          Contains source-reference code, enforcement rules, persona definitions.
+          Index in docs/ README and link from HEADY_CONTEXT.md.
+        source: "in/jules_session_2030306490357698989.zip"
+        targets: [docs/heady-full-rebuild/]
+        stage: finalize
+        status: open
+        priority: medium
+
+      - id: TB-075
+        task: "Wire phi-compliance-validator and phi-compliance-checker into CI"
+        description: >
+          Two phi-compliance tools integrated to tools/. Validates all numeric
+          constants derive from φ/Fibonacci. Add to pre-commit hooks and CI
+          pipeline as mandatory checks.
+        source: "in/jules_session_2030306490357698989.zip"
+        targets: [tools/phi-compliance-validator.js, tools/phi-compliance-checker.js]
+        stage: optimize
+        status: open
+        priority: medium
+
+      - id: TB-076
+        task: "Wire branch-protection rules and apply to GitHub repos"
+        description: >
+          Branch protection configs integrated: rulesets.json, CODEOWNERS,
+          pr-template.md, branch-protection-apply.sh, branch-protection-verify.sh.
+          Run apply script against all HeadyMe GitHub repos.
+        source: "in/jules_session_2030306490357698989.zip"
+        targets: [branch-protection/]
+        stage: deploy_priority
+        status: open
+        priority: medium
+
+      - id: TB-077
+        task: "Wire websites/generate-sites.js into build pipeline"
+        description: >
+          Site generation script from jules_session_15420467594094585555.
+          Generates static sites for all 9+ public domains. Wire into
+          pipeline finalize stage and reconcile with existing build-sites.py.
+        source: "in/jules_session_15420467594094585555.zip"
+        targets: [websites/generate-sites.js]
+        stage: finalize
+        status: open
+        priority: medium
+
+      - id: TB-078
+        task: "Merge HeadyAcademy Python modules (HeadyBrain, HeadyOptimizer)"
+        description: >
+          HeadyBrain.py, HeadyBrain_optimized.py, HeadyOptimizer.py integrated
+          to HeadyAcademy/. Contains neural network training, optimization,
+          and ML pipeline code. Validate Python dependencies and add to
+          requirements.txt.
+        source: "in/jules_session_11625959678638198903.zip"
+        targets: [HeadyAcademy/]
+        stage: execute-major-phase
+        status: open
+        priority: medium
+
+      # ── MINOR ─────────────────────────────────────────────────────────────────
+
+      - id: TB-079
+        task: "Wire 12 new test suites from session 2030306490357698989 into CI"
+        description: >
+          12 test files merged to tests/: bees, buddy-system, continuous-embedder,
+          cross-device-sync.runtime, heady-autocomplete, ide-bridge,
+          liquid-colab-services, octree-manager, pipeline-validation,
+          spatial-embedder, storage_policy, test-mcp. Add to jest config
+          and CI test matrix.
+        source: "in/jules_session_2030306490357698989.zip"
+        targets: [tests/]
+        stage: self-critique
+        status: open
+        priority: minor
+
+    # ── COMPLETED (from 2026-03-10T16:34Z in/ extraction) ─────────────────────
+    latestCompletedExtraction:
+      - id: TB-C19
+        task: "heady-cognition modules extracted and integrated"
+        description: "Enforcement rules, persona definitions, law modules, WIRING_GUIDE.md"
+        source: "in/jules_session_2030306490357698989.zip"
+        status: done
+        completedDate: "2026-03-10"
+
+      - id: TB-C20
+        task: "heady-patent-implementations extracted and integrated"
+        description: "Patent test runner, CSL/phi-math/VSA test suite"
+        source: "in/jules_session_2030306490357698989.zip"
+        status: done
+        completedDate: "2026-03-10"
+
+      - id: TB-C21
+        task: "heady-max infrastructure stack extracted and integrated"
+        description: "NATS, PgBouncer, Consul, Envoy, colab-gateway, scale configs, 50K-line docker-compose"
+        source: "in/heady-liquid-latent-os-v2.0.0.zip"
+        status: done
+        completedDate: "2026-03-10"
+
+      - id: TB-C22
+        task: "12 new test suites extracted and integrated"
+        description: "bees, buddy-system, continuous-embedder, cross-device-sync, ide-bridge, spatial-embedder + more"
+        source: "in/jules_session_2030306490357698989.zip"
+        status: done
+        completedDate: "2026-03-10"
+
+      - id: TB-C23
+        task: "phi-compliance tools integrated"
+        description: "phi-compliance-validator.js and phi-compliance-checker.js added to tools/"
+        source: "in/jules_session_2030306490357698989.zip"
+        status: done
+        completedDate: "2026-03-10"
+
+      - id: TB-C24
+        task: "branch-protection configs integrated"
+        description: "rulesets.json, CODEOWNERS, apply/verify scripts, pr-template.md"
+        source: "in/jules_session_2030306490357698989.zip"
+        status: done
+        completedDate: "2026-03-10"
+
+      - id: TB-C25
+        task: "HeadyAcademy Python modules integrated"
+        description: "HeadyBrain.py, HeadyBrain_optimized.py, HeadyOptimizer.py"
+        source: "in/jules_session_11625959678638198903.zip"
+        status: done
+        completedDate: "2026-03-10"
+
+      - id: TB-C26
+        task: "heady-full-rebuild docs archived"
+        description: "32K-line rebuild prompt + source-reference + enforcement rules"
+        source: "in/jules_session_2030306490357698989.zip"
+        status: done
+        completedDate: "2026-03-10"
+
+      - id: TB-C27
+        task: "websites/generate-sites.js integrated"
+        description: "Site generation script from session 15420467594094585555"
+        source: "in/jules_session_15420467594094585555.zip"
+        status: done
+        completedDate: "2026-03-10"
