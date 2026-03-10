@@ -9,36 +9,52 @@
 // ║                                                                  ║
 // ║  ∞ SACRED GEOMETRY ∞  Organic Systems · Breathing Interfaces    ║
 // ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
-// ║  FILE: services/api/controllers/mcpController.js                                                    ║
-// ║  LAYER: root                                                  ║
+// ║  FILE: src/shared/logger.js                                      ║
+// ║  LAYER: shared                                                   ║
 // ╚══════════════════════════════════════════════════════════════════╝
 // HEADY_BRAND:END
-import { readFileSync } from 'fs';
-import { createRequire } from 'module';
-import path from 'path';
-import yaml from 'yaml';
+/**
+ * Shared Logger Factory
+ *
+ * Usage:
+ *   const logger = require('../../src/shared/logger')('MyModule');
+ *   logger.info('Server started');
+ *   logger.error('Connection failed', err.message);
+ *   logger.warn('Cache miss');
+ *   logger.debug('Verbose detail');
+ *
+ * Wraps ColorfulLogger so every service uses structured, tagged output.
+ */
 
-const require = createRequire(import.meta.url);
-const logger = require('../../../src/shared/logger')('MCPController');
+const ColorfulLogger = require('../hc_colorful_logger');
 
-export const getMCPTools = async (req, res) => {
-  try {
-    const mcpConfigPath = path.join(process.cwd(), 'distribution', 'mcp', 'configs', 'default-mcp.yaml');
-    const file = readFileSync(mcpConfigPath, 'utf8');
-    const config = yaml.parse(file);
+/**
+ * Create a logger instance tagged with a module name.
+ * @param {string} moduleName — e.g. 'BrainAPI', 'MCPGateway'
+ * @returns {{ info, error, warn, debug, system, pipeline, success }}
+ */
+function createLogger(moduleName) {
+    const instance = new ColorfulLogger({
+        enabled: true,
+        level: process.env.LOG_LEVEL || 'info',
+        useRainbow: process.env.NODE_ENV !== 'production',
+        useEmojis: true
+    });
 
-    const tools = Object.entries(config.servers).map(([key, tool]) => ({
-      id: key,
-      name: tool.name,
-      description: tool.description,
-      enabled: tool.enabled,
-      requiredPlan: tool.requiredPlan || 'free',
-      capabilities: tool.capabilities || []
-    }));
+    return {
+        info: (msg) => instance.info(msg, moduleName),
+        error: (msg) => instance.error(msg, moduleName),
+        warn: (msg) => instance.warning(msg, moduleName),
+        debug: (msg) => instance.debug(msg, moduleName),
+        system: (msg) => instance.system(msg, moduleName),
+        pipeline: (msg) => instance.pipeline(msg, moduleName),
+        success: (msg) => instance.success(msg, moduleName),
+        startup: () => instance.startup(moduleName),
+        shutdown: () => instance.shutdown(moduleName),
 
-    res.status(200).json(tools);
-  } catch (error) {
-    logger.error(`Failed to load MCP tools: ${error.message}`);
-    res.status(500).json({ error: 'Failed to load MCP tools' });
-  }
-};
+        /** Direct access to the underlying ColorfulLogger */
+        _instance: instance
+    };
+}
+
+module.exports = createLogger;

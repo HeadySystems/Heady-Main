@@ -1,7 +1,7 @@
 {
   "name": "heady-dev-companion",
   "displayName": "Heady Dev Companion",
-  "description": "AI code assistant — completions, chat, refactors, agents, voice. Sacred Geometry.",
+  "description": "AI code assistant \u2014 completions, chat, refactors, agents, voice. Sacred Geometry.",
   "version": "0.1.0",
   "publisher": "HeadySystems",
   "license": "MIT",
@@ -12,22 +12,75 @@
   "engines": {
     "vscode": "^1.85.0"
   },
-  "categories": ["Programming Languages", "Machine Learning", "Other"],
-  "keywords": ["ai", "copilot", "assistant", "heady", "sacred-geometry", "agent"],
-  "activationEvents": ["onStartupFinished"],
+  "categories": [
+    "Programming Languages",
+    "Machine Learning",
+    "Other"
+  ],
+  "keywords": [
+    "ai",
+    "copilot",
+    "assistant",
+    "heady",
+    "sacred-geometry",
+    "agent"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
-      { "command": "heady.chat", "title": "Heady: Open Chat", "icon": "$(comment-discussion)" },
-      { "command": "heady.explain", "title": "Heady: Explain Selection", "icon": "$(lightbulb)" },
-      { "command": "heady.refactor", "title": "Heady: Refactor Selection", "icon": "$(edit)" },
-      { "command": "heady.tests", "title": "Heady: Generate Tests", "icon": "$(beaker)" },
-      { "command": "heady.docs", "title": "Heady: Generate Docs", "icon": "$(book)" },
-      { "command": "heady.fix", "title": "Heady: Fix Error", "icon": "$(wrench)" },
-      { "command": "heady.voice", "title": "Heady: Voice Input", "icon": "$(mic)" },
-      { "command": "heady.agent", "title": "Heady: Agent Mode", "icon": "$(robot)" },
-      { "command": "heady.login", "title": "Heady: Sign In", "icon": "$(key)" },
-      { "command": "heady.settings", "title": "Heady: Settings", "icon": "$(gear)" }
+      {
+        "command": "heady.chat",
+        "title": "Heady: Open Chat",
+        "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "heady.explain",
+        "title": "Heady: Explain Selection",
+        "icon": "$(lightbulb)"
+      },
+      {
+        "command": "heady.refactor",
+        "title": "Heady: Refactor Selection",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "heady.tests",
+        "title": "Heady: Generate Tests",
+        "icon": "$(beaker)"
+      },
+      {
+        "command": "heady.docs",
+        "title": "Heady: Generate Docs",
+        "icon": "$(book)"
+      },
+      {
+        "command": "heady.fix",
+        "title": "Heady: Fix Error",
+        "icon": "$(wrench)"
+      },
+      {
+        "command": "heady.voice",
+        "title": "Heady: Voice Input",
+        "icon": "$(mic)"
+      },
+      {
+        "command": "heady.agent",
+        "title": "Heady: Agent Mode",
+        "icon": "$(robot)"
+      },
+      {
+        "command": "heady.login",
+        "title": "Heady: Sign In",
+        "icon": "$(key)"
+      },
+      {
+        "command": "heady.settings",
+        "title": "Heady: Settings",
+        "icon": "$(gear)"
+      }
     ],
     "viewsContainers": {
       "activitybar": [
@@ -40,9 +93,19 @@
     },
     "views": {
       "heady-sidebar": [
-        { "type": "webview", "id": "heady.chatView", "name": "Chat" },
-        { "id": "heady.agentsView", "name": "Agents" },
-        { "id": "heady.historyView", "name": "History" }
+        {
+          "type": "webview",
+          "id": "heady.chatView",
+          "name": "Chat"
+        },
+        {
+          "id": "heady.agentsView",
+          "name": "Agents"
+        },
+        {
+          "id": "heady.historyView",
+          "name": "History"
+        }
       ]
     },
     "configuration": {
@@ -55,7 +118,11 @@
         },
         "heady.mode": {
           "type": "string",
-          "enum": ["local", "hybrid", "cloud"],
+          "enum": [
+            "local",
+            "hybrid",
+            "cloud"
+          ],
           "default": "hybrid",
           "description": "AI processing mode"
         },
@@ -77,15 +144,38 @@
       }
     },
     "keybindings": [
-      { "command": "heady.chat", "key": "ctrl+shift+h", "mac": "cmd+shift+h" },
-      { "command": "heady.explain", "key": "ctrl+shift+e", "mac": "cmd+shift+e", "when": "editorHasSelection" }
+      {
+        "command": "heady.chat",
+        "key": "ctrl+shift+h",
+        "mac": "cmd+shift+h"
+      },
+      {
+        "command": "heady.explain",
+        "key": "ctrl+shift+e",
+        "mac": "cmd+shift+e",
+        "when": "editorHasSelection"
+      }
     ],
     "menus": {
       "editor/context": [
-        { "command": "heady.explain", "when": "editorHasSelection", "group": "heady" },
-        { "command": "heady.refactor", "when": "editorHasSelection", "group": "heady" },
-        { "command": "heady.tests", "group": "heady" },
-        { "command": "heady.docs", "group": "heady" }
+        {
+          "command": "heady.explain",
+          "when": "editorHasSelection",
+          "group": "heady"
+        },
+        {
+          "command": "heady.refactor",
+          "when": "editorHasSelection",
+          "group": "heady"
+        },
+        {
+          "command": "heady.tests",
+          "group": "heady"
+        },
+        {
+          "command": "heady.docs",
+          "group": "heady"
+        }
       ]
     }
   },
@@ -100,7 +190,7 @@
   },
   "dependencies": {
     "node-fetch": "^3.3.2",
-    "ws": "^8.16.0",
+    "ws": "^8.18.0",
     "eventsource": "^2.0.2"
   },
   "devDependencies": {

@@ -43,6 +43,7 @@ const path = require('path');
 const yaml = require('js-yaml');
 
 const router = express.Router();
+const logger = require('../../src/shared/logger')('HCSysOrchestrator');
 
 // ─── Model Router Integration ────────────────────────────────────
 const { modelRouter } = require('./model_router');
@@ -52,7 +53,7 @@ function loadYaml(filename) {
   const filePath = path.join(__dirname, '..', '..', 'configs', filename);
   if (!fs.existsSync(filePath)) return null;
   try { return yaml.load(fs.readFileSync(filePath, 'utf8')); }
-  catch (e) { console.error(`Failed to load ${filename}:`, e.message); return null; }
+  catch (e) { logger.error(`Failed to load ${filename}: ${e.message}`); return null; }
 }
 
 let brainProfiles = null;

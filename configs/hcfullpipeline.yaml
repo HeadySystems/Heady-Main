@@ -530,3 +530,399 @@ pipeline:
         command: Start-Service -Name HeadyBuddy
       - name: trigger_state_sync
         command: Invoke-WebRequest -Uri http://api.headysystems.com:3300/api/buddy/sync-events
+
+  # ─── TASK BACKLOG (scanned from in/ 2026-03-10T07:30Z) ─────────────────────
+  taskBacklog:
+    scanDate: "2026-03-10T07:38:00Z"
+    source: "in/jules_session_139…014.zip, in/jules_session_162…328.zip, in/jules_session_158…046.zip, in/heady-perplexity-full-system-context.zip"
+    version: "5.5.0"
+
+    # ── CRITICAL ─────────────────────────────────────────────────────────────
+    critical:
+      - id: TB-001
+        task: "Configure DNS zones for all 11 public domains"
+        description: >
+          0/11 public domains resolve — headyme.com, headysystems.com,
+          headybuddy.org, headymcp.com, headyio.com, headyconnection.org,
+          headyapi.com, headyos.com, headyweb.com, headybot.com, headycloud.com.
+          Root cause: DNS zones not configured to point to Cloud Run service URLs.
+        source: GAPS_FOUND.md
+        targets: [cloudflare-dns]
+        stage: deploy_priority
+        status: open
+        priority: critical
+
+      - id: TB-002
+        task: "Create subdomain CNAME/A records"
+        description: >
+          All subdomain records missing — manager.headysystems.com,
+          api.headysystems.com, conductor.headysystems.com, etc.
+        source: GAPS_FOUND.md
+        targets: [cloudflare-dns]
+        stage: deploy_priority
+        status: open
+        priority: critical
+
+      - id: TB-003
+        task: "Integrate auth-session-server into monorepo and deploy"
+        description: >
+          New auth-session service with Dockerfile + package-lock delivered via
+          zip. Needs placement in services/, npm install, Cloud Run deploy.
+        source: "in/jules_session_139…014.zip"
+        targets: [services/auth-session-server/]
+        stage: execute-major-phase
+        status: open
+        priority: critical
+
+      - id: TB-004
+        task: "Run fix_eric_head.sh — normalize founder name"
+        description: >
+          Script replaces remaining 'Eric Head' references with 'Eric Haywood'
+          across .md, .js, .py, .json files (excludes node_modules, .git).
+        source: "in/jules_session_139…014.zip"
+        targets: [fix_eric_head.sh]
+        stage: finalize
+        status: open
+        priority: critical
+
+      - id: TB-005
+        task: "Run fix_dc2.py — inject auth-session-server into docker-compose"
+        description: >
+          Python script inserts auth-session-server service block into
+          docker-compose.yml (port 4309, Firebase project, healthcheck, heady-net).
+        source: "in/jules_session_139…014.zip"
+        targets: [fix_dc2.py, docker-compose.yml]
+        stage: execute-major-phase
+        status: open
+        priority: critical
+
+      - id: TB-016
+        task: "Copy complete auth-session-server source into monorepo"
+        description: >
+          ZIP 3 delivers full auth-session-server: package.json (@heady/auth-session-server v1.0.0,
+          express + cookie-parser + firebase-admin), src/index.js (sessionLogin/sessionLogout
+          endpoints, φ-scaled session TTL via PHI_INTERVAL, CSL confidence gates, port 3310),
+          Dockerfile (node:20-alpine). Supersedes ZIP 1 skeleton (which only had
+          Dockerfile + package-lock). Copy to services/auth-session-server/.
+        source: "in/jules_session_15849592285622860046.zip"
+        targets: [services/auth-session-server/]
+        stage: execute-major-phase
+        status: open
+        priority: critical
+
+      - id: TB-020
+        task: "Deploy Drupal 11 headless CMS with 7 custom modules"
+        description: >
+          Perplexity bundle delivers complete Drupal 11 headless CMS stack:
+          docker-compose (drupal:11-php8.3-apache, postgres:16-alpine, redis:7-alpine,
+          task-browser, nginx), setup script, and 7 custom modules — heady_admin
+          (dashboard, settings, services, HeadyLens), heady_cms (content manager,
+          liquid nodes, task browser, clipboard, content delivery), heady_control
+          (control panel dashboard), heady_config, heady_content, heady_sites
+          (taxonomy), heady_tasks (task management). Deploy at admin.headysystems.com.
+        source: "in/heady-perplexity-full-system-context.zip"
+        targets:
+          - drupal/14-drupal-config/
+          - drupal/web/modules/custom/
+        stage: execute-major-phase
+        status: open
+        priority: critical
+
+    # ── MEDIUM ───────────────────────────────────────────────────────────────
+    medium:
+      - id: TB-006
+        task: "Deploy enterprise Founder's Pilot landing page"
+        description: >
+          Full HTML/CSS landing page for HeadyOS Founder's Pilot Program —
+          89-day access, Sacred Geometry branding, apply form. Deploy to
+          headysystems.com or headyos.com.
+        source: "in/jules_session_162…328.zip"
+        targets: [heady-enterprise/pilot/landing-page/]
+        stage: deploy_priority
+        status: open
+        priority: medium
+
+      - id: TB-007
+        task: "Copy updated source files into monorepo"
+        description: >
+          Merge improved versions of: auth-manager.js (real OAuth2 fetch),
+          hc_autobuild.js (pino logging), auto-success-engine.js (pino logging),
+          bee-factory-v2.js (vectorMemory.embed impl).
+        source: "in/jules_session_162…328.zip"
+        targets:
+          - src/services/auth-manager.js
+          - src/hc_autobuild.js
+          - src/engines/auto-success-engine.js
+          - src/bees/bee-factory-v2.js
+        stage: execute-major-phase
+        status: open
+        priority: medium
+
+      - id: TB-008
+        task: "Merge docker-compose.yml additions"
+        description: >
+          New compose adds: pgvector/pgvector:pg16, redis:7-bookworm,
+          otel/opentelemetry-collector-contrib:0.120.0, heady-manager,
+          api-gateway, auth-session-server with full healthchecks and heady-net.
+        source: "in/jules_session_139…014.zip"
+        targets: [docker-compose.yml]
+        stage: execute-major-phase
+        status: open
+        priority: medium
+
+      - id: TB-009
+        task: "Merge .env secrets into vault or .env.production"
+        description: >
+          Secrets from zip .env need secure integration — either into HeadyVault
+          or merged into .env.production (never commit to git).
+        source: "in/jules_session_139…014.zip"
+        targets: [.env, .env.production]
+        stage: finalize
+        status: open
+        priority: medium
+
+      - id: TB-010
+        task: "Fix generate-verticals.js logger undefined in browser"
+        description: >
+          Login handler in generate-verticals.js references 'logger' which may
+          be undefined in browser context. Needs conditional check or browser-safe
+          logging fallback.
+        source: GAPS_FOUND.md
+        targets: [generate-verticals.js]
+        stage: self-critique
+        status: open
+        priority: medium
+
+      - id: TB-017
+        task: "Merge improved auth-manager.js with error-handling fallback"
+        description: >
+          ZIP 3 version adds try/catch around OAuth token exchange with logger.error
+          fallback and development/testing resilience. More robust than ZIP 2 version
+          which throws on failure. Diff merge needed into src/services/auth-manager.js.
+        source: "in/jules_session_15849592285622860046.zip"
+        targets: [src/services/auth-manager.js]
+        stage: execute-major-phase
+        status: open
+        priority: medium
+
+      - id: TB-018
+        task: "Merge improved bee-factory-v2.js with deps.executeAction pattern"
+        description: >
+          ZIP 3 version refactors worker logic to use deps.executeAction(name, ctx)
+          with structured return { bee, action, status, result/error, ts } instead
+          of direct vectorMemory.embed. More extensible pattern. Diff merge needed
+          into src/bees/bee-factory-v2.js.
+        source: "in/jules_session_15849592285622860046.zip"
+        targets: [src/bees/bee-factory-v2.js]
+        stage: execute-major-phase
+        status: open
+        priority: medium
+
+      - id: TB-019
+        task: "Add /health endpoint to auth-session-server"
+        description: >
+          Current auth-session-server src/index.js only has sessionLogin and
+          sessionLogout routes. Needs /health endpoint for Cloud Run health checks
+          and docker-compose healthcheck (fix_dc2.py expects port 4309 but
+          index.js defaults to 3310 — reconcile port).
+        source: "in/jules_session_15849592285622860046.zip"
+        targets: [services/auth-session-server/src/index.js]
+        stage: execute-major-phase
+        status: open
+        priority: medium
+
+      - id: TB-021
+        task: "Integrate domain-aliases.json into domain router"
+        description: >
+          Bundle provides domain alias map: www→bare redirects for 7 domains
+          plus manager.headysystems.com→admin.headysystems.com alias.
+          Integrate into domain-router.js and Cloudflare worker routing.
+        source: "in/heady-perplexity-full-system-context.zip"
+        targets: [configs/17-domain-aliases.json, src/services/domain-router.js]
+        stage: execute-major-phase
+        status: open
+        priority: medium
+
+      - id: TB-022
+        task: "Enforce reconciliation decisions in runtime configs"
+        description: >
+          Animal archetypes reconciliation: pipeline=21 stages, bee capacity=6765
+          (Fibonacci), auto-success base cycle=29034ms (phi-derived),
+          strategic ceiling 10K only in roadmap docs (not runtime).
+          Audit and enforce across heady-cognitive-config.json, hcfullpipeline configs.
+        source: "in/heady-perplexity-full-system-context.zip"
+        targets: [configs/heady-cognitive-config.json]
+        stage: self-critique
+        status: open
+        priority: medium
+
+      - id: TB-023
+        task: "Sync prime directive v2 and unbreakable laws v2 into configs"
+        description: >
+          Bundle includes SYSTEM_PRIME_DIRECTIVE.md v2.0.0 and UNBREAKABLE_LAWS.md
+          v2.0.0 with comprehensive agent behavior rules, code quality mandates,
+          and thorough-over-speed principle. Copy to configs/ and ensure all
+          agents reference them at boot.
+        source: "in/heady-perplexity-full-system-context.zip"
+        targets: [configs/SYSTEM_PRIME_DIRECTIVE.md, configs/UNBREAKABLE_LAWS.md]
+        stage: finalize
+        status: open
+        priority: medium
+
+    # ── MINOR ────────────────────────────────────────────────────────────────
+    minor:
+      - id: TB-011
+        task: "Create Architecture Decision Records (ADRs)"
+        description: >
+          No ADR documents exist. Create docs/adr/ directory with initial ADRs
+          covering core architecture decisions (CLA, Sacred Geometry, CSL gates,
+          multi-provider routing, cloud-first policy).
+        source: GAPS_FOUND.md
+        targets: [docs/adr/]
+        stage: finalize
+        status: open
+        priority: minor
+
+      - id: TB-012
+        task: "Add logging.logEntries.list permission to CI service account"
+        description: >
+          Cloud Run logs inaccessible — CI service account missing
+          logging.logEntries.list IAM permission.
+        source: GAPS_FOUND.md
+        targets: [GCP IAM]
+        stage: deploy_priority
+        status: open
+        priority: minor
+
+      - id: TB-013
+        task: "Migrate ~1000+ console.log to structured logging"
+        description: >
+          ~1000+ console.log instances remain across src/. Migrate to pino
+          structured JSON logging for production observability.
+        source: GAPS_FOUND.md
+        targets: ["src/**/*.js"]
+        stage: optimize
+        status: open
+        priority: minor
+
+      - id: TB-014
+        task: "Add entry points to services missing server.js/index.js"
+        description: >
+          Several services in services/ directory lack proper entry point files
+          (server.js or index.js), preventing standalone startup.
+        source: GAPS_FOUND.md
+        targets: [services/]
+        stage: execute-major-phase
+        status: open
+        priority: minor
+
+      - id: TB-015
+        task: "Update HEADY_CONTEXT.md version to current"
+        description: >
+          HEADY_CONTEXT.md still shows version 3.2.3 — needs update to match
+          current package.json version.
+        source: "in/jules_session_139…014.zip, in/jules_session_162…328.zip"
+        targets: [HEADY_CONTEXT.md]
+        stage: finalize
+        status: open
+        priority: minor
+
+      - id: TB-024
+        task: "Archive model-racing-prompts from downloads section"
+        description: >
+          Bundle 15-downloads/model-racing-prompts contains competitive prompts
+          for AI model evaluation. Copy to docs/ or prompts/ directory.
+        source: "in/heady-perplexity-full-system-context.zip"
+        targets: [docs/model-racing-prompts/]
+        stage: finalize
+        status: open
+        priority: minor
+
+      - id: TB-025
+        task: "Sync reference JS files from perplexity bundle"
+        description: >
+          Bundle includes reference copies of: auto-context.js, vector-memory.js,
+          auth-manager.js, bee-factory.js, swarm-coordinator.js,
+          17-swarm-orchestrator.js. Diff against monorepo versions and merge
+          any missing improvements.
+        source: "in/heady-perplexity-full-system-context.zip"
+        targets: [src/]
+        stage: optimize
+        status: open
+        priority: minor
+
+      - id: TB-026
+        task: "Archive full system build prompt (00-THIS-PROMPT.md)"
+        description: >
+          Master build directive from Eric Haywood to Perplexity Computer.
+          Archive as the canonical system build spec in docs/ for reference.
+        source: "in/heady-perplexity-full-system-context.zip"
+        targets: [docs/00-THIS-PROMPT.md]
+        stage: finalize
+        status: open
+        priority: minor
+
+    # ── COMPLETED (from in/ scan) ────────────────────────────────────────────
+    completed:
+      - id: TB-C01
+        task: "CORS wildcard → origin-whitelisted"
+        description: "Replaced Access-Control-Allow-Origin '*' across 9 files (14 instances)"
+        source: IMPROVEMENTS.md
+        status: done
+        completedDate: "2026-03-09"
+
+      - id: TB-C02
+        task: "localStorage → sessionStorage + httpOnly cookies"
+        description: "template-bee.js and generate-verticals.js migrated"
+        source: IMPROVEMENTS.md
+        status: done
+        completedDate: "2026-03-09"
+
+      - id: TB-C03
+        task: "Render.com → Cloud Run + Cloudflare migration"
+        description: "Purged all Render references from 9 config/registry files"
+        source: IMPROVEMENTS.md
+        status: done
+        completedDate: "2026-03-09"
+
+      - id: TB-C04
+        task: "Turbo workspace conflict resolution"
+        description: "services/heady-web renamed to @heady/heady-web-shell"
+        source: IMPROVEMENTS.md
+        status: done
+        completedDate: "2026-03-09"
+
+      - id: TB-C05
+        task: "Model routing upgrade"
+        description: "Primary: Gemini 2.5 Pro (Vertex AI), Fallback: Claude Sonnet 4"
+        source: IMPROVEMENTS.md
+        status: done
+        completedDate: "2026-03-09"
+
+      - id: TB-C06
+        task: "Structured logging in auto-success-engine.js + hc_autobuild.js"
+        description: "console.log → logger.info (pino structured JSON)"
+        source: IMPROVEMENTS.md
+        status: done
+        completedDate: "2026-03-10"
+
+      - id: TB-C07
+        task: "OAuth2 stub replaced with real fetch"
+        description: "auth-manager.js handleOAuth2Callback now performs actual HTTP fetch"
+        source: IMPROVEMENTS.md
+        status: done
+        completedDate: "2026-03-10"
+
+      - id: TB-C08
+        task: "bee-factory-v2 TODO replaced"
+        description: "Now uses deps.vectorMemory.embed instead of stub response"
+        source: IMPROVEMENTS.md
+        status: done
+        completedDate: "2026-03-10"
+
+      - id: TB-C09
+        task: "Founder name normalized"
+        description: "Eric Haywood normalized across all docs and landing pages"
+        source: IMPROVEMENTS.md
+        status: done
+        completedDate: "2026-03-10"

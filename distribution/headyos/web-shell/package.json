@@ -2,7 +2,7 @@
   "name": "headyos-web-shell",
   "version": "0.1.0",
   "private": true,
-  "description": "HeadyOS Web Shell — OS-like web UI with windowed panels, apps, and settings",
+  "description": "HeadyOS Web Shell \u2014 OS-like web UI with windowed panels, apps, and settings",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -27,7 +27,7 @@
     "@types/node": "^20.0.0",
     "@types/react": "^18.3.3",
     "autoprefixer": "^10.4.19",
-    "postcss": "^8.4.38",
+    "postcss": "^8.5.2",
     "typescript": "^5.4.0"
   },
   "headyos": {

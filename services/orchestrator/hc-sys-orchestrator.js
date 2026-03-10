@@ -40,6 +40,8 @@
 const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
+const logger = require('../../src/shared/logger')('HCSysOrchestrator');
+const { PHI_TIMEOUT_DEFAULT } = require('../../src/shared/phi-timeouts');
 
 class HCSysOrchestrator {
   constructor(configDir) {
@@ -69,9 +71,9 @@ class HCSysOrchestrator {
       }
 
       this._buildBrainEndpointMap();
-      console.log('[HCSysOrchestrator] Configs loaded successfully');
+      logger.info('Configs loaded successfully');
     } catch (err) {
-      console.error('[HCSysOrchestrator] Config load error:', err.message);
+      logger.error(`Config load error: ${err.message}`);
     }
   }
 
@@ -189,11 +191,8 @@ class HCSysOrchestrator {
     try {
       const descriptor = this.buildTaskDescriptor(request);
 
-      console.log(`[HCSysOrchestrator] Routing task ${descriptor.id}`);
-      console.log(`  Brain: ${descriptor.brain_profile_id}`);
-      console.log(`  Layer: ${descriptor.cloud_layer}`);
-      console.log(`  Model: ${descriptor.model.model}`);
-      console.log(`  Agents: ${descriptor.agents.map(a => a.role).join(', ')}`);
+      logger.info(`Routing task ${descriptor.id} | Brain: ${descriptor.brain_profile_id} | Layer: ${descriptor.cloud_layer} | Model: ${descriptor.model.model} | Agents: ${descriptor.agents.map(a => a.role).join(', ')}`);
+
 
       // Call HeadyBrain for plan
       const plan = await this.callBrainPlan(descriptor);
@@ -215,7 +214,7 @@ class HCSysOrchestrator {
       const latency = Date.now() - start;
       this.metrics.latency.push(latency);
 
-      console.error(`[HCSysOrchestrator] Route error:`, err.message);
+      logger.error(`Route error: ${err.message}`);
       return {
         success: false,
         error: err.message,
@@ -244,7 +243,7 @@ class HCSysOrchestrator {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(descriptor),
-        signal: AbortSignal.timeout(10000)
+        signal: AbortSignal.timeout(PHI_TIMEOUT_DEFAULT)
       });
 
       if (response.ok) {
@@ -252,7 +251,7 @@ class HCSysOrchestrator {
       }
       throw new Error(`Brain responded with ${response.status}`);
     } catch (err) {
-      console.warn(`[HCSysOrchestrator] Brain unreachable, using local plan:`, err.message);
+      logger.warn(`Brain unreachable, using local plan: ${err.message}`);
       return {
         strategy: 'local-fallback',
         agents: descriptor.agents.map(a => a.role),
@@ -274,7 +273,7 @@ class HCSysOrchestrator {
     const maxParallel = arena.max_parallel_brains || 3;
     const selectedBrains = brainIds.slice(0, maxParallel);
 
-    console.log(`[HCSysOrchestrator] Arena Mode: ${selectedBrains.join(', ')}`);
+    logger.info(`Arena Mode: ${selectedBrains.join(', ')}`);
 
     const results = await Promise.allSettled(
       selectedBrains.map(brainId =>
@@ -365,7 +364,7 @@ class HCSysOrchestrator {
 
     router.post('/brain/feedback', (req, res) => {
       const { task_id, outcome, latency_ms, quality_score } = req.body;
-      console.log(`[HCSysOrchestrator] Feedback for ${task_id}: quality=${quality_score}, latency=${latency_ms}ms`);
+      logger.info(`Feedback for ${task_id}: quality=${quality_score}, latency=${latency_ms}ms`);
       res.json({ received: true, task_id });
     });
 

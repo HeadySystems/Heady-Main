@@ -157,7 +157,7 @@
     "@vscode/vsce": "^2.19.0"
   },
   "dependencies": {
-    "axios": "^1.6.0"
+    "axios": "^1.8.4"
   },
   "repository": {
     "type": "git",
@@ -165,4 +165,3 @@
   },
   "license": "MIT"
 }
-

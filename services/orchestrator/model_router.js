@@ -39,6 +39,8 @@ const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
 const { EventEmitter } = require('events');
+const logger = require('../../src/shared/logger')('ModelRouter');
+const { PHI_TIMEOUT_PIPELINE } = require('../../src/shared/phi-timeouts');
 
 class ModelRouter extends EventEmitter {
   constructor(configDir) {
@@ -207,7 +209,7 @@ class ModelRouter extends EventEmitter {
     const filePath = path.join(this.configDir, filename);
     if (!fs.existsSync(filePath)) return null;
     try { return yaml.load(fs.readFileSync(filePath, 'utf8')); }
-    catch (e) { console.error(`[ModelRouter] Failed to load ${filename}: ${e.message}`); return null; }
+    catch (e) { logger.error(`Failed to load ${filename}: ${e.message}`); return null; }
   }
 
   _matchMatrix(layer, taskType, privacy, costSensitivity) {
@@ -267,7 +269,7 @@ class ModelRouter extends EventEmitter {
     const cb = this.circuitBreakers.get(provider);
     if (!cb || !cb.open) return false;
     // Auto-close after 5 minutes (half-open)
-    if (Date.now() - cb.lastFailure > 300000) {
+    if (Date.now() - cb.lastFailure > PHI_TIMEOUT_PIPELINE * 10) {
       cb.open = false;
       cb.failures = 0;
       return false;

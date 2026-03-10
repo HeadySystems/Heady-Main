@@ -2,7 +2,7 @@
   "name": "headyos-desktop",
   "version": "0.1.0",
   "private": true,
-  "description": "HeadyOS Desktop — Sacred Geometry AI Desktop Shell (Tauri v2)",
+  "description": "HeadyOS Desktop \u2014 Sacred Geometry AI Desktop Shell (Tauri v2)",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -34,14 +34,18 @@
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.19",
-    "postcss": "^8.4.38",
+    "postcss": "^8.5.2",
     "tailwindcss": "^3.4.4",
     "typescript": "^5.4.0",
     "vite": "^5.3.1"
   },
   "headyos": {
     "form": "desktop",
-    "modes": ["local", "hybrid", "cloud"],
+    "modes": [
+      "local",
+      "hybrid",
+      "cloud"
+    ],
     "features": [
       "system-tray",
       "global-hotkey",

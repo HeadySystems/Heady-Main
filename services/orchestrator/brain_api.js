@@ -39,11 +39,13 @@
 const express = require('express');
 const router = express.Router();
 const { getBrainConnector } = require('../../src/brain_connector');
+const logger = require('../../src/shared/logger')('BrainAPI');
+const { PHI_TIMEOUT_LONG } = require('../../src/shared/phi-timeouts');
 
 // Initialize brain connector with failover
 const brainConnector = getBrainConnector({
   poolSize: 3,
-  healthCheckInterval: 15000 // 15 seconds for faster recovery
+  healthCheckInterval: PHI_TIMEOUT_LONG // φ⁶ × 1000 ms for faster recovery
 });
 
 // In-memory state for this brain instance
@@ -67,23 +69,23 @@ let selfCritique = null;
 
 try {
   monteCarlo = require('../../src/hc_monte_carlo');
-  console.log('  ∞ Brain: Monte Carlo scheduler loaded');
+  logger.info('Monte Carlo scheduler loaded');
 } catch (e) {
-  console.warn(`  ⚠ Brain: MC scheduler not loaded: ${e.message}`);
+  logger.warn(`MC scheduler not loaded: ${e.message}`);
 }
 
 try {
   patternEngine = require('../../src/hc_pattern_engine');
-  console.log('  ∞ Brain: Pattern engine loaded');
+  logger.info('Pattern engine loaded');
 } catch (e) {
-  console.warn(`  ⚠ Brain: Pattern engine not loaded: ${e.message}`);
+  logger.warn(`Pattern engine not loaded: ${e.message}`);
 }
 
 try {
   selfCritique = require('../../src/hc_self_critique');
-  console.log('  ∞ Brain: Self-critique loaded');
+  logger.info('Self-critique loaded');
 } catch (e) {
-  console.warn(`  ⚠ Brain: Self-critique not loaded: ${e.message}`);
+  logger.warn(`Self-critique not loaded: ${e.message}`);
 }
 
 /**
@@ -93,7 +95,7 @@ router.get('/health', (req, res) => {
   const connectorStats = brainConnector.getStats();
   const healthyEndpoints = connectorStats.circuitBreakers.filter(cb => cb.state === 'CLOSED').length;
   const totalEndpoints = connectorStats.circuitBreakers.length;
-  
+
   res.json({
     ok: true,
     service: 'HeadyBrain',
@@ -113,7 +115,7 @@ router.get('/health', (req, res) => {
     performance: brainState.performance,
     connector: {
       uptime: connectorStats.uptime,
-      success_rate: connectorStats.totalRequests > 0 
+      success_rate: connectorStats.totalRequests > 0
         ? (connectorStats.successfulRequests / connectorStats.totalRequests * 100).toFixed(2) + '%'
         : '100%',
       queue_length: connectorStats.queueLength,
@@ -144,7 +146,7 @@ router.post('/plan', async (req, res) => {
     // Try distributed brain processing first
     let planSpec = null;
     let distributed = false;
-    
+
     // Check if we should use distributed brain
     if (task.cloud_layer && task.cloud_layer !== 'local') {
       try {
@@ -154,12 +156,12 @@ router.post('/plan', async (req, res) => {
         });
         planSpec = distributedPlan.plan;
         distributed = true;
-        console.log(`[BrainAPI] Used distributed brain for task ${task.type}`);
+        logger.info(`Used distributed brain for task ${task.type}`);
       } catch (err) {
-        console.warn(`[BrainAPI] Distributed brain failed, using local: ${err.message}`);
+        logger.warn(`Distributed brain failed, using local: ${err.message}`);
       }
     }
-    
+
     // Fallback to local processing
     if (!planSpec) {
       // Use Monte Carlo to select strategy if available
@@ -189,11 +191,11 @@ router.post('/plan', async (req, res) => {
     const latency = Date.now() - startTime;
     brainState.plans_generated++;
     brainState.last_plan_ts = new Date().toISOString();
-    brainState.recent_plans.push({ 
-      plan_id: planSpec.plan_id, 
-      task_type: task.type, 
+    brainState.recent_plans.push({
+      plan_id: planSpec.plan_id,
+      task_type: task.type,
       latency_ms: latency,
-      distributed 
+      distributed
     });
     if (brainState.recent_plans.length > 50) brainState.recent_plans.shift();
     brainState.performance.total_tasks++;
@@ -203,10 +205,10 @@ router.post('/plan', async (req, res) => {
 
     // Feed timing to pattern engine if available
     if (patternEngine && typeof patternEngine.observe === 'function') {
-      patternEngine.observe('brain_plan', { 
-        latency_ms: latency, 
+      patternEngine.observe('brain_plan', {
+        latency_ms: latency,
         strategy: planSpec.strategy,
-        distributed 
+        distributed
       });
     }
 
@@ -221,12 +223,12 @@ router.post('/plan', async (req, res) => {
           latency_ms: latency,
           node: process.env.BRAIN_NODE_ID || 'local'
         }
-      }).catch(() => {}); // Fire and forget
+      }).catch(() => { }); // Fire and forget
     }
 
-    res.json({ 
-      ok: true, 
-      plan: planSpec, 
+    res.json({
+      ok: true,
+      plan: planSpec,
       latency_ms: latency,
       distributed,
       brain_node: distributed ? 'distributed' : 'local'
@@ -246,11 +248,11 @@ router.post('/plan', async (req, res) => {
       distributed: false,
       fallback: true
     };
-    
-    console.error(`[BrainAPI] All brain processing failed, using fallback: ${err.message}`);
-    res.json({ 
-      ok: true, 
-      plan: fallbackPlan, 
+
+    logger.error(`All brain processing failed, using fallback: ${err.message}`);
+    res.json({
+      ok: true,
+      plan: fallbackPlan,
       latency_ms: Date.now() - startTime,
       distributed: false,
       brain_node: 'fallback',
@@ -316,9 +318,9 @@ router.post('/feedback', (req, res) => {
 router.post('/distributed-plan', async (req, res) => {
   const task = req.body;
   const nodeId = req.headers['x-brain-node-id'] || 'unknown';
-  
-  console.log(`[BrainAPI] Distributed plan request from ${nodeId} for task ${task.type}`);
-  
+
+  logger.info(`Distributed plan request from ${nodeId} for task ${task.type}`);
+
   // Use local processing but mark as distributed
   try {
     let strategy = { id: 'balanced', cost: 1.5, latency: 0.6 };
@@ -341,8 +343,8 @@ router.post('/distributed-plan', async (req, res) => {
       requestor_node: nodeId
     };
 
-    res.json({ 
-      ok: true, 
+    res.json({
+      ok: true,
       plan: planSpec,
       node_id: process.env.BRAIN_NODE_ID || 'local'
     });
@@ -356,14 +358,14 @@ router.post('/distributed-plan', async (req, res) => {
  */
 router.get('/status', (req, res) => {
   const connectorStats = brainConnector.getStats();
-  
+
   res.json({
     ok: true,
     state: brainState,
     connector: {
       uptime: connectorStats.uptime,
       total_requests: connectorStats.totalRequests,
-      success_rate: connectorStats.totalRequests > 0 
+      success_rate: connectorStats.totalRequests > 0
         ? (connectorStats.successfulRequests / connectorStats.totalRequests * 100).toFixed(2) + '%'
         : '100%',
       queue_length: connectorStats.queueLength,
@@ -382,7 +384,7 @@ router.get('/status', (req, res) => {
  */
 router.get('/connector-status', (req, res) => {
   const stats = brainConnector.getStats();
-  
+
   res.json({
     ok: true,
     connector: stats,
@@ -405,12 +407,12 @@ router.post('/reset-circuits', (req, res) => {
   if (adminToken !== process.env.ADMIN_TOKEN) {
     return res.status(403).json({ ok: false, error: 'Admin token required' });
   }
-  
+
   brainConnector.resetCircuitBreakers();
-  console.log('[BrainAPI] Circuit breakers reset by admin');
-  
-  res.json({ 
-    ok: true, 
+  logger.info('Circuit breakers reset by admin');
+
+  res.json({
+    ok: true,
     message: 'All circuit breakers reset',
     ts: new Date().toISOString()
   });
