@@ -16,7 +16,7 @@ const DIMS = 384;
 function localEmbed(text) {
   const vec = new Float32Array(DIMS);
   // Tokenize: lowercase, split on non-alphanumeric, filter stopwords/short
-  const STOP = new Set(['the','a','an','is','are','was','were','be','been','being','in','on','at','to','for','of','and','or','but','not','with','by','from','as','it','its','this','that','all','has','have','had']);
+  const STOP = new Set(['the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'in', 'on', 'at', 'to', 'for', 'of', 'and', 'or', 'but', 'not', 'with', 'by', 'from', 'as', 'it', 'its', 'this', 'that', 'all', 'has', 'have', 'had']);
   const words = text.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(w => w.length > 2 && !STOP.has(w));
   if (words.length === 0) words.push('empty');
 
@@ -85,7 +85,7 @@ function cosineSimilarity(a, b) {
   if (!a || !b || a.length !== b.length) return 0;
   let dot = 0, magA = 0, magB = 0;
   for (let i = 0; i < a.length; i++) {
-    dot  += a[i] * b[i];
+    dot += a[i] * b[i];
     magA += a[i] * a[i];
     magB += b[i] * b[i];
   }
@@ -137,6 +137,7 @@ class MemoryStore {
       maxEntries: parseInt(process.env.MEMORY_MAX_ENTRIES) || 100000,
       embeddedCount: this.memories.filter(m => m.embedding).length,
       dimensions: DIMS,
+      hasEmbeddings: this.memories.some(m => m.embedding !== null),
     };
   }
 
@@ -158,6 +159,8 @@ class MemoryStore {
   }
 
   async query(queryText, limit = 10) {
+    if (this.memories.length === 0) return [];
+
     const { embedding: queryVec } = await generateEmbedding(queryText);
 
     // Vector similarity search with CSL gate
@@ -165,7 +168,9 @@ class MemoryStore {
       .filter(m => m.embedding)
       .map(m => ({
         ...m,
-        score: cosineSimilarity(queryVec, m.embedding),
+        score: Array.isArray(m.embedding)
+          ? cosineSimilarity(queryVec, m.embedding)
+          : this._fallbackScore(queryText, m.content),
       }))
       .filter(m => m.score >= PSI_SQ) // CSL gate: ψ² ≈ 0.382 minimum relevance
       .sort((a, b) => b.score - a.score)
@@ -181,6 +186,16 @@ class MemoryStore {
       .filter(m => m.content.toLowerCase().includes(queryText.toLowerCase()))
       .slice(0, limit)
       .map(({ embedding, ...rest }) => ({ ...rest, score: null }));
+  }
+
+  // Fallback for memories without array embeddings (legacy data)
+  _fallbackScore(query, content) {
+    const q = query.toLowerCase();
+    const c = content.toLowerCase();
+    if (c.includes(q)) return 0.8;
+    const words = q.split(/\s+/);
+    const matched = words.filter(w => c.includes(w)).length;
+    return matched / (words.length || 1) * 0.6;
   }
 }
 
