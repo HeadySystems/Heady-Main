@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<!--
+   ______                            __
+  / ____/___  ____ ___  ____  __  __/ /____  _____
+ / /   / __ \/ __ `__ \/ __ \/ / / / __/ _ \/ ___/
+/ /___/ /_/ / / / / / / /_/ / /_/ / /_/  __/ /
+\____/\____/_/ /_/ /_/ .___/\__,_/\__/\___/_/
+                    /_/
+        Created with Perplexity Computer
+        https://www.perplexity.ai/computer
+-->
+<meta name="generator" content="Perplexity Computer">
+<meta name="author" content="Perplexity Computer">
+<meta property="og:see_also" content="https://www.perplexity.ai/computer">
+<link rel="author" href="https://www.perplexity.ai/computer">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heady Documentation Hub — Sacred Geometry v4.0</title>
+<meta name="description" content="Comprehensive documentation for the Heady Sovereign AI Platform — architecture, modules, APIs, deployment, and phi-math foundations.">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- Sidebar Overlay (mobile) -->
+<div class="sidebar-overlay" id="overlay"></div>
+
+<!-- Sidebar Navigation -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <a href="#" class="logo">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-label="Heady Logo">
+        <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="1.5"/>
+        <circle cx="16" cy="16" r="8.7" stroke="currentColor" stroke-width="1" opacity="0.6"/>
+        <circle cx="16" cy="16" r="5.4" stroke="currentColor" stroke-width="1" opacity="0.4"/>
+        <circle cx="16" cy="16" r="3.3" fill="currentColor" opacity="0.8"/>
+        <line x1="16" y1="2" x2="16" y2="30" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+        <line x1="2" y1="16" x2="30" y2="16" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+      </svg>
+      <div>
+        <div class="logo-text">Heady Docs</div>
+        <div class="logo-sub">Sacred Geometry v4.0</div>
+      </div>
+    </a>
+  </div>
+
+  <div class="sidebar-search">
+    <input type="search" class="search-input" placeholder="Search docs..." id="searchInput">
+  </div>
+
+  <nav class="sidebar-nav" id="sidebarNav">
+    <div class="nav-section">
+      <div class="nav-section-title">Overview</div>
+      <a href="#overview" class="nav-link active" data-page="overview">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Home
+      </a>
+      <a href="#ecosystem" class="nav-link" data-page="ecosystem">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        Ecosystem Map
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">Architecture</div>
+      <a href="#topology" class="nav-link" data-page="topology">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        Node Topology
+      </a>
+      <a href="#conductor" class="nav-link" data-page="conductor">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+        Conductor Routing
+      </a>
+      <a href="#infrastructure" class="nav-link" data-page="infrastructure">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+        Infrastructure
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">Modules</div>
+      <a href="#evolution-engine" class="nav-link" data-page="evolution-engine">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        Evolution Engine
+      </a>
+      <a href="#persona-router" class="nav-link" data-page="persona-router">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Persona Router
+      </a>
+      <a href="#wisdom-store" class="nav-link" data-page="wisdom-store">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+        Wisdom Store
+      </a>
+      <a href="#budget-tracker" class="nav-link" data-page="budget-tracker">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        Budget Tracker
+      </a>
+      <a href="#heady-lens" class="nav-link" data-page="heady-lens">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        HeadyLens
+      </a>
+      <a href="#council-mode" class="nav-link" data-page="council-mode">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Council Mode
+      </a>
+      <a href="#auto-success" class="nav-link" data-page="auto-success">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Auto-Success Engine
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">Foundations</div>
+      <a href="#phi-math" class="nav-link" data-page="phi-math">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
+        Phi-Math
+      </a>
+      <a href="#csl" class="nav-link" data-page="csl">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5"/><line x1="12" y1="22" x2="12" y2="15.5"/><polyline points="22 8.5 12 15.5 2 8.5"/></svg>
+        CSL Gates
+      </a>
+      <a href="#bees" class="nav-link" data-page="bees">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+        Bee Registry
+      </a>
+      <a href="#deployment" class="nav-link" data-page="deployment">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
+        Deployment
+      </a>
+    </div>
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<div class="main-content">
+  <div class="top-bar">
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="breadcrumb" id="breadcrumb">
+      <a href="#">Heady Docs</a>
+      <span class="sep">/</span>
+      <span id="breadcrumbPage">Overview</span>
+    </div>
+    <div class="top-bar-actions">
+      <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════ OVERVIEW PAGE ═══════════════ -->
+  <div class="content-area page" id="page-overview">
+    <h1 class="page-title">Heady Sovereign AI Platform</h1>
+    <p class="page-subtitle">A self-aware, self-improving system where every component exists in continuous 3D vector space with 384D embeddings, phi-continuous scaling, and Sacred Geometry orchestration.</p>
+
+    <div class="section">
+      <h2 class="section-title">Quick Start</h2>
+      <div class="card-grid">
+        <a class="card" href="#ecosystem" onclick="navigateTo('ecosystem')">
+          <div class="card-icon teal">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+          </div>
+          <div class="card-title">Ecosystem Map</div>
+          <div class="card-desc">9 domains, 30+ nodes, 30+ bee types, and the complete infrastructure topology.</div>
+          <div class="card-meta">9 domains &middot; 30+ services</div>
+        </a>
+        <a class="card" href="#topology" onclick="navigateTo('topology')">
+          <div class="card-icon green">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7"/><polyline points="2 17 12 22 22 17"/></svg>
+          </div>
+          <div class="card-title">Node Topology</div>
+          <div class="card-desc">Sacred Geometry rings — HeadySoul center, processing core, execution layer, and governance shell.</div>
+          <div class="card-meta">5 rings &middot; Concentric layout</div>
+        </a>
+        <a class="card" href="#phi-math" onclick="navigateTo('phi-math')">
+          <div class="card-icon orange">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/></svg>
+          </div>
+          <div class="card-title">Phi-Math Foundation</div>
+          <div class="card-desc">Golden ratio constants, Fibonacci sequences, CSL thresholds — zero magic numbers.</div>
+          <div class="card-meta">PHI = 1.618 &middot; PSI = 0.618</div>
+        </a>
+        <a class="card" href="#auto-success" onclick="navigateTo('auto-success')">
+          <div class="card-icon purple">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div class="card-title">Auto-Success Engine</div>
+          <div class="card-desc">Complete pipeline: Battle Arena, Coder, Analysis, Risks, Patterns — automated delivery.</div>
+          <div class="card-meta">8-stage pipeline</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">New Modules (March 2026)</h2>
+      <p style="color: var(--color-text-muted); margin-bottom: var(--space-5);">Seven modules built to fill identified gaps in the Heady architecture. Each uses phi-math constants, CSL gates for thresholds, and Fibonacci sizing throughout.</p>
+      <div class="card-grid">
+        <a class="card" href="#evolution-engine" onclick="navigateTo('evolution-engine')">
+          <div class="card-title">Evolution Engine</div>
+          <div class="card-desc">Evolutionary optimization with phi-scaled mutation rates, CSL-gated selection, and tournament-based population management.</div>
+          <div class="card-meta">347 lines &middot; src/engines/</div>
+        </a>
+        <a class="card" href="#persona-router" onclick="navigateTo('persona-router')">
+          <div class="card-title">Persona Router</div>
+          <div class="card-desc">7 animal archetypes (ant, elephant, beaver, owl, eagle, dolphin, rabbit) for intelligent task routing.</div>
+          <div class="card-meta">265 lines &middot; src/intelligence/</div>
+        </a>
+        <a class="card" href="#wisdom-store" onclick="navigateTo('wisdom-store')">
+          <div class="card-title">Wisdom Store</div>
+          <div class="card-desc">Curated knowledge persistence with LRU eviction, cosine similarity dedup, and promotion/demotion cycles.</div>
+          <div class="card-meta">262 lines &middot; src/memory/</div>
+        </a>
+        <a class="card" href="#budget-tracker" onclick="navigateTo('budget-tracker')">
+          <div class="card-title">Budget Tracker</div>
+          <div class="card-desc">LLM cost management with Fibonacci budget tiers, provider-aware tracking, and CSL-gated spending controls.</div>
+          <div class="card-meta">282 lines &middot; src/finance/</div>
+        </a>
+        <a class="card" href="#heady-lens" onclick="navigateTo('heady-lens')">
+          <div class="card-title">HeadyLens</div>
+          <div class="card-desc">System introspection and observability — runtime diagnostics, node health, topology visualization.</div>
+          <div class="card-meta">295 lines &middot; src/intelligence/</div>
+        </a>
+        <a class="card" href="#council-mode" onclick="navigateTo('council-mode')">
+          <div class="card-title">Council Mode</div>
+          <div class="card-desc">Multi-model consensus with phi-weighted voting, semantic clustering, and dissent analysis.</div>
+          <div class="card-meta">264 lines &middot; src/governance/</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">3 Unbreakable Laws</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-4);">
+        <div style="padding: var(--space-5); background: var(--color-surface); border-radius: var(--radius-lg); border-left: 4px solid var(--color-primary);">
+          <div style="font-weight: 700; margin-bottom: var(--space-2);">1. Structural Integrity</div>
+          <div style="font-size: var(--text-sm); color: var(--color-text-muted);">Code compiles, passes type checks, respects module boundaries.</div>
+        </div>
+        <div style="padding: var(--space-5); background: var(--color-surface); border-radius: var(--radius-lg); border-left: 4px solid var(--color-success);">
+          <div style="font-weight: 700; margin-bottom: var(--space-2);">2. Semantic Coherence</div>
+          <div style="font-size: var(--text-sm); color: var(--color-text-muted);">Every change's embedding stays within tolerance of the intended design.</div>
+        </div>
+        <div style="padding: var(--space-5); background: var(--color-surface); border-radius: var(--radius-lg); border-left: 4px solid var(--color-warning);">
+          <div style="font-weight: 700; margin-bottom: var(--space-2);">3. Mission Alignment</div>
+          <div style="font-size: var(--text-sm); color: var(--color-text-muted);">Every change serves HeadyConnection's mission — community, equity, empowerment.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ ECOSYSTEM PAGE ═══════════════ -->
+  <div class="content-area page" id="page-ecosystem" style="display:none">
+    <h1 class="page-title">Ecosystem Map</h1>
+    <p class="page-subtitle">9 domains, 3 GitHub organizations, and a unified infrastructure spanning Cloudflare Edge, Google Cloud Run, and 3 Colab Pro+ GPU runtimes.</p>
+
+    <div class="section">
+      <h2 class="section-title">Domain Registry</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Domain</th><th>Role</th><th>Stack</th></tr></thead>
+          <tbody>
+            <tr><td><strong>headyme.com</strong></td><td>Command center — main orchestration dashboard</td><td>Next.js + Cloudflare Pages</td></tr>
+            <tr><td><strong>headysystems.com</strong></td><td>Core architecture engine — technical docs & API reference</td><td>Next.js + Cloud Run</td></tr>
+            <tr><td><strong>headyconnection.org</strong></td><td>501(c)(3) nonprofit — community programs, grants, equity</td><td>Drupal 11</td></tr>
+            <tr><td><strong>headybuddy.org</strong></td><td>AI companion experience — conversational interface</td><td>Next.js + WebSocket</td></tr>
+            <tr><td><strong>headymcp.com</strong></td><td>MCP layer — tool routing, transport, zero-trust gateway</td><td>Cloudflare Workers</td></tr>
+            <tr><td><strong>headyio.com</strong></td><td>Developer platform — SDKs, APIs, integration guides</td><td>Next.js + Cloud Run</td></tr>
+            <tr><td><strong>headybot.com</strong></td><td>Automation and agents — bot management, swarm dashboard</td><td>Next.js + Cloud Run</td></tr>
+            <tr><td><strong>headyapi.com</strong></td><td>Public intelligence interface — API gateway, rate limiting</td><td>CF Workers + Cloud Run</td></tr>
+            <tr><td><strong>headyai.com</strong></td><td>Intelligence routing hub — model selection, liquid gateway</td><td>Cloudflare Workers</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">GitHub Organizations</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Organization</th><th>Repos</th><th>Key Repositories</th></tr></thead>
+          <tbody>
+            <tr><td><strong>HeadyMe</strong></td><td>13</td><td>Heady-pre-production-9f2f0642 (monorepo), headyme-core, headybuddy-core, headymcp-core, headyapi-core, headyai-core, headybot-core, headyio-core</td></tr>
+            <tr><td><strong>HeadySystems</strong></td><td>7</td><td>headysystems-core, infrastructure, docs, configs</td></tr>
+            <tr><td><strong>HeadyConnection</strong></td><td>0</td><td>To be populated with nonprofit repos</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Resource Pool Allocation</h2>
+      <p style="color: var(--color-text-muted); margin-bottom: var(--space-4);">Resources distributed using Fibonacci ratios — no arbitrary percentages.</p>
+      <div class="table-wrap">
+        <table class="phi-table">
+          <thead><tr><th>Pool</th><th>Allocation</th><th>Fibonacci Basis</th><th>Use</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge hot">Hot</span></td><td class="value">34%</td><td>fib(9)/&Sigma;</td><td>User-facing, latency-critical (&lt; 30s)</td></tr>
+            <tr><td><span class="badge warm">Warm</span></td><td class="value">21%</td><td>fib(8)/&Sigma;</td><td>Background processing (&lt; 5 min)</td></tr>
+            <tr><td><span class="badge cold">Cold</span></td><td class="value">13%</td><td>fib(7)/&Sigma;</td><td>Batch, analytics, ingestion (&lt; 30 min)</td></tr>
+            <tr><td><span class="badge gov">Reserve</span></td><td class="value">8%</td><td>fib(6)/&Sigma;</td><td>Burst capacity for traffic spikes</td></tr>
+            <tr><td><span class="badge gov">Governance</span></td><td class="value">5%</td><td>fib(5)/&Sigma;</td><td>HeadyCheck, HeadyAssure, HeadyAware</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ TOPOLOGY PAGE ═══════════════ -->
+  <div class="content-area page" id="page-topology" style="display:none">
+    <h1 class="page-title">Node Topology</h1>
+    <p class="page-subtitle">Sacred Geometry concentric rings — from HeadySoul at center to the governance shell at the boundary.</p>
+
+    <div class="section">
+      <div class="topology-diagram">
+        <div class="ring-label">Center — HeadySoul</div>
+        <div class="topology-ring center">
+          <div class="topology-node" style="border-color: var(--color-primary);">HeadySoul</div>
+        </div>
+
+        <div class="ring-label">Inner Ring — Processing Core</div>
+        <div class="topology-ring inner">
+          <div class="topology-node">HeadyBrains</div>
+          <div class="topology-node">HeadyConductor</div>
+          <div class="topology-node">HeadyVinci</div>
+        </div>
+
+        <div class="ring-label">Middle Ring — Execution Layer</div>
+        <div class="topology-ring middle">
+          <div class="topology-node">JULES</div>
+          <div class="topology-node">BUILDER</div>
+          <div class="topology-node">OBSERVER</div>
+          <div class="topology-node">MURPHY</div>
+          <div class="topology-node">ATLAS</div>
+          <div class="topology-node">PYTHIA</div>
+        </div>
+
+        <div class="ring-label">Outer Ring — Specialized Capabilities</div>
+        <div class="topology-ring outer">
+          <div class="topology-node">BRIDGE</div>
+          <div class="topology-node">MUSE</div>
+          <div class="topology-node">SENTINEL</div>
+          <div class="topology-node">NOVA</div>
+          <div class="topology-node">JANITOR</div>
+          <div class="topology-node">SOPHIA</div>
+          <div class="topology-node">CIPHER</div>
+          <div class="topology-node">LENS</div>
+        </div>
+
+        <div class="ring-label">Governance Shell</div>
+        <div class="topology-ring outer" style="border-color: var(--color-primary);">
+          <div class="topology-node">HeadyCheck</div>
+          <div class="topology-node">HeadyAssure</div>
+          <div class="topology-node">HeadyAware</div>
+          <div class="topology-node">HeadyPatterns</div>
+          <div class="topology-node">HeadyMC</div>
+          <div class="topology-node">HeadyRisks</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Node Details</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Node</th><th>Ring</th><th>Role</th><th>Pool</th></tr></thead>
+          <tbody>
+            <tr><td><strong>HeadySoul</strong></td><td>Center</td><td>Awareness layer, values arbiter, coherence guardian</td><td><span class="badge gov">Governance</span></td></tr>
+            <tr><td><strong>HeadyBrains</strong></td><td>Inner</td><td>Computational pre-processor, context gathering</td><td><span class="badge hot">Hot</span></td></tr>
+            <tr><td><strong>HeadyConductor</strong></td><td>Inner</td><td>Central orchestration, task classification & routing</td><td><span class="badge hot">Hot</span></td></tr>
+            <tr><td><strong>HeadyVinci</strong></td><td>Inner</td><td>Session planner, topology maintainer, multi-step planning</td><td><span class="badge hot">Hot</span></td></tr>
+            <tr><td><strong>JULES</strong></td><td>Middle</td><td>Code generation, implementation</td><td><span class="badge hot">Hot</span></td></tr>
+            <tr><td><strong>BUILDER</strong></td><td>Middle</td><td>Full-stack system building</td><td><span class="badge hot">Hot</span></td></tr>
+            <tr><td><strong>OBSERVER</strong></td><td>Middle</td><td>Code review, monitoring, quality assessment</td><td><span class="badge hot">Hot</span></td></tr>
+            <tr><td><strong>MURPHY</strong></td><td>Middle</td><td>Security analysis, vulnerability detection</td><td><span class="badge hot">Hot</span></td></tr>
+            <tr><td><strong>ATLAS</strong></td><td>Middle</td><td>Architecture documentation, system mapping</td><td><span class="badge warm">Warm</span></td></tr>
+            <tr><td><strong>PYTHIA</strong></td><td>Middle</td><td>Predictive analysis, forecasting</td><td><span class="badge warm">Warm</span></td></tr>
+            <tr><td><strong>BRIDGE</strong></td><td>Outer</td><td>Translation, cross-domain communication</td><td><span class="badge warm">Warm</span></td></tr>
+            <tr><td><strong>MUSE</strong></td><td>Outer</td><td>Creative content generation, UX design</td><td><span class="badge warm">Warm</span></td></tr>
+            <tr><td><strong>SOPHIA</strong></td><td>Outer</td><td>Research, wisdom synthesis, deep analysis</td><td><span class="badge warm">Warm</span></td></tr>
+            <tr><td><strong>HeadyMemory</strong></td><td>Memory</td><td>Vector memory read/write (384D, RAM-first)</td><td><span class="badge hot">Hot</span></td></tr>
+            <tr><td><strong>HeadyEmbed</strong></td><td>Memory</td><td>Embedding generation (multi-provider routing)</td><td><span class="badge hot">Hot</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ CONDUCTOR PAGE ═══════════════ -->
+  <div class="content-area page" id="page-conductor" style="display:none">
+    <h1 class="page-title">Conductor Routing</h1>
+    <p class="page-subtitle">HeadyConductor classifies tasks and routes to optimal nodes with provider fallback chains.</p>
+
+    <div class="section">
+      <h2 class="section-title">Routing Matrix</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Task Type</th><th>Primary</th><th>Fallback 1</th><th>Fallback 2</th><th>Pool</th></tr></thead>
+          <tbody>
+            <tr><td>Code Generation</td><td>Claude Sonnet &rarr; JULES</td><td>GPT-4o &rarr; BUILDER</td><td>Groq Llama</td><td><span class="badge hot">Hot</span></td></tr>
+            <tr><td>Code Review</td><td>Claude Sonnet &rarr; OBSERVER</td><td>GPT-4o</td><td>Gemini Pro</td><td><span class="badge hot">Hot</span></td></tr>
+            <tr><td>Security Audit</td><td>Claude Sonnet &rarr; MURPHY</td><td>GPT-4o</td><td>Claude Opus</td><td><span class="badge hot">Hot</span></td></tr>
+            <tr><td>Architecture</td><td>Claude Opus &rarr; ATLAS</td><td>GPT-4o &rarr; HeadyVinci</td><td>Claude Sonnet</td><td><span class="badge hot">Hot</span></td></tr>
+            <tr><td>Research</td><td>Perplexity Sonar &rarr; SOPHIA</td><td>Claude Sonnet</td><td>GPT-4o</td><td><span class="badge warm">Warm</span></td></tr>
+            <tr><td>Documentation</td><td>GPT-4o &rarr; HeadyCodex</td><td>Claude Sonnet</td><td>Gemini Pro</td><td><span class="badge warm">Warm</span></td></tr>
+            <tr><td>Quick Tasks</td><td>Groq Llama (edge)</td><td>GPT-4o-mini</td><td>Gemini Flash</td><td><span class="badge hot">Hot</span></td></tr>
+            <tr><td>Creative</td><td>Claude Opus &rarr; MUSE</td><td>GPT-4o &rarr; NOVA</td><td>Gemini Pro</td><td><span class="badge warm">Warm</span></td></tr>
+            <tr><td>Embeddings</td><td>CF Edge (bge-base)</td><td>Nomic v2</td><td>Local Ollama</td><td><span class="badge hot">Hot</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">HCFullPipeline (HCFP)</h2>
+      <div class="pipeline">
+        <div class="pipeline-stage"><div class="stage-num">1</div><div class="stage-name">Context</div><div class="stage-node">HeadyBrains</div></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-stage"><div class="stage-num">2</div><div class="stage-name">Classify</div><div class="stage-node">Conductor</div></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-stage"><div class="stage-num">3</div><div class="stage-name">Select</div><div class="stage-node">CSL Route</div></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-stage"><div class="stage-num">4</div><div class="stage-name">Execute</div><div class="stage-node">Nodes</div></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-stage"><div class="stage-num">5</div><div class="stage-name">Quality</div><div class="stage-node">HeadyCheck</div></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-stage"><div class="stage-num">6</div><div class="stage-name">Assure</div><div class="stage-node">HeadyAssure</div></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-stage"><div class="stage-num">7</div><div class="stage-name">Patterns</div><div class="stage-node">Learn</div></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-stage"><div class="stage-num">8</div><div class="stage-name">Story</div><div class="stage-node">Autobiog.</div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Edge-Origin Routing</h2>
+      <p style="color: var(--color-text-muted); margin-bottom: var(--space-4);">Complexity scored using phi-derived thresholds to decide edge vs. origin processing.</p>
+      <div class="table-wrap">
+        <table class="phi-table">
+          <thead><tr><th>Complexity Score</th><th>Route</th><th>Examples</th></tr></thead>
+          <tbody>
+            <tr><td class="value">&lt; &psi;&sup2; (0.382)</td><td>Edge-only</td><td>Simple lookups, embeddings, classification</td></tr>
+            <tr><td class="value">&psi;&sup2; &ndash; &psi; (0.382&ndash;0.618)</td><td>Edge-preferred</td><td>Moderate queries with edge fallback</td></tr>
+            <tr><td class="value">&gt; &psi; (0.618)</td><td>Origin-required</td><td>Complex reasoning, multi-step, code gen</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ INFRASTRUCTURE PAGE ═══════════════ -->
+  <div class="content-area page" id="page-infrastructure" style="display:none">
+    <h1 class="page-title">Infrastructure</h1>
+    <p class="page-subtitle">Three-tier architecture: Cloudflare Edge, Google Cloud Run origin, and 3 Colab Pro+ GPU runtimes as the latent space operations layer.</p>
+
+    <div class="section">
+      <h2 class="section-title">Architecture Diagram</h2>
+      <div class="code-block">
+        <div class="code-header"><span>Infrastructure Topology</span></div>
+        <div class="code-body">                    ┌─────────────────────────────────┐
+                    │         CLOUDFLARE EDGE          │
+                    │  Workers │ Pages │ KV │ Vectorize│
+                    │  Durable Objects │ Workers AI    │
+                    └─────────────┬───────────────────┘
+                                  │
+                    ┌─────────────┴───────────────────┐
+                    │        LIQUID GATEWAY            │
+                    │  Auth │ Routing │ Cache │ Stream │
+                    └─────────────┬───────────────────┘
+                                  │
+              ┌───────────────────┼───────────────────┐
+              │                   │                   │
+    ┌─────────┴─────────┐ ┌──────┴──────┐ ┌─────────┴─────────┐
+    │   CLOUD RUN        │ │  FIREBASE   │ │    COLAB PRO+     │
+    │   (Origin)         │ │  Auth + DB  │ │  3 GPU Runtimes   │
+    │   HeadyManager     │ │  Firestore  │ │  Vector │ LLM │   │
+    │   HCFullPipeline   │ │  Storage    │ │  Train  │     │   │
+    └─────────┬─────────┘ └──────┬──────┘ └─────────┬─────────┘
+              │                   │                   │
+              └───────────────────┼───────────────────┘
+                                  │
+                    ┌─────────────┴───────────────────┐
+                    │     POSTGRESQL + PGVECTOR        │
+                    │  Source of truth │ HNSW indexes  │
+                    │  Graph RAG │ BM25 │ Audit logs   │
+                    └─────────────────────────────────┘</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Colab Pro+ Runtimes</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Runtime</th><th>Port</th><th>GPU</th><th>Role</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Vector Ops</strong></td><td><code>3301</code></td><td>T4 / A100</td><td>Embedding generation, vector search, similarity computation</td></tr>
+            <tr><td><strong>LLM Inference</strong></td><td><code>3302</code></td><td>A100</td><td>Local model inference, fine-tuned model serving</td></tr>
+            <tr><td><strong>Training</strong></td><td><code>3303</code></td><td>A100</td><td>Model fine-tuning, LoRA training, evaluation</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Key Identifiers</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Service</th><th>Identifier</th></tr></thead>
+          <tbody>
+            <tr><td>Cloudflare Account</td><td><code>8b1fa38f282c691423c6399247d53323</code></td></tr>
+            <tr><td>Cloud Run Project</td><td><code>gen-lang-client-0920560496</code></td></tr>
+            <tr><td>Cloud Run Region</td><td><code>us-east1</code></td></tr>
+            <tr><td>Main Repo</td><td><code>Heady-pre-production-9f2f0642</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ MODULE PAGES ═══════════════ -->
+  <div class="content-area page" id="page-evolution-engine" style="display:none">
+    <h1 class="page-title">Evolution Engine</h1>
+    <p class="page-subtitle">Evolutionary optimization engine that improves system configurations through phi-scaled mutation, CSL-gated selection, and tournament-based population management.</p>
+    <div class="section">
+      <h2 class="section-title">Key Features</h2>
+      <ul style="list-style: none; display: grid; gap: var(--space-3);">
+        <li style="padding: var(--space-3) var(--space-4); background: var(--color-surface); border-radius: var(--radius-md); border-left: 3px solid var(--color-primary);">Population size: fib(8) = 21 candidates</li>
+        <li style="padding: var(--space-3) var(--space-4); background: var(--color-surface); border-radius: var(--radius-md); border-left: 3px solid var(--color-primary);">Mutation rate: &psi;&sup3; &asymp; 0.236 (phi-derived, not arbitrary)</li>
+        <li style="padding: var(--space-3) var(--space-4); background: var(--color-surface); border-radius: var(--radius-md); border-left: 3px solid var(--color-primary);">Crossover probability: &psi; &asymp; 0.618</li>
+        <li style="padding: var(--space-3) var(--space-4); background: var(--color-surface); border-radius: var(--radius-md); border-left: 3px solid var(--color-primary);">Tournament size: fib(5) = 5</li>
+        <li style="padding: var(--space-3) var(--space-4); background: var(--color-surface); border-radius: var(--radius-md); border-left: 3px solid var(--color-primary);">Elite preservation: top fib(5) = 5 candidates pass unchanged</li>
+        <li style="padding: var(--space-3) var(--space-4); background: var(--color-surface); border-radius: var(--radius-md); border-left: 3px solid var(--color-primary);">CSL-gated fitness: candidates must pass MEDIUM threshold (0.809)</li>
+      </ul>
+    </div>
+    <div class="section">
+      <h2 class="section-title">API</h2>
+      <div class="code-block">
+        <div class="code-header"><span>evolution-engine.js</span></div>
+        <div class="code-body"><span class="kw">const</span> engine = <span class="kw">new</span> <span class="fn">EvolutionEngine</span>({ dimensions: <span class="num">384</span> });
+
+<span class="cm">// Initialize population with seed candidates</span>
+engine.<span class="fn">initPopulation</span>(seedConfigs);
+
+<span class="cm">// Run N generations with fitness function</span>
+<span class="kw">const</span> best = <span class="kw">await</span> engine.<span class="fn">evolve</span>(fitnessFunc, { generations: fib(<span class="num">7</span>) });
+
+<span class="cm">// Get current best candidate</span>
+<span class="kw">const</span> champion = engine.<span class="fn">getBest</span>();
+
+<span class="cm">// Export population for persistence</span>
+<span class="kw">const</span> snapshot = engine.<span class="fn">snapshot</span>();</div>
+      </div>
+    </div>
+    <div class="card-meta" style="margin-top: var(--space-6);">src/engines/evolution-engine.js &middot; 347 lines &middot; Requires: shared/phi-math.js</div>
+  </div>
+
+  <div class="content-area page" id="page-persona-router" style="display:none">
+    <h1 class="page-title">Persona Router</h1>
+    <p class="page-subtitle">Routes tasks to the optimal processing personality using 7 animal archetype embeddings with CSL cosine similarity scoring.</p>
+    <div class="section">
+      <h2 class="section-title">Animal Archetypes</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Archetype</th><th>Animal</th><th>Specialization</th><th>Traits</th></tr></thead>
+          <tbody>
+            <tr><td>Worker</td><td>Ant</td><td>Repetitive tasks, data processing</td><td>Tireless, systematic, parallel</td></tr>
+            <tr><td>Memory</td><td>Elephant</td><td>Knowledge retrieval, context management</td><td>Never forgets, associative, deep</td></tr>
+            <tr><td>Builder</td><td>Beaver</td><td>Construction, architecture, scaffolding</td><td>Methodical, structural, persistent</td></tr>
+            <tr><td>Wisdom</td><td>Owl</td><td>Analysis, judgment, pattern recognition</td><td>Patient, observant, precise</td></tr>
+            <tr><td>Vision</td><td>Eagle</td><td>Strategy, planning, big-picture</td><td>Far-sighted, decisive, aerial</td></tr>
+            <tr><td>Creative</td><td>Dolphin</td><td>Innovation, lateral thinking, play</td><td>Playful, social, inventive</td></tr>
+            <tr><td>Multiplier</td><td>Rabbit</td><td>Idea generation, rapid expansion</td><td>Prolific, fast, iterative</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="section">
+      <h2 class="section-title">Routing Flow</h2>
+      <div class="pipeline">
+        <div class="pipeline-stage"><div class="stage-num">1</div><div class="stage-name">Embed</div><div class="stage-node">Task &rarr; 384D</div></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-stage"><div class="stage-num">2</div><div class="stage-name">Score</div><div class="stage-node">CSL Cosine</div></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-stage"><div class="stage-num">3</div><div class="stage-name">Gate</div><div class="stage-node">&gt; MEDIUM</div></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-stage"><div class="stage-num">4</div><div class="stage-name">Route</div><div class="stage-node">Persona</div></div>
+      </div>
+    </div>
+    <div class="card-meta" style="margin-top: var(--space-6);">src/intelligence/persona-router.js &middot; 265 lines &middot; Requires: shared/phi-math.js</div>
+  </div>
+
+  <div class="content-area page" id="page-wisdom-store" style="display:none">
+    <h1 class="page-title">Wisdom Store</h1>
+    <p class="page-subtitle">Curated knowledge persistence layer — stores validated insights with LRU eviction, cosine similarity deduplication, and promotion/demotion lifecycle.</p>
+    <div class="section">
+      <h2 class="section-title">Configuration</h2>
+      <ul style="list-style: none; display: grid; gap: var(--space-3);">
+        <li style="padding: var(--space-3) var(--space-4); background: var(--color-surface); border-radius: var(--radius-md); border-left: 3px solid var(--color-success);">Max entries: fib(16) = 987</li>
+        <li style="padding: var(--space-3) var(--space-4); background: var(--color-surface); border-radius: var(--radius-md); border-left: 3px solid var(--color-success);">Dedup threshold: 1 - &psi;<sup>6</sup> &times; 0.5 &asymp; 0.972</li>
+        <li style="padding: var(--space-3) var(--space-4); background: var(--color-surface); border-radius: var(--radius-md); border-left: 3px solid var(--color-success);">Promotion: access count reaches fib(5) = 5</li>
+        <li style="padding: var(--space-3) var(--space-4); background: var(--color-surface); border-radius: var(--radius-md); border-left: 3px solid var(--color-success);">Demotion: staleness exceeds fib(11) = 89 days</li>
+        <li style="padding: var(--space-3) var(--space-4); background: var(--color-surface); border-radius: var(--radius-md); border-left: 3px solid var(--color-success);">Tiers: Provisional &rarr; Verified &rarr; Canonical</li>
+      </ul>
+    </div>
+    <div class="card-meta" style="margin-top: var(--space-6);">src/memory/wisdom-store.js &middot; 262 lines &middot; Requires: shared/phi-math.js</div>
+  </div>
+
+  <div class="content-area page" id="page-budget-tracker" style="display:none">
+    <h1 class="page-title">Budget Tracker</h1>
+    <p class="page-subtitle">LLM cost management with Fibonacci-stepped budget tiers, provider-aware tracking, and CSL-gated spending controls that prevent overruns without hard cutoffs.</p>
+    <div class="section">
+      <h2 class="section-title">Budget Tiers</h2>
+      <div class="table-wrap">
+        <table class="phi-table">
+          <thead><tr><th>Tier</th><th>Monthly Budget</th><th>Fibonacci Basis</th><th>CSL Gate</th></tr></thead>
+          <tbody>
+            <tr><td>Free</td><td class="value">$0</td><td>fib(0)</td><td>MINIMUM</td></tr>
+            <tr><td>Starter</td><td class="value">$21</td><td>fib(8)</td><td>LOW</td></tr>
+            <tr><td>Pro</td><td class="value">$55</td><td>fib(10)</td><td>MEDIUM</td></tr>
+            <tr><td>Team</td><td class="value">$144</td><td>fib(12)</td><td>HIGH</td></tr>
+            <tr><td>Enterprise</td><td class="value">$987</td><td>fib(16)</td><td>CRITICAL</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="section">
+      <h2 class="section-title">Cost Tracking</h2>
+      <p style="color: var(--color-text-muted);">Tracks per-provider costs (Claude, GPT-4o, Gemini, Groq, Perplexity, edge inference) with real-time utilization percentage. When utilization crosses CSL threshold for the tier, the system degrades gracefully — routing to cheaper models instead of hard-blocking requests.</p>
+    </div>
+    <div class="card-meta" style="margin-top: var(--space-6);">src/finance/budget-tracker.js &middot; 282 lines &middot; Requires: shared/phi-math.js</div>
+  </div>
+
+  <div class="content-area page" id="page-heady-lens" style="display:none">
+    <h1 class="page-title">HeadyLens</h1>
+    <p class="page-subtitle">System introspection and observability — real-time diagnostics, node health visualization, memory utilization, and topology-aware status reporting.</p>
+    <div class="section">
+      <h2 class="section-title">Capabilities</h2>
+      <ul style="list-style: none; display: grid; gap: var(--space-3);">
+        <li style="padding: var(--space-3) var(--space-4); background: var(--color-surface); border-radius: var(--radius-md); border-left: 3px solid var(--color-primary);">Node health monitoring with phi-backoff probe intervals</li>
+        <li style="padding: var(--space-3) var(--space-4); background: var(--color-surface); border-radius: var(--radius-md); border-left: 3px solid var(--color-primary);">Memory utilization tracking (vector store, LRU caches, working memory)</li>
+        <li style="padding: var(--space-3) var(--space-4); background: var(--color-surface); border-radius: var(--radius-md); border-left: 3px solid var(--color-primary);">Pipeline execution tracing with stage-level timing</li>
+        <li style="padding: var(--space-3) var(--space-4); background: var(--color-surface); border-radius: var(--radius-md); border-left: 3px solid var(--color-primary);">Semantic drift detection — cosine similarity monitoring</li>
+        <li style="padding: var(--space-3) var(--space-4); background: var(--color-surface); border-radius: var(--radius-md); border-left: 3px solid var(--color-primary);">Bee swarm status — active workers, queue depth, error rates</li>
+        <li style="padding: var(--space-3) var(--space-4); background: var(--color-surface); border-radius: var(--radius-md); border-left: 3px solid var(--color-primary);">Topology visualization data export for UI rendering</li>
+      </ul>
+    </div>
+    <div class="card-meta" style="margin-top: var(--space-6);">src/intelligence/heady-lens.js &middot; 295 lines &middot; Requires: shared/phi-math.js</div>
+  </div>
+
+  <div class="content-area page" id="page-council-mode" style="display:none">
+    <h1 class="page-title">Council Mode</h1>
+    <p class="page-subtitle">Multi-model consensus engine — submits tasks to multiple LLM providers simultaneously, then uses phi-weighted voting and semantic clustering to produce a high-confidence synthesized answer.</p>
+    <div class="section">
+      <h2 class="section-title">Council Flow</h2>
+      <div class="pipeline">
+        <div class="pipeline-stage"><div class="stage-num">1</div><div class="stage-name">Fan Out</div><div class="stage-node">N providers</div></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-stage"><div class="stage-num">2</div><div class="stage-name">Collect</div><div class="stage-node">Responses</div></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-stage"><div class="stage-num">3</div><div class="stage-name">Embed</div><div class="stage-node">384D vectors</div></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-stage"><div class="stage-num">4</div><div class="stage-name">Cluster</div><div class="stage-node">Cosine sim</div></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-stage"><div class="stage-num">5</div><div class="stage-name">Vote</div><div class="stage-node">&phi;-weighted</div></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-stage"><div class="stage-num">6</div><div class="stage-name">Synthesize</div><div class="stage-node">Final answer</div></div>
+      </div>
+    </div>
+    <div class="section">
+      <h2 class="section-title">Voting Mechanism</h2>
+      <p style="color: var(--color-text-muted); margin-bottom: var(--space-4);">Responses are embedded and clustered by cosine similarity. The largest cluster gets the highest weight (&psi;<sup>0</sup>), second cluster gets &psi;<sup>1</sup>, and so on — phi-fusion weights that decay geometrically. Dissenting responses (outside all clusters) are flagged for manual review if their CSL gate score exceeds the MEDIUM threshold.</p>
+    </div>
+    <div class="card-meta" style="margin-top: var(--space-6);">src/governance/council-mode.js &middot; 264 lines &middot; Requires: shared/phi-math.js</div>
+  </div>
+
+  <div class="content-area page" id="page-auto-success" style="display:none">
+    <h1 class="page-title">Auto-Success Engine</h1>
+    <p class="page-subtitle">Complete automated pipeline that chains Battle Arena, Coder, Analysis, Risks, and Patterns into a single workflow taking any task from request to verified delivery.</p>
+    <div class="section">
+      <h2 class="section-title">Pipeline Stages</h2>
+      <div class="table-wrap">
+        <table class="phi-table">
+          <thead><tr><th>Stage</th><th>Name</th><th>Dependencies</th><th>Timeout</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td><strong>Context</strong></td><td>&mdash;</td><td class="value">21s</td><td>Assemble all relevant context from vector memory</td></tr>
+            <tr><td>2</td><td><strong>Battle</strong></td><td>Context</td><td class="value">34s</td><td>Competitive evaluation — pit multiple solutions against each other</td></tr>
+            <tr><td>3</td><td><strong>Code</strong></td><td>Battle</td><td class="value">55s</td><td>Generate implementation from winning battle strategy</td></tr>
+            <tr><td>4a</td><td><strong>Analyze</strong></td><td>Code</td><td class="value">34s</td><td>Deep analysis of generated code (parallel with Risks)</td></tr>
+            <tr><td>4b</td><td><strong>Risks</strong></td><td>Code</td><td class="value">21s</td><td>Risk assessment and vulnerability scan (parallel with Analyze)</td></tr>
+            <tr><td>5</td><td><strong>Patterns</strong></td><td>Analyze + Risks</td><td class="value">21s</td><td>Pattern extraction and learning capture</td></tr>
+            <tr><td>6</td><td><strong>Quality</strong></td><td>Patterns</td><td class="value">13s</td><td>HeadyCheck output validation gate</td></tr>
+            <tr><td>7</td><td><strong>Delivery</strong></td><td>Quality</td><td class="value">8s</td><td>Package and deliver verified result</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="color: var(--color-text-muted);">Note: Analyze and Risks run concurrently (both depend only on Code). All timeouts are Fibonacci numbers in seconds. The pipeline uses data-dependency-aware scheduling — independent stages execute in parallel automatically.</p>
+    </div>
+    <div class="card-meta" style="margin-top: var(--space-6);">src/engines/auto-success-engine.js &middot; 332 lines &middot; Requires: shared/phi-math.js</div>
+  </div>
+
+  <!-- ═══════════════ PHI-MATH PAGE ═══════════════ -->
+  <div class="content-area page" id="page-phi-math" style="display:none">
+    <h1 class="page-title">Phi-Math Foundation</h1>
+    <p class="page-subtitle">Every constant in Heady derives from the golden ratio. No magic numbers — all thresholds, sizes, timings, and weights trace back to &phi; &asymp; 1.618 or its conjugate &psi; &asymp; 0.618.</p>
+    <div class="section">
+      <h2 class="section-title">Core Constants</h2>
+      <div class="table-wrap">
+        <table class="phi-table">
+          <thead><tr><th>Constant</th><th>Value</th><th>Formula</th><th>Use</th></tr></thead>
+          <tbody>
+            <tr><td>&phi; (PHI)</td><td class="value">1.618033...</td><td>(1 + &radic;5) / 2</td><td>Scaling ratio, typography, layout</td></tr>
+            <tr><td>&psi; (PSI)</td><td class="value">0.618033...</td><td>1 / &phi;</td><td>Conjugate — weights, thresholds</td></tr>
+            <tr><td>&phi;&sup2;</td><td class="value">2.618033...</td><td>&phi; + 1</td><td>Token budget scaling</td></tr>
+            <tr><td>&phi;&sup3;</td><td class="value">4.236067...</td><td>2&phi; + 1</td><td>Timing multipliers</td></tr>
+            <tr><td>&psi;&sup2;</td><td class="value">0.381966...</td><td>PSI&sup2;</td><td>Lower bounds, edge routing</td></tr>
+            <tr><td>&psi;&sup3;</td><td class="value">0.236067...</td><td>PSI&sup3;</td><td>Mutation rates, temperature</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="section">
+      <h2 class="section-title">Fibonacci Quick Reference</h2>
+      <div class="table-wrap">
+        <table class="phi-table">
+          <thead><tr><th>fib(n)</th><th>Value</th><th>Use in Heady</th></tr></thead>
+          <tbody>
+            <tr><td>fib(5)</td><td class="value">5</td><td>Circuit breaker threshold, tournament size</td></tr>
+            <tr><td>fib(6)</td><td class="value">8</td><td>Batch sizes, max concurrent workers</td></tr>
+            <tr><td>fib(7)</td><td class="value">13</td><td>Small limits, trial days, generation count</td></tr>
+            <tr><td>fib(8)</td><td class="value">21</td><td>HNSW m, rerankTopK, population size</td></tr>
+            <tr><td>fib(9)</td><td class="value">34</td><td>Sliding windows, pipeline timeouts</td></tr>
+            <tr><td>fib(10)</td><td class="value">55</td><td>Max entities, code gen timeout</td></tr>
+            <tr><td>fib(11)</td><td class="value">89</td><td>efSearch, retention days</td></tr>
+            <tr><td>fib(12)</td><td class="value">144</td><td>ef_construction</td></tr>
+            <tr><td>fib(13)</td><td class="value">233</td><td>Queue depth</td></tr>
+            <tr><td>fib(16)</td><td class="value">987</td><td>Cache sizes, max wisdom entries</td></tr>
+            <tr><td>fib(20)</td><td class="value">6765</td><td>Large LRU caches</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="section">
+      <h2 class="section-title">Key Functions</h2>
+      <div class="code-block">
+        <div class="code-header"><span>shared/phi-math.js</span></div>
+        <div class="code-body"><span class="cm">// CSL Threshold Generator</span>
+<span class="kw">function</span> <span class="fn">phiThreshold</span>(level, spread = <span class="num">0.5</span>) {
+  <span class="kw">return</span> <span class="num">1</span> - Math.<span class="fn">pow</span>(PSI, level) * spread;
+}
+<span class="cm">// MINIMUM: 0.500, LOW: 0.691, MEDIUM: 0.809, HIGH: 0.882, CRITICAL: 0.927</span>
+
+<span class="cm">// Phi-Weighted Fusion (geometric decay)</span>
+<span class="kw">function</span> <span class="fn">phiFusionWeights</span>(n) {
+  <span class="kw">const</span> raw = Array.<span class="fn">from</span>({ length: n }, (_, i) => Math.<span class="fn">pow</span>(PSI, i));
+  <span class="kw">const</span> sum = raw.<span class="fn">reduce</span>((a, b) => a + b, <span class="num">0</span>);
+  <span class="kw">return</span> raw.<span class="fn">map</span>(w => w / sum);
+}
+
+<span class="cm">// Phi-Backoff (exponential with golden ratio base)</span>
+<span class="kw">function</span> <span class="fn">phiBackoff</span>(attempt, baseMs = <span class="num">1000</span>, maxMs = <span class="num">60000</span>) {
+  <span class="kw">return</span> Math.<span class="fn">min</span>(Math.<span class="fn">round</span>(baseMs * Math.<span class="fn">pow</span>(PHI, attempt)), maxMs);
+}
+
+<span class="cm">// CSL Gate (soft sigmoid threshold)</span>
+<span class="kw">function</span> <span class="fn">cslGate</span>(value, cosScore, tau, temp = <span class="num">0.236</span>) {
+  <span class="kw">return</span> value * (<span class="num">1</span> / (<span class="num">1</span> + Math.<span class="fn">exp</span>(-(cosScore - tau) / temp)));
+}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ CSL PAGE ═══════════════ -->
+  <div class="content-area page" id="page-csl" style="display:none">
+    <h1 class="page-title">CSL Gates</h1>
+    <p class="page-subtitle">Continuous Semantic Logic — Heady's core innovation using vector operations as logical gates. Every decision flows through cosine similarity scoring and phi-derived thresholds.</p>
+    <div class="section">
+      <h2 class="section-title">CSL Operations</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Operation</th><th>Vector Implementation</th><th>Use</th></tr></thead>
+          <tbody>
+            <tr><td><strong>CSL AND</strong></td><td>Cosine similarity</td><td>Semantic agreement — how aligned are two concepts</td></tr>
+            <tr><td><strong>CSL OR</strong></td><td>Vector superposition (sum + normalize)</td><td>Merge concepts into unified representation</td></tr>
+            <tr><td><strong>CSL NOT</strong></td><td>Orthogonal projection rejection</td><td>Remove a concept from a vector</td></tr>
+            <tr><td><strong>CSL IMPLY</strong></td><td>Projection onto subspace</td><td>Extract the part of A that relates to B</td></tr>
+            <tr><td><strong>CSL XOR</strong></td><td>Symmetric difference</td><td>What's unique to each concept</td></tr>
+            <tr><td><strong>CSL GATE</strong></td><td>Sigmoid(cosine - threshold)</td><td>Soft binary decision on similarity</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="section">
+      <h2 class="section-title">Threshold Levels</h2>
+      <div class="table-wrap">
+        <table class="phi-table">
+          <thead><tr><th>Level</th><th>Threshold</th><th>Formula</th><th>Use Case</th></tr></thead>
+          <tbody>
+            <tr><td>MINIMUM</td><td class="value">0.500</td><td>1 - &psi;<sup>0</sup> &times; 0.5</td><td>Loose matching, broad search</td></tr>
+            <tr><td>LOW</td><td class="value">0.691</td><td>1 - &psi;<sup>1</sup> &times; 0.5</td><td>Embedding similarity filtering</td></tr>
+            <tr><td>MEDIUM</td><td class="value">0.809</td><td>1 - &psi;<sup>2</sup> &times; 0.5</td><td>Routing decisions, drift detection</td></tr>
+            <tr><td>HIGH</td><td class="value">0.882</td><td>1 - &psi;<sup>3</sup> &times; 0.5</td><td>Quality gates, assurance</td></tr>
+            <tr><td>CRITICAL</td><td class="value">0.927</td><td>1 - &psi;<sup>4</sup> &times; 0.5</td><td>Security decisions, identity verification</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ BEES PAGE ═══════════════ -->
+  <div class="content-area page" id="page-bees" style="display:none">
+    <h1 class="page-title">Bee Registry</h1>
+    <p class="page-subtitle">30+ HeadyBee worker types following the BaseHeadyBee lifecycle: spawn() &rarr; execute() &rarr; report() &rarr; retire()</p>
+    <div class="section">
+      <h2 class="section-title">All Bee Types</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Bee Type</th><th>Module</th><th>Role</th></tr></thead>
+          <tbody>
+            <tr><td>agents-bee</td><td><code>src/bees/agents-bee.js</code></td><td>Agent creation and routing</td></tr>
+            <tr><td>auth-provider-bee</td><td><code>src/bees/auth-provider-bee.js</code></td><td>Authentication provider orchestration</td></tr>
+            <tr><td>auto-success-bee</td><td><code>src/bees/auto-success-bee.js</code></td><td>Automated success pipeline execution</td></tr>
+            <tr><td>brain-bee</td><td><code>src/bees/brain-bee.js</code></td><td>LLM provider routing and model selection</td></tr>
+            <tr><td>config-bee</td><td><code>src/bees/config-bee.js</code></td><td>Configuration management and validation</td></tr>
+            <tr><td>connectors-bee</td><td><code>src/bees/connectors-bee.js</code></td><td>External service connector management</td></tr>
+            <tr><td>creative-bee</td><td><code>src/bees/creative-bee.js</code></td><td>Creative content generation</td></tr>
+            <tr><td>deployment-bee</td><td><code>src/bees/deployment-bee.js</code></td><td>Cloud deployment automation</td></tr>
+            <tr><td>device-provisioner-bee</td><td><code>src/bees/device-provisioner-bee.js</code></td><td>Device onboarding and provisioning</td></tr>
+            <tr><td>documentation-bee</td><td><code>src/bees/documentation-bee.js</code></td><td>Auto-documentation generation</td></tr>
+            <tr><td>engines-bee</td><td><code>src/bees/engines-bee.js</code></td><td>Engine orchestration and lifecycle</td></tr>
+            <tr><td>governance-bee</td><td><code>src/bees/governance-bee.js</code></td><td>Policy enforcement and compliance</td></tr>
+            <tr><td>health-bee</td><td><code>src/bees/health-bee.js</code></td><td>Health probe execution and reporting</td></tr>
+            <tr><td>intelligence-bee</td><td><code>src/bees/intelligence-bee.js</code></td><td>Intelligence gathering and analysis</td></tr>
+            <tr><td>lifecycle-bee</td><td><code>src/bees/lifecycle-bee.js</code></td><td>Service lifecycle management</td></tr>
+            <tr><td>mcp-bee</td><td><code>src/bees/mcp-bee.js</code></td><td>MCP protocol tool execution</td></tr>
+            <tr><td>memory-bee</td><td><code>src/bees/memory-bee.js</code></td><td>Memory operations (store, retrieve, embed)</td></tr>
+            <tr><td>middleware-bee</td><td><code>src/bees/middleware-bee.js</code></td><td>Middleware chain management</td></tr>
+            <tr><td>midi-bee</td><td><code>src/bees/midi-bee.js</code></td><td>MIDI event processing</td></tr>
+            <tr><td>ops-bee</td><td><code>src/bees/ops-bee.js</code></td><td>Operations automation</td></tr>
+            <tr><td>orchestration-bee</td><td><code>src/bees/orchestration-bee.js</code></td><td>Multi-bee orchestration coordination</td></tr>
+            <tr><td>pipeline-bee</td><td><code>src/bees/pipeline-bee.js</code></td><td>Pipeline stage execution</td></tr>
+            <tr><td>providers-bee</td><td><code>src/bees/providers-bee.js</code></td><td>Provider health and failover</td></tr>
+            <tr><td>refactor-bee</td><td><code>src/bees/refactor-bee.js</code></td><td>Code refactoring automation</td></tr>
+            <tr><td>resilience-bee</td><td><code>src/bees/resilience-bee.js</code></td><td>Resilience pattern enforcement</td></tr>
+            <tr><td>routes-bee</td><td><code>src/bees/routes-bee.js</code></td><td>API route management</td></tr>
+            <tr><td>security-bee</td><td><code>src/bees/security-bee.js</code></td><td>Security scanning and enforcement</td></tr>
+            <tr><td>services-bee</td><td><code>src/bees/services-bee.js</code></td><td>Service catalog management</td></tr>
+            <tr><td>sync-projection-bee</td><td><code>src/bees/sync-projection-bee.js</code></td><td>Repo projection synchronization</td></tr>
+            <tr><td>telemetry-bee</td><td><code>src/bees/telemetry-bee.js</code></td><td>Telemetry collection and export</td></tr>
+            <tr><td>trading-bee</td><td><code>src/bees/trading-bee.js</code></td><td>Financial trading operations</td></tr>
+            <tr><td>vector-ops-bee</td><td><code>src/bees/vector-ops-bee.js</code></td><td>Vector space operations</td></tr>
+            <tr><td>vector-template-bee</td><td><code>src/bees/vector-template-bee.js</code></td><td>Vector template management</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ DEPLOYMENT PAGE ═══════════════ -->
+  <div class="content-area page" id="page-deployment" style="display:none">
+    <h1 class="page-title">Deployment Guide</h1>
+    <p class="page-subtitle">How to deploy the 7 new modules and integrate them into the existing Heady monorepo.</p>
+    <div class="section">
+      <h2 class="section-title">Installation</h2>
+      <div class="code-block">
+        <div class="code-header"><span>Shell</span></div>
+        <div class="code-body"><span class="cm"># 1. Clone the monorepo</span>
+git clone git@github.com:HeadyMe/Heady-pre-production-9f2f0642.git
+<span class="kw">cd</span> Heady-pre-production-9f2f0642
+
+<span class="cm"># 2. Copy new modules into place</span>
+cp -r heady-missing-modules/src/shared/* src/shared/
+cp -r heady-missing-modules/src/engines/* src/engines/
+cp -r heady-missing-modules/src/intelligence/* src/intelligence/
+cp -r heady-missing-modules/src/memory/* src/memory/
+cp -r heady-missing-modules/src/finance/* src/finance/
+cp -r heady-missing-modules/src/governance/* src/governance/
+
+<span class="cm"># 3. Verify all modules load</span>
+node -e "
+  require('./src/engines/evolution-engine');
+  require('./src/intelligence/persona-router');
+  require('./src/memory/wisdom-store');
+  require('./src/finance/budget-tracker');
+  require('./src/intelligence/heady-lens');
+  require('./src/governance/council-mode');
+  require('./src/engines/auto-success-engine');
+  console.log('All 7 modules loaded successfully');
+"</div>
+      </div>
+    </div>
+    <div class="section">
+      <h2 class="section-title">Module Dependency Map</h2>
+      <div class="code-block">
+        <div class="code-header"><span>Dependencies</span></div>
+        <div class="code-body">shared/phi-math.js      &larr; Required by ALL modules
+shared/logger.js        &larr; Required by ALL modules
+engines/
+  evolution-engine.js   &larr; Standalone (phi-math, logger)
+  auto-success-engine.js &larr; Standalone (phi-math, logger)
+intelligence/
+  persona-router.js     &larr; Standalone (phi-math, logger)
+  heady-lens.js         &larr; Standalone (phi-math, logger)
+memory/
+  wisdom-store.js       &larr; Standalone (phi-math, logger)
+finance/
+  budget-tracker.js     &larr; Standalone (phi-math, logger)
+governance/
+  council-mode.js       &larr; Standalone (phi-math, logger)</div>
+      </div>
+      <p style="color: var(--color-text-muted);">Every module is self-contained with only phi-math and logger as shared dependencies. No circular dependencies, no deep import chains.</p>
+    </div>
+    <div class="section">
+      <h2 class="section-title">Self-Healing Cycle</h2>
+      <div class="pipeline">
+        <div class="pipeline-stage"><div class="stage-num">1</div><div class="stage-name">Monitor</div><div class="stage-node">Cosine sim</div></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-stage"><div class="stage-num">2</div><div class="stage-name">Detect</div><div class="stage-node">&lt; 0.809</div></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-stage"><div class="stage-num">3</div><div class="stage-name">Alert</div><div class="stage-node">HeadySoul</div></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-stage"><div class="stage-num">4</div><div class="stage-name">Diagnose</div><div class="stage-node">Patterns</div></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-stage"><div class="stage-num">5</div><div class="stage-name">Heal</div><div class="stage-node">Maintain</div></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-stage"><div class="stage-num">6</div><div class="stage-name">Verify</div><div class="stage-node">Check</div></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-stage"><div class="stage-num">7</div><div class="stage-name">Learn</div><div class="stage-node">Store</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2026 HeadySystems Inc. &mdash; Eric Haywood, Founder &mdash; 60+ Provisional Patents</p>
+    <p style="margin-top: var(--space-2);">&Phi; &asymp; 1.618 &middot; Sacred Geometry v4.0 &middot; Alive Software Architecture</p>
+    <p style="margin-top: var(--space-2);"><a href="https://www.perplexity.ai/computer" target="_blank" rel="noopener noreferrer">Created with Perplexity Computer</a></p>
+  </footer>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
