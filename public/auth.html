@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -43,7 +44,8 @@
             box-sizing: border-box;
         }
 
-        html, body {
+        html,
+        body {
             width: 100%;
             height: 100%;
             overflow: hidden;
@@ -82,8 +84,15 @@
         }
 
         @keyframes shift-gradient {
-            0%, 100% { filter: brightness(1); }
-            50% { filter: brightness(1.1); }
+
+            0%,
+            100% {
+                filter: brightness(1);
+            }
+
+            50% {
+                filter: brightness(1.1);
+            }
         }
 
         /* Particle animation background */
@@ -109,8 +118,15 @@
         }
 
         @keyframes twinkle {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 0.8; }
+
+            0%,
+            100% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
         }
 
         /* ─────────────────────────────────────────────────────────────────── */
@@ -159,8 +175,15 @@
         }
 
         @keyframes card-float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-8px);
+            }
         }
 
         /* ─────────────────────────────────────────────────────────────────── */
@@ -177,13 +200,11 @@
             width: 100px;
             height: 100px;
             border-radius: 50%;
-            background: conic-gradient(
-                from 0deg,
-                var(--heady-cyan),
-                var(--heady-magenta),
-                var(--heady-gold),
-                var(--heady-cyan)
-            );
+            background: conic-gradient(from 0deg,
+                    var(--heady-cyan),
+                    var(--heady-magenta),
+                    var(--heady-gold),
+                    var(--heady-cyan));
             box-shadow:
                 var(--glow-cyan),
                 var(--glow-gold),
@@ -205,18 +226,37 @@
         }
 
         @keyframes rotate-orb {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         @keyframes breathe-orb {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.08); }
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.08);
+            }
         }
 
         @keyframes shift-shine {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(10px, 10px); }
+
+            0%,
+            100% {
+                transform: translate(0, 0);
+            }
+
+            50% {
+                transform: translate(10px, 10px);
+            }
         }
 
         /* ─────────────────────────────────────────────────────────────────── */
@@ -441,7 +481,9 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         /* ─────────────────────────────────────────────────────────────────── */
@@ -482,6 +524,7 @@
                 transform: translateX(400px);
                 opacity: 0;
             }
+
             to {
                 transform: translateX(0);
                 opacity: 1;
@@ -493,6 +536,7 @@
                 transform: translateX(0);
                 opacity: 1;
             }
+
             to {
                 transform: translateX(400px);
                 opacity: 0;
@@ -550,6 +594,7 @@
                 opacity: 0;
                 transform: translateY(10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -592,6 +637,7 @@
         /* HEADY_BRAND:END */
     </style>
 </head>
+
 <body>
     <div class="auth-container">
         <a href="/" class="back-link">
@@ -619,13 +665,7 @@
                 <div class="form-group">
                     <label for="login-email">Email</label>
                     <div class="input-wrapper">
-                        <input
-                            type="email"
-                            id="login-email"
-                            name="email"
-                            placeholder="your@heady.systems"
-                            required
-                        >
+                        <input type="email" id="login-email" name="email" placeholder="your@heady.systems" required>
                     </div>
                     <div class="error-message" data-field="login-email"></div>
                 </div>
@@ -633,18 +673,8 @@
                 <div class="form-group">
                     <label for="login-password">Password</label>
                     <div class="input-wrapper">
-                        <input
-                            type="password"
-                            id="login-password"
-                            name="password"
-                            placeholder="••••••••"
-                            required
-                        >
-                        <button
-                            type="button"
-                            class="password-toggle"
-                            data-target="login-password"
-                        >👁</button>
+                        <input type="password" id="login-password" name="password" placeholder="••••••••" required>
+                        <button type="button" class="password-toggle" data-target="login-password">👁</button>
                     </div>
                     <div class="error-message" data-field="login-password"></div>
                 </div>
@@ -659,17 +689,8 @@
                     <div class="form-group">
                         <label for="login-api-key">API Key</label>
                         <div class="input-wrapper">
-                            <input
-                                type="password"
-                                id="login-api-key"
-                                name="apiKey"
-                                placeholder="heady_sk_..."
-                            >
-                            <button
-                                type="button"
-                                class="password-toggle"
-                                data-target="login-api-key"
-                            >👁</button>
+                            <input type="password" id="login-api-key" name="apiKey" placeholder="heady_sk_...">
+                            <button type="button" class="password-toggle" data-target="login-api-key">👁</button>
                         </div>
                     </div>
                 </div>
@@ -684,13 +705,7 @@
                 <div class="form-group">
                     <label for="register-name">Full Name</label>
                     <div class="input-wrapper">
-                        <input
-                            type="text"
-                            id="register-name"
-                            name="name"
-                            placeholder="Your Name"
-                            required
-                        >
+                        <input type="text" id="register-name" name="name" placeholder="Your Name" required>
                     </div>
                     <div class="error-message" data-field="register-name"></div>
                 </div>
@@ -698,13 +713,7 @@
                 <div class="form-group">
                     <label for="register-email">Email</label>
                     <div class="input-wrapper">
-                        <input
-                            type="email"
-                            id="register-email"
-                            name="email"
-                            placeholder="your@heady.systems"
-                            required
-                        >
+                        <input type="email" id="register-email" name="email" placeholder="your@heady.systems" required>
                     </div>
                     <div class="error-message" data-field="register-email"></div>
                 </div>
@@ -712,18 +721,8 @@
                 <div class="form-group">
                     <label for="register-password">Password</label>
                     <div class="input-wrapper">
-                        <input
-                            type="password"
-                            id="register-password"
-                            name="password"
-                            placeholder="••••••••"
-                            required
-                        >
-                        <button
-                            type="button"
-                            class="password-toggle"
-                            data-target="register-password"
-                        >👁</button>
+                        <input type="password" id="register-password" name="password" placeholder="••••••••" required>
+                        <button type="button" class="password-toggle" data-target="register-password">👁</button>
                     </div>
                     <div class="error-message" data-field="register-password"></div>
                 </div>
@@ -731,18 +730,10 @@
                 <div class="form-group">
                     <label for="register-password-confirm">Confirm Password</label>
                     <div class="input-wrapper">
-                        <input
-                            type="password"
-                            id="register-password-confirm"
-                            name="passwordConfirm"
-                            placeholder="••••••••"
-                            required
-                        >
-                        <button
-                            type="button"
-                            class="password-toggle"
-                            data-target="register-password-confirm"
-                        >👁</button>
+                        <input type="password" id="register-password-confirm" name="passwordConfirm"
+                            placeholder="••••••••" required>
+                        <button type="button" class="password-toggle"
+                            data-target="register-password-confirm">👁</button>
                     </div>
                     <div class="error-message" data-field="register-password-confirm"></div>
                 </div>
@@ -780,7 +771,8 @@
             for (const url of HEADY_CLOUD_URLS) {
                 try {
                     const r = await fetch(url + '/health', {
-                        signal: AbortSignal.timeout(3000)
+                        signal: AbortSignal.timeout(3000),
+                        credentials: 'include'
                     });
                     if (r.ok) {
                         HEADY_API = url;
@@ -788,7 +780,7 @@
                         console.log('[Auth] API resolved:', HEADY_API);
                         return url;
                     }
-                } catch(e) {
+                } catch (e) {
                     console.log('[Auth] URL failed:', url, e.message);
                 }
             }
@@ -997,6 +989,7 @@
                 const response = await fetch(`${HEADY_API}/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify(payload)
                 });
 
@@ -1006,8 +999,7 @@
                     throw new Error(data.error || 'Sign in failed');
                 }
 
-                // Store token
-                localStorage.setItem('heady_token', data.token);
+                // Token is now stored in httpOnly cookie (set by server)
                 showToast('Welcome! Redirecting...', 'success');
 
                 // Redirect based on isNewUser flag
@@ -1045,6 +1037,7 @@
                 const response = await fetch(`${HEADY_API}/auth/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({ name, email, password })
                 });
 
@@ -1054,8 +1047,7 @@
                     throw new Error(data.error || 'Registration failed');
                 }
 
-                // Store token
-                localStorage.setItem('heady_token', data.token);
+                // Token is now stored in httpOnly cookie (set by server)
                 showToast('Account created! Redirecting to onboarding...', 'success');
 
                 // New users always go to onboarding
@@ -1080,4 +1072,5 @@
         });
     </script>
 </body>
+
 </html>
