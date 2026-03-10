@@ -175,3 +175,84 @@ externalIntegrations:
     domain: api.cloudflare.com
     proxyPolicy: external-proxy-allowed
     rateLimit: 30/min
+
+  - name: google-vertex-ai
+    type: ml-platform
+    domain: us-central1-aiplatform.googleapis.com
+    proxyPolicy: external-proxy-allowed
+    rateLimit: 30/min
+
+  - name: google-ai-studio
+    type: llm-api
+    domain: generativelanguage.googleapis.com
+    proxyPolicy: external-proxy-allowed
+    rateLimit: 60/min
+
+  - name: google-colab
+    type: notebook-platform
+    domain: colab.research.google.com
+    proxyPolicy: external-proxy-allowed
+    rateLimit: 10/min
+
+# ─── LIQUID NODES (MCP-Connected External Interfaces) ─────────────────────
+liquidNodes:
+  - name: github-node
+    type: scm
+    status: needs_token
+    envVar: GITHUB_TOKEN
+    capabilities: [list-repos, repo-info, search-code]
+    vaultKey: heady-vault-manifest
+
+  - name: gists-node
+    type: code-snippets
+    status: needs_token
+    envVar: GITHUB_TOKEN
+    capabilities: [list-gists, get-gist, create-gist]
+
+  - name: cloudflare-node
+    type: infrastructure
+    status: needs_token
+    envVar: CLOUDFLARE_API_TOKEN
+    capabilities: [list-zones, dns-records, list-workers, list-pages]
+
+  - name: vertex-ai-node
+    type: ml-inference
+    status: needs_token
+    envVar: GCLOUD_ACCESS_TOKEN
+    capabilities: [list-models, list-endpoints, predict]
+
+  - name: ai-studio-node
+    type: llm-generation
+    status: needs_token
+    envVar: GOOGLE_AI_KEY
+    capabilities: [generate-text]
+
+  - name: colab-node
+    type: notebooks
+    status: needs_token
+    envVar: GOOGLE_DRIVE_TOKEN
+    capabilities: [list-notebooks, get-notebook]
+
+  - name: latent-space-node
+    type: vector-memory
+    status: active
+    envVar: null
+    capabilities: [store, search, list, delete]
+    currentVectors: 43
+
+# ─── HEADY VAULT ──────────────────────────────────────────────────────────
+vault:
+  name: HeadyVault
+  source: .Heady/.shit
+  latentSpaceKey: heady-vault-manifest
+  totalSecrets: 45
+  categories:
+    ai-llm: [ANTHROPIC_API_KEY, CLAUDE_API_KEY, OPENAI_API_KEY, GROQ_API_KEY, PERPLEXITY_API_KEY, HF_TOKEN, GEMINI_API_KEY, GCLOUD_API_KEY]
+    infrastructure: [DATABASE_URL, NEON_API_KEY, UPSTASH_REDIS_REST_URL, FIREBASE_API_KEY, PINECONE_API_KEY]
+    cloud-deploy: [CLOUDFLARE_API_TOKEN, SENTRY_AUTH_TOKEN, SENTRY_DSN]
+    scm: [GITHUB_TOKEN, GITHUB_TOKEN_SECONDARY]
+    finance: [STRIPE_SECRET_KEY]
+    auth: [ADMIN_TOKEN, HEADY_API_KEY, OP_SERVICE_ACCOUNT_TOKEN]
+  rotationPolicy: quarterly
+  lastRotation: unknown
+  nextRotation: 2026-03-15

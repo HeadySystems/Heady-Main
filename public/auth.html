@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heady Systems - Sacred Authentication</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ╔══════════════════════════════════════════════════════════════════╗ */
+        /* ║  HEADY_BRAND:BEGIN — Sacred Geometry Design System              ║ */
+        /* ║  Authentication Page — Glassmorphism & Breathing Orb            ║ */
+        /* ╚══════════════════════════════════════════════════════════════════╝ */
+
+        :root {
+            --heady-gold: #D4AF37;
+            --heady-gold-light: #F4D03F;
+            --heady-gold-dark: #B8860B;
+            --heady-cyan: #00D9FF;
+            --heady-cyan-soft: rgba(0, 217, 255, 0.2);
+            --heady-magenta: #FF00A0;
+            --heady-magenta-soft: rgba(255, 0, 160, 0.2);
+            --heady-deep-space: #0A0A1A;
+            --heady-void: #050510;
+            --heady-nebula: #1A1A3E;
+            --heady-white: #FAFAFA;
+            --heady-cream: #F5F0E8;
+
+            --radius-sacred: 24px;
+            --radius-pill: 9999px;
+            --radius-card: 20px;
+            --radius-button: 16px;
+
+            --shadow-sacred: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            --glow-gold: 0 0 30px rgba(212, 175, 55, 0.6);
+            --glow-cyan: 0 0 40px rgba(0, 217, 255, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--heady-void) 0%, var(--heady-deep-space) 50%, var(--heady-nebula) 100%);
+            color: var(--heady-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+
+        /* ─────────────────────────────────────────────────────────────────── */
+        /* BACKGROUND: Sacred Geometry Pattern + Particles */
+        /* ─────────────────────────────────────────────────────────────────── */
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(0, 217, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 0, 160, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.05) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+            animation: shift-gradient 15s ease-in-out infinite;
+        }
+
+        @keyframes shift-gradient {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.1); }
+        }
+
+        /* Particle animation background */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(2px 2px at 20px 30px, rgba(212, 175, 55, 0.5), transparent),
+                radial-gradient(2px 2px at 60px 70px, rgba(0, 217, 255, 0.4), transparent),
+                radial-gradient(1px 1px at 50px 50px, rgba(255, 0, 160, 0.3), transparent),
+                radial-gradient(1px 1px at 130px 80px, rgba(212, 175, 55, 0.3), transparent),
+                radial-gradient(2px 2px at 90px 10px, rgba(0, 217, 255, 0.3), transparent);
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            opacity: 0.6;
+            pointer-events: none;
+            z-index: 0;
+            animation: twinkle 8s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.8; }
+        }
+
+        /* ─────────────────────────────────────────────────────────────────── */
+        /* MAIN CONTAINER */
+        /* ─────────────────────────────────────────────────────────────────── */
+
+        .auth-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 420px;
+            padding: 2rem;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--heady-cyan);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            gap: 0.8rem;
+            filter: drop-shadow(0 0 10px rgba(0, 217, 255, 0.5));
+        }
+
+        /* ─────────────────────────────────────────────────────────────────── */
+        /* CARD: Glassmorphism */
+        /* ─────────────────────────────────────────────────────────────────── */
+
+        .auth-card {
+            background: rgba(26, 26, 62, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: var(--radius-card);
+            box-shadow: var(--shadow-sacred);
+            padding: 3rem 2.5rem;
+            animation: card-float 6s ease-in-out infinite;
+        }
+
+        @keyframes card-float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* ─────────────────────────────────────────────────────────────────── */
+        /* HEADY ORB: Breathing, Rotating, Glowing */
+        /* ─────────────────────────────────────────────────────────────────── */
+
+        .orb-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .heady-orb {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 0deg,
+                var(--heady-cyan),
+                var(--heady-magenta),
+                var(--heady-gold),
+                var(--heady-cyan)
+            );
+            box-shadow:
+                var(--glow-cyan),
+                var(--glow-gold),
+                0 0 60px rgba(255, 0, 160, 0.4),
+                inset 0 0 30px rgba(255, 255, 255, 0.1);
+            animation:
+                rotate-orb 8s linear infinite,
+                breathe-orb 4s ease-in-out infinite;
+            position: relative;
+        }
+
+        .heady-orb::before {
+            content: '';
+            position: absolute;
+            inset: 20%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), transparent);
+            animation: shift-shine 4s ease-in-out infinite;
+        }
+
+        @keyframes rotate-orb {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes breathe-orb {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        @keyframes shift-shine {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(10px, 10px); }
+        }
+
+        /* ─────────────────────────────────────────────────────────────────── */
+        /* TITLE & SUBTITLE */
+        /* ─────────────────────────────────────────────────────────────────── */
+
+        .auth-title {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--heady-cyan) 0%, var(--heady-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .auth-subtitle {
+            text-align: center;
+            font-size: 0.95rem;
+            color: rgba(245, 240, 232, 0.6);
+            margin-bottom: 2rem;
+        }
+
+        /* ─────────────────────────────────────────────────────────────────── */
+        /* MODE TOGGLE: Login / Register */
+        /* ─────────────────────────────────────────────────────────────────── */
+
+        .mode-toggle {
+            display: flex;
+            background: rgba(5, 5, 16, 0.6);
+            border-radius: var(--radius-pill);
+            padding: 0.4rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(212, 175, 55, 0.15);
+        }
+
+        .toggle-button {
+            flex: 1;
+            padding: 0.7rem 1rem;
+            border: none;
+            background: transparent;
+            color: rgba(245, 240, 232, 0.6);
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: var(--radius-pill);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .toggle-button.active {
+            background: linear-gradient(135deg, var(--heady-gold) 0%, var(--heady-gold-light) 100%);
+            color: var(--heady-deep-space);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+        }
+
+        /* ─────────────────────────────────────────────────────────────────── */
+        /* FORM STYLES */
+        /* ─────────────────────────────────────────────────────────────────── */
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--heady-cream);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="key"] {
+            width: 100%;
+            padding: 0.95rem 1.2rem;
+            background: rgba(5, 5, 16, 0.8);
+            border: 2px solid rgba(212, 175, 55, 0.25);
+            border-radius: var(--radius-button);
+            color: var(--heady-white);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        input[type="key"]:focus {
+            outline: none;
+            border-color: var(--heady-cyan);
+            background: rgba(5, 5, 16, 0.95);
+            box-shadow: var(--glow-cyan);
+        }
+
+        input::placeholder {
+            color: rgba(245, 240, 232, 0.35);
+        }
+
+        /* Password visibility toggle */
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--heady-cyan);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            padding: 0.5rem;
+        }
+
+        .password-toggle:hover {
+            filter: drop-shadow(0 0 8px rgba(0, 217, 255, 0.5));
+        }
+
+        /* ─────────────────────────────────────────────────────────────────── */
+        /* API KEY COLLAPSIBLE */
+        /* ─────────────────────────────────────────────────────────────────── */
+
+        .api-key-section {
+            margin-top: 1.5rem;
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.4s ease;
+        }
+
+        .api-key-section.open {
+            max-height: 200px;
+        }
+
+        .api-toggle {
+            background: none;
+            border: none;
+            color: var(--heady-gold);
+            font-size: 0.9rem;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .api-toggle:hover {
+            filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5));
+        }
+
+        .api-toggle-icon {
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+
+        .api-toggle.open .api-toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        /* ─────────────────────────────────────────────────────────────────── */
+        /* BUTTONS */
+        /* ─────────────────────────────────────────────────────────────────── */
+
+        .submit-button {
+            width: 100%;
+            padding: 1rem;
+            margin-top: 2rem;
+            background: linear-gradient(135deg, var(--heady-gold) 0%, var(--heady-gold-light) 100%);
+            border: none;
+            border-radius: var(--radius-button);
+            color: var(--heady-deep-space);
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            position: relative;
+        }
+
+        .submit-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow:
+                0 6px 30px rgba(212, 175, 55, 0.5),
+                0 0 30px rgba(212, 175, 55, 0.3);
+        }
+
+        .submit-button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .submit-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(10, 10, 26, 0.3);
+            border-top-color: var(--heady-deep-space);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ─────────────────────────────────────────────────────────────────── */
+        /* TOAST NOTIFICATIONS */
+        /* ─────────────────────────────────────────────────────────────────── */
+
+        .toast {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            padding: 1.2rem 1.5rem;
+            border-radius: var(--radius-button);
+            backdrop-filter: blur(20px);
+            border: 1px solid;
+            font-size: 0.95rem;
+            font-weight: 500;
+            z-index: 1000;
+            animation: slide-in 0.4s ease, slide-out 0.4s ease 3.6s forwards;
+            max-width: 320px;
+        }
+
+        .toast.success {
+            background: rgba(0, 217, 255, 0.15);
+            border-color: var(--heady-cyan);
+            color: var(--heady-cyan);
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+        }
+
+        .toast.error {
+            background: rgba(255, 0, 160, 0.15);
+            border-color: var(--heady-magenta);
+            color: var(--heady-magenta);
+            box-shadow: 0 0 20px rgba(255, 0, 160, 0.3);
+        }
+
+        @keyframes slide-in {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slide-out {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        /* ─────────────────────────────────────────────────────────────────── */
+        /* VALIDATION STATES */
+        /* ─────────────────────────────────────────────────────────────────── */
+
+        input.error {
+            border-color: var(--heady-magenta) !important;
+        }
+
+        .error-message {
+            font-size: 0.8rem;
+            color: var(--heady-magenta);
+            margin-top: 0.4rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* ─────────────────────────────────────────────────────────────────── */
+        /* FOOTER */
+        /* ─────────────────────────────────────────────────────────────────── */
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(212, 175, 55, 0.1);
+            font-size: 0.85rem;
+            color: rgba(245, 240, 232, 0.5);
+        }
+
+        .infinity {
+            color: var(--heady-gold);
+            font-weight: 700;
+            margin: 0 0.3rem;
+        }
+
+        /* ─────────────────────────────────────────────────────────────────── */
+        /* FORM ANIMATIONS */
+        /* ─────────────────────────────────────────────────────────────────── */
+
+        .form-content {
+            animation: fade-in 0.5s ease;
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ─────────────────────────────────────────────────────────────────── */
+        /* RESPONSIVE */
+        /* ─────────────────────────────────────────────────────────────────── */
+
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 1rem;
+                max-width: 100%;
+            }
+
+            .auth-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .auth-title {
+                font-size: 1.5rem;
+            }
+
+            .submit-button {
+                font-size: 0.95rem;
+            }
+
+            .toast {
+                right: 1rem;
+                left: 1rem;
+                max-width: none;
+            }
+
+            .back-link {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* HEADY_BRAND:END */
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <a href="/" class="back-link">
+            <span>←</span> Back to Home
+        </a>
+
+        <div class="auth-card">
+            <!-- Heady Orb -->
+            <div class="orb-container">
+                <div class="heady-orb"></div>
+            </div>
+
+            <!-- Title -->
+            <h1 class="auth-title">Sacred Access</h1>
+            <p class="auth-subtitle">Enter the Heady Orchestrator</p>
+
+            <!-- Mode Toggle -->
+            <div class="mode-toggle">
+                <button class="toggle-button active" data-mode="login">Sign In</button>
+                <button class="toggle-button" data-mode="register">Create Account</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="form-content">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <div class="input-wrapper">
+                        <input
+                            type="email"
+                            id="login-email"
+                            name="email"
+                            placeholder="your@heady.systems"
+                            required
+                        >
+                    </div>
+                    <div class="error-message" data-field="login-email"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <div class="input-wrapper">
+                        <input
+                            type="password"
+                            id="login-password"
+                            name="password"
+                            placeholder="••••••••"
+                            required
+                        >
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            data-target="login-password"
+                        >👁</button>
+                    </div>
+                    <div class="error-message" data-field="login-password"></div>
+                </div>
+
+                <!-- API Key Option -->
+                <button type="button" class="api-toggle" data-target="api-key-login">
+                    <span class="api-toggle-icon">▼</span>
+                    Or use API Key
+                </button>
+
+                <div class="api-key-section" id="api-key-login">
+                    <div class="form-group">
+                        <label for="login-api-key">API Key</label>
+                        <div class="input-wrapper">
+                            <input
+                                type="password"
+                                id="login-api-key"
+                                name="apiKey"
+                                placeholder="heady_sk_..."
+                            >
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                data-target="login-api-key"
+                            >👁</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-button">
+                    <span>Sign In</span>
+                </button>
+            </form>
+
+            <!-- Register Form (hidden by default) -->
+            <form id="register-form" class="form-content" style="display: none;">
+                <div class="form-group">
+                    <label for="register-name">Full Name</label>
+                    <div class="input-wrapper">
+                        <input
+                            type="text"
+                            id="register-name"
+                            name="name"
+                            placeholder="Your Name"
+                            required
+                        >
+                    </div>
+                    <div class="error-message" data-field="register-name"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <div class="input-wrapper">
+                        <input
+                            type="email"
+                            id="register-email"
+                            name="email"
+                            placeholder="your@heady.systems"
+                            required
+                        >
+                    </div>
+                    <div class="error-message" data-field="register-email"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <div class="input-wrapper">
+                        <input
+                            type="password"
+                            id="register-password"
+                            name="password"
+                            placeholder="••••••••"
+                            required
+                        >
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            data-target="register-password"
+                        >👁</button>
+                    </div>
+                    <div class="error-message" data-field="register-password"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="register-password-confirm">Confirm Password</label>
+                    <div class="input-wrapper">
+                        <input
+                            type="password"
+                            id="register-password-confirm"
+                            name="passwordConfirm"
+                            placeholder="••••••••"
+                            required
+                        >
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            data-target="register-password-confirm"
+                        >👁</button>
+                    </div>
+                    <div class="error-message" data-field="register-password-confirm"></div>
+                </div>
+
+                <button type="submit" class="submit-button">
+                    <span>Create Account</span>
+                </button>
+            </form>
+
+            <!-- Footer -->
+            <div class="auth-footer">
+                <span class="infinity">∞</span> Heady Systems · Sacred Geometry · Organic Intelligence
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ════════════════════════════════════════════════════════════════════════ */
+        /* HEADY AUTH PAGE: Core Logic                                             */
+        /* ════════════════════════════════════════════════════════════════════════ */
+
+        /* API Resolution with fallback */
+        const HEADY_CLOUD_URLS = [
+            window.location.origin + '/api',
+            'https://heady-manager-headyme.headysystems.com/api',
+            'https://heady-manager-headysystems.headysystems.com/api',
+            'https://heady-manager-headyconnection.headysystems.com/api',
+        ];
+
+        let HEADY_API = HEADY_CLOUD_URLS[0];
+        let _apiResolved = false;
+
+        async function resolveApi() {
+            if (_apiResolved) return HEADY_API;
+            for (const url of HEADY_CLOUD_URLS) {
+                try {
+                    const r = await fetch(url + '/health', {
+                        signal: AbortSignal.timeout(3000)
+                    });
+                    if (r.ok) {
+                        HEADY_API = url;
+                        _apiResolved = true;
+                        console.log('[Auth] API resolved:', HEADY_API);
+                        return url;
+                    }
+                } catch(e) {
+                    console.log('[Auth] URL failed:', url, e.message);
+                }
+            }
+            console.log('[Auth] Using default API:', HEADY_API);
+            return HEADY_API;
+        }
+
+        /* Mode toggle */
+        const modeButtons = document.querySelectorAll('.toggle-button');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+
+        modeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const mode = btn.dataset.mode;
+
+                modeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                if (mode === 'login') {
+                    loginForm.style.display = 'block';
+                    registerForm.style.display = 'none';
+                } else {
+                    loginForm.style.display = 'none';
+                    registerForm.style.display = 'block';
+                }
+            });
+        });
+
+        /* Password visibility toggle */
+        const passwordToggles = document.querySelectorAll('.password-toggle');
+
+        passwordToggles.forEach(toggle => {
+            toggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = toggle.dataset.target;
+                const input = document.getElementById(targetId);
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    toggle.textContent = '👁‍🗨';
+                } else {
+                    input.type = 'password';
+                    toggle.textContent = '👁';
+                }
+            });
+        });
+
+        /* API Key collapsible */
+        const apiToggles = document.querySelectorAll('.api-toggle');
+
+        apiToggles.forEach(toggle => {
+            toggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = toggle.dataset.target;
+                const section = document.getElementById(targetId);
+
+                section.classList.toggle('open');
+                toggle.classList.toggle('open');
+            });
+        });
+
+        /* Toast notification */
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 4000);
+        }
+
+        /* Validation helpers */
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function validateLoginForm() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const apiKey = document.getElementById('login-api-key').value;
+
+            let valid = true;
+
+            // Either (email + password) or apiKey
+            if (!apiKey) {
+                if (!email) {
+                    showError('login-email', 'Email is required');
+                    valid = false;
+                } else if (!isValidEmail(email)) {
+                    showError('login-email', 'Invalid email format');
+                    valid = false;
+                } else {
+                    clearError('login-email');
+                }
+
+                if (!password) {
+                    showError('login-password', 'Password is required');
+                    valid = false;
+                } else if (password.length < 6) {
+                    showError('login-password', 'Password must be at least 6 characters');
+                    valid = false;
+                } else {
+                    clearError('login-password');
+                }
+            } else {
+                clearError('login-email');
+                clearError('login-password');
+            }
+
+            return valid;
+        }
+
+        function validateRegisterForm() {
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const passwordConfirm = document.getElementById('register-password-confirm').value;
+
+            let valid = true;
+
+            if (!name) {
+                showError('register-name', 'Name is required');
+                valid = false;
+            } else {
+                clearError('register-name');
+            }
+
+            if (!email) {
+                showError('register-email', 'Email is required');
+                valid = false;
+            } else if (!isValidEmail(email)) {
+                showError('register-email', 'Invalid email format');
+                valid = false;
+            } else {
+                clearError('register-email');
+            }
+
+            if (!password) {
+                showError('register-password', 'Password is required');
+                valid = false;
+            } else if (password.length < 6) {
+                showError('register-password', 'Password must be at least 6 characters');
+                valid = false;
+            } else {
+                clearError('register-password');
+            }
+
+            if (!passwordConfirm) {
+                showError('register-password-confirm', 'Please confirm your password');
+                valid = false;
+            } else if (password !== passwordConfirm) {
+                showError('register-password-confirm', 'Passwords do not match');
+                valid = false;
+            } else {
+                clearError('register-password-confirm');
+            }
+
+            return valid;
+        }
+
+        function showError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const errorEl = document.querySelector(`[data-field="${fieldId}"]`);
+
+            field.classList.add('error');
+            if (errorEl) {
+                errorEl.textContent = message;
+                errorEl.classList.add('show');
+            }
+        }
+
+        function clearError(fieldId) {
+            const field = document.getElementById(fieldId);
+            const errorEl = document.querySelector(`[data-field="${fieldId}"]`);
+
+            field.classList.remove('error');
+            if (errorEl) {
+                errorEl.classList.remove('show');
+            }
+        }
+
+        /* Login handler */
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!validateLoginForm()) return;
+
+            const submitBtn = loginForm.querySelector('.submit-button');
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const apiKey = document.getElementById('login-api-key').value;
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="spinner"></div><span>Signing In...</span>';
+
+            try {
+                await resolveApi();
+
+                const payload = apiKey
+                    ? { apiKey }
+                    : { email, password };
+
+                const response = await fetch(`${HEADY_API}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Sign in failed');
+                }
+
+                // Store token
+                localStorage.setItem('heady_token', data.token);
+                showToast('Welcome! Redirecting...', 'success');
+
+                // Redirect based on isNewUser flag
+                const redirectUrl = data.isNewUser ? '/onboarding.html' : '/';
+                setTimeout(() => {
+                    window.location.href = redirectUrl;
+                }, 1000);
+
+            } catch (error) {
+                console.error('[Auth] Login error:', error);
+                showToast(error.message || 'Sign in failed', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Sign In</span>';
+            }
+        });
+
+        /* Register handler */
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!validateRegisterForm()) return;
+
+            const submitBtn = registerForm.querySelector('.submit-button');
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="spinner"></div><span>Creating Account...</span>';
+
+            try {
+                await resolveApi();
+
+                const response = await fetch(`${HEADY_API}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Registration failed');
+                }
+
+                // Store token
+                localStorage.setItem('heady_token', data.token);
+                showToast('Account created! Redirecting to onboarding...', 'success');
+
+                // New users always go to onboarding
+                setTimeout(() => {
+                    window.location.href = '/onboarding.html';
+                }, 1000);
+
+            } catch (error) {
+                console.error('[Auth] Register error:', error);
+                showToast(error.message || 'Registration failed', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Create Account</span>';
+            }
+        });
+
+        /* Init: Resolve API on page load */
+        window.addEventListener('load', () => {
+            resolveApi().catch(err => {
+                console.error('[Auth] Failed to resolve API:', err);
+            });
+        });
+    </script>
+</body>
+</html>

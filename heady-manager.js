@@ -2109,14 +2109,48 @@ try {
 }
 
 try {
-  const authRoutes = require('./src/routes/auth-routes');
-  app.use('/api/auth', authRoutes);
+  const { router: authRouter } = require('./src/routes/auth-routes');
+  app.use('/api/auth', authRouter);
   console.log("  ∞ Auth Routes: LOADED");
 } catch (err) {
   console.warn(`  \u26a0 Auth routes not loaded: ${err.message}`);
 }
 
 // (Layer management routes already registered above at /api/layer)
+
+// ─── Liquid Nodes Status ────────────────────────────────────────────
+app.get('/api/liquid-nodes', (req, res) => {
+  const nodes = [
+    { name: 'github', status: process.env.GITHUB_TOKEN ? 'connected' : 'needs_token', capabilities: ['repos', 'code-search', 'gists'] },
+    { name: 'cloudflare', status: process.env.CLOUDFLARE_API_TOKEN ? 'connected' : 'needs_token', capabilities: ['zones', 'dns', 'workers', 'pages'] },
+    { name: 'vertex-ai', status: process.env.GCLOUD_ACCESS_TOKEN ? 'connected' : 'needs_token', capabilities: ['models', 'endpoints', 'predict'] },
+    { name: 'ai-studio', status: process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY ? 'connected' : 'needs_token', capabilities: ['generate'] },
+    { name: 'colab', status: 'needs_oauth', capabilities: ['notebooks'] },
+    { name: 'latent-space', status: 'active', capabilities: ['store', 'search', 'list', 'delete'] },
+  ];
+  const active = nodes.filter(n => n.status === 'connected' || n.status === 'active').length;
+  res.json({ nodes, summary: { total: nodes.length, active, needsConfig: nodes.length - active }, ts: new Date().toISOString() });
+});
+
+// ─── HeadyVault Status ──────────────────────────────────────────────
+app.get('/api/vault/status', (req, res) => {
+  const categories = {
+    'ai-llm': ['ANTHROPIC_API_KEY', 'CLAUDE_API_KEY', 'OPENAI_API_KEY', 'GROQ_API_KEY', 'PERPLEXITY_API_KEY', 'HF_TOKEN', 'GEMINI_API_KEY'],
+    'infrastructure': ['DATABASE_URL', 'NEON_API_KEY', 'UPSTASH_REDIS_REST_URL', 'FIREBASE_API_KEY', 'PINECONE_API_KEY'],
+    'cloud-deploy': ['CLOUDFLARE_API_TOKEN', 'SENTRY_AUTH_TOKEN'],
+    'scm': ['GITHUB_TOKEN', 'GITHUB_TOKEN_SECONDARY'],
+    'finance': ['STRIPE_SECRET_KEY'],
+    'auth': ['ADMIN_TOKEN', 'HEADY_API_KEY'],
+  };
+  const summary = {};
+  let totalSet = 0, totalKeys = 0;
+  for (const [cat, keys] of Object.entries(categories)) {
+    const set = keys.filter(k => !!process.env[k]).length;
+    totalSet += set; totalKeys += keys.length;
+    summary[cat] = { total: keys.length, configured: set, missing: keys.length - set };
+  }
+  res.json({ vault: 'HeadyVault', latentSpaceKey: 'heady-vault-manifest', summary, totals: { keys: totalKeys, configured: totalSet, missing: totalKeys - totalSet }, rotationPolicy: 'quarterly', ts: new Date().toISOString() });
+});
 
 // ─── Error Handler ──────────────────────────────────────────────────
 app.use((err, req, res, next) => {
