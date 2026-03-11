@@ -31,6 +31,7 @@ const fs = require("fs");
 const compression = require("compression");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const cookieParser = require("cookie-parser");
 
 // Load and preload persistent memory before any operations
 function preloadPersistentMemory() {
@@ -160,6 +161,7 @@ app.use(helmet({
 }));
 app.use(compression());
 app.use(express.json({ limit: "5mb" }));
+app.use(cookieParser());
 app.use(cors({
   origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",") : "*",
   credentials: true,

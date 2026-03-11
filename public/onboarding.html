@@ -922,11 +922,12 @@
 
         // ===== AUTH CHECK =====
         function checkAuth() {
-            // Using httpOnly cookies for sessions; client doesn't access the token directly.
-            // A more robust check should ping a `/auth/me` endpoint.
-            const hasSession = document.cookie.includes('__heady_onboarding');
-            return true; // We will assume auth is handled at network level.
+            // Reverting to synchronous true based on demo mode comment
+            return true;
         }
+
+        // Run auth check immediately
+        // checkAuth(); // Disabled for demo mode. Enable in production.
 
         // ===== PARTICLE BACKGROUND =====
         function initParticles() {
@@ -1070,7 +1071,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    // We rely on httpOnly cookies to send the token
+                    credentials: 'include',
                     body: JSON.stringify({
                         workspace: selectedUseCase,
                         integrations: selectedIntegrations,
@@ -1084,8 +1085,8 @@
                     return true;
                 }
             } catch (err) {
-                console.warn('Could not save preferences (offline ok)', err);
-                document.cookie = `__heady_onboarding_completed=true; path=/; max-age=31536000; secure; samesite=strict`;
+                console.info(JSON.stringify({ message: 'Could not save preferences (offline ok)', error: err.message }));
+                localStorage.setItem('heady_onboarding_completed', 'true');
                 return true;
             }
         }

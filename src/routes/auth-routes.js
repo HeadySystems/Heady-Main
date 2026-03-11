@@ -35,7 +35,7 @@ const DEMO_USER = {
   id: 'demo-user-1',
   email: 'eric@headyconnection.org',
   password: 'heady2026', // In production, this would be hashed
-  name: 'Eric Heady',
+  name: 'Eric Haywood',
 };
 
 // Register demo user on startup
@@ -70,19 +70,31 @@ function generateToken() {
 }
 
 /**
- * Extract Bearer token from Authorization header or cookie.
+ * Extract token from __Host-heady_session cookie or Authorization header.
  */
 function extractToken(req) {
+  if (req.cookies && req.cookies['__Host-heady_session']) {
+    return req.cookies['__Host-heady_session'];
+  }
+
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
     return authHeader.substring(7);
   }
-
-  if (req.cookies && req.cookies.__heady_session) {
-    return req.cookies.__heady_session;
-  }
-
   return null;
+}
+
+/**
+ * Helper to set standard secure cookie options for session token.
+ */
+function setSessionCookie(res, token) {
+  res.cookie('__Host-heady_session', token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    path: '/'
+  });
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -184,15 +196,9 @@ router.post('/login', (req, res) => {
         createdAt: new Date(),
       });
 
-      res.cookie('__heady_session', token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-        maxAge: 8 * 60 * 60 * 1000 // 8 hours
-      });
+      setSessionCookie(res, token);
 
       return res.status(200).json({
-        token,
         user: adminUser,
       });
     }
@@ -238,15 +244,9 @@ router.post('/login', (req, res) => {
       createdAt: new Date(),
     });
 
-    res.cookie('__heady_session', token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      maxAge: 8 * 60 * 60 * 1000 // 8 hours
-    });
+    setSessionCookie(res, token);
 
     return res.status(200).json({
-      token,
       user: {
         id: user.id,
         email: user.email,
@@ -324,15 +324,9 @@ router.post('/register', (req, res) => {
       createdAt: new Date(),
     });
 
-    res.cookie('__heady_session', token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      maxAge: 8 * 60 * 60 * 1000 // 8 hours
-    });
+    setSessionCookie(res, token);
 
     return res.status(201).json({
-      token,
       user: {
         id: newUser.id,
         email: newUser.email,
@@ -363,6 +357,13 @@ router.post('/logout', requireAuth, (req, res) => {
   try {
     const token = req.token;
     sessions.delete(token);
+
+    res.clearCookie('__Host-heady_session', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      path: '/'
+    });
 
     return res.status(200).json({
       message: 'Logged out successfully',
