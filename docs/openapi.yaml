@@ -1,0 +1,599 @@
+openapi: 3.1.0
+info:
+  title: Heady™ Platform API
+  version: 7.0.0
+  description: |
+    Alive Software Platform API — self-aware, self-improving AI operating system.
+    All numeric parameters derive from phi (φ ≈ 1.618) and Fibonacci sequences.
+
+    ## Authentication
+    All authenticated endpoints require a `__Host-heady_session` httpOnly cookie
+    obtained via the `/api/auth/session` endpoint. No localStorage tokens.
+
+    ## CSL Thresholds
+    - CRITICAL: 0.927 (phiThreshold(4))
+    - HIGH: 0.882 (phiThreshold(3))
+    - MEDIUM: 0.809 (phiThreshold(2))
+    - LOW: 0.691 (phiThreshold(1))
+    - MINIMUM: 0.500 (phiThreshold(0))
+  contact:
+    name: Eric Haywood
+    email: eric@headyconnection.org
+    url: https://headysystems.com
+  license:
+    name: Proprietary
+    url: https://headysystems.com/license
+servers:
+  - url: https://api.headysystems.com
+    description: Production (Cloudflare Edge → Cloud Run)
+  - url: https://heady-api-gen-lang-client-0920560496.us-east1.run.app
+    description: Cloud Run Origin
+  - url: http://localhost:3360
+    description: Local Development (Conductor)
+
+paths:
+  # ─── Health ────────────────────────────────────────────────────────────
+  /health:
+    get:
+      operationId: getHealth
+      summary: System health check
+      tags: [Health]
+      responses:
+        "200":
+          description: System healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+        "503":
+          description: System degraded
+
+  # ─── Auth ──────────────────────────────────────────────────────────────
+  /api/auth/session:
+    post:
+      operationId: createSession
+      summary: Create authenticated session from Firebase ID token
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [idToken]
+              properties:
+                idToken:
+                  type: string
+                  description: Firebase Auth ID token
+      responses:
+        "200":
+          description: Session created — httpOnly cookie set
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: "__Host-heady_session=...; HttpOnly; Secure; SameSite=Strict; Path=/"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: authenticated
+                  expiresIn:
+                    type: integer
+                    description: "Session TTL in seconds (fib(14)*60 = 22620)"
+        "401":
+          description: Invalid ID token
+
+  /api/auth/me:
+    get:
+      operationId: getCurrentUser
+      summary: Get current authenticated user profile
+      tags: [Auth]
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "401":
+          description: Not authenticated
+
+  /api/auth/logout:
+    post:
+      operationId: logout
+      summary: Destroy session and clear cookie
+      tags: [Auth]
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Logged out
+
+  # ─── Conductor ─────────────────────────────────────────────────────────
+  /api/conductor/classify:
+    post:
+      operationId: classifyTask
+      summary: Classify task intent and determine routing
+      tags: [Conductor]
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [query]
+              properties:
+                query:
+                  type: string
+                  maxLength: 6765
+                  description: "Task query (max fib(20) = 6765 chars)"
+                context:
+                  type: object
+                  description: Additional context for routing
+      responses:
+        "200":
+          description: Task classified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskClassification"
+
+  /api/conductor/execute:
+    post:
+      operationId: executeTask
+      summary: Execute a task through the HCFullPipeline
+      tags: [Conductor]
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [query]
+              properties:
+                query:
+                  type: string
+                sessionId:
+                  type: string
+                  format: uuid
+                stream:
+                  type: boolean
+                  default: false
+      responses:
+        "200":
+          description: Task result (or SSE stream if stream=true)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskResult"
+            text/event-stream:
+              schema:
+                type: string
+
+  # ─── Memory ────────────────────────────────────────────────────────────
+  /api/memory:
+    post:
+      operationId: storeMemory
+      summary: Store a memory entry in vector space
+      tags: [Memory]
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MemoryInput"
+      responses:
+        "201":
+          description: Memory stored
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  action:
+                    type: string
+                    enum: [created, updated]
+
+  /api/memory/search:
+    post:
+      operationId: searchMemory
+      summary: Semantic search across vector memory
+      tags: [Memory]
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [query]
+              properties:
+                query:
+                  type: string
+                namespace:
+                  type: string
+                  enum: [user, system, session, knowledge, pattern, soul]
+                limit:
+                  type: integer
+                  default: 21
+                  description: "Max results (default fib(8) = 21)"
+                threshold:
+                  type: number
+                  default: 0.691
+                  description: "Min cosine similarity (default CSL LOW)"
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/MemorySearchResult"
+                  count:
+                    type: integer
+
+  /api/memory/{id}:
+    get:
+      operationId: recallMemory
+      summary: Recall a specific memory by ID
+      tags: [Memory]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Memory entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemoryEntry"
+        "404":
+          description: Memory not found
+    delete:
+      operationId: forgetMemory
+      summary: Delete a memory entry
+      tags: [Memory]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Memory deleted
+
+  /api/memory/batch:
+    post:
+      operationId: batchStoreMemory
+      summary: Batch store multiple memory entries
+      tags: [Memory]
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [entries]
+              properties:
+                entries:
+                  type: array
+                  maxItems: 233
+                  items:
+                    $ref: "#/components/schemas/MemoryInput"
+      responses:
+        "201":
+          description: Batch stored
+
+  /api/memory/consolidate:
+    post:
+      operationId: consolidateMemory
+      summary: Consolidate old low-access memories
+      tags: [Memory]
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Consolidation result
+
+  # ─── Edge Embedding ────────────────────────────────────────────────────
+  /v1/embed:
+    post:
+      operationId: generateEmbedding
+      summary: Generate 384-dim embeddings via edge Workers AI
+      tags: [Edge AI]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                texts:
+                  type: array
+                  items:
+                    type: string
+                  maxItems: 55
+                  description: "Max fib(10) = 55 texts per batch"
+                model:
+                  type: string
+                  default: "@cf/baai/bge-base-en-v1.5"
+      responses:
+        "200":
+          description: Embeddings generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmbeddingResponse"
+
+  /v1/classify:
+    post:
+      operationId: classifyText
+      summary: Text classification via edge Workers AI
+      tags: [Edge AI]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text:
+                  type: string
+                labels:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: Classification results
+
+  # ─── MCP Transport ────────────────────────────────────────────────────
+  /mcp/sse:
+    get:
+      operationId: mcpSSEStream
+      summary: MCP Server-Sent Events transport
+      tags: [MCP]
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: SSE event stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+
+  /mcp/jsonrpc:
+    post:
+      operationId: mcpJsonRpc
+      summary: MCP JSON-RPC request
+      tags: [MCP]
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [jsonrpc, method, id]
+              properties:
+                jsonrpc:
+                  type: string
+                  const: "2.0"
+                method:
+                  type: string
+                params:
+                  type: object
+                id:
+                  oneOf:
+                    - type: string
+                    - type: integer
+      responses:
+        "200":
+          description: JSON-RPC response
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: __Host-heady_session
+      description: "httpOnly session cookie — no localStorage tokens"
+
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, down]
+        service:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        coherence:
+          type: number
+          description: "System coherence score (0-1, CSL-scaled)"
+        checks:
+          type: object
+          additionalProperties:
+            type: string
+
+    UserProfile:
+      type: object
+      properties:
+        uid:
+          type: string
+        email:
+          type: string
+          format: email
+        displayName:
+          type: string
+        photoURL:
+          type: string
+          format: uri
+
+    TaskClassification:
+      type: object
+      properties:
+        domain:
+          type: string
+          description: "Detected task domain"
+        pool:
+          type: string
+          enum: [hot, warm, cold]
+        confidence:
+          type: number
+          description: "Classification confidence (CSL-scored)"
+        targetNodes:
+          type: array
+          items:
+            type: string
+
+    TaskResult:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [completed, partial, failed]
+        result:
+          type: object
+        duration:
+          type: integer
+          description: "Execution time in milliseconds"
+        nodesUsed:
+          type: array
+          items:
+            type: string
+
+    MemoryInput:
+      type: object
+      required: [content]
+      properties:
+        namespace:
+          type: string
+          enum: [user, system, session, knowledge, pattern, soul]
+          default: knowledge
+        content:
+          type: string
+        embedding:
+          type: array
+          items:
+            type: number
+          minItems: 384
+          maxItems: 384
+          description: "384-dimensional embedding vector"
+        metadata:
+          type: object
+        importance:
+          type: number
+          minimum: 0
+          maximum: 1
+          default: 0.809
+          description: "Entry importance (default CSL MEDIUM)"
+
+    MemoryEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        namespace:
+          type: string
+        content:
+          type: string
+        metadata:
+          type: object
+        importance:
+          type: number
+        accessCount:
+          type: integer
+        createdAt:
+          type: integer
+        updatedAt:
+          type: integer
+
+    MemorySearchResult:
+      allOf:
+        - $ref: "#/components/schemas/MemoryEntry"
+        - type: object
+          properties:
+            similarity:
+              type: number
+              description: "Cosine similarity score"
+            source:
+              type: string
+              enum: [ram, pgvector]
+
+    EmbeddingResponse:
+      type: object
+      properties:
+        embeddings:
+          type: array
+          items:
+            type: array
+            items:
+              type: number
+        model:
+          type: string
+        dimensions:
+          type: integer
+          const: 384
+        count:
+          type: integer
+        latency_ms:
+          type: integer
+
+tags:
+  - name: Health
+    description: System health and readiness probes
+  - name: Auth
+    description: Authentication — Firebase Auth with httpOnly cookies
+  - name: Conductor
+    description: Task routing and HCFullPipeline orchestration
+  - name: Memory
+    description: Vector memory CRUD and semantic search (384D, HNSW)
+  - name: Edge AI
+    description: Edge-local AI inference via Cloudflare Workers AI
+  - name: MCP
+    description: Model Context Protocol transport (SSE, JSON-RPC)
