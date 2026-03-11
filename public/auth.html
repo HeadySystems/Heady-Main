@@ -996,7 +996,7 @@
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.error || 'Sign in failed');
+                    throw new Error(data.message || data.error || 'Sign in failed');
                 }
 
                 // Token is now stored in httpOnly cookie (set by server)
@@ -1044,7 +1044,7 @@
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.error || 'Registration failed');
+                    throw new Error(data.message || data.error || 'Registration failed');
                 }
 
                 // Token is now stored in httpOnly cookie (set by server)
