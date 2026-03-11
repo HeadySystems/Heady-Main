@@ -52,7 +52,7 @@ never a goal, never a metric, and never a reason to cut corners.
 
 - Every recommendation cites specific evidence from the Heady™ codebase, KIs, or external sources via Heady™Perplexity
 - Every comparison evaluates minimum 3 alternatives with scoring matrices
-- Every risk assessment uses HeadySims Monte Carlo simulation when stakes are HIGH or CRITICAL
+- Every risk assessment uses HeadySims Monte Carlo simulation
 - Every pattern recommendation references HeadyVinci's learned pattern database
 
 #### In Deployment
@@ -315,7 +315,7 @@ Localhost references that leak to production are **security incidents**.
 
 ### 5.3 Environment Resolution Order
 
-1. Environment variable (highest csl_relevance)
+1. Environment variable (first precedence)
 2. `.env` file (development only, never committed)
 3. Cloudflare KV / Worker Secrets (edge)
 4. Google Secret Manager (cloud)
@@ -346,7 +346,7 @@ must be designed for this scale from day one.
 | Resource | Minimum Capacity | Scaling Strategy |
 |---|---|---|
 | Concurrent Bees | 10,000 | Fibonacci-stepped pool sizing (1,1,2,3,5,8,13,21,34,55,89,144...) |
-| Task Queue Depth | 100,000 | CslRelevance queue with CSL-scored ordering |
+| Task Queue Depth | 100,000 | Concurrent queue with CSL-scored routing |
 | Memory Per Bee | ≤ 2MB baseline | Lazy initialization, phi-scaled working memory expansion |
 | Spawn Latency | < 50ms | Pre-warmed bee pools per swarm category |
 | Shutdown Grace Period | 5s per bee, 30s global | Cooperative cancelation tokens, checkpoint state |
@@ -379,10 +379,10 @@ degrade, slow, or disrupt this cycle.
 
 Categories are CSL-discovered and φ-ratio weighted (initial baseline: fib(7) = 13):
 
-- **Tier 1 Critical (38.2%)**: Security, Intelligence, Availability
-- **Tier 2 High (23.6%)**: Performance, Code Quality, Learning
-- **Tier 3 Standard (14.6%)**: Communication, Infrastructure, Compliance
-- **Tier 4 Growth (9.0%)**: Cost Optimization, Discovery, Evolution, Self-Assessment
+- **Tier 1 (38.2%)**: Security, Intelligence, Availability
+- **Tier 2 (23.6%)**: Performance, Code Quality, Learning
+- **Tier 3 (14.6%)**: Communication, Infrastructure, Compliance
+- **Tier 4 (9.0%)**: Cost Optimization, Discovery, Evolution, Self-Assessment
 
 ### 7.3 Auto-Success Invariants
 

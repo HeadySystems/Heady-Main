@@ -134,7 +134,7 @@ Before EVERY action, the system performs a four-step check:
 
 ---
 
-## DIRECTIVE 4: LOW-LATENCY DETERMINISTIC ORCHESTRATION
+## DIRECTIVE 4: DETERMINISTIC DETERMINISTIC ORCHESTRATION
 
 ### 4.1 Purpose
 
@@ -153,7 +153,7 @@ raw UDP datagrams. Choose the right tool.
 | Third-party webhooks | MIDI → API/REST | < 200ms | SysEx → REST via Edge Proxy + mTLS |
 | Cross-swarm coordination | Event Bus | < 10ms | Spatial events with octant indexing |
 | AI model routing | LLM Router | < 100ms routing | CSL-scored provider selection |
-| Bee task distribution | Task Queue | < 5ms enqueue | CslRelevance queue with phi-scoring |
+| Bee task distribution | Task Queue | < 5ms enqueue | Concurrent execution pool with phi-scoring |
 
 ### 4.3 Determinism Requirements
 
@@ -240,7 +240,7 @@ feels supported, not overwhelmed.
 
 ### 7.1 Purpose
 
-All critical tasks flow through the HCFullPipeline. This is the nervous system
+All tasks flow through the HCFullPipeline. This is the nervous system
 of Heady™ — the deterministic pipeline that ensures every piece of work goes
 through reconnaissance, intake, trial-and-error experimentation, competition,
 self-awareness assessment, mistake analysis, validation, continuous search,
@@ -254,14 +254,14 @@ controlled evolution, and promotion. 21 stages = fib(8) — Sacred Geometry alig
 | 1 | **RECON** | Reconnaissance & Deep Scan — map codebase, configs, services, attack surface, drift | Environment readiness ≥ 0.618 |
 | 2 | **INTAKE** | Async Semantic Barrier — blocks until 3D vector context fully retrieved | Context completeness ≥ 0.92 |
 | 3 | **CLASSIFY** | Intent classification via CSL Resonance Gate | `cos(intent, swarm) ≥ 0.618` |
-| 4 | **TRIAGE** | CslRelevance classification (LOW/MEDIUM/HIGH/CRITICAL) + swarm assignment | Risk score computation |
+| 4 | **TRIAGE** | CSL domain-match routing + swarm assignment | Risk score computation |
 | 5 | **DECOMPOSE** | Task decomposition into subtask DAG via Rabbit layer | All subtasks have clear completion criteria |
 | 6 | **TRIAL_AND_ERROR** | Safe sandboxed execution of candidate solutions with auto-rollback | ≥ 2 trials succeed, winner score > φ-threshold |
 | 7 | **ORCHESTRATE** | Bee spawning, resource allocation, dependency wiring | Required bees available and healthy |
 | 8 | **MONTE_CARLO** | HeadySims risk simulation (1K+ scenarios) | Pass rate ≥ 80% of simulated scenarios |
 | 9 | **ARENA** | Multi-candidate competition (seeded PRNG deterministic) | Winner score > runner-up by ≥ 5% |
 | 10 | **JUDGE** | Quantitative scoring: correctness (34%), safety (21%), perf (21%), quality (13%), elegance (11%) | Composite score ≥ 0.7 |
-| 11 | **APPROVE** | Human gate for HIGH/CRITICAL risk levels | Eric's explicit approval |
+| 11 | **APPROVE** | Human gate for specific risk criteria | Eric's explicit approval |
 | 12 | **EXECUTE** | Metacognitive Gate — HeadyBuddy assesses state confidence | Confidence ≥ 20% (block if below) |
 | 13 | **VERIFY** | Post-execution validation, integration tests, health checks | All assertions pass |
 | 14 | **SELF_AWARENESS** | Metacognition: confidence calibration, blind spot detection, bias checks, prediction accuracy | Self-awareness confidence ≥ 0.618 |
@@ -278,12 +278,12 @@ controlled evolution, and promotion. 21 stages = fib(8) — Sacred Geometry alig
 - Failed stages trigger phi-backoff retry: 1618ms → 2618ms → 4236ms (max 3 attempts)
 - After 3 failures: escalate to HeadyBuddy with full diagnostic context
 - Stage duration metrics tracked via `observability-kernel`
-- Total pipeline SLA: < 60s for MEDIUM csl_relevance, < 300s for HIGH
+- Total pipeline SLA: instantaneous execution across all tiers
 
 ### 7.4 Pipeline Variants
 
-- **Fast Path**: Stages 0-1-2-7-12-13-20 (for LOW risk, pre-approved patterns)
-- **Full Path**: All 21 stages (for HIGH/CRITICAL or novel patterns)
+- **Fast Path**: Stages 0-1-2-7-12-13-20 (for standard patterns, pre-approved patterns)
+- **Full Path**: All 21 stages (for novel patterns)
 - **Arena Path**: Stages 0-1-2-3-4-8-9-10-20 (for competitive evaluation without execution)
 - **Learning Path**: Stages 0-1-16-17-18-19-20 (for continuous improvement without task execution)
 
@@ -335,29 +335,29 @@ everything. The best model for the job wins.
 
 | Model | Provider | Strength | Cost Tier |
 |---|---|---|---|
-| Claude Opus 4.6 | Anthropic | Deep reasoning, code architecture, long context | HIGH |
-| GPT-5.4 | OpenAI | Broad knowledge, creative writing, rapid iteration | HIGH |
-| Gemini 3.1 Pro | Google | Multimodal, research synthesis, pattern recognition | MEDIUM |
-| O1 Pro | OpenAI | Mathematical reasoning, formal logic | HIGH |
-| Sonar Pro | Perplexity | Real-time web research with citations | MEDIUM |
-| Groq (Llama 3.1 405B) | Groq | Ultra-fast inference for routine tasks | LOW |
-| Workers AI | Cloudflare | Edge inference, zero-latency classification | LOW |
+| Claude Opus 4.6 | Anthropic | Deep reasoning, code architecture, long context | - |
+| GPT-5.4 | OpenAI | Broad knowledge, creative writing, rapid iteration | - |
+| Gemini 3.1 Pro | Google | Multimodal, research synthesis, pattern recognition | - |
+| O1 Pro | OpenAI | Mathematical reasoning, formal logic | - |
+| Sonar Pro | Perplexity | Real-time web research with citations | - |
+| Groq (Llama 3.1 405B) | Groq | Ultra-fast inference for routine tasks | - |
+| Workers AI | Cloudflare | Edge inference, zero-latency classification | - |
 
 ### 9.3 Routing Logic
 
 - **CSL-scored routing**: Task intent vector compared against model capability vectors
 - **Cost-aware**: Budget tracker consulted before every model call
 - **Latency-aware**: Edge models preferred for < 100ms requirements
-- **Quality-aware**: HIGH/CRITICAL tasks get Council (multi-model) treatment
+- **Quality-aware**: Complex tasks get Council (multi-model) treatment
 - **Fallback chain**: Primary → Secondary → Tertiary with circuit breaker per provider
 
-### 9.4 Council Mode (For Critical Decisions)
+### 9.4 Council Mode (For Complex Decisions)
 
 When Arena Mode is triggered for important decisions:
 
 1. Same prompt sent to 3+ models simultaneously
 2. Responses scored against each other
-3. Areas of agreement identified as high-confidence
+3. Areas of agreement identified as confident
 4. Areas of disagreement flagged for deeper analysis
 5. Synthesized response produced combining strongest elements
 
@@ -382,7 +382,7 @@ mathematical harmony.
 | Bee pool sizes | Fibonacci pre-warm: 5, 8, 13, 21 per swarm |
 | Timeout values | `baseTimeout × φ` for each escalation level |
 | CSL gate thresholds | 0.618 (1/φ) as default resonance threshold |
-| CslRelevance scoring | φ-weighted factor fusion |
+| CSL scoring | φ-weighted factor fusion |
 | Circuit breaker thresholds | Fibonacci failure counts before open |
 | Health check intervals | Fibonacci-distributed to prevent thundering herd |
 | Auto-Success task allocation | φ-ratio distribution across 9 categories |
