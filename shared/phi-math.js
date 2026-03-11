@@ -8,17 +8,17 @@
  * © 2024-2026 HeadySystems Inc. All Rights Reserved. 60+ Provisional Patents.
  */
 
-'use strict';
+// ESM is always strict mode
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CORE CONSTANTS
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const PHI          = 1.6180339887498948;    // φ = (1 + √5) / 2
-const PSI          = 0.6180339887498949;    // ψ = 1/φ = φ - 1
-const PHI_SQ       = 2.618033988749895;     // φ² = φ + 1
-const PHI_CUBED    = 4.23606797749979;      // φ³ = 2φ + 1
-const SQRT5        = 2.23606797749979;      // √5
+const PHI = 1.6180339887498948;    // φ = (1 + √5) / 2
+const PSI = 0.6180339887498949;    // ψ = 1/φ = φ - 1
+const PHI_SQ = 2.618033988749895;     // φ² = φ + 1
+const PHI_CUBED = 4.23606797749979;      // φ³ = 2φ + 1
+const SQRT5 = 2.23606797749979;      // √5
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // FIBONACCI SEQUENCE (first 25 terms, 1-indexed)
@@ -70,15 +70,15 @@ function phiMs(n) {
 }
 
 const PHI_TIMING = Object.freeze({
-  PHI_1:  phiMs(1),   // 1,618ms  — quick retries
-  PHI_2:  phiMs(2),   // 2,618ms  — short operations
-  PHI_3:  phiMs(3),   // 4,236ms  — standard operations
-  PHI_4:  phiMs(4),   // 6,854ms  — API calls, webhooks, recon
-  PHI_5:  phiMs(5),   // 11,090ms — complex operations
-  PHI_6:  phiMs(6),   // 17,944ms — trial execution
-  PHI_7:  phiMs(7),   // 29,034ms — heartbeat cycle
-  PHI_8:  phiMs(8),   // 46,979ms — long operations
-  PHI_9:  phiMs(9),   // 75,025ms — extended operations
+  PHI_1: phiMs(1),   // 1,618ms  — quick retries
+  PHI_2: phiMs(2),   // 2,618ms  — short operations
+  PHI_3: phiMs(3),   // 4,236ms  — standard operations
+  PHI_4: phiMs(4),   // 6,854ms  — API calls, webhooks, recon
+  PHI_5: phiMs(5),   // 11,090ms — complex operations
+  PHI_6: phiMs(6),   // 17,944ms — trial execution
+  PHI_7: phiMs(7),   // 29,034ms — heartbeat cycle
+  PHI_8: phiMs(8),   // 46,979ms — long operations
+  PHI_9: phiMs(9),   // 75,025ms — extended operations
   PHI_10: phiMs(10),  // 121,393ms — max single operation
 });
 
@@ -92,14 +92,14 @@ function phiThreshold(level, spread = 0.5) {
 }
 
 const CSL_THRESHOLDS = Object.freeze({
-  MINIMUM:     phiThreshold(0),   // ≈ 0.500  — noise floor
-  LOW:         phiThreshold(1),   // ≈ 0.691  — weak alignment
-  MEDIUM:      phiThreshold(2),   // ≈ 0.809  — moderate alignment
-  HIGH:        phiThreshold(3),   // ≈ 0.882  — strong alignment
-  CRITICAL:    phiThreshold(4),   // ≈ 0.927  — near-certain
-  DEFAULT:     PSI,               //   0.618  — standard CSL gate (1/φ)
-  DEDUP:       0.972,             // above CRITICAL, for semantic identity
-  COHERENCE:   phiThreshold(2),   // ≈ 0.809  — drift detection threshold
+  MINIMUM: phiThreshold(0),   // ≈ 0.500  — noise floor
+  LOW: phiThreshold(1),   // ≈ 0.691  — weak alignment
+  MEDIUM: phiThreshold(2),   // ≈ 0.809  — moderate alignment
+  HIGH: phiThreshold(3),   // ≈ 0.882  — strong alignment
+  CRITICAL: phiThreshold(4),   // ≈ 0.927  — near-certain
+  DEFAULT: PSI,               //   0.618  — standard CSL gate (1/φ)
+  DEDUP: 0.972,             // above CRITICAL, for semantic identity
+  COHERENCE: phiThreshold(2),   // ≈ 0.809  — drift detection threshold
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -147,9 +147,9 @@ function phiMultiSplit(whole, n) {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const PRESSURE = Object.freeze({
-  NOMINAL:  { min: 0, max: PSI * PSI, label: 'NOMINAL' },           // 0 – 0.382
+  NOMINAL: { min: 0, max: PSI * PSI, label: 'NOMINAL' },           // 0 – 0.382
   ELEVATED: { min: PSI * PSI, max: PSI, label: 'ELEVATED' },        // 0.382 – 0.618
-  HIGH:     { min: PSI, max: 1 - Math.pow(PSI, 3), label: 'HIGH' }, // 0.618 – 0.854
+  HIGH: { min: PSI, max: 1 - Math.pow(PSI, 3), label: 'HIGH' }, // 0.618 – 0.854
   CRITICAL: { min: 1 - Math.pow(PSI, 4), max: 1.0, label: 'CRITICAL' }, // 0.910+
 });
 
@@ -165,11 +165,11 @@ function getPressureLevel(utilization) {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const ALERTS = Object.freeze({
-  WARNING:   PSI,                     // 0.618
-  CAUTION:   1 - PSI * PSI,          // 0.764
-  CRITICAL:  1 - Math.pow(PSI, 3),   // 0.854
-  EXCEEDED:  1 - Math.pow(PSI, 4),   // 0.910
-  HARD_MAX:  1.0,
+  WARNING: PSI,                     // 0.618
+  CAUTION: 1 - PSI * PSI,          // 0.764
+  CRITICAL: 1 - Math.pow(PSI, 3),   // 0.854
+  EXCEEDED: 1 - Math.pow(PSI, 4),   // 0.910
+  HARD_MAX: 1.0,
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -177,13 +177,13 @@ const ALERTS = Object.freeze({
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const AUTO_SUCCESS = Object.freeze({
-  CYCLE_MS:           PHI_TIMING.PHI_7,       // 29,034ms
-  CATEGORIES:         fib(7),                  // 13
-  TASKS_TOTAL:        fib(12),                 // 144
-  TASKS_PER_CAT:      Math.floor(fib(12) / fib(7)),  // 11
-  TASK_TIMEOUT_MS:    PHI_TIMING.PHI_3,        // 4,236ms
-  MAX_RETRIES_CYCLE:  fib(4),                  // 3
-  MAX_RETRIES_TOTAL:  fib(6),                  // 8
+  CYCLE_MS: PHI_TIMING.PHI_7,       // 29,034ms
+  CATEGORIES: fib(7),                  // 13
+  TASKS_TOTAL: fib(12),                 // 144
+  TASKS_PER_CAT: Math.floor(fib(12) / fib(7)),  // 11
+  TASK_TIMEOUT_MS: PHI_TIMING.PHI_3,        // 4,236ms
+  MAX_RETRIES_CYCLE: fib(4),                  // 3
+  MAX_RETRIES_TOTAL: fib(6),                  // 8
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -191,22 +191,22 @@ const AUTO_SUCCESS = Object.freeze({
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const PIPELINE = Object.freeze({
-  STAGES:           fib(8),           // 21
-  MAX_CONCURRENT:   fib(6),           // 8
-  MAX_RETRIES:      fib(4),           // 3
-  CONTEXT_GATE:     0.92,             // embedding density gate
-  BACKOFF_MS:       [phiMs(1), phiMs(2), phiMs(3)], // [1618, 2618, 4236]
-  MAX_BACKOFF_MS:   phiMs(5),         // 11,090
+  STAGES: fib(8),           // 21
+  MAX_CONCURRENT: fib(6),           // 8
+  MAX_RETRIES: fib(4),           // 3
+  CONTEXT_GATE: 0.92,             // embedding density gate
+  BACKOFF_MS: [phiMs(1), phiMs(2), phiMs(3)], // [1618, 2618, 4236]
+  MAX_BACKOFF_MS: phiMs(5),         // 11,090
   TIMEOUT: Object.freeze({
-    RECON:        phiMs(4),           // 6,854ms
-    INTAKE:       phiMs(3),           // 4,236ms
-    TRIAL:        phiMs(6),           // 17,944ms
-    EXECUTE:      120000,
-    AWARENESS:    phiMs(5),           // 11,090ms
-    SEARCH:       phiMs(7),           // 29,034ms
-    EVOLUTION:    phiMs(7),           // 29,034ms
-    RECEIPT:      phiMs(4),           // 6,854ms
-    DEFAULT:      phiMs(7),           // 29,034ms
+    RECON: phiMs(4),           // 6,854ms
+    INTAKE: phiMs(3),           // 4,236ms
+    TRIAL: phiMs(6),           // 17,944ms
+    EXECUTE: 120000,
+    AWARENESS: phiMs(5),           // 11,090ms
+    SEARCH: phiMs(7),           // 29,034ms
+    EVOLUTION: phiMs(7),           // 29,034ms
+    RECEIPT: phiMs(4),           // 6,854ms
+    DEFAULT: phiMs(7),           // 29,034ms
   }),
 });
 
@@ -216,12 +216,12 @@ const PIPELINE = Object.freeze({
 
 const BEE = Object.freeze({
   PRE_WARM: [fib(5), fib(6), fib(7), fib(8)],  // [5, 8, 13, 21]
-  SCALE_UP:   PHI,           // queue > pool × φ → scale up
-  SCALE_DOWN: 1 - 1/PHI,    // idle > pool × 0.382 → scale down
-  STALE_MS:   60000,         // 60s no heartbeat → dead
-  MAX_TOTAL:  10000,
-  SWARMS:     17,
-  TYPES:      fib(11),       // 89
+  SCALE_UP: PHI,           // queue > pool × φ → scale up
+  SCALE_DOWN: 1 - 1 / PHI,    // idle > pool × 0.382 → scale down
+  STALE_MS: 60000,         // 60s no heartbeat → dead
+  MAX_TOTAL: 10000,
+  SWARMS: 17,
+  TYPES: fib(11),       // 89
   LIFECYCLE: ['SPAWN', 'INITIALIZE', 'READY', 'ACTIVE', 'DRAINING', 'SHUTDOWN', 'DEAD'],
 });
 
@@ -230,10 +230,10 @@ const BEE = Object.freeze({
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const POOLS = Object.freeze({
-  HOT:        0.34,    // 34% — user-facing, latency-critical
-  WARM:       0.21,    // 21% — important background
-  COLD:       0.13,    // 13% — batch, analytics
-  RESERVE:    0.08,    // 8%  — burst capacity
+  HOT: 0.34,    // 34% — user-facing, latency-critical
+  WARM: 0.21,    // 21% — important background
+  COLD: 0.13,    // 13% — batch, analytics
+  RESERVE: 0.08,    // 8%  — burst capacity
   GOVERNANCE: 0.05,    // 5%  — HeadyCheck/HeadyAssure always running
 });
 
@@ -243,22 +243,22 @@ const POOLS = Object.freeze({
 
 const JUDGE = Object.freeze({
   CORRECTNESS: 0.34,
-  SAFETY:      0.21,
+  SAFETY: 0.21,
   PERFORMANCE: 0.21,
-  QUALITY:     0.13,
-  ELEGANCE:    0.11,
+  QUALITY: 0.13,
+  ELEGANCE: 0.11,
 });
 
 const COST_W = Object.freeze({
-  TIME:    0.382,
-  MONEY:   0.382,
+  TIME: 0.382,
+  MONEY: 0.382,
   QUALITY: 0.236,
 });
 
 const EVICTION = Object.freeze({
   IMPORTANCE: 0.486,
-  RECENCY:    0.300,
-  RELEVANCE:  0.214,
+  RECENCY: 0.300,
+  RELEVANCE: 0.214,
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -266,11 +266,11 @@ const EVICTION = Object.freeze({
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const VECTOR = Object.freeze({
-  DIMS:       384,
-  PROJ_DIMS:  3,
-  DRIFT:      CSL_THRESHOLDS.COHERENCE,  // 0.809
-  DEDUP:      CSL_THRESHOLDS.DEDUP,      // 0.972
-  MIN_SCORE:  PSI,                        // 0.618
+  DIMS: 384,
+  PROJ_DIMS: 3,
+  DRIFT: CSL_THRESHOLDS.COHERENCE,  // 0.809
+  DEDUP: CSL_THRESHOLDS.DEDUP,      // 0.972
+  MIN_SCORE: PSI,                        // 0.618
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -279,9 +279,9 @@ const VECTOR = Object.freeze({
 
 function phiTokenBudgets(base = 8192) {
   return {
-    working:   base,
-    session:   Math.round(base * PHI_SQ),
-    memory:    Math.round(base * Math.pow(PHI, 4)),
+    working: base,
+    session: Math.round(base * PHI_SQ),
+    memory: Math.round(base * Math.pow(PHI, 4)),
     artifacts: Math.round(base * Math.pow(PHI, 6)),
   };
 }
@@ -316,7 +316,7 @@ function cosineSimilarity(a, b) {
   if (a.length !== b.length) throw new Error('Vectors must have same dimension');
   let dot = 0, magA = 0, magB = 0;
   for (let i = 0; i < a.length; i++) {
-    dot  += a[i] * b[i];
+    dot += a[i] * b[i];
     magA += a[i] * a[i];
     magB += b[i] * b[i];
   }
@@ -372,12 +372,12 @@ const DEDUP_THRESHOLD = CSL_THRESHOLDS.CRITICAL || 0.972;
 
 /** Resource allocation — pool sizing */
 const RESOURCE_ALLOCATION = Object.freeze({
-  HOT:     { ratio: PHI / (PHI + 1 + PSI), preWarm: fib(5) },
-  WARM:    { ratio: 1 / (PHI + 1 + PSI),   preWarm: fib(6) },
-  COLD:    { ratio: PSI / (PHI + 1 + PSI), preWarm: fib(4) },
+  HOT: { ratio: PHI / (PHI + 1 + PSI), preWarm: fib(5) },
+  WARM: { ratio: 1 / (PHI + 1 + PSI), preWarm: fib(6) },
+  COLD: { ratio: PSI / (PHI + 1 + PSI), preWarm: fib(4) },
 });
 
-module.exports = {
+export {
   // Core
   PHI, PSI, PHI_SQ, PHI_CUBED, SQRT5,
   // Fibonacci
@@ -405,6 +405,25 @@ module.exports = {
   // Vector math
   cosineSimilarity, normalize,
   // Aliases & compatibility (core/liquid-nodes)
+  phiResourceWeights, classifyPressure, PRESSURE_LEVELS,
+  cslAND, phiFusionScore, phiAdaptiveInterval,
+  fibSequence, DEDUP_THRESHOLD, RESOURCE_ALLOCATION,
+};
+
+// Default export for CJS-style consumers using `import pm from '...'`
+export default {
+  PHI, PSI, PHI_SQ, PHI_CUBED, SQRT5,
+  FIB_CACHE, fib, fibCeil, fibFloor,
+  phiPower, phiMs, PHI_TIMING,
+  phiThreshold, CSL_THRESHOLDS,
+  phiBackoff, phiBackoffWithJitter, PHI_BACKOFF_SEQ,
+  phiFusionWeights, phiMultiSplit,
+  PRESSURE, getPressureLevel, ALERTS,
+  AUTO_SUCCESS, PIPELINE, BEE, POOLS,
+  JUDGE, COST_W, EVICTION, VECTOR,
+  phiTokenBudgets,
+  sigmoid, cslGate, cslBlend, adaptiveTemperature,
+  cosineSimilarity, normalize,
   phiResourceWeights, classifyPressure, PRESSURE_LEVELS,
   cslAND, phiFusionScore, phiAdaptiveInterval,
   fibSequence, DEDUP_THRESHOLD, RESOURCE_ALLOCATION,

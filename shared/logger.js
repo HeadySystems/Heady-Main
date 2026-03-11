@@ -6,15 +6,15 @@
  * @license Proprietary — HeadySystems Inc.
  */
 
-'use strict';
+// ESM is always strict mode
 
-const { PHI, PSI, fib } = require('./phi-math');
+import { PHI, PSI, fib } from './phi-math.js';
 
 const LOG_LEVELS = Object.freeze({
   TRACE: 0,
   DEBUG: 1,
-  INFO:  2,
-  WARN:  3,
+  INFO: 2,
+  WARN: 3,
   ERROR: 4,
   FATAL: 5,
 });
@@ -49,7 +49,7 @@ class HeadyLogger {
       ...meta,
     };
     if (this.correlationId) entry.correlationId = this.correlationId;
-    
+
     this.buffer.push(entry);
     if (this.buffer.length >= this.bufferSize || level >= LOG_LEVELS.ERROR) {
       this.flush();
@@ -65,8 +65,8 @@ class HeadyLogger {
 
   trace(msg, meta) { if (this._shouldLog(LOG_LEVELS.TRACE)) this._emit(LOG_LEVELS.TRACE, msg, meta); }
   debug(msg, meta) { if (this._shouldLog(LOG_LEVELS.DEBUG)) this._emit(LOG_LEVELS.DEBUG, msg, meta); }
-  info(msg, meta)  { if (this._shouldLog(LOG_LEVELS.INFO))  this._emit(LOG_LEVELS.INFO, msg, meta); }
-  warn(msg, meta)  { if (this._shouldLog(LOG_LEVELS.WARN))  this._emit(LOG_LEVELS.WARN, msg, meta); }
+  info(msg, meta) { if (this._shouldLog(LOG_LEVELS.INFO)) this._emit(LOG_LEVELS.INFO, msg, meta); }
+  warn(msg, meta) { if (this._shouldLog(LOG_LEVELS.WARN)) this._emit(LOG_LEVELS.WARN, msg, meta); }
   error(msg, meta) { if (this._shouldLog(LOG_LEVELS.ERROR)) this._emit(LOG_LEVELS.ERROR, msg, meta); }
   fatal(msg, meta) { if (this._shouldLog(LOG_LEVELS.FATAL)) this._emit(LOG_LEVELS.FATAL, msg, meta); }
 
@@ -86,4 +86,6 @@ function createLogger(service, options = {}) {
   return new HeadyLogger(service, options);
 }
 
-module.exports = { HeadyLogger, createLogger, LOG_LEVELS };
+export { HeadyLogger, createLogger, LOG_LEVELS };
+
+export default { HeadyLogger, createLogger, LOG_LEVELS };
