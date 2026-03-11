@@ -1,10 +1,10 @@
-'use strict';
+import https from 'https';
+import { createRequire } from 'node:module';
+import { logger } from '../utils/logger.js';
 
-const https = require('https');
+const require = createRequire(import.meta.url);
 const agentConfig = require('../../config/agents.json');
-const { logger } = require('../utils/logger');
 
-// Maps agent categories to AI provider task types from config/providers.json routing
 const CATEGORY_TO_TASK = {
   thinker: 'reasoning',
   builder: 'code',
@@ -107,7 +107,7 @@ class AgentManager {
       }
     }
 
-    throw Object.assign(new Error('No AI provider available — configure at least one API key'), { statusCode: 503 });
+    throw Object.assign(new Error('No AI provider available'), { statusCode: 503 });
   }
 
   async _callAnthropic(prompt, options) {
@@ -150,9 +150,9 @@ class AgentManager {
     return JSON.parse(data).choices?.[0]?.message?.content || '';
   }
 
-  _httpsPost(hostname, path, body, headers) {
+  _httpsPost(hostname, urlPath, body, headers) {
     return new Promise((resolve, reject) => {
-      const req = https.request({ hostname, path, method: 'POST', headers: {
+      const req = https.request({ hostname, path: urlPath, method: 'POST', headers: {
         ...headers, 'Content-Length': Buffer.byteLength(body),
       }}, (res) => {
         let data = '';
@@ -170,4 +170,4 @@ class AgentManager {
   }
 }
 
-module.exports = { AgentManager };
+export { AgentManager };

@@ -1,14 +1,14 @@
-'use strict';
-
-const os = require('os');
-const fs = require('fs');
-// logger available for future probes
+import os from 'os';
+import fs from 'fs';
+import path from 'path';
+import { logger } from '../utils/logger.js';
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
 
 const startTime = Date.now();
 let startupComplete = false;
 
 function setupHealthRoutes(app) {
-  // Basic liveness
   app.get('/health', (req, res) => {
     res.json({
       status: 'ok',
@@ -18,7 +18,6 @@ function setupHealthRoutes(app) {
     });
   });
 
-  // Deep health — checks all dependencies with real probes
   app.get('/health/deep', async (req, res) => {
     const services = {};
     const checks = [
@@ -29,7 +28,6 @@ function setupHealthRoutes(app) {
       { name: 'data_dirs', check: () => checkDataDirs() },
     ];
 
-    // Run all checks concurrently
     const results = await Promise.allSettled(
       checks.map(async ({ name, check }) => {
         const start = Date.now();
@@ -62,35 +60,24 @@ function setupHealthRoutes(app) {
     });
   });
 
-  // Kubernetes readiness
   app.get('/health/ready', (req, res) => {
-    if (startupComplete) {
-      res.json({ status: 'ready' });
-    } else {
-      res.status(503).json({ status: 'not_ready' });
-    }
+    if (startupComplete) res.json({ status: 'ready' });
+    else res.status(503).json({ status: 'not_ready' });
   });
 
-  // Kubernetes startup
   app.get('/health/startup', (req, res) => {
-    if (startupComplete) {
-      res.json({ status: 'started' });
-    } else {
-      res.status(503).json({ status: 'starting' });
-    }
+    if (startupComplete) res.json({ status: 'started' });
+    else res.status(503).json({ status: 'starting' });
   });
 
-  // Mark startup complete after first auto-success cycle
   setTimeout(() => { startupComplete = true; }, 35000);
 }
-
-// Real checks
 
 async function checkMemoryStore() {
   const storePath = process.env.MEMORY_STORE_PATH || './data/memory';
   const accessible = fs.existsSync(storePath);
   let memoryCount = 0;
-  const indexPath = require('path').join(storePath, 'index.json');
+  const indexPath = path.join(storePath, 'index.json');
   if (fs.existsSync(indexPath)) {
     try {
       const data = JSON.parse(fs.readFileSync(indexPath, 'utf8'));
@@ -101,7 +88,7 @@ async function checkMemoryStore() {
 }
 
 async function checkMCPTools() {
-  const { toolRegistry } = require('../mcp/tool-registry');
+  const { toolRegistry } = await import('../mcp/tool-registry.js');
   const tools = toolRegistry.listTools();
   return { toolCount: tools.length, tools: tools.map(t => t.name) };
 }
@@ -137,4 +124,4 @@ async function checkDataDirs() {
   return { dirs: results };
 }
 
-module.exports = { setupHealthRoutes };
+export { setupHealthRoutes };
