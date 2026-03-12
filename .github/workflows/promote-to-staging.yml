@@ -72,17 +72,28 @@ jobs:
             echo "::warning::No validation metadata found, proceeding with caution"
           fi
 
-      - name: Run smoke tests
+      - name: Run comprehensive test orchestrator
         run: |
           cd /tmp/heady-testing
 
           echo "Installing dependencies..."
-          npm ci
+          npm ci || pnpm install --frozen-lockfile || npm install
 
-          echo "Running smoke tests with PHI constant: ${{ env.PHI }}"
-          npm run test:smoke || npm test 2>&1 | head -50
+          echo "Running Heady™ Test Orchestrator with PHI constant: ${{ env.PHI }}"
+          node scripts/test-orchestrator.mjs --staging --promote
 
-          echo "✓ Smoke tests completed"
+          echo "✓ Test orchestrator completed — all suites passed"
+
+      - name: Upload test report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-run-report
+          path: |
+            /tmp/heady-testing/reports/test-run-report.json
+            /tmp/heady-testing/reports/test-run-report.md
+            /tmp/heady-testing/.validation-metadata.json
+          retention-days: 30
 
       - name: Prepare code for staging
         run: |
@@ -157,7 +168,8 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Validation Checks Passed" >> $GITHUB_STEP_SUMMARY
           echo "- [x] HeadyValidator verification" >> $GITHUB_STEP_SUMMARY
-          echo "- [x] Smoke tests" >> $GITHUB_STEP_SUMMARY
+          echo "- [x] Comprehensive test orchestrator (pipeline, staging, unit, integration)" >> $GITHUB_STEP_SUMMARY
+          echo "- [x] Test report generated and archived" >> $GITHUB_STEP_SUMMARY
           echo "- [x] Code sync to Heady-Staging" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "The code is now available for comprehensive testing in the Staging environment." >> $GITHUB_STEP_SUMMARY

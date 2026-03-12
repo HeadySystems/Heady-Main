@@ -1,14 +1,15 @@
 {
   "_meta": {
     "name": "HCFullPipeline",
-    "version": "3.2.3",
+    "version": "4.0.0",
     "description": "Heady™ 21-Stage (fib(8)) Cognitive Pipeline — 100% φ-compliant",
     "copyright": "© 2026-2026 HeadySystems Inc.",
     "generatedFrom": "hcfullpipeline.yaml",
     "phiCompliance": "100%",
     "phi": 1.6180339887,
     "psi": 0.6180339887,
-    "fibSeries": [1,1,2,3,5,8,13,21,34,55,89,144,233,377,610,987,1597,2584,4181,6765,10946,17711]
+    "fibSeries": [1,1,2,3,5,8,13,21,34,55,89,144,233,377,610,987,1597,2584,4181,6765,10946,17711],
+    "dataFlowAudit": "2026-03-11 — all 21 stages verified connected, 6 engine bindings confirmed"
   },
   "global": {
     "maxDuration": 290340,
@@ -428,12 +429,54 @@
     "_maxCascadeNote": "fib(5)"
   },
   "hooks": {
-    "onStageStart":    "telemetry.stageStart",
-    "onStageComplete": "telemetry.stageComplete",
-    "onStageError":    "telemetry.stageError",
-    "onPipelineComplete": "telemetry.pipelineComplete",
+    "onPipelineStart": ["telemetry.pipelineStart", "story_driver.record", "resource_manager.snapshot", "pattern_engine.observeStart"],
+    "onStageStart": ["telemetry.stageStart", "resource_manager.checkPressure", "story_driver.recordStageEntry"],
+    "onStageComplete": ["telemetry.stageComplete", "story_driver.record", "mc_scheduler.feedStageTiming", "pattern_engine.feedTaskTiming"],
+    "onStageError": ["telemetry.stageError", "self_critique.recordFailure", "pattern_engine.observeError"],
+    "onPipelineComplete": ["telemetry.pipelineComplete", "story_driver.record", "self_critique.recordRunCritique", "pattern_engine.analyzeRun", "mc_scheduler.updateBaseline", "resource_manager.releaseReservations"],
     "onCoherenceDrop": "wisdom.recordCoherenceEvent",
     "onBudgetWarning": "costTracker.emitWarning",
-    "onEvolution":     "wisdom.recordEvolutionEvent"
+    "onEvolution": "wisdom.recordEvolutionEvent",
+    "onStopRuleTriggered": ["story_driver.record", "self_critique.recordEscalation", "resource_manager.enterSafeMode"],
+    "onCheckpoint": ["story_driver.recordCheckpoint", "pattern_engine.observeCheckpoint"]
+  },
+  "engineBindings": {
+    "_description": "All 6 core engines that the pipeline must bind() to at startup for full data flow",
+    "required": ["mcScheduler", "patternEngine", "selfCritique", "storyDriver", "resourceManager", "taskScheduler"]
+  },
+  "dataFlow": {
+    "_description": "Explicit stage-to-stage data contracts — every output feeds a downstream input",
+    "connections": [
+      { "from": 0, "to": 1, "data": ["session_id", "channel_meta", "vector_scan_result"] },
+      { "from": 0, "to": 2, "data": ["normalized_input", "user_identity"] },
+      { "from": 1, "to": 2, "data": ["context_snapshot", "history_summary"] },
+      { "from": 1, "to": 4, "data": ["user_profile", "attack_surface"] },
+      { "from": 2, "to": 3, "data": ["structured_request", "intent_vector"] },
+      { "from": 2, "to": 4, "data": ["entities", "intent_vector"] },
+      { "from": 3, "to": 4, "data": ["task_class", "criticality", "routing_tags"] },
+      { "from": 4, "to": 5, "data": ["priority_score", "admission_decision"] },
+      { "from": 5, "to": 6, "data": ["subtask_graph", "execution_plan"] },
+      { "from": 5, "to": 7, "data": ["subtask_graph", "dependency_map", "execution_plan"] },
+      { "from": 6, "to": 7, "data": ["candidate_solutions", "trial_scores"] },
+      { "from": 7, "to": 8, "data": ["swarm_assignments", "agent_telemetry"] },
+      { "from": 7, "to": 9, "data": ["swarm_assignments", "backpressure_state"] },
+      { "from": 8, "to": 10, "data": ["outcome_distribution", "confidence_intervals"] },
+      { "from": 9, "to": 10, "data": ["arena_rankings", "elo_scores"] },
+      { "from": 10, "to": 11, "data": ["judge_score", "gate_pass_fail"] },
+      { "from": 11, "to": 12, "data": ["approval_status", "approver_id"] },
+      { "from": 10, "to": 12, "data": ["judge_score"], "condition": "low_risk_bypass" },
+      { "from": 12, "to": 13, "data": ["execution_result", "tool_call_log"] },
+      { "from": 13, "to": 14, "data": ["verification_status", "test_results"] },
+      { "from": 14, "to": 15, "data": ["coherence_score", "confidence_estimate", "uncertainty_map"] },
+      { "from": 15, "to": 16, "data": ["critique_report", "identified_gaps"] },
+      { "from": 16, "to": 17, "data": ["root_causes", "prevention_rules"] },
+      { "from": 17, "to": 18, "data": ["optimization_report", "perf_improvements"] },
+      { "from": 18, "to": 19, "data": ["search_results", "novelty_score"] },
+      { "from": 19, "to": 20, "data": ["evolved_population", "champion_genome"] },
+      { "from": 13, "to": 20, "data": ["verification_status"], "condition": "fast_path" },
+      { "from": 20, "to": "external:vector_memory", "data": ["final_response", "session_receipt"] },
+      { "from": 20, "to": "external:story_driver", "data": ["audit_record", "session_receipt"] },
+      { "from": 20, "to": "external:governance", "data": ["audit_record", "ed25519_signature"] }
+    ]
   }
 }

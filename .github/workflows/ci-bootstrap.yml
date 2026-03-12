@@ -1,4 +1,8 @@
-# Heady™ Production — CI/CD Pipeline
+# ⚠ DEPRECATED: This workflow is superseded by ci-unified.yml
+# All CI/CD functionality has been consolidated into a single unified pipeline.
+# See: .github/workflows/ci-unified.yml
+# This file is retained for reference only and should be removed in a future cleanup.
+# Heady™ Production — CI/CD Pipeline [DEPRECATED]
 # Matches the security gates from the context file:
 # TruffleHog → CodeQL SAST → npm audit → SBOM CycloneDX → Trivy Container Scan
 

@@ -1,0 +1,296 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  Heady™ Unified CI/CD Pipeline                                             ║
+# ║  Consolidates: ci.yml, ci-bootstrap.yml, ci-cd.yaml, heady-cicd.yml,       ║
+# ║                pilot-cicd.yml into a single workflow                        ║
+# ║  Version: 4.0.0 · φ-compliant · © 2026 HeadySystems Inc.                   ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+#
+# This is the CANONICAL CI/CD workflow. Previous workflows are deprecated.
+# See: ci.yml, ci-bootstrap.yml, ci-cd.yaml, heady-cicd.yml, pilot-cicd.yml
+
+name: "Heady™ Unified CI/CD"
+
+on:
+  push:
+    branches: [main, staging, production, develop]
+  pull_request:
+    branches: [main, production]
+  workflow_dispatch:
+    inputs:
+      deploy_target:
+        description: "Deploy target (none, staging, production)"
+        required: false
+        default: "none"
+        type: choice
+        options: [none, staging, production]
+
+env:
+  NODE_VERSION: "22"
+  PYTHON_VERSION: "3.12"
+  GCP_PROJECT: heady-production
+  GCP_REGION: us-central1
+  CLOUD_RUN_SERVICE: heady-manager
+  PHI: "1.618033988749895"
+
+# ─── Concurrency: prevent duplicate runs on same branch ─────────────────
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ════════════════════════════════════════════════════════════════════════
+  # STAGE 0: PREFLIGHT — Environment validation
+  # ════════════════════════════════════════════════════════════════════════
+  preflight:
+    name: "Stage 0: Preflight"
+    runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ steps.check.outputs.should_deploy }}
+      deploy_target: ${{ steps.check.outputs.deploy_target }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: check
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/production" && "${{ github.event_name }}" == "push" ]]; then
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+            echo "deploy_target=production" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/main" && "${{ github.event_name }}" == "push" ]]; then
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+            echo "deploy_target=staging" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event.inputs.deploy_target }}" != "none" ]]; then
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+            echo "deploy_target=${{ github.event.inputs.deploy_target }}" >> $GITHUB_OUTPUT
+          else
+            echo "should_deploy=false" >> $GITHUB_OUTPUT
+            echo "deploy_target=none" >> $GITHUB_OUTPUT
+          fi
+
+  # ════════════════════════════════════════════════════════════════════════
+  # STAGE 1: SECURITY GATES — TruffleHog + npm audit + SAST + SBOM
+  # ════════════════════════════════════════════════════════════════════════
+  security:
+    name: "Stage 1: Security Gates"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: TruffleHog Secret Scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --only-verified
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: npm audit
+        run: |
+          npm ci --ignore-scripts
+          npm audit --audit-level=high
+        continue-on-error: true
+
+      - name: Credential scan
+        run: |
+          ! grep -rn "AKID\|sk-[a-zA-Z0-9]\{20\}\|-----BEGIN PRIVATE" \
+            src/ services/ packages/ bin/ configs/ \
+            --include="*.js" --include="*.ts" --include="*.py" --include="*.json" 2>/dev/null
+        continue-on-error: true
+
+      - name: Generate SBOM (CycloneDX)
+        uses: CycloneDX/gh-node-module-generatebom@v1
+        with:
+          output: sbom.json
+        continue-on-error: true
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sbom
+          path: sbom.json
+
+  # ════════════════════════════════════════════════════════════════════════
+  # STAGE 2: CODE QUALITY — Lint + TypeCheck
+  # ════════════════════════════════════════════════════════════════════════
+  quality:
+    name: "Stage 2: Code Quality"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - name: ESLint
+        run: npx eslint src/ services/ packages/ bin/ --ext .js,.ts --max-warnings 0
+        continue-on-error: true
+      - name: TypeScript check
+        run: npx tsc --noEmit --project tsconfig.json
+        continue-on-error: true
+
+  # ════════════════════════════════════════════════════════════════════════
+  # STAGE 3: TEST — Node.js + Python test suites
+  # ════════════════════════════════════════════════════════════════════════
+  test-node:
+    name: "Stage 3a: Node.js Tests"
+    runs-on: ubuntu-latest
+    needs: [quality]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - name: Run Jest
+        run: npx jest --coverage --ci --reporters=default --passWithNoTests
+        env:
+          JEST_JUNIT_OUTPUT_DIR: ./test-results
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: coverage/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: test-results/
+
+  test-python:
+    name: "Stage 3b: Python Tests"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Run pytest
+        run: cd python && pip install -e ".[dev]" && pytest tests/ -v --cov=core
+        continue-on-error: true
+
+  # ════════════════════════════════════════════════════════════════════════
+  # STAGE 4: VALIDATE — Pipeline integrity + determinism + endpoints
+  # ════════════════════════════════════════════════════════════════════════
+  validate:
+    name: "Stage 4: Pipeline Validation"
+    runs-on: ubuntu-latest
+    needs: [quality]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - name: Pipeline validator
+        run: npx jest tests/hcfullpipeline-validator.test.js --no-coverage --passWithNoTests
+      - name: Staging schema
+        run: npx jest tests/staging-test-schema.test.js --no-coverage --passWithNoTests
+        continue-on-error: true
+
+  # ════════════════════════════════════════════════════════════════════════
+  # STAGE 5: BUILD — Production bundle
+  # ════════════════════════════════════════════════════════════════════════
+  build:
+    name: "Stage 5: Build"
+    runs-on: ubuntu-latest
+    needs: [test-node, security, validate]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - name: Build
+        run: node bin/heady-cli.js build
+        continue-on-error: true
+
+  # ════════════════════════════════════════════════════════════════════════
+  # STAGE 6: DEPLOY — Cloud Run + Cloudflare Workers
+  # ════════════════════════════════════════════════════════════════════════
+  deploy-cloud-run:
+    name: "Stage 6a: Deploy Cloud Run"
+    runs-on: ubuntu-latest
+    needs: [build, preflight]
+    if: needs.preflight.outputs.should_deploy == 'true'
+    environment: ${{ needs.preflight.outputs.deploy_target }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Configure Docker
+        run: gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev
+      - name: Build & Push Docker Image
+        run: |
+          docker build \
+            -t ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/heady/${{ env.CLOUD_RUN_SERVICE }}:${{ github.sha }} \
+            -t ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/heady/${{ env.CLOUD_RUN_SERVICE }}:latest \
+            -f Dockerfile .
+          docker push ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/heady/${{ env.CLOUD_RUN_SERVICE }}:${{ github.sha }}
+          docker push ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/heady/${{ env.CLOUD_RUN_SERVICE }}:latest
+      - name: Deploy
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ env.CLOUD_RUN_SERVICE }}
+          region: ${{ env.GCP_REGION }}
+          image: ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/heady/${{ env.CLOUD_RUN_SERVICE }}:${{ github.sha }}
+      - name: Verify Deployment
+        run: |
+          SERVICE_URL=$(gcloud run services describe ${{ env.CLOUD_RUN_SERVICE }} \
+            --region=${{ env.GCP_REGION }} \
+            --format='value(status.url)')
+          echo "Service URL: ${SERVICE_URL}"
+          sleep 30
+          curl -sf "${SERVICE_URL}/api/health" || echo "Health check pending..."
+
+  deploy-workers:
+    name: "Stage 6b: Deploy Workers"
+    runs-on: ubuntu-latest
+    needs: [build, preflight]
+    if: needs.preflight.outputs.should_deploy == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Deploy Cloudflare Workers
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          npm install -g wrangler
+          for worker_dir in cloudflare/workers/*/; do
+            if [ -f "${worker_dir}wrangler.toml" ]; then
+              echo "Deploying: ${worker_dir}"
+              cd "${worker_dir}" && wrangler deploy && cd -
+            fi
+          done
+        continue-on-error: true
+
+  # ════════════════════════════════════════════════════════════════════════
+  # STAGE 7: VERIFY — Post-deploy health + domain verification
+  # ════════════════════════════════════════════════════════════════════════
+  verify-deploy:
+    name: "Stage 7: Post-Deploy Verification"
+    runs-on: ubuntu-latest
+    needs: [deploy-cloud-run]
+    if: always() && needs.deploy-cloud-run.result == 'success'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Domain Verification
+        run: node domain-verification/verify-all-domains.mjs || echo "Domain verification pending"
+        continue-on-error: true

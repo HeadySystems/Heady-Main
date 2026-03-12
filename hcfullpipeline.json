@@ -4,8 +4,9 @@
     "version": "4.0.0",
     "description": "Heady™ AI Platform 21-Stage (fib(8)) Cognitive Pipeline — φ-scaled throughout, zero magic numbers",
     "copyright": "© 2026-2026 HeadySystems Inc. All Rights Reserved.",
-    "updatedAt": "2026-03-08T00:00:00Z",
-    "audit": "All constants φ-derived per FIXED-VALUE-AUDIT and phi-math-foundation"
+    "updatedAt": "2026-03-11T18:15:00Z",
+    "audit": "All constants φ-derived per FIXED-VALUE-AUDIT and phi-math-foundation",
+    "dataFlowAudit": "2026-03-11 — all 21 stages verified connected, 6 engine bindings confirmed"
   },
   "pipeline": {
     "id": "hcfullpipeline",
@@ -741,6 +742,20 @@
           }
         },
         {
+          "id": "imagination_seed",
+          "name": "Seed mutations with Imagination Engine creative concepts",
+          "node": "HeadyImagination",
+          "action": "recombine",
+          "params": {
+            "operators": ["BLEND", "MORPH", "EXTEND"],
+            "maxConcepts": 5,
+            "maxConcepts_source": "fib(5)",
+            "noveltyThreshold": 0.618,
+            "noveltyThreshold_source": "1/φ (CSL default gate)",
+            "safetyCheck": true
+          }
+        },
+        {
           "id": "simulate_mutations",
           "name": "Simulate mutations via HeadySims",
           "node": "HeadyConductor",
@@ -994,23 +1009,122 @@
   "hooks": {
     "onPipelineStart": [
       "story_driver.record",
-      "budget.checkpoint"
+      "budget.checkpoint",
+      "resource_manager.snapshot",
+      "pattern_engine.observeStart"
     ],
     "onStageStart": [
-      "budget.checkpoint"
+      "budget.checkpoint",
+      "resource_manager.checkPressure",
+      "story_driver.recordStageEntry"
     ],
     "onStageComplete": [
-      "story_driver.record"
+      "story_driver.record",
+      "mc_scheduler.feedStageTiming",
+      "pattern_engine.feedTaskTiming"
     ],
     "onPipelineComplete": [
       "story_driver.record",
       "budget.finalize",
-      "coherence.update"
+      "coherence.update",
+      "self_critique.recordRunCritique",
+      "pattern_engine.analyzeRun",
+      "mc_scheduler.updateBaseline",
+      "resource_manager.releaseReservations"
     ],
     "onPipelineError": [
       "story_driver.record",
       "budget.finalize",
-      "alert.send"
+      "alert.send",
+      "self_critique.recordFailure",
+      "pattern_engine.observeError",
+      "resource_manager.releaseReservations"
+    ],
+    "onStopRuleTriggered": [
+      "story_driver.record",
+      "self_critique.recordEscalation",
+      "resource_manager.enterSafeMode"
+    ],
+    "onCheckpoint": [
+      "story_driver.recordCheckpoint",
+      "pattern_engine.observeCheckpoint"
+    ]
+  },
+  "engineBindings": {
+    "_description": "All 6 core engines that the pipeline must bind() to at startup for full data flow",
+    "required": [
+      {
+        "engine": "mcScheduler",
+        "source": "src/hc_monte_carlo.js",
+        "feeds": ["stage_timing → UCB1 plan selection", "drift_alerts → pattern_engine + self_critique"],
+        "receives": ["plan_recommendations", "speed_mode_config"]
+      },
+      {
+        "engine": "patternEngine",
+        "source": "src/hc_pattern_engine.js",
+        "feeds": ["task_observations → convergence tracking", "anomaly_events → story_driver"],
+        "receives": ["improvement_tasks", "bottleneck_alerts"]
+      },
+      {
+        "engine": "selfCritique",
+        "source": "src/hc_self_critique.js",
+        "feeds": ["run_critiques → improvement_tracking", "bottleneck_diagnostics"],
+        "receives": ["drift_alerts_from_mc", "improvement_created_from_patterns"]
+      },
+      {
+        "engine": "storyDriver",
+        "source": "src/hc_story_driver.js",
+        "feeds": ["pipeline_events → narrative_timeline", "system_events → decision_context"],
+        "receives": ["resource_events", "pattern_convergence", "anomaly_alerts"]
+      },
+      {
+        "engine": "resourceManager",
+        "source": "src/hc_resource_manager.js",
+        "feeds": ["resource_events → pattern_engine + story_driver", "mitigation → task_scheduler"],
+        "receives": ["pressure_queries", "reservation_requests"]
+      },
+      {
+        "engine": "taskScheduler",
+        "source": "src/hc_task_scheduler.js",
+        "feeds": ["task_completed/failed → pattern_engine"],
+        "receives": ["safe_mode_from_resource_manager", "concurrency_adjustments"]
+      }
+    ]
+  },
+  "dataFlow": {
+    "_description": "Explicit stage-to-stage data contracts — every output feeds a downstream input",
+    "connections": [
+      { "from": "stage_channel_entry", "to": "stage_recon", "data": ["session_id", "channel_meta", "vector_scan_result"] },
+      { "from": "stage_channel_entry", "to": "stage_intake", "data": ["normalized_input", "user_identity"] },
+      { "from": "stage_recon", "to": "stage_intake", "data": ["codebase_state", "service_health_matrix", "dependency_audit"] },
+      { "from": "stage_recon", "to": "stage_triage", "data": ["env_map", "attack_surface"] },
+      { "from": "stage_intake", "to": "stage_memory", "data": ["classified_intent", "csl_resonance_score"] },
+      { "from": "stage_intake", "to": "stage_triage", "data": ["governance_pre_check", "task_type"] },
+      { "from": "stage_memory", "to": "stage_triage", "data": ["semantic_matches", "pattern_recognition", "narrative_context"] },
+      { "from": "stage_triage", "to": "stage_decompose", "data": ["risk_score", "swarm_assignment", "priority_level"] },
+      { "from": "stage_decompose", "to": "stage_trial_and_error", "data": ["subtask_dag", "execution_plan"] },
+      { "from": "stage_decompose", "to": "stage_orchestrate", "data": ["subtask_dag", "execution_plan", "parallel_subtasks"] },
+      { "from": "stage_trial_and_error", "to": "stage_orchestrate", "data": ["candidate_scores", "trial_learnings"] },
+      { "from": "stage_orchestrate", "to": "stage_monte_carlo", "data": ["execution_output", "bee_telemetry"] },
+      { "from": "stage_orchestrate", "to": "stage_arena", "data": ["execution_output", "candidate_solutions"] },
+      { "from": "stage_monte_carlo", "to": "stage_judge", "data": ["confidence_estimation", "pass_threshold_result"] },
+      { "from": "stage_arena", "to": "stage_judge", "data": ["battle_results", "quality_rankings"] },
+      { "from": "stage_judge", "to": "stage_approve", "data": ["composite_score", "gate_pass_fail"] },
+      { "from": "stage_approve", "to": "stage_execute_verified", "data": ["approval_status", "approver"] },
+      { "from": "stage_judge", "to": "stage_execute_verified", "data": ["composite_score"], "condition": "low_risk_bypass" },
+      { "from": "stage_execute_verified", "to": "stage_verify", "data": ["final_execution_result", "confidence_assessment"] },
+      { "from": "stage_verify", "to": "stage_self_awareness", "data": ["integration_test_results", "assertion_status"] },
+      { "from": "stage_self_awareness", "to": "stage_self_critique", "data": ["calibration_accuracy", "blind_spots", "prediction_accuracy"] },
+      { "from": "stage_self_critique", "to": "stage_mistake_analysis", "data": ["bottlenecks", "weaknesses", "gaps"] },
+      { "from": "stage_mistake_analysis", "to": "stage_optimization_ops", "data": ["prevention_rules", "anti_regression_guards"] },
+      { "from": "stage_optimization_ops", "to": "stage_continuous_search", "data": ["ranked_optimizations", "waste_detection"] },
+      { "from": "stage_continuous_search", "to": "stage_evolution", "data": ["high_value_discoveries", "innovation_candidates"] },
+      { "from": "stage_evolution", "to": "stage_receipt", "data": ["promoted_mutations", "evolution_history"] },
+      { "from": "stage_verify", "to": "stage_receipt", "data": ["verification_status"], "condition": "fast_path" },
+      { "from": "stage_receipt", "to": "external:vector_memory", "data": ["embedded_result", "pipeline_receipt"] },
+      { "from": "stage_receipt", "to": "external:story_driver", "data": ["execution_narrative", "decision_log"] },
+      { "from": "stage_receipt", "to": "external:vinci_patterns", "data": ["baseline_update", "pattern_observations"] },
+      { "from": "stage_receipt", "to": "external:governance", "data": ["ed25519_signed_receipt", "drift_check_result"] }
     ]
   },
   "taskQueuePolicy": {

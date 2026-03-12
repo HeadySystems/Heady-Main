@@ -1150,6 +1150,174 @@ app.get("/api/aloha/web-baseline", (req, res) => {
   });
 });
 
+// ─── Service Health Matrix (Optimization 1: Aggregate all 57 services) ──────
+app.get("/api/services/health-matrix", (req, res) => {
+  const reg = loadRegistry();
+  const nodeList = Object.entries(reg.nodes || {});
+  const serviceList = Object.entries(reg.services || {});
+  const now = Date.now();
+
+  // Aggregate node health
+  const nodeHealth = nodeList.map(([id, node]) => ({
+    id,
+    name: node.name || id,
+    status: node.status || "unknown",
+    lastInvoked: node.last_invoked || null,
+    staleSince: node.last_invoked && (now - new Date(node.last_invoked).getTime()) > 300000
+      ? Math.round((now - new Date(node.last_invoked).getTime()) / 1000) + "s"
+      : null,
+  }));
+
+  // Aggregate service health
+  const serviceHealth = serviceList.map(([id, svc]) => ({
+    id,
+    status: svc.status || "unknown",
+    type: svc.type || "service",
+  }));
+
+  // Subsystem status aggregation
+  const subsystems = {
+    pipeline: pipeline ? { loaded: true, state: pipeline.getState()?.status || "idle" } : { loaded: false },
+    mcScheduler: mcPlanScheduler ? { loaded: true, mode: mcPlanScheduler.getSpeedMode?.() || "unknown" } : { loaded: false },
+    patternEngine: patternEngine ? { loaded: true, running: true } : { loaded: false },
+    selfCritique: selfCritiqueEngine ? { loaded: true } : { loaded: false },
+    resourceManager: resourceManager ? { loaded: true, safeMode: resourceManager.getSnapshot?.()?.safeMode || false } : { loaded: false },
+    taskScheduler: taskScheduler ? { loaded: true, paused: taskScheduler.getStatus?.()?.paused || false } : { loaded: false },
+    storyDriver: storyDriver ? { loaded: true } : { loaded: false },
+    secretsManager: secretsManager ? { loaded: true, count: secretsManager.getAll?.()?.length || 0 } : { loaded: false },
+    cloudflare: cfManager ? { loaded: true, tokenValid: cfManager.isTokenValid?.() || false } : { loaded: false },
+    imaginationEngine: imaginationRoutes ? { loaded: true } : { loaded: false },
+  };
+
+  const activeNodes = nodeHealth.filter(n => n.status === "active").length;
+  const healthyServices = serviceHealth.filter(s => s.status === "healthy" || s.status === "active").length;
+  const loadedSubsystems = Object.values(subsystems).filter(s => s.loaded).length;
+  const totalSubsystems = Object.keys(subsystems).length;
+
+  // Overall health score (φ-weighted: nodes 0.382, services 0.382, subsystems 0.236)
+  const nodeScore = nodeList.length > 0 ? activeNodes / nodeList.length : 0;
+  const serviceScore = serviceList.length > 0 ? healthyServices / serviceList.length : 0;
+  const subsystemScore = loadedSubsystems / totalSubsystems;
+  const overallScore = Math.round((nodeScore * 0.382 + serviceScore * 0.382 + subsystemScore * 0.236) * 1000) / 1000;
+
+  res.json({
+    ok: true,
+    overallHealth: overallScore >= 0.618 ? "HEALTHY" : overallScore >= 0.382 ? "DEGRADED" : "CRITICAL",
+    overallScore,
+    nodes: { total: nodeList.length, active: activeNodes, list: nodeHealth },
+    services: { total: serviceList.length, healthy: healthyServices, list: serviceHealth },
+    subsystems,
+    continuousPipeline: {
+      running: continuousPipeline.running,
+      cycleCount: continuousPipeline.cycleCount,
+    },
+    ts: new Date().toISOString(),
+  });
+});
+
+// ─── Swarm Consensus Metrics (Optimization 5: Cross-Swarm Intelligence) ─────
+app.get("/api/swarms/consensus", (req, res) => {
+  const reg = loadRegistry();
+  const nodeList = Object.entries(reg.nodes || {});
+  const activeNodes = nodeList.filter(([, n]) => n.status === "active");
+
+  // Build swarm domain distribution from registry
+  const swarmDomains = [
+    { id: "heady-soul",       ring: "center",     layer: "strategic",   domain: "orchestration" },
+    { id: "cognition-core",   ring: "inner",      layer: "tactical",    domain: "reasoning" },
+    { id: "memory-weave",     ring: "inner",      layer: "tactical",    domain: "memory" },
+    { id: "context-bridge",   ring: "inner",      layer: "tactical",    domain: "context" },
+    { id: "task-planner",     ring: "inner",      layer: "tactical",    domain: "planning" },
+    { id: "consensus-forge",  ring: "inner",      layer: "tactical",    domain: "consensus" },
+    { id: "code-artisan",     ring: "middle",     layer: "operational", domain: "coding" },
+    { id: "data-sculptor",    ring: "middle",     layer: "operational", domain: "data" },
+    { id: "research-herald",  ring: "middle",     layer: "operational", domain: "research" },
+    { id: "tool-weaver",      ring: "middle",     layer: "operational", domain: "tools" },
+    { id: "language-flow",    ring: "middle",     layer: "operational", domain: "language" },
+    { id: "vision-scribe",    ring: "middle",     layer: "operational", domain: "vision" },
+    { id: "audio-pulse",      ring: "middle",     layer: "operational", domain: "audio" },
+    { id: "integration-node", ring: "outer",      layer: "operational", domain: "integration" },
+    { id: "cache-guardian",   ring: "outer",      layer: "operational", domain: "caching" },
+    { id: "stream-runner",    ring: "outer",      layer: "operational", domain: "streaming" },
+    { id: "policy-sentinel",  ring: "governance", layer: "strategic",   domain: "governance" },
+  ];
+
+  // Ring health aggregation
+  const ringHealth = {};
+  for (const swarm of swarmDomains) {
+    if (!ringHealth[swarm.ring]) ringHealth[swarm.ring] = { total: 0, domains: [] };
+    ringHealth[swarm.ring].total++;
+    ringHealth[swarm.ring].domains.push(swarm.domain);
+  }
+
+  // Layer aggregation
+  const layerCounts = {};
+  for (const swarm of swarmDomains) {
+    layerCounts[swarm.layer] = (layerCounts[swarm.layer] || 0) + 1;
+  }
+
+  // Consensus readiness score (all swarms agreeable if nodes are active)
+  const consensusReadiness = activeNodes.length > 0
+    ? Math.round((activeNodes.length / Math.max(nodeList.length, 1)) * 1000) / 1000
+    : 0;
+
+  // Feed into pattern engine if available
+  if (patternEngine && consensusReadiness < 0.618) {
+    patternEngine.observe("reliability", "swarm:consensus", consensusReadiness * 100, {
+      severity: consensusReadiness < 0.382 ? "CRITICAL" : "WARN_HARD",
+      tags: ["swarm", "consensus"],
+    });
+  }
+
+  res.json({
+    ok: true,
+    swarmCount: swarmDomains.length,
+    consensusReadiness,
+    consensusState: consensusReadiness >= 0.618 ? "CONVERGED" : consensusReadiness >= 0.382 ? "PARTIAL" : "DIVERGED",
+    topology: {
+      rings: ringHealth,
+      layers: layerCounts,
+    },
+    swarms: swarmDomains,
+    activeNodeCount: activeNodes.length,
+    totalNodeCount: nodeList.length,
+    ts: new Date().toISOString(),
+  });
+});
+
+// ─── Imagination Engine → Pipeline Evolution Wiring (Optimization 2+5) ──────
+try {
+  if (patternEngine && pipeline) {
+    // When imagination concepts are generated, feed novelty scores into pattern engine
+    // This creates a closed feedback loop: Imagination → Patterns → Self-Critique → Evolution
+    if (typeof pipeline.on === "function") {
+      pipeline.on("stage:evolution:complete", (data) => {
+        if (patternEngine) {
+          patternEngine.observe("innovation", "evolution:imagination_seed", data?.noveltyScore || 0, {
+            mutations: data?.mutationsGenerated || 0,
+            promoted: data?.mutationsPromoted || 0,
+            tags: ["evolution", "imagination"],
+          });
+        }
+        if (storyDriver) {
+          storyDriver.ingestSystemEvent({
+            type: "EVOLUTION_CYCLE_COMPLETE",
+            refs: {
+              mutations: data?.mutationsGenerated || 0,
+              promoted: data?.mutationsPromoted || 0,
+              imaginationSeeded: true,
+            },
+            source: "hcfullpipeline:evolution",
+          });
+        }
+      });
+    }
+    console.log("  ∞ Imagination → Evolution wiring: ACTIVE");
+  }
+} catch (err) {
+  console.warn(`  ⚠ Imagination → Evolution wiring failed: ${err.message}`);
+}
+
 // ─── Error Handler ──────────────────────────────────────────────────
 app.use((err, req, res, next) => {
   console.error("HeadyManager Error:", err);
