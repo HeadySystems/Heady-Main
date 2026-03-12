@@ -33,7 +33,7 @@ LABEL org.opencontainers.image.version="3.1.0"
 LABEL org.opencontainers.image.vendor="HeadySystems Inc."
 
 # Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/templates/default.conf.template
 
 # Copy built assets from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
@@ -45,10 +45,16 @@ RUN mkdir -p /usr/share/nginx/html/remotes
 RUN chown -R nginx:nginx /usr/share/nginx/html && \
     chmod -R 755 /usr/share/nginx/html
 
+# Cloud Run uses PORT env var (default 8080)
+ENV PORT=8080
+
 # Health check
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD wget -q --spider http://localhost/health || exit 1
+  CMD wget -q --spider http://localhost:${PORT}/health || exit 1
 
-EXPOSE 80
+EXPOSE ${PORT}
 
-CMD ["nginx", "-g", "daemon off;"]
+# Use shell form to allow env var substitution in nginx config
+CMD sh -c "sed -i 's/listen 80;/listen ${PORT};/' /etc/nginx/templates/default.conf.template && \
+    cp /etc/nginx/templates/default.conf.template /etc/nginx/conf.d/default.conf && \
+    nginx -g 'daemon off;'"

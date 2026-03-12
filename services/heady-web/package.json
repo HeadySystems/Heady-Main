@@ -20,6 +20,7 @@
     "clean": "rm -rf dist/"
   },
   "dependencies": {
+    "core-js": "^3.36.0",
     "three": "^0.163.0"
   },
   "devDependencies": {

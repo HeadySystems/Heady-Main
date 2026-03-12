@@ -85,4 +85,4 @@ function renderIntegratedWorkspace(container, options = {}) {
     });
 }
 
-module.exports = { renderIntegratedWorkspace };
+export { renderIntegratedWorkspace };

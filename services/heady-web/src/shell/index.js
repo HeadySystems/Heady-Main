@@ -252,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ── Exports ──────────────────────────────────────────────────────────────────
 
-module.exports = {
+export {
   bootShell,
   REMOTE_REGISTRY,
   SHELL_VERSION,

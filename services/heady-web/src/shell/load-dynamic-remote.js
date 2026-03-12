@@ -307,7 +307,7 @@ function getLoadLog() {
 
 // ── Exports ───────────────────────────────────────────────────────────────────
 
-module.exports = {
+export {
   loadDynamicRemote,
   mountRemote,
   preloadRemote,
