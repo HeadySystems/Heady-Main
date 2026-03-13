@@ -9,7 +9,7 @@
     },
     "heady-render": {
       "command": "node",
-      "args": ["/home/headyme/Heady/mcp-servers/render-mcp-server.js"],
+      "args": ["../../../mcp-servers/render-mcp-server.js"],
       "env": {
         "RENDER_API_KEY": "${RENDER_API_KEY}"
       }
@@ -19,8 +19,25 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem",
-        "/home/headyme/Heady"
+        "../../.."
       ]
+    }
+  },
+  "taskPipeline": {
+    "configPath": "configs/cloud-config.json",
+    "sources": {
+      "hcfp": "configs/hcfullpipeline-tasks.json",
+      "masterBoard": "docs/MASTER-TASK-BOARD.md",
+      "strategic": "docs/extracted-tasks.md",
+      "enterprise": "docs/enterprise-task-extraction.md",
+      "autoSuccess": "data/auto-success-tasks.json",
+      "improvements": "data/improvement-tasks.json"
+    },
+    "infrastructure": {
+      "scheduler": "src/hc_task_scheduler.js",
+      "dispatcher": "task-dispatcher.js",
+      "orchestrator": "battle-sim-task-orchestrator.js",
+      "migration": "migrations/004_task_queue.sql"
     }
   }
 }

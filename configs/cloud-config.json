@@ -21,7 +21,11 @@
           "HEADY_MCP_TRANSPORT": "http",
           "HEADY_LOG_LEVEL": "info"
         },
-        "secrets": ["DATABASE_URL", "REDIS_URL", "HEADY_API_KEY"],
+        "secrets": [
+          "DATABASE_URL",
+          "REDIS_URL",
+          "HEADY_API_KEY"
+        ],
         "url": "https://heady-mcp-server-HASH.us-central1.run.app"
       },
       "heady-manager": {
@@ -37,7 +41,12 @@
           "NODE_ENV": "production",
           "MCP_SERVER_URL": "http://localhost:3310"
         },
-        "secrets": ["DATABASE_URL", "REDIS_URL", "HEADY_API_KEY", "ANTHROPIC_API_KEY"]
+        "secrets": [
+          "DATABASE_URL",
+          "REDIS_URL",
+          "HEADY_API_KEY",
+          "ANTHROPIC_API_KEY"
+        ]
       },
       "heady-conductor": {
         "image": "gcr.io/gen-lang-client-0920560496/heady-conductor:latest",
@@ -61,18 +70,162 @@
       "render-api-key": "projects/gen-lang-client-0920560496/secrets/render-api-key"
     }
   },
+  "taskPipeline": {
+    "version": "5.6.0",
+    "sources": {
+      "hcfullpipeline": {
+        "file": "configs/hcfullpipeline-tasks.json",
+        "taskCount": 138,
+        "status": { "completed": 2, "inProgress": 8, "pending": 128 },
+        "categories": [
+          "SECURITY", "INFRASTRUCTURE", "ARCHITECTURE", "QUALITY",
+          "DOCUMENTATION", "SCALING", "FEATURES", "REMEDIATION"
+        ]
+      },
+      "masterBoard": {
+        "file": "docs/MASTER-TASK-BOARD.md",
+        "taskCount": 55,
+        "groups": {
+          "SEC": { "count": 15, "label": "Security Hardening" },
+          "TEST": { "count": 15, "label": "Test Coverage" },
+          "PIL": { "count": 8, "label": "Public Pilot" },
+          "RED": { "count": 6, "label": "Redis Pooling" },
+          "VIZ": { "count": 6, "label": "Logic Visualizer" },
+          "CLI": { "count": 5, "label": "CLI Scaffold" }
+        }
+      },
+      "strategic": {
+        "file": "docs/extracted-tasks.md",
+        "taskCount": 4,
+        "tasks": [
+          "Public Pilot Phase — Non-Profit Grant Writing",
+          "Logic Visualizer — Sacred Geometry Debugging",
+          "Redis Pooling — Sub-50ms p99 Handoff",
+          "create-heady-agent CLI — Community Scaffold"
+        ]
+      },
+      "enterprise": {
+        "file": "docs/enterprise-task-extraction.md",
+        "taskCount": 30,
+        "status": "all_completed"
+      },
+      "autoSuccess": {
+        "file": "data/auto-success-tasks.json",
+        "taskCount": 2000,
+        "type": "runtime",
+        "cycles": "1202-1205",
+        "categories": 38,
+        "pools": { "hot": 571, "warm": 999, "cold": 430 },
+        "successRate": 1.0
+      },
+      "improvements": {
+        "file": "data/improvement-tasks.json",
+        "taskCount": 1000,
+        "type": "generated",
+        "areas": ["usability", "reliability", "scalability", "performance"],
+        "modules": ["sync-system", "auto-pipeline", "resource-manager"]
+      }
+    },
+    "totals": {
+      "grandTotal": 3267,
+      "actionable": 187,
+      "completed": 32,
+      "runtime": 2000,
+      "generated": 1000
+    }
+  },
+  "taskInfrastructure": {
+    "scheduler": {
+      "module": "src/hc_task_scheduler.js",
+      "class": "HCTaskScheduler",
+      "taskClasses": ["interactive", "batch", "training"],
+      "concurrency": { "interactive": 4, "batch": 2, "training": 1 },
+      "resourceTiers": ["L", "M", "S"],
+      "endpoints": {
+        "status": "/api/scheduler/status",
+        "queues": "/api/scheduler/queues",
+        "history": "/api/scheduler/history",
+        "submit": "/api/scheduler/submit",
+        "submitHCFP": "/api/scheduler/submit/hcfp",
+        "submitUser": "/api/scheduler/submit/user",
+        "cancel": "/api/scheduler/cancel/:taskId",
+        "pause": "/api/scheduler/pause",
+        "resume": "/api/scheduler/resume",
+        "safeMode": "/api/scheduler/safe-mode",
+        "concurrency": "/api/scheduler/concurrency"
+      }
+    },
+    "dispatcher": {
+      "module": "task-dispatcher.js",
+      "subAgents": {
+        "heady-io": "https://heady-io.headyme.com/api",
+        "heady-bot": "https://heady-bot.headyme.com/api",
+        "heady-mcp": "https://heady-mcp.headyme.com/api",
+        "heady-connection": "https://heady-connection.headyme.com/api",
+        "heady-cloudrun": "https://heady-edge-gateway-609590223909.us-central1.run.app",
+        "heady-battle": "https://heady-battle.headyme.com/api",
+        "heady-sims": "https://heady-sims.headyme.com/api",
+        "core": "https://127.0.0.1:3301/api/brain/chat"
+      }
+    },
+    "orchestrator": {
+      "module": "battle-sim-task-orchestrator.js",
+      "class": "BattleSimTaskOrchestrator",
+      "pipeline": [
+        "sim_preflight",
+        "csl_gate",
+        "battle_race",
+        "mc_sampling",
+        "bee_dispatch",
+        "swarm_route",
+        "result_capture",
+        "drift_check",
+        "audit_log"
+      ]
+    },
+    "database": {
+      "migration": "migrations/004_task_queue.sql",
+      "schema": "heady_swarm.task_queue",
+      "functions": [
+        "heady_swarm.dequeue_task",
+        "heady_swarm.start_task",
+        "heady_swarm.complete_task",
+        "heady_swarm.fail_task",
+        "heady_swarm.retry_failed_tasks",
+        "heady_swarm.timeout_stale_locks",
+        "heady_swarm.dependencies_met"
+      ],
+      "features": [
+        "SKIP LOCKED dequeuing",
+        "phi-based exponential backoff",
+        "multi-tenant RLS",
+        "dependency chains",
+        "dead letter queue",
+        "pipeline stage integration"
+      ]
+    }
+  },
   "domains": {
     "primary": "headysystems.com",
     "mcp": "headymcp.com",
     "api": "api.headysystems.com",
     "auth": "auth.headysystems.com",
-    "admin": "admin.headysystems.com"
+    "admin": "admin.headysystems.com",
+    "io": "heady-io.headyme.com",
+    "bot": "heady-bot.headyme.com",
+    "connection": "heady-connection.headyme.com",
+    "battle": "heady-battle.headyme.com",
+    "sims": "heady-sims.headyme.com"
   },
   "cloudflare": {
     "workerDomain": "headysystems.com",
     "routes": [
-      "mcp.headysystems.com/*",
-      "api.headysystems.com/*"
+      "headymcp.com/*",
+      "api.headysystems.com/*",
+      "heady-io.headyme.com/*",
+      "heady-bot.headyme.com/*",
+      "heady-battle.headyme.com/*",
+      "heady-sims.headyme.com/*"
     ]
   },
   "deploy": {
