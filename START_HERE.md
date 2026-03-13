@@ -63,7 +63,7 @@ pwsh --version     # PowerShell 7+
 
 ## 1. Security First
 
-**Run this BEFORE any other work.** See `DEEP_SCAN_REPORT.md` for full findings.
+**Run this BEFORE any other work.** See `docs/GAPS_FOUND.md` for current gap analysis.
 
 ```powershell
 # Dry run first (no changes)
@@ -322,7 +322,7 @@ Built-in patterns handle: port conflicts, missing modules, lint errors, git lock
 
 ## 7. Deep Scan
 
-Full findings in `DEEP_SCAN_REPORT.md`. Summary:
+Full findings in `docs/GAPS_FOUND.md` and `docs/IMPROVEMENTS.md`. Summary:
 
 ### Critical (Fix Today)
 
@@ -365,8 +365,8 @@ When working with Cascade in Windsurf, use these patterns:
 | File | Purpose |
 |------|---------|
 | `START_HERE.md` | This file — master guide |
-| `DEEP_SCAN_REPORT.md` | Full security/architecture audit |
-| `IMMEDIATE_ACTION_PLAN.md` | Phased remediation checklist |
+| `docs/GAPS_FOUND.md` | Current gap analysis and remediation status |
+| `docs/IMPROVEMENTS.md` | Detailed improvement log across sessions |
 | `scripts/security-remediation.ps1` | Auto-fix hardcoded secrets |
 | `scripts/create_bootable_drive.ps1` | Armor/SanDisk Ventoy setup |
 | `scripts/hc.js` | CLI with --rx rapid execute |

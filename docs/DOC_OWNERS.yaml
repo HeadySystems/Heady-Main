@@ -363,13 +363,10 @@ liveDocuments:
     description: Registry API demonstration notebook
 
 # ─── HISTORICAL DOCUMENTS (Don't need updates) ──────────────────────
-historicalDocuments:
-  - path: docs/email-greg-lewis-csu-project-update.md
-    type: correspondence
-    description: Historical email correspondence
-  - path: docs/heady-vs-agentic-coding-landscape.md
-    type: analysis
-    description: Market analysis snapshot
+# Cleaned up 2026-03-13: Removed obsolete timestamped reports, stale status
+# snapshots, email drafts, and credential references from the repository.
+# See CHANGES.md for the full list of removed files.
+historicalDocuments: []
 
 # ─── REVIEW RULES ────────────────────────────────────────────────────
 reviewRules:
