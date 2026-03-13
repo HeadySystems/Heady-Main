@@ -16,7 +16,14 @@
 
 # CHANGES.md — Heady Platform Changelog
 
-## [Unreleased] — 2026-03-10
+## [Unreleased] — 2026-03-13
+
+### Removed
+- Obsolete root-level status reports: `AUTO_DEPLOY_STATUS.md`, `CLONE_REPOSITORIES_SUMMARY.md`, `DEEP_SCAN_ANALYSIS.md`, `DEEP_SCAN_REPORT.md`, `EMERGENCY_RECOVERY.md`, `FINALIZATION-REPORT.md`, `HCPIPELINE-EXECUTION-LOG.md`, `IMMEDIATE_ACTION_PLAN.md`, `PERFECTION_ACHIEVEMENT_REPORT.md`, `SANDBOX-DEPLOYMENT-STATUS.md`, `SYNC_STATUS_REPORT.md`
+- Obsolete docs/ files: `cloudflare-credentials.md` (security: contained account email), `LEARNING_LOG.md` (stub), `email-greg-lewis-csu-project-update.md` (one-time correspondence), `SYSTEM_STATUS_OVERVIEW.md` (stale snapshot), `final-deployment-report.md`, `deployment-completion.md`, `deployment-success.md` (duplicate historical deployment logs), `heady-vs-agentic-coding-landscape.md` (outdated analysis)
+
+### Changed
+- Updated `docs/DOC_OWNERS.yaml` to remove references to deleted historical documents
 
 ### Added
 
