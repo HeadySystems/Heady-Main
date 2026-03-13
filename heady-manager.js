@@ -119,6 +119,18 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// ─── Render Health Check Alias (Bug #2 Fix) ─────────────────────────
+app.get("/api/brain/health", (req, res) => {
+  res.json({
+    ok: true,
+    service: "heady-manager",
+    version: "3.0.0",
+    ts: new Date().toISOString(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+  });
+});
+
 app.get("/api/pulse", (req, res) => {
   res.json({
     ok: true,
@@ -1005,6 +1017,87 @@ try {
   console.warn(`  ⚠ Secrets/Cloudflare routes not registered: ${err.message}`);
 }
 
+// ─── HeadyBee Agent System (Bug #3 Fix) ──────────────────────────────
+let beeFactory = null;
+try {
+  beeFactory = require("./agents/bee-factory");
+  if (typeof beeFactory.registerBeeRoutes === "function") {
+    beeFactory.registerBeeRoutes(app);
+  }
+  console.log("  ∞ HeadyBee Agent Factory: LOADED");
+} catch (err) {
+  console.warn(`  ⚠ HeadyBee not loaded: ${err.message}`);
+}
+
+// ─── Latent Space / Vector Memory (Bug #4 Fix) ──────────────────────
+let latentSpace = null;
+try {
+  const { HCLatentSpace, registerLatentSpaceRoutes } = require("./src/hc_latent_space");
+  latentSpace = new HCLatentSpace({ backend: "memory" });
+  registerLatentSpaceRoutes(app, latentSpace);
+  console.log("  ∞ Latent Space: LOADED (" + latentSpace.dimensions + "d, " + latentSpace.backend + " backend)");
+} catch (err) {
+  console.warn(`  ⚠ Latent Space not loaded: ${err.message}`);
+}
+
+// ─── Orchestrator Engine (Bug #5 Fix) ────────────────────────────────
+let orchestrator = null;
+try {
+  const orchMod = require("./src/hc_orchestrator");
+  if (orchMod.HCOrchestrator) {
+    orchestrator = new orchMod.HCOrchestrator();
+    if (typeof orchMod.registerOrchestratorRoutes === "function") {
+      orchMod.registerOrchestratorRoutes(app, orchestrator);
+    }
+  } else if (typeof orchMod === "function") {
+    orchestrator = orchMod;
+  } else {
+    orchestrator = orchMod;
+  }
+  console.log("  ∞ Orchestrator Engine: LOADED");
+} catch (err) {
+  console.warn(`  ⚠ Orchestrator not loaded: ${err.message}`);
+}
+
+// ─── Conductor / AI Brain (Bug #6 Fix) ───────────────────────────────
+let conductor = null;
+try {
+  const condMod = require("./src/hc_conductor");
+  if (condMod.HCConductor) {
+    conductor = new condMod.HCConductor();
+    if (typeof condMod.registerConductorRoutes === "function") {
+      condMod.registerConductorRoutes(app, conductor);
+    }
+  } else if (typeof condMod === "function") {
+    conductor = condMod;
+  } else {
+    conductor = condMod;
+  }
+  console.log("  ∞ Conductor (AI Brain): LOADED");
+} catch (err) {
+  console.warn(`  ⚠ Conductor not loaded: ${err.message}`);
+}
+
+// ─── Colab Runtime Manager (Bug #7 Fix) ──────────────────────────────
+let colabRuntimeManager = null;
+try {
+  const colabMod = require("./services/colab-runtime-manager");
+  if (colabMod.ColabRuntimeManager) {
+    colabRuntimeManager = new colabMod.ColabRuntimeManager();
+    if (typeof colabMod.registerColabRoutes === "function") {
+      colabMod.registerColabRoutes(app, colabRuntimeManager);
+    }
+  } else if (typeof colabMod.registerRoutes === "function") {
+    colabMod.registerRoutes(app);
+    colabRuntimeManager = colabMod;
+  } else {
+    colabRuntimeManager = colabMod;
+  }
+  console.log("  ∞ Colab Runtime Manager: LOADED");
+} catch (err) {
+  console.warn(`  ⚠ Colab Runtime Manager not loaded: ${err.message}`);
+}
+
 // ─── Aloha Protocol System (Always-On) ───────────────────────────────
 const alohaProtocol = loadYamlConfig("aloha-protocol.yaml");
 const deOptProtocol = loadYamlConfig("de-optimization-protocol.yaml");
@@ -1317,6 +1410,323 @@ try {
 } catch (err) {
   console.warn(`  ⚠ Imagination → Evolution wiring failed: ${err.message}`);
 }
+
+// ─── Colab Runtime Management ────────────────────────────────────────────────
+const colabHeartbeats = {};
+
+app.get("/api/colab/runtimes", (req, res) => {
+  const reg = loadRegistry();
+  const runtimes = reg.colab_runtimes || {};
+  const runtimeList = Object.entries(runtimes).map(([id, rt]) => {
+    const heartbeat = colabHeartbeats[id] || null;
+    const staleThresholdMs = 5 * 60 * 1000; // 5 minutes
+    const isLive = heartbeat && (Date.now() - new Date(heartbeat.ts).getTime()) < staleThresholdMs;
+    return {
+      id,
+      ...rt,
+      live: isLive,
+      lastHeartbeat: heartbeat ? heartbeat.ts : null,
+      latestMetrics: heartbeat ? heartbeat.latestMetrics : null,
+      gpu: heartbeat ? heartbeat.gpu : { available: false, name: rt.gpu || "unknown", memoryGB: 0 },
+    };
+  });
+  const liveCount = runtimeList.filter(r => r.live).length;
+  res.json({
+    ok: true,
+    total: runtimeList.length,
+    live: liveCount,
+    subscriptions: "Colab Pro+ × 4",
+    runtimes: runtimeList,
+    ts: new Date().toISOString(),
+  });
+});
+
+app.get("/api/colab/runtimes/:nodeId", (req, res) => {
+  const reg = loadRegistry();
+  const runtimes = reg.colab_runtimes || {};
+  const rt = runtimes[req.params.nodeId];
+  if (!rt) return res.status(404).json({ error: `Runtime '${req.params.nodeId}' not found` });
+  const heartbeat = colabHeartbeats[req.params.nodeId] || null;
+  res.json({
+    ok: true,
+    id: req.params.nodeId,
+    ...rt,
+    lastHeartbeat: heartbeat,
+    ts: new Date().toISOString(),
+  });
+});
+
+app.post("/api/colab/runtimes/:nodeId/heartbeat", (req, res) => {
+  const nodeId = req.params.nodeId;
+  colabHeartbeats[nodeId] = {
+    ...req.body,
+    ts: new Date().toISOString(),
+    receivedAt: Date.now(),
+  };
+
+  // Wire heartbeat into story driver
+  if (storyDriver) {
+    storyDriver.ingestSystemEvent({
+      type: "COLAB_HEARTBEAT",
+      refs: { nodeId, cycleCount: req.body.cycleCount || 0 },
+      source: "colab_runtime",
+    });
+  }
+
+  res.json({ ok: true, nodeId, acknowledged: true, ts: new Date().toISOString() });
+});
+
+// ─── Liquid Node Topology ────────────────────────────────────────────────────
+app.get("/api/liquid-nodes/topology", (req, res) => {
+  const reg = loadRegistry();
+  const nodeList = Object.entries(reg.nodes || {});
+  const nodes = nodeList.map(([id, n]) => ({
+    id,
+    name: n.name || id,
+    role: n.role || "unknown",
+    ring: n.ring || "unknown",
+    layer: n.layer || "unknown",
+    domain: n.domain || "unknown",
+    tier: n.tier || "M",
+    status: n.status || "unknown",
+    description: n.description || "",
+    lastInvoked: n.last_invoked || null,
+  }));
+
+  // Ring aggregation
+  const rings = {};
+  for (const node of nodes) {
+    if (!rings[node.ring]) rings[node.ring] = { count: 0, active: 0, domains: [] };
+    rings[node.ring].count++;
+    if (node.status === "active") rings[node.ring].active++;
+    rings[node.ring].domains.push(node.domain);
+  }
+
+  // Layer aggregation
+  const layers = {};
+  for (const node of nodes) {
+    if (!layers[node.layer]) layers[node.layer] = { count: 0, active: 0 };
+    layers[node.layer].count++;
+    if (node.status === "active") layers[node.layer].active++;
+  }
+
+  // Tier distribution
+  const tiers = { L: 0, M: 0, S: 0 };
+  for (const node of nodes) {
+    tiers[node.tier] = (tiers[node.tier] || 0) + 1;
+  }
+
+  const activeCount = nodes.filter(n => n.status === "active").length;
+  const healthScore = nodeList.length > 0
+    ? Math.round((activeCount / nodeList.length) * 1000) / 1000
+    : 0;
+
+  res.json({
+    ok: true,
+    totalNodes: nodes.length,
+    activeNodes: activeCount,
+    healthScore,
+    vectorSpaceState: healthScore >= 0.618 ? "OPTIMAL" : healthScore >= 0.382 ? "DEGRADED" : "CRITICAL",
+    topology: { rings, layers, tiers },
+    nodes,
+    phi: 1.6180339887,
+    ts: new Date().toISOString(),
+  });
+});
+
+app.post("/api/liquid-nodes/:nodeId/invoke", (req, res) => {
+  const reg = loadRegistry();
+  const id = req.params.nodeId.toUpperCase();
+  if (!reg.nodes[id]) return res.status(404).json({ error: `Node '${id}' not found` });
+  reg.nodes[id].status = "active";
+  reg.nodes[id].last_invoked = new Date().toISOString();
+  saveRegistry(reg);
+
+  // Wire into pattern engine
+  if (patternEngine) {
+    patternEngine.observeSuccess(`liquid_node:${id}`, 0, {
+      domain: reg.nodes[id].domain,
+      tags: ["liquid_node", "invocation"],
+    });
+  }
+
+  res.json({ ok: true, node: id, status: "active", invokedAt: reg.nodes[id].last_invoked });
+});
+
+// ─── Wave 1–4 Service Wiring ──────────────────────────────────────────────────
+const WAVE_SERVICES = [
+  { name: "HeadyBus",       path: "./services/heady-bus",       register: "registerBusRoutes",       label: "Event Bus" },
+  { name: "HeadyGate",      path: "./services/heady-gate",      register: "registerGateRoutes",      label: "AI Gateway" },
+  { name: "HeadyObserver",  path: "./services/heady-observer",  register: "registerObserverRoutes",  label: "AIOps Observability" },
+  { name: "HeadyKnowledge", path: "./services/heady-knowledge", register: "registerKnowledgeRoutes", label: "RAG Knowledge Base" },
+  { name: "HeadyFlags",     path: "./services/heady-flags",     register: "registerFlagsRoutes",     label: "Feature Flags" },
+  { name: "HeadyIdentity",  path: "./services/heady-identity",  register: "registerIdentityRoutes",  label: "Agent IAM" },
+  { name: "HeadyRegistry",  path: "./services/heady-registry",  register: "registerRegistryRoutes",  label: "Artifact Registry" },
+  { name: "HeadyMeter",     path: "./services/heady-meter",     register: "registerMeterRoutes",     label: "Usage Metering" },
+  { name: "HeadyAudit",     path: "./services/heady-audit",     register: "registerAuditRoutes",     label: "Compliance Audit" },
+];
+
+let waveLoaded = 0;
+for (const svc of WAVE_SERVICES) {
+  try {
+    const mod = require(svc.path);
+    if (typeof mod[svc.register] === "function") {
+      mod[svc.register](app);
+      waveLoaded++;
+      console.log(`  ∞ ${svc.name}: LOADED (${svc.label})`);
+    } else {
+      console.warn(`  ⚠ ${svc.name}: register function '${svc.register}' not found`);
+    }
+  } catch (err) {
+    console.warn(`  ⚠ ${svc.name}: ${err.message}`);
+  }
+}
+console.log(`  ∞ Wave Services: ${waveLoaded}/${WAVE_SERVICES.length} loaded`);
+
+// ─── 17-Swarm Orchestrator Wiring ────────────────────────────────────────────
+let swarmOrchestrator = null;
+try {
+  const { SwarmOrchestrator, SwarmTask, PRIORITY } = require("./seventeen-swarm-orchestrator");
+  swarmOrchestrator = new SwarmOrchestrator();
+  swarmOrchestrator.start();
+
+  // Wire swarm task completions into pattern engine
+  if (patternEngine) {
+    for (const [, swarm] of swarmOrchestrator.getAllSwarms()) {
+      swarm.onChange("complete", (task) => {
+        patternEngine.observeSuccess(`swarm:${swarm.name}:${task.type}`, task.getDuration() || 0, {
+          swarm: swarm.name, priority: task.priority,
+          tags: ["swarm", swarm.name.toLowerCase()],
+        });
+      });
+      swarm.onChange("error", (task) => {
+        patternEngine.observeError(`swarm:${swarm.name}:${task.type}`, task.error || "unknown", {
+          swarm: swarm.name, priority: task.priority,
+          tags: ["swarm", swarm.name.toLowerCase(), "failure"],
+        });
+      });
+    }
+  }
+
+  // Wire self-critique bottlenecks → Emergency swarm escalation
+  if (selfCritiqueEngine && typeof selfCritiqueEngine.on === "function") {
+    selfCritiqueEngine.on("critique:critical", (critique) => {
+      swarmOrchestrator.dispatch(new SwarmTask({
+        type: "escalation",
+        targetSwarm: "Emergency",
+        payload: { source: "self-critique", critique },
+        priority: PRIORITY.CRITICAL,
+      }));
+    });
+  }
+
+  // Wire swarm emergency events into story driver
+  if (storyDriver) {
+    const emergencySwarm = swarmOrchestrator.getSwarm("Emergency");
+    if (emergencySwarm) {
+      emergencySwarm.onChange("complete", (task) => {
+        storyDriver.ingestSystemEvent({
+          type: "SWARM_EMERGENCY_HANDLED",
+          refs: { taskId: task.id, payload: task.payload },
+          source: "swarm_orchestrator:emergency",
+        });
+      });
+    }
+  }
+
+  console.log(`  ∞ Swarm Orchestrator: LOADED (${swarmOrchestrator.listSwarmNames().length} swarms active)`);
+} catch (err) {
+  console.warn(`  ⚠ Swarm Orchestrator not loaded: ${err.message}`);
+}
+
+// ─── Swarm Orchestrator REST Endpoints ───────────────────────────────────────
+app.get("/api/swarms/status", (req, res) => {
+  if (!swarmOrchestrator) return res.status(503).json({ error: "Swarm Orchestrator not loaded" });
+  const status = swarmOrchestrator.getStatus();
+
+  // Map swarm names to liquid node domains for cross-referencing
+  const SWARM_TO_DOMAIN = {
+    Deploy: "integration", Battle: "consensus", Research: "research",
+    Security: "governance", Memory: "memory", Creative: "audio",
+    Trading: "data", Health: "streaming", Governance: "governance",
+    Documentation: "language", Testing: "coding", Migration: "data",
+    Monitoring: "streaming", Cleanup: "caching", Onboarding: "context",
+    Analytics: "research", Emergency: "orchestration",
+  };
+
+  const enrichedSwarms = status.swarms.map(s => ({
+    ...s,
+    linkedDomain: SWARM_TO_DOMAIN[s.name] || null,
+  }));
+
+  res.json({
+    ok: true,
+    initialized: status.initialized,
+    swarmCount: enrichedSwarms.length,
+    totalTasks: status.totalTasks,
+    busMessagesLast60s: status.busHistory,
+    swarms: enrichedSwarms,
+    ts: new Date().toISOString(),
+  });
+});
+
+app.post("/api/swarms/dispatch", (req, res) => {
+  if (!swarmOrchestrator) return res.status(503).json({ error: "Swarm Orchestrator not loaded" });
+  const { SwarmTask: ST, PRIORITY: PR } = require("./seventeen-swarm-orchestrator");
+  const { type, targetSwarm, payload, priority } = req.body;
+  if (!type) return res.status(400).json({ error: "type is required" });
+
+  const task = new ST({
+    type,
+    targetSwarm: targetSwarm || null,
+    payload: payload || {},
+    priority: PR[priority] || PR.NORMAL,
+  });
+  const result = swarmOrchestrator.dispatch(task);
+
+  // Wire dispatch into pattern engine
+  if (patternEngine) {
+    patternEngine.observeSuccess("swarm:dispatch", 0, {
+      swarm: targetSwarm || "auto-routed", taskType: type,
+      tags: ["swarm", "dispatch"],
+    });
+  }
+
+  res.json({
+    ok: true,
+    taskId: result.id,
+    status: result.status,
+    targetSwarm: result.targetSwarm,
+    ts: new Date().toISOString(),
+  });
+});
+
+app.get("/api/swarms/audit", (req, res) => {
+  if (!swarmOrchestrator) return res.status(503).json({ error: "Swarm Orchestrator not loaded" });
+  const since = req.query.since ? parseInt(req.query.since, 10) : Date.now() - 3600000;
+  const action = req.query.action || undefined;
+  const log = swarmOrchestrator.getAuditLog({ since, action });
+  res.json({
+    ok: true,
+    total: log.length,
+    entries: log.slice(-100),
+    ts: new Date().toISOString(),
+  });
+});
+
+app.get("/api/swarms/bus/history", (req, res) => {
+  if (!swarmOrchestrator) return res.status(503).json({ error: "Swarm Orchestrator not loaded" });
+  const since = req.query.since ? parseInt(req.query.since, 10) : Date.now() - 60000;
+  const history = swarmOrchestrator.getBus().getHistory({ since });
+  res.json({
+    ok: true,
+    total: history.length,
+    messages: history.slice(-50).map(m => ({
+      id: m.id, type: m.type, from: m.from, to: m.to, priority: m.priority, ts: m.ts,
+    })),
+    ts: new Date().toISOString(),
+  });
+});
 
 // ─── Error Handler ──────────────────────────────────────────────────
 app.use((err, req, res, next) => {
