@@ -2,28 +2,425 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>HeadyMCP - Manager Control Plane</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HeadyMCP - Manager Control Plane | Heady Systems</title>
+    <meta name="description" content="HeadyMCP is the central management hub for orchestrating Heady services, AI nodes, pipelines, and infrastructure across the entire Heady ecosystem.">
     <style>
-        body { font-family: Arial, sans-serif; }
+        :root {
+            --bg-deep: #0a0e27;
+            --bg-card: #111633;
+            --border: #1e2548;
+            --cyan: #00d9ff;
+            --purple: #7b68ee;
+            --green: #4ade80;
+            --gold: #ffd700;
+            --text: #e0e6ff;
+            --muted: #6b7194;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+        /* ─── Header ─────────────────────────────────────────── */
+        header {
+            padding: 40px 0 60px;
+            text-align: center;
+            position: relative;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0,217,255,0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .logo-mark {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .logo-mark .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--green);
+            animation: breathe 3s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+            0%, 100% { opacity: 0.6; transform: scale(0.95); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        .logo-mark span {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: 48px;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: var(--muted);
+            max-width: 600px;
+            margin: 0 auto 32px;
+        }
+
+        .cta-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, rgba(0,217,255,0.2), rgba(123,104,238,0.2));
+            color: var(--cyan);
+            border-color: rgba(0,217,255,0.3);
+        }
+
+        .btn-primary:hover { background: rgba(0,217,255,0.15); }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text);
+            border-color: var(--border);
+        }
+
+        .btn-secondary:hover { border-color: var(--muted); }
+
+        /* ─── Features ───────────────────────────────────────── */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin-bottom: 60px;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            transition: border-color 0.3s;
+        }
+
+        .feature-card:hover { border-color: var(--cyan); }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+
+        .feature-card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .feature-card p {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        /* ─── Services ───────────────────────────────────────── */
+        .services-section { margin-bottom: 60px; }
+
+        .services-section h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 12px;
+        }
+
+        .service-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .service-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .service-dot.active { background: var(--green); }
+        .service-dot.building { background: var(--gold); animation: breathe 2s ease-in-out infinite; }
+
+        .service-info h4 { font-size: 14px; font-weight: 600; }
+        .service-info p { font-size: 11px; color: var(--muted); }
+
+        /* ─── API Endpoints ──────────────────────────────────── */
+        .api-section { margin-bottom: 60px; }
+
+        .api-section h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .api-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .api-table th {
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .api-table td {
+            padding: 10px 16px;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(30,37,72,0.5);
+        }
+
+        .api-table td:first-child {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            color: var(--cyan);
+            font-size: 12px;
+        }
+
+        .method {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .method-get { background: rgba(74,222,128,0.15); color: var(--green); }
+        .method-post { background: rgba(123,104,238,0.15); color: var(--purple); }
+
+        /* ─── Footer ─────────────────────────────────────────── */
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        footer a { color: var(--cyan); text-decoration: none; }
     </style>
 </head>
 <body>
-    <header>
-        <h1>HeadyMCP</h1>
-        <p>Central management hub for Heady services</p>
-    </header>
-    
-    <section>
-        <h2>Services Managed</h2>
-        <ul>
-            <li>HeadyBrain</li>
-            <li>HeadyRender</li>
-            <li>HeadySync</li>
-        </ul>
-    </section>
-    
+    <div class="container">
+        <header>
+            <div class="logo-mark">
+                <div class="dot"></div>
+                <span>Heady Systems</span>
+            </div>
+            <h1>HeadyMCP</h1>
+            <p class="subtitle">
+                The Manager Control Plane that orchestrates all Heady services, AI nodes,
+                pipelines, and infrastructure as one unified, intelligent system.
+            </p>
+            <div class="cta-row">
+                <a href="/api/health" class="btn btn-primary">Check Health</a>
+                <a href="/api/registry" class="btn btn-secondary">View Registry</a>
+                <a href="/api/system/status" class="btn btn-secondary">System Status</a>
+            </div>
+        </header>
+
+        <!-- Features -->
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon" style="background: rgba(0,217,255,0.1);">&#x1f9e0;</div>
+                <h3>Intelligent Orchestration</h3>
+                <p>HCFullPipeline runs in strict dependency order with checkpoints at each stage. The system deeply re-analyzes state, configs, and patterns at every checkpoint for self-correction.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background: rgba(123,104,238,0.1);">&#x1f916;</div>
+                <h3>Multi-Agent Supervisor</h3>
+                <p>JULES, OBSERVER, BUILDER, ATLAS, and PYTHIA work in parallel fan-out. Tasks are routed via direct routing with no proxy for minimal latency.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background: rgba(74,222,128,0.1);">&#x1f6e1;&#xfe0f;</div>
+                <h3>Circuit Breakers & Rate Limits</h3>
+                <p>Resource policies enforce concurrency limits, cost budgets, retry/backoff, and circuit breakers on all external calls. Production-grade resilience built in.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background: rgba(255,215,0,0.1);">&#x1f4ca;</div>
+                <h3>Operational Readiness</h3>
+                <p>Continuous ORS scoring (0-100) determines system mode: full parallelism above 85, normal at 70-85, maintenance at 50-70, and recovery below 50.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background: rgba(255,100,130,0.1);">&#x1f50d;</div>
+                <h3>Checkpoint Protocol</h3>
+                <p>At every checkpoint: validate run state, compare config hashes, re-evaluate health, check concept alignment, sync registry entries, and produce comprehensive reports.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background: rgba(0,200,255,0.1);">&#x2699;&#xfe0f;</div>
+                <h3>YAML-Driven Config</h3>
+                <p>All pipeline definitions, resource rules, governance policies, and concept indexes live in versioned YAML configs. The system is deterministic given the same inputs.</p>
+            </div>
+        </div>
+
+        <!-- Managed Services -->
+        <div class="services-section">
+            <h2>Managed Services</h2>
+            <div class="service-grid">
+                <div class="service-item">
+                    <div class="service-dot active"></div>
+                    <div class="service-info">
+                        <h4>HeadyBrain</h4>
+                        <p>System meta-controller & ORS</p>
+                    </div>
+                </div>
+                <div class="service-item">
+                    <div class="service-dot active"></div>
+                    <div class="service-info">
+                        <h4>HeadyConductor</h4>
+                        <p>Python render worker</p>
+                    </div>
+                </div>
+                <div class="service-item">
+                    <div class="service-dot active"></div>
+                    <div class="service-info">
+                        <h4>HeadySync</h4>
+                        <p>Multi-remote git sync</p>
+                    </div>
+                </div>
+                <div class="service-item">
+                    <div class="service-dot active"></div>
+                    <div class="service-info">
+                        <h4>HeadyRegistry</h4>
+                        <p>Central component catalog</p>
+                    </div>
+                </div>
+                <div class="service-item">
+                    <div class="service-dot active"></div>
+                    <div class="service-info">
+                        <h4>HeadyCheckpoint</h4>
+                        <p>Protocol analyzer</p>
+                    </div>
+                </div>
+                <div class="service-item">
+                    <div class="service-dot active"></div>
+                    <div class="service-info">
+                        <h4>HeadyHealth</h4>
+                        <p>Node health + cron</p>
+                    </div>
+                </div>
+                <div class="service-item">
+                    <div class="service-dot active"></div>
+                    <div class="service-info">
+                        <h4>HeadyReadiness</h4>
+                        <p>Operational readiness probes</p>
+                    </div>
+                </div>
+                <div class="service-item">
+                    <div class="service-dot building"></div>
+                    <div class="service-info">
+                        <h4>HeadyBuddy</h4>
+                        <p>AI companion overlay</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Reference -->
+        <div class="api-section">
+            <h2>API Reference</h2>
+            <table class="api-table">
+                <thead>
+                    <tr><th>Endpoint</th><th>Method</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>/api/health</td><td><span class="method method-get">GET</span></td><td>System health check</td></tr>
+                    <tr><td>/api/system/status</td><td><span class="method method-get">GET</span></td><td>Full system status with capabilities</td></tr>
+                    <tr><td>/api/pipeline/run</td><td><span class="method method-post">POST</span></td><td>Trigger a pipeline run</td></tr>
+                    <tr><td>/api/pipeline/state</td><td><span class="method method-get">GET</span></td><td>Current pipeline execution state</td></tr>
+                    <tr><td>/api/registry</td><td><span class="method method-get">GET</span></td><td>Full HeadyRegistry catalog</td></tr>
+                    <tr><td>/api/nodes</td><td><span class="method method-get">GET</span></td><td>List all AI nodes</td></tr>
+                    <tr><td>/api/brain/status</td><td><span class="method method-get">GET</span></td><td>Brain status and readiness score</td></tr>
+                    <tr><td>/api/supervisor/status</td><td><span class="method method-get">GET</span></td><td>Multi-agent supervisor status</td></tr>
+                    <tr><td>/api/readiness/evaluate</td><td><span class="method method-get">GET</span></td><td>Run operational readiness probes</td></tr>
+                    <tr><td>/api/checkpoint/analyze</td><td><span class="method method-post">POST</span></td><td>Run checkpoint analysis</td></tr>
+                    <tr><td>/api/subsystems</td><td><span class="method method-get">GET</span></td><td>All subsystem status overview</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <footer>
-        <p>Connected to 1me1.com admin portal</p>
+        <div class="container">
+            <p>Sacred Geometry :: Organic Systems :: Breathing Interfaces</p>
+            <p style="margin-top: 8px;">
+                Part of the <a href="#">Heady Ecosystem</a> &mdash;
+                HeadyMe &middot; HeadySystems &middot; HeadyConnection &middot; Heady-AI
+            </p>
+        </div>
     </footer>
 </body>
 </html>

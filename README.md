@@ -48,23 +48,27 @@ cd Heady
 - **Monte Carlo Optimization**: Real-time performance optimization
 - **Pattern Recognition**: Self-learning system with continuous improvement
 
+## Ecosystem
+
+The Heady platform is one unified organism with four brands: **HeadyMe** (personal AI), **HeadySystems** (enterprise infrastructure), **HeadyConnection** (nonprofit & community), and **Heady-AI** (research & models). See [Ecosystem Overview](docs/ECOSYSTEM_OVERVIEW.md) for the full map.
+
 ## Quickstart Guides
 
-Get started with Heady applications:
-
-- [HeadyBuddy](docs/quickstarts/HEADYBUDDY.md) - Android companion
-- [HeadyIDE](docs/quickstarts/HEADYIDE.md) - Desktop AI assistant
-- [HeadyBrowser](docs/quickstarts/HEADYBROWSER.md) - Web extension
-- [HeadyServices](docs/quickstarts/HEADYSERVICES.md) - Backend system
-- [Heady API](docs/quickstarts/HEADY_API_QUICKSTART.md) - Service interaction
-- [HeadyMCP](docs/quickstarts/HEADYMCP.md) - Manager Control Plane
+| Guide | What You Learn | Time |
+|-------|----------------|------|
+| [HeadyBuddy](docs/quickstarts/HEADYBUDDY.md) | AI companion (desktop + mobile) | 15 min |
+| [HeadyServices](docs/quickstarts/HEADYSERVICES.md) | Backend infrastructure | 10 min |
+| [HeadyAI-IDE](docs/quickstarts/HEADYIDE.md) | Custom IDE setup | 20 min |
+| [HeadyBrowser](docs/quickstarts/HEADYBROWSER.md) | Browser extension | 10 min |
+| [HeadyMCP](docs/quickstarts/HEADYMCP.md) | Manager Control Plane | 15 min |
+| [Heady API](docs/quickstarts/HEADY_API_QUICKSTART.md) | API interaction | 10 min |
 
 ## Guides and References
 
-Deeper integration and API documentation:
-
+- [Ecosystem Overview](docs/ECOSYSTEM_OVERVIEW.md) - Full system map across all brands
 - [Service Integration](docs/guides/SERVICE_INTEGRATION.md) - How Heady services connect
 - [HeadyManager API](docs/api/HEADYMANAGER_API.md) - Service endpoints reference
+- [HeadyAcademy](HeadyAcademy/README.md) - AI Nodes and learning tracks
 
 ## Architecture
 

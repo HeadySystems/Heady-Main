@@ -144,56 +144,54 @@ Request → Queue → GPU Workers → Model Inference → Result Cache → Respo
 ### 3. Analytics Aggregation
 ```
 Events → Stream Processor → Time-series DB → Dashboard/Alerts
-    
-    I -.-> T
-    J -.-> T
-    K -.-> T
-    M -.-> T
-    
-    E -.-> U
-    I -.-> U
-    J -.-> U
-    K -.-> U
-    M -.-> U
-    
-    I -.-> V
-    J -.-> V
-    K -.-> V
-    M -.-> V
-    
-    U --> W
-    T --> W
-    V --> W
-    
-    style A fill:#e1f5ff
-    style B fill:#e1f5ff
-    style C fill:#e1f5ff
-    style D fill:#e1f5ff
-    style J fill:#fff4e1
-    style M fill:#fff4e1
-    style N fill:#f0f0f0
-    style O fill:#f0f0f0
-    style P fill:#f0f0f0
-    style Q fill:#f0f0f0
-    style R fill:#f0f0f0
-    style S fill:#ffe1f5
-    style T fill:#e1ffe1
-    style U fill:#e1ffe1
-    style V fill:#e1ffe1
-    style W fill:#ffe1e1
-    style X fill:#fff9e1
-    style Y fill:#fff9e1
-    style Z fill:#fff9e1
 ```
-graph LR
-  A[HeadyBuddy] --> B[Sync Service]
-  C[HeadyBrowser] --> B
-  D[HeadyIDE] --> B
-  B --> E[HeadyAI Processing]
-  E --> F[Data Storage]
+
+### 4. Client-to-Service Flow
+```
+HeadyBuddy ──┐
+HeadyBrowser ─┼──→ Sync Service ──→ HeadyAI Processing ──→ Data Storage
+HeadyIDE ─────┘
 ```
 
 ## Integration Points
-1. **Authentication**: Central auth service
-2. **Data Sync**: WebSocket-based real-time sync
-3. **AI Processing**: Unified API endpoint
+
+### Authentication
+All clients authenticate through the central auth service using JWT tokens:
+- Token TTL: 1 hour with refresh
+- API keys for service-to-service calls (timing-safe validation)
+- Rate limiting: 100 requests/min/key via Redis
+
+### Data Sync
+Real-time synchronization via WebSocket:
+- Max concurrent connections: 50k
+- Event bus: partitioned topics for scalability
+- Cross-device state sync for HeadyBuddy
+
+### AI Processing
+Unified API endpoint for all AI workloads:
+- GPU-accelerated model inference
+- Result caching for repeated queries
+- Circuit breakers on external API calls (Claude, etc.)
+
+### Direct Routing Protocol
+Internal service-to-service calls use direct routing (no proxy):
+- Use `@heady/networking` client with `proxy: false`
+- Minimizes latency for Supervisor-to-Agent communication
+- External calls go through circuit breakers with retry + backoff
+
+## Monitoring & Observability
+
+| Layer | Tool | Configuration |
+|-------|------|---------------|
+| Logging | Structured JSON | All services emit structured logs |
+| Metrics | Prometheus-compatible | 15s scrape interval |
+| Tracing | Distributed tracing | Correlation IDs across services |
+| Alerting | Slack/PagerDuty | SLA breach notifications |
+
+## Configuration
+
+Service connections are defined in `configs/service-catalog.yaml`. Each service registers:
+- Endpoint URL and health check path
+- SLO targets (availability, latency, throughput)
+- Circuit breaker thresholds
+- Rate limit policies
