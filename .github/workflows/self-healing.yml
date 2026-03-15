@@ -403,7 +403,7 @@ jobs:
           " || echo "Redis remediation skipped"
 
       - name: Comprehensive alert on remediation
-        uses: slackapi/slack-github-action@v1.26.0
+        uses: slackapi/slack-github-action@v3
         with:
           payload: |
             {

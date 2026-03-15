@@ -218,7 +218,7 @@ jobs:
           
       - name: Alert on code errors
         if: failure() && env.error_type == 'code'
-        uses: slackapi/slack-github-action@v1
+        uses: slackapi/slack-github-action@v3
         with:
           payload: |
             {
@@ -507,7 +507,7 @@ jobs:
           curl -sf https://api.heady.systems/api/health
           
       - name: Notify deployment
-        uses: slackapi/slack-github-action@v1
+        uses: slackapi/slack-github-action@v3
         with:
           payload: |
             {
