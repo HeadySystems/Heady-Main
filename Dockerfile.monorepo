@@ -5,7 +5,7 @@
 # ╚══════════════════════════════════════════════════════════════════════╝
 
 # ─── Stage 1: Dependencies ────────────────────────────────────────────────────
-FROM node:20-alpine AS deps
+FROM node:25-alpine AS deps
 
 WORKDIR /app
 
@@ -28,7 +28,7 @@ RUN npm ci --omit=dev --ignore-scripts 2>/dev/null || \
     npm install --omit=dev --legacy-peer-deps
 
 # ─── Stage 2: Builder ─────────────────────────────────────────────────────────
-FROM node:20-alpine AS builder
+FROM node:25-alpine AS builder
 
 WORKDIR /app
 
@@ -48,7 +48,7 @@ COPY . .
 RUN node -e "try { require('./scripts/generate-sites.js') } catch(e) { console.log('Build step skipped:', e.message) }" 2>/dev/null || true
 
 # ─── Stage 3: Production Runtime ─────────────────────────────────────────────
-FROM node:20-alpine AS runner
+FROM node:25-alpine AS runner
 
 # Add tini for proper signal handling
 RUN apk add --no-cache tini curl

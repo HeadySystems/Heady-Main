@@ -10,7 +10,7 @@
 # Run:    docker run -e HEADY_ROLE=manager heady-universal:latest
 # ═══════════════════════════════════════════════════════════════
 
-FROM node:20-slim AS base
+FROM node:25-slim AS base
 
 # Install essential system packages
 RUN apt-get update && apt-get install -y --no-install-recommends \

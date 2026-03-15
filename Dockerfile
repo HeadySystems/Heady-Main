@@ -13,7 +13,7 @@
 # ║  LAYER: root                                                     ║
 # ╚══════════════════════════════════════════════════════════════════╝
 # HEADY_BRAND:END
-FROM node:20-alpine
+FROM node:25-alpine
 
 WORKDIR /app
 
@@ -34,7 +34,7 @@ RUN if [ -f pnpm-lock.yaml ]; then \
 
 # ─── Stage 2: Build ──────────────────────────────────────────────────────────
 
-FROM node:22-alpine AS build
+FROM node:25-alpine AS build
 
 WORKDIR /app
 
@@ -59,7 +59,7 @@ RUN if [ -f pnpm-lock.yaml ]; then \
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
   CMD wget -qO- http://localhost:3300/api/health || exit 1
 
-FROM node:22-alpine AS production
+FROM node:25-alpine AS production
 
 # Install tini for proper PID 1 signal handling (SIGTERM → graceful shutdown)
 RUN apk add --no-cache tini curl
