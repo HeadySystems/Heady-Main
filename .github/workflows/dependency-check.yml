@@ -274,7 +274,7 @@ jobs:
       github.event_name == 'schedule'
     steps:
       - name: Download audit reports
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: '*-report'
           merge-multiple: true
