@@ -209,6 +209,32 @@ class HeadyConductor extends EventEmitter {
         });
     }
 
+    // ── Redis Pool Integration (RED-03) ─────────────────────────
+    /**
+     * Wire a RedisPoolV3 instance for agent handoff support.
+     * @param {import('../resilience/redis-pool-v3').RedisPoolV3} redisPool
+     */
+    setRedisPool(redisPool) {
+        this._redisPool = redisPool;
+    }
+
+    /**
+     * Agent handoff — transfer task context between bees via Redis.
+     * @param {string} fromBeeId - Source bee
+     * @param {string} toBeeId - Target bee
+     * @param {object} taskContext - Serializable context
+     * @param {object} [opts] - { ttlMs, priority }
+     * @returns {Promise<object>} handoff result
+     */
+    async agentHandoff(fromBeeId, toBeeId, taskContext, opts = {}) {
+        if (!this._redisPool) {
+            return { ok: false, error: 'Redis pool not wired — call setRedisPool() first' };
+        }
+        const result = await this._redisPool.agentHandoff(fromBeeId, toBeeId, taskContext, opts);
+        this.emit('agent:handoff', { from: fromBeeId, to: toBeeId, handoffId: result.handoffId });
+        return { ok: true, ...result };
+    }
+
     // ── Status ──────────────────────────────────────────────────
     getStatus() {
         const beeStatus = {};
