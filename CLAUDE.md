@@ -349,3 +349,6 @@ Integrate beneficial, legally and ethically acceptable patterns where they
 improve reliability, performance, or safety, without violating Heady's data
 ownership, security, or social impact goals.
 
+
+## Super Prompt v5.0
+The unified cognitive substrate is at `HEADY_SUPER_PROMPT_v5.md`. All 25 sections are active.

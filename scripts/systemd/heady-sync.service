@@ -1,0 +1,21 @@
+[Unit]
+Description=Heady Cross-Device Git Sync
+Documentation=https://github.com/HeadyAI/Heady
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/headyme/Heady/scripts/heady-sync.sh --auto
+WorkingDirectory=/home/headyme/Heady
+Environment=HOME=/home/headyme
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+StandardOutput=append:/home/headyme/Heady/logs/heady-sync.log
+StandardError=append:/home/headyme/Heady/logs/heady-sync.log
+
+# Safety limits
+TimeoutStartSec=120
+Nice=10
+
+[Install]
+WantedBy=default.target
