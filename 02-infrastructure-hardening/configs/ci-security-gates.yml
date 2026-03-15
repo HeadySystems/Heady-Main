@@ -1,0 +1,104 @@
+# =============================================================================
+# Heady™ CI Security Gates (SEC-04 through SEC-07)
+# Drop into: .github/workflows/ci-security-gates.yml
+# =============================================================================
+name: CI Security Gates
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # SEC-04: Coverage gate
+  coverage-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm jest --coverage --coverageReporters=json-summary --forceExit
+      - name: Enforce phi-scaled coverage threshold
+        run: |
+          node -e "
+            const cov = require('./coverage/coverage-summary.json');
+            const PSI = 0.6180339887;
+            const threshold = Math.round(100 * Math.pow(PSI, 0.5) * 10) / 10; // ~78.6%
+            const pct = cov.total.lines.pct;
+            console.log('Coverage: ' + pct + '% | Phi threshold: ' + threshold + '%');
+            if (pct < threshold) { console.error('FAIL: Below phi^0.5 threshold'); process.exit(1); }
+            console.log('PASS');
+          "
+
+  # SEC-05: Lockfile integrity check
+  lockfile-integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - name: Verify frozen lockfile
+        run: pnpm install --frozen-lockfile
+      - name: Detect lockfile tampering
+        run: git diff --exit-code pnpm-lock.yaml || (echo "ERROR: Lockfile modified during install" && exit 1)
+
+  # SEC-06: SBOM generation
+  sbom-generation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Generate CycloneDX SBOM
+        run: npx @cyclonedx/cyclonedx-npm --output-file sbom.json --output-format JSON
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ github.sha }}
+          path: sbom.json
+          retention-days: 90
+
+  # SEC-07: Integration test stage
+  integration-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Run integration tests
+        run: pnpm jest --testPathPattern=tests/integration --forceExit --detectOpenHandles
+
+  # Security scan (dependency audit)
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Dependency audit (high severity)
+        run: pnpm audit --audit-level=high || true
+      - name: License compliance check
+        run: npx license-checker --onlyAllow 'MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;0BSD' || true

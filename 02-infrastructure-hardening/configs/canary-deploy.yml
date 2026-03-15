@@ -1,0 +1,85 @@
+# =============================================================================
+# Heady™ Canary Deployment (SEC-13)
+# φ-scaled traffic ramp: 1% → 5% → 20% → 100%
+# =============================================================================
+name: Canary Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: 'Cloud Run service name'
+        required: true
+        default: 'heady-manager'
+      region:
+        description: 'GCP region'
+        required: true
+        default: 'us-central1'
+
+env:
+  GCP_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
+
+jobs:
+  canary-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Build container
+        run: gcloud builds submit --tag gcr.io/$GCP_PROJECT/${{ inputs.service }}:canary
+
+      - name: Deploy canary (0% traffic)
+        run: |
+          gcloud run deploy ${{ inputs.service }} \
+            --image gcr.io/$GCP_PROJECT/${{ inputs.service }}:canary \
+            --region ${{ inputs.region }} \
+            --no-traffic \
+            --tag canary
+
+      - name: Smoke test canary
+        run: |
+          CANARY_URL=$(gcloud run services describe ${{ inputs.service }} \
+            --region ${{ inputs.region }} \
+            --format='value(status.traffic[tag=canary].url)')
+          curl -sf "$CANARY_URL/health/live" || (echo "Canary health failed" && exit 1)
+
+      - name: "Ramp: 1% (φ⁰ observation)"
+        run: |
+          gcloud run services update-traffic ${{ inputs.service }} \
+            --region ${{ inputs.region }} --to-tags canary=1
+          sleep 60
+
+      - name: "Ramp: 5% (φ¹ observation)"
+        run: |
+          gcloud run services update-traffic ${{ inputs.service }} \
+            --region ${{ inputs.region }} --to-tags canary=5
+          sleep 120
+
+      - name: "Ramp: 20% (φ² observation)"
+        run: |
+          gcloud run services update-traffic ${{ inputs.service }} \
+            --region ${{ inputs.region }} --to-tags canary=20
+          sleep 180
+
+      - name: "Promote: 100%"
+        run: |
+          gcloud run services update-traffic ${{ inputs.service }} \
+            --region ${{ inputs.region }} --to-tags canary=100
+
+  rollback:
+    runs-on: ubuntu-latest
+    needs: canary-deploy
+    if: failure()
+    steps:
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Rollback canary traffic to 0%
+        run: |
+          gcloud run services update-traffic ${{ inputs.service }} \
+            --region ${{ inputs.region }} --to-tags canary=0
