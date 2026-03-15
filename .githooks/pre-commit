@@ -37,13 +37,13 @@ if echo "$STAGED_CONTENT" | grep -qE 'AKIA[0-9A-Z]{16}'; then
   VIOLATIONS=$((VIOLATIONS + 1))
 fi
 
-if echo "$STAGED_CONTENT" | grep -qE '-----BEGIN (RSA |EC )?PRIVATE KEY-----'; then
+if echo "$STAGED_CONTENT" | grep -qE -- '-----BEGIN (RSA |EC )?PRIVATE KEY-----'; then
   echo -e "${RED}❌ BLOCKED: Private key block in staged changes${NC}"
   VIOLATIONS=$((VIOLATIONS + 1))
 fi
 
 # Check for .pid, .bak, .jsonl files
-BAD_FILES=$(git diff --cached --name-only | grep -E '\.(pid|bak|jsonl)$')
+BAD_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(pid|bak|jsonl)$')
 if [ -n "$BAD_FILES" ]; then
   echo -e "${RED}❌ BLOCKED: Forbidden file type(s) staged:${NC}"
   echo "$BAD_FILES"
