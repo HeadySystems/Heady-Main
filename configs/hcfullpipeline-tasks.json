@@ -1,22 +1,22 @@
 {
   "$schema": "heady://pipeline/task-queue",
-  "version": "5.6.0",
+  "version": "5.7.0",
   "pipeline": "hcfullpipeline",
   "generatedAt": "2026-03-10T05:41:52Z",
-  "lastFineTuned": "2026-03-10T11:33:00Z",
+  "lastFineTuned": "2026-03-15T11:30:00Z",
   "phi": 1.618033988749895,
-  "description": "Complete task queue for HCFullPipeline — dual-scan reconciled (full-repo + production-scoped)",
-  "taskCount": 138,
+  "description": "Complete task queue for HCFullPipeline — dual-scan reconciled + report-extracted tasks (25 net-new from 12 platform reports)",
+  "taskCount": 163,
   "concurrentEquals": true,
   "paradigm": "All tasks are concurrent-equals. No ranking, no priority tiering. CSL resonance determines contextual relevance, not importance hierarchy.",
   "categories": {
     "SECURITY": {
       "csl_resonance": 1.0,
-      "tasks": 20
+      "tasks": 23
     },
     "INFRASTRUCTURE": {
       "csl_resonance": 1.0,
-      "tasks": 22
+      "tasks": 27
     },
     "ARCHITECTURE": {
       "csl_resonance": 1.0,
@@ -24,23 +24,23 @@
     },
     "QUALITY": {
       "csl_resonance": 1.0,
-      "tasks": 25
+      "tasks": 30
     },
     "DOCUMENTATION": {
       "csl_resonance": 1.0,
-      "tasks": 17
+      "tasks": 25
     },
     "SCALING": {
       "csl_resonance": 1.0,
-      "tasks": 13
+      "tasks": 14
     },
     "FEATURES": {
       "csl_resonance": 1.0,
-      "tasks": 16
+      "tasks": 19
     },
     "REMEDIATION": {
       "csl_resonance": 1.0,
-      "tasks": 5
+      "tasks": 6
     }
   },
   "tasks": [
@@ -1393,6 +1393,266 @@
       "csl_confidence": 0.882,
       "estimated_hours": 1,
       "source": "Deep scan 2026-03-10 — duplicate tree inflating TODO, localhost, console.log counts"
+    },
+    {
+      "id": "DOC-018",
+      "category": "DOCUMENTATION",
+      "title": "Create visual stage-flow diagram (SVG/Mermaid) for the 21-stage pipeline",
+      "description": "Build SVG or Mermaid diagram showing parallel vs sequential execution across all 21 stages, node assignments, and conditional branching for pipeline variants",
+      "status": "pending",
+      "csl_confidence": 0.618,
+      "estimated_hours": 3,
+      "source": "Report 1: Executive Architecture Overview — no visual pipeline representation exists"
+    },
+    {
+      "id": "DOC-019",
+      "category": "DOCUMENTATION",
+      "title": "Document all 20 AI node interfaces — input/output contracts, failure modes, CSL scoring",
+      "description": "For each of the 20 Heady nodes, document: accepted actions, input parameters, output schema, failure modes, CSL scoring behaviors, and retry handling",
+      "status": "pending",
+      "csl_confidence": 0.618,
+      "estimated_hours": 4,
+      "source": "Report 1: Executive Architecture Overview — nodes exist in JSON but no interface specification docs"
+    },
+    {
+      "id": "QUAL-026",
+      "category": "QUALITY",
+      "title": "Validate fullAutoMode governance constraints with integration tests",
+      "description": "Test budget cap ($5.00), prohibited scopes (deploy, delete, external_write), confirmation bypass=false, and requiresGovernancePass=true under fullAutoMode",
+      "status": "pending",
+      "csl_confidence": 0.618,
+      "estimated_hours": 3,
+      "source": "Report 1: Executive Architecture Overview — fullAutoMode exists but has no test coverage"
+    },
+    {
+      "id": "DOC-020",
+      "category": "DOCUMENTATION",
+      "title": "Create security hardening execution sequence playbook",
+      "description": "Ordered dependency resolution runbook: SEC-017→SEC-002→SEC-004→SEC-005→SEC-018→SEC-019→SEC-006→SEC-014→SEC-007. Include verification steps per task",
+      "status": "pending",
+      "csl_confidence": 0.718,
+      "estimated_hours": 2,
+      "source": "Report 2: Security Posture — optimal sequencing identified but no runbook exists"
+    },
+    {
+      "id": "QUAL-027",
+      "category": "QUALITY",
+      "title": "Audit SEC-001 completion — verify CORS whitelist deployment across all 16 sites",
+      "description": "Verify shared/middleware/cors-whitelist.js is deployed and active on all 16 sites. Validate via automated curl tests checking Access-Control-Allow-Origin headers",
+      "status": "pending",
+      "csl_confidence": 0.927,
+      "estimated_hours": 2,
+      "source": "Report 2: Security Posture — SEC-001 marked ✅ but 144 residual instances found"
+    },
+    {
+      "id": "SEC-021",
+      "category": "SECURITY",
+      "title": "Implement automated security regression CI guard",
+      "description": "Add CI step that grep-guards against reintroduction of eval(), http:// URLs, cors(*), localStorage in committed code. Fail build on violation. Add to .github/workflows/ci.yml",
+      "status": "pending",
+      "csl_confidence": 0.927,
+      "estimated_hours": 3,
+      "source": "Report 2: Security Posture — multiple completed security tasks regressed; no CI guard prevents reintroduction"
+    },
+    {
+      "id": "QUAL-028",
+      "category": "QUALITY",
+      "title": "Create Redis latency benchmark suite",
+      "description": "Automated benchmark measuring p50/p95/p99 latency before and after pooling optimization. Script to run periodically and track progress toward <50ms target (current: 143ms)",
+      "status": "pending",
+      "csl_confidence": 0.618,
+      "estimated_hours": 2,
+      "source": "Report 3: Infrastructure Readiness — no automated benchmark to track Redis optimization progress"
+    },
+    {
+      "id": "INFRA-023",
+      "category": "INFRASTRUCTURE",
+      "title": "Audit and consolidate 12 Git remotes to 3-4 max",
+      "description": "Consolidate from 4 orgs × 3 environments (12 remotes) to 1 primary org (HeadyAI) × 3 repos (main/staging/testing) + Azure DevOps. Remove or archive redundant remotes",
+      "status": "pending",
+      "csl_confidence": 0.718,
+      "estimated_hours": 3,
+      "source": "Report 3 + Report 11: Git Health — 12 remotes across 4 orgs is excessive"
+    },
+    {
+      "id": "SEC-022",
+      "category": "SECURITY",
+      "title": "Standardize Git authentication — migrate mixed SSH/PAT to single method",
+      "description": "Migrate all remotes to SSH key auth (preferred) or rotate all PATs to fine-grained tokens with minimal scopes. Document in SECURITY.md",
+      "status": "pending",
+      "csl_confidence": 0.618,
+      "estimated_hours": 2,
+      "source": "Report 3 + Report 11: Git Health — mix of SSH keys and PATs creates credential management complexity"
+    },
+    {
+      "id": "DOC-021",
+      "category": "DOCUMENTATION",
+      "title": "Create sprint planning board — map 163 tasks to 16-week sprints",
+      "description": "Map all tasks to sprints with dependency resolution. Use burndown projection from Report 4. Include dependency chains (SEC-006←SEC-002, QUAL-002←FEAT-001+SEC-002, etc.)",
+      "status": "pending",
+      "csl_confidence": 0.618,
+      "estimated_hours": 4,
+      "source": "Report 4: Task Inventory — burndown projection exists but no actionable sprint board"
+    },
+    {
+      "id": "FEAT-017",
+      "category": "FEATURES",
+      "title": "Build task status dashboard — live view of 163 tasks with filters and dependency graph",
+      "description": "Web UI reading hcfullpipeline-tasks.json: category filters, progress bars, dependency graph visualization, CSL confidence sorting. Deploy to admin.headysystems.com/tasks",
+      "status": "pending",
+      "csl_confidence": 0.618,
+      "estimated_hours": 6,
+      "source": "Report 4: Task Inventory — hcfullpipeline-tasks.json has data but no UI to visualize it"
+    },
+    {
+      "id": "INFRA-024",
+      "category": "INFRASTRUCTURE",
+      "title": "Automate task status sync from Git commit messages",
+      "description": "Script/hook to update hcfullpipeline-tasks.json status from Git commit messages. Match feat:/fix:/chore: prefixes to task IDs (e.g., 'fix(SEC-017): eliminate eval calls' → SEC-017 status=completed)",
+      "status": "pending",
+      "csl_confidence": 0.618,
+      "estimated_hours": 4,
+      "source": "Report 4: Task Inventory — manual status tracking will drift from actual completion"
+    },
+    {
+      "id": "INFRA-025",
+      "category": "INFRASTRUCTURE",
+      "title": "Build pipeline telemetry collector — measure actual vs configured timeouts",
+      "description": "Collect actual execution times per stage across production runs. Compare to configured φ-scaled timeouts. Alert when actual exceeds configured by >20%. Store in time-series DB",
+      "status": "pending",
+      "csl_confidence": 0.618,
+      "estimated_hours": 4,
+      "source": "Report 5: HCFullPipeline Deep Dive — φ-scaled timeouts configured but no telemetry validates them"
+    },
+    {
+      "id": "QUAL-029",
+      "category": "QUALITY",
+      "title": "Create pipeline variant selector tests",
+      "description": "Verify fast_path includes only stages [0,1,2,7,12,13,20], arena_path includes [0,1,2,3,4,8,9,10,20], learning_path includes [0,1,16,17,18,19,20], full_path includes all 21. Test with mock stage executors",
+      "status": "pending",
+      "csl_confidence": 0.718,
+      "estimated_hours": 3,
+      "source": "Report 5: HCFullPipeline Deep Dive — 5 variants defined; no tests verify correct stage inclusion/exclusion"
+    },
+    {
+      "id": "DOC-022",
+      "category": "DOCUMENTATION",
+      "title": "Document CSL scoring weight rationale as ADR",
+      "description": "ADR explaining why correctness=34%, safety=21%, performance=21%, quality=13%, elegance=11%. Include when/how to adjust weights for different pipeline contexts",
+      "status": "pending",
+      "csl_confidence": 0.618,
+      "estimated_hours": 2,
+      "source": "Report 5: HCFullPipeline Deep Dive — weights exist but no rationale documented"
+    },
+    {
+      "id": "FEAT-018",
+      "category": "FEATURES",
+      "title": "Implement pipeline dry-run mode",
+      "description": "Execute all 21 stages with mock data and no side effects. Validate wiring, timing, node connectivity, and CSL scoring without real execution. Add --dry-run flag to pipeline CLI",
+      "status": "pending",
+      "csl_confidence": 0.618,
+      "estimated_hours": 4,
+      "source": "Report 5: HCFullPipeline Deep Dive — no way to test pipeline end-to-end without real execution"
+    },
+    {
+      "id": "QUAL-030",
+      "category": "QUALITY",
+      "title": "Create test coverage measurement infrastructure — jest --coverage + CI gate",
+      "description": "Configure jest --coverage reporting, set minimum thresholds (80% for core/, 50% for services/), add CI gate that fails on coverage regression. Publish coverage badge to README",
+      "status": "pending",
+      "csl_confidence": 0.718,
+      "estimated_hours": 3,
+      "source": "Report 7: Quality & Testing — QUAL-001 targets 80% but no measurement tool is configured"
+    },
+    {
+      "id": "DOC-023",
+      "category": "DOCUMENTATION",
+      "title": "Prioritize smoke tests for 43 untested services — minimum viable test spec",
+      "description": "Generate minimal health check + startup/shutdown test template for each of 43 services with zero test coverage. Template: import service, verify /health returns 200, verify graceful shutdown",
+      "status": "pending",
+      "csl_confidence": 0.618,
+      "estimated_hours": 8,
+      "source": "Report 7: Quality & Testing — QUAL-024 asks for tests but no minimum viable approach specified"
+    },
+    {
+      "id": "INFRA-026",
+      "category": "INFRASTRUCTURE",
+      "title": "Build liquid node health aggregator — unified dashboard for 7 providers",
+      "description": "Unified dashboard showing health status of all 7 compute providers (Colab, Cloudflare, Cloud Run, AI Studio, Vertex, GitHub Actions, Gists). Include latency, availability, and cost per provider",
+      "status": "pending",
+      "csl_confidence": 0.618,
+      "estimated_hours": 3,
+      "source": "Report 9: Scaling & Liquid Nodes — each provider deployed independently; no unified health view"
+    },
+    {
+      "id": "SCALE-014",
+      "category": "SCALING",
+      "title": "Create liquid node cost tracker with φ-scaled budget alerts",
+      "description": "Per-provider cost monitoring across 7 compute providers. Set φ-scaled budget alerts: warning at $0.618×budget, critical at budget. Monthly cost reports",
+      "status": "pending",
+      "csl_confidence": 0.618,
+      "estimated_hours": 4,
+      "source": "Report 9: Scaling & Liquid Nodes — multi-provider compute needs cost visibility"
+    },
+    {
+      "id": "REM-006",
+      "category": "REMEDIATION",
+      "title": "Delete 50+ stale remote branches across all remotes",
+      "description": "Delete merged Dependabot branches, abandoned Copilot/Claude/Codex branches. Target: reduce from 100+ remote branches to <30 active branches",
+      "status": "pending",
+      "csl_confidence": 0.882,
+      "estimated_hours": 2,
+      "source": "Report 11: Git & Repository Health — 100+ remote branches; many stale"
+    },
+    {
+      "id": "INFRA-027",
+      "category": "INFRASTRUCTURE",
+      "title": "Implement semantic versioning with Git tags",
+      "description": "Add v5.7.0 tag aligned with hcfullpipeline-tasks.json version. Set up release-please or standard-version for automated tagging. Document versioning policy",
+      "status": "pending",
+      "csl_confidence": 0.882,
+      "estimated_hours": 1,
+      "source": "Report 11: Git & Repository Health — zero tags in repository"
+    },
+    {
+      "id": "SEC-023",
+      "category": "SECURITY",
+      "title": "Set up branch protection rules on main across all remotes",
+      "description": "Require PR review, status checks, no force push on main branch for all GitHub org repositories (HeadyAI, HeadyConnection, HeadySystems, HeadyMe)",
+      "status": "pending",
+      "csl_confidence": 0.718,
+      "estimated_hours": 2,
+      "source": "Report 11: Git & Repository Health — multiple remotes with no branch protection"
+    },
+    {
+      "id": "FEAT-019",
+      "category": "FEATURES",
+      "title": "Create competitive comparison page on headysystems.com",
+      "description": "Feature matrix comparing Heady vs LangChain, AutoGen, CrewAI, Semantic Kernel, OpenAI Assistants. Highlight metacognition, φ-math, CSL, liquid compute, trust receipts as unique differentiators",
+      "status": "pending",
+      "csl_confidence": 0.618,
+      "estimated_hours": 4,
+      "source": "Report 12: Competitive Landscape — feature matrix exists internally but no public-facing comparison"
+    },
+    {
+      "id": "DOC-024",
+      "category": "DOCUMENTATION",
+      "title": "Write 'Why Heady?' technical blog post for HN/dev.to",
+      "description": "Technical blog post targeting Hacker News and dev.to audience with concrete differentiators: metacognitive loop, φ-math, CSL, concurrent-equals, trust receipts. Include code examples",
+      "status": "pending",
+      "csl_confidence": 0.618,
+      "estimated_hours": 3,
+      "source": "Report 12: Competitive Landscape — competitive analysis exists internally but isn't externalized"
+    },
+    {
+      "id": "DOC-025",
+      "category": "DOCUMENTATION",
+      "title": "Create auto-extract-tasks workflow — extract tasks from any new docs/reports",
+      "description": "Workflow/script that scans new or modified docs/ files, cross-references findings against hcfullpipeline-tasks.json, and surfaces net-new tasks for merging. Run on every doc commit",
+      "status": "pending",
+      "csl_confidence": 0.718,
+      "estimated_hours": 3,
+      "source": "User directive 2026-03-15 — 'set it up to be that way no matter the significance'"
     }
   ]
 }
