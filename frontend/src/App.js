@@ -68,18 +68,18 @@ function App() {
     }
   };
 
-  retu{/* Brand & Emoji Utility */}
-      <div style={{ position: 'absolute', top: '10px', left: '50%', transform: 'translateX(-50%)', zIndex: 100, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-         <div style={{ display: 'flex', gap: '10px', marginBottom: '5px' }}>
+  return (
+    <div className="App heady-container">
+      {/* Brand & Emoji Utility - Floating Top Bar */}
+      <div className="heady-navbar">
+         <div className="heady-brand-group">
             <HeadySacredIcon name="connection" size={20} color="#00f2ff" />
-            <span style={{ color: '#00f2ff', fontSize: '12px', letterSpacing: '2px', fontWeight: 'bold' }}>HEADY SYSTEMS</span>
+            <span className="heady-brand-text">HEADY SYSTEMS</span>
             <HeadySacredIcon name="brain" size={20} color="#bd00ff" />
          </div>
          <HeadyEmojiBar />
       </div>
 
-      rn (
-    <div className="App">
       <Layout
         sidebar={<FileTree onFileSelect={handleFileSelect} />}
         editor={
@@ -92,18 +92,21 @@ function App() {
                     filename={currentFile.path}
                 />
             ) : (
-                <div style={{ padding: '20px', color: '#555' }}>Select a file to edit</div>
+                <div className="empty-editor-state">
+                  <div className="empty-pulse"></div>
+                  Select a localized vector to edit...
+                </div>
             )
         }
         cascade={<CascadePanel contextFile={currentFile} />}
         bottom={<TerminalComponent />}
       />
 
-      {/* Settings Button in Header (using portal or absolute) */}
-      <div style={{ position: 'absolute', top: '5px', right: '10px', zIndex: 100 }}>
+      {/* Settings Button in Header */}
+      <div className="settings-container">
          <button
             onClick={() => setShowSettings(true)}
-            style={{ background: 'transparent', border: 'none', color: '#888', cursor: 'pointer', fontSize: '14px' }}
+            className="heady-settings-btn"
          >
             ⚙️ Settings
          </button>

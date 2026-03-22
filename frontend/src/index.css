@@ -1,9 +1,146 @@
+/* HEADY SYSTEMS - ADVANCED CSS ARCHITECTURE */
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;600;700&display=swap');
+
+:root {
+  --heady-cyan: #00f2ff;
+  --heady-purple: #bd00ff;
+  --bg-deep: #0a0a0c;
+  --bg-panel: rgba(22, 22, 26, 0.7);
+  --border-glass: rgba(255, 255, 255, 0.08);
+  --text-main: #e2e2ec;
+  --text-dim: #8b8b9f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  font-family: 'Inter', sans-serif;
-  background: #121212;
-  color: #fff;
+  font-family: 'Geist', -apple-system, sans-serif;
+  background-color: var(--bg-deep);
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(0, 242, 255, 0.03), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(189, 0, 255, 0.03), transparent 25%);
+  color: var(--text-main);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
 }
+
 #root {
   height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 
+  Glassmorphic Container 
+*/
+.heady-container {
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+/* Navbar & Brand */
+.heady-navbar {
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--bg-panel);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 10px 24px;
+  border-radius: 20px;
+  border: 1px solid var(--border-glass);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  transition: all 0.3s ease;
+}
+
+.heady-navbar:hover {
+  border-color: rgba(0, 242, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(0, 242, 255, 0.1);
+}
+
+.heady-brand-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.heady-brand-text {
+  color: var(--text-main);
+  font-size: 13px;
+  letter-spacing: 3px;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, var(--heady-cyan), var(--heady-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Settings Controls */
+.settings-container {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.heady-settings-btn {
+  background: var(--bg-panel);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-glass);
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.heady-settings-btn:hover {
+  color: var(--text-main);
+  border-color: var(--heady-purple);
+  box-shadow: 0 0 10px rgba(189, 0, 255, 0.2);
+}
+
+/* Empty Editor State */
+.empty-editor-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-dim);
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+.empty-pulse {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--heady-cyan);
+  margin-bottom: 16px;
+  box-shadow: 0 0 0 0 rgba(0, 242, 255, 0.7);
+  animation: pulse-ring 2s infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 242, 255, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(0, 242, 255, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 242, 255, 0); }
+}
+
+/* Apply sleek overrides to Layout and panels if they inherit */
+.layout-container {
+  overflow: hidden;
 }

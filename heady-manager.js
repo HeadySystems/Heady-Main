@@ -40,11 +40,18 @@ const nexus = new NexusProtocol();
 
 const { HEADY_MAID_CONFIG } = require(path.join(__dirname, "src", "heady_maid"));
 
+const { GracefulShutdownManager } = require(path.join(__dirname, "src", "graceful_shutdown"));
+const { logger } = require(path.join(__dirname, "src", "structured_logger"));
+
+const shutdown = new GracefulShutdownManager({ timeout: 34000 });
+
 const PORT = Number(process.env.PORT || 3300);
 const HEADY_ADMIN_SCRIPT = process.env.HEADY_ADMIN_SCRIPT || path.join(__dirname, "src", "heady_project", "heady_conductor.py");
 const HEADY_PYTHON_BIN = process.env.HEADY_PYTHON_BIN || "python";
 
 const app = express();
+app.use(shutdown.middleware());       // 503 during drain
+app.use(logger.requestLogger());      // Structured JSON request logging
 app.use(express.json({ limit: "50mb" }));
 app.use(cors());
 
@@ -214,4 +221,7 @@ function runPythonConductor(args) {
   });
 }
 
-app.listen(PORT, () => console.log(`∞ Heady System Active on Port ${PORT} ∞`));
+const server = app.listen(PORT, () => {
+  logger.info(`∞ Heady System Active on Port ${PORT} ∞`, { port: PORT });
+});
+shutdown.attach(server);

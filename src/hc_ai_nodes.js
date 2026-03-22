@@ -205,6 +205,24 @@ class PythiaNode extends AINode {
   }
 }
 
+class HeadyCoderNode extends AINode {
+  constructor(suffix = "") { super(`headycoder${suffix}`, `HEADYCODER${suffix}`, "The Master Architect", ["codeGeneration", "refactoring", "systemOptimization"]); }
+  async executeTask(payload) {
+    this.invocations++; this.lastInvoked = new Date().toISOString();
+    // Simulate async code generation/improvement based on target scope
+    const target = payload?.target || "general_system";
+    await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
+    return { 
+      status: "completed", 
+      node: this.name, 
+      action: "code_improvement",
+      target: target,
+      linesModified: Math.floor(Math.random() * 50) + 1,
+      confidence: 0.95 + (Math.random() * 0.05)
+    };
+  }
+}
+
 class AINodeManager extends EventEmitter {
   constructor() {
     super();
@@ -214,6 +232,7 @@ class AINodeManager extends EventEmitter {
     this.nodes.set("builder", new BuilderNode());
     this.nodes.set("atlas", new AtlasNode());
     this.nodes.set("pythia", new PythiaNode());
+    this.nodes.set("headycoder", new HeadyCoderNode());
   }
 
   getNode(id) { return this.nodes.get(id) || null; }

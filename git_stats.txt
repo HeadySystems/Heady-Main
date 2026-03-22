@@ -1,0 +1,25 @@
+ac5ea96d - Eric Haywood, 1 second ago : ZeroDefect Protocol & Data Integration Bridge (Phase 4-5)
+ .heady/memory.db                         |  Bin 45056 -> 45056 bytes
+ .heady_cache/pattern_store.json          | 1435 ++++++++++++++++++++++++++++++
+ .heady_cache/secrets_state.json          |  273 ++++++
+ branches.txt                             |  187 ++++
+ codex_heady_brain.py                     |    0
+ codex_process_data.py                    |    0
+ commits.txt                              |  347 ++++++++
+ docs/DOMAIN_REGISTRY.md                  |   78 ++
+ jest.config.js                           |    9 +
+ package-lock.json                        |  392 +++++++-
+ package.json                             |    8 +-
+ scripts/pre_projection_gate.js           |  109 +++
+ src/bad_code.js                          |    7 +
+ src/hc_ai_nodes.js                       |  268 ++++++
+ src/hc_brain.js                          |  121 +++
+ src/hc_memory_bridge.js                  |  167 ++++
+ src/hc_semantic_hasher.js                |   56 ++
+ src/hc_supervisor.js                     |  152 ++++
+ src/routes/auth-routes.js                |   83 ++
+ src/routes/vault-bee.js                  |  102 +++
+ test_data_bridge.js                      |   51 ++
+ tests/integration/pre_projection.test.js |    8 +
+ tests/unit/core.test.js                  |    6 +
+ 23 files changed, 3852 insertions(+), 7 deletions(-)

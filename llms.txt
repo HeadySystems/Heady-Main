@@ -1,0 +1,35 @@
+# Heady™ — The Cognitive Operating System for AI
+
+> HeadySystems Inc. is a Colorado C-Corp (EIN 41-3412204) building Heady™ — a 21-stage
+> autonomous AI orchestration platform with 51 provisional patents covering Continuous
+> Semantic Logic (CSL), Sacred Geometry orchestration, and 384D vector memory.
+
+## Key Resources
+- Architecture: /docs/architecture
+- API Reference: https://headyapi.com/docs
+- MCP Integration: https://headymcp.com
+- Pricing: https://headysystems.com/pricing
+- GitHub: https://github.com/HeadyMe
+
+## Technical Foundation
+- CSL replaces boolean logic with cosine similarity gates (threshold: 0.618 = 1/φ)
+- All constants derived from φ = 1.618 (golden ratio)
+- 21-stage HCFullPipeline: Recon → Classify → Memory → Execute → Metacog → Critique → Sign
+- 20 AI nodes in Sacred Geometry topology: Center (HeadySoul) → Inner → Middle → Outer → Governance
+- Ed25519 trust receipts on every output; post-quantum ready
+- 384D pgvector embeddings with HNSW indexing in Neon Postgres
+
+## Services
+- headyme.com — Personal AI portal and dashboard
+- headysystems.com — Corporate hub and documentation
+- headymcp.com — MCP protocol layer for Claude, Cursor, Windsurf
+- headyapi.com — Public REST API gateway
+- headyconnection.org — 501(c)(3) nonprofit community hub
+- headybuddy.org — AI companion interface
+- heady-ai.com — Intelligence routing hub
+- headyio.com — Developer integrations
+- headybot.com — Conversational assistant
+
+## Contact
+- Founder: Eric Head (eric@headyconnection.org)
+- Sister nonprofit: HeadyConnection Inc. (EIN 41-3508351)

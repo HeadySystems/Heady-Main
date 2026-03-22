@@ -17,8 +17,24 @@ const fs = require('fs');
 const path = require('path');
 const { pipeline } = require('../src/hc_pipeline');
 const { AINodeManager } = require('../src/hc_ai_nodes');
+const { runAgentUpstreamScan } = require('./agent_scanner');
+
 // Normally we'd fetch this via API, but we'll instantiate it for pre-commit context
 const nodeManager = new AINodeManager();
+
+// Color codes
+const C_GREEN = "\x1b[32m";
+const C_RESET = "\x1b[0m";
+
+async function runAgentScan() {
+  console.log('\n--- 0. UPSTREAM AGENT SCAN ---');
+  const result = runAgentUpstreamScan();
+  result.findings.forEach(f => console.log(`  ${f}`));
+  if (!result.passed) {
+    throw new Error(`Upstream Agent Scan Blocked Projection: ${result.blocker}`);
+  }
+  console.log(`✅ Agent upstream is clear.`);
+}
 
 async function runStaticAnalysis(files) {
   console.log('--- 1. STATIC ANALYSIS (JULES) ---');
@@ -96,6 +112,7 @@ async function main() {
     // For now we test a few core files as a sample, plus our intentionally vulnerable file.
     const filesToCheck = ['src/bad_code.js'];
     
+    await runAgentScan();
     await runStaticAnalysis(filesToCheck);
     runTests();
     await runSimulation();

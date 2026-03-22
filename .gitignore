@@ -12,35 +12,54 @@
 #    Sacred Geometry :: Organic Systems :: Breathing Interfaces
 # HEADY_BRAND:END
 
+# === Dependencies ===
+node_modules/
+venv/
+.venv/
 __pycache__/
 *.pyc
-<<<<<<< C:/Users/erich/Heady/.gitignore
-=======
-venv/
-.venv/
-<<<<<<< C:/Users/erich/Heady/.gitignore
->>>>>>> C:/Users/erich/.windsurf/worktrees/Heady/Heady-b7f06678/.gitignore
-=======
->>>>>>> C:/Users/erich/.windsurf/worktrees/Heady/Heady-b7f06678/.gitignore
-node_modules/
+
+# === Build Output ===
 dist/
 build/
+
+# === Secrets & Credentials (CRITICAL — never commit) ===
 .env
-.pytest_cache/
-heady-manifest.json
+.env.local
+.env.production
+.env.staging
 .heady_secrets
-<<<<<<< C:/Users/erich/Heady/.gitignore
-<<<<<<< C:/Users/erich/Heady/.gitignore
-venv/
-.venv/
-*.log
-=======
-*.log
-logs/
-HeadyAcademy/Content_Forge/Visualizations/
->>>>>>> C:/Users/erich/.windsurf/worktrees/Heady/Heady-b7f06678/.gitignore
-=======
+*.pem
+*.key
+*.p12
+*.pfx
+
+# === Logs ===
 *.log
 logs/
+
+# === Testing & Cache ===
+.pytest_cache/
+coverage/
+.nyc_output/
+
+# === IDE & System ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === Heady Artifacts ===
+heady-manifest.json
 HeadyAcademy/Content_Forge/Visualizations/
->>>>>>> C:/Users/erich/.windsurf/worktrees/Heady/Heady-b7f06678/.gitignore
+
+# === Large Binaries (use GitHub Releases) ===
+*.zip
+*.tar.gz
+*.exe
+*.msi
+*.dmg

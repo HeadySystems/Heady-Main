@@ -1,0 +1,111 @@
+{
+  "name": "heady-mcp",
+  "version": "1.0.0",
+  "description": "Heady MCP Tools Manifest — 6 tools for the 21-stage HCFullPipeline",
+  "tools": [
+    {
+      "name": "heady_pipeline",
+      "description": "Run the full 21-stage HCFullPipeline on any task. Returns signed output with coherence score.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "task": { "type": "string", "description": "The task to process through all 21 pipeline stages" },
+          "mode": { "type": "string", "enum": ["fast", "full", "arena", "learning"], "default": "full", "description": "Pipeline mode: fast (skip metacog), full (all 21), arena (competitive), learning (with feedback)" }
+        },
+        "required": ["task"]
+      }
+    },
+    {
+      "name": "heady_memory_search",
+      "description": "Semantic vector search across personal latent space using CSL cosine gating (384D pgvector HNSW).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "description": "Natural language search query" },
+          "topK": { "type": "integer", "default": 21, "description": "Number of results (Fibonacci-aligned default)" },
+          "threshold": { "type": "number", "default": 0.618, "description": "CSL cosine similarity threshold (1/φ = 0.618)" }
+        },
+        "required": ["query"]
+      }
+    },
+    {
+      "name": "heady_bee_spawn",
+      "description": "Spawn a specialized HeadyBee agent (26 types) for async task execution with phi-backoff retry.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "beeType": {
+            "type": "string",
+            "enum": [
+              "agents-bee", "auth-provider-bee", "brain-bee", "config-bee",
+              "connectors-bee", "creative-bee", "deployment-bee", "documentation-bee",
+              "governance-bee", "health-bee", "intelligence-bee", "lifecycle-bee",
+              "mcp-bee", "memory-bee", "middleware-bee", "ops-bee", "orchestration-bee",
+              "pipeline-bee", "resilience-bee", "routes-bee", "security-bee",
+              "services-bee", "sync-projection-bee", "telemetry-bee",
+              "vector-ops-bee", "vector-template-bee"
+            ],
+            "description": "Type of HeadyBee to spawn"
+          },
+          "task": { "type": "string", "description": "Task description for the bee" },
+          "priority": { "type": "number", "default": 0.618, "description": "Priority level (ψ = 1/φ = 0.618 default)" }
+        },
+        "required": ["beeType", "task"]
+      }
+    },
+    {
+      "name": "heady_csl_gate",
+      "description": "Evaluate CSL (Continuous Semantic Logic) cosine similarity between two semantic inputs. Returns score and threshold evaluation.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "a": { "type": "string", "description": "First semantic input" },
+          "b": { "type": "string", "description": "Second semantic input" },
+          "threshold": { "type": "number", "default": 0.809, "description": "CSL threshold (MEDIUM = 0.809)" }
+        },
+        "required": ["a", "b"]
+      }
+    },
+    {
+      "name": "heady_wisdom",
+      "description": "Query the wisdom knowledge base for patterns, anti-patterns, and design decisions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "description": "Natural language query about Heady patterns or architecture" },
+          "category": {
+            "type": "string",
+            "enum": ["patterns", "anti-patterns", "design-decisions", "errors"],
+            "description": "Filter by knowledge category"
+          }
+        },
+        "required": ["query"]
+      }
+    },
+    {
+      "name": "heady_coherence_check",
+      "description": "Score semantic coherence of any output against intended design. Returns CSL level (CRITICAL/HIGH/MEDIUM/LOW/MINIMUM) and alert flag.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "output": { "type": "string", "description": "The output to evaluate" },
+          "intendedDesign": { "type": "string", "description": "The intended design or specification to compare against" }
+        },
+        "required": ["output", "intendedDesign"]
+      }
+    }
+  ],
+  "claudeDesktopConfig": {
+    "mcpServers": {
+      "heady": {
+        "command": "npx",
+        "args": ["-y", "@headyme/mcp-server@latest"],
+        "env": {
+          "HEADY_API_KEY": "your-api-key",
+          "HEADY_ENDPOINT": "https://headymcp.com/mcp",
+          "HEADY_CSL_THRESHOLD": "0.618"
+        }
+      }
+    }
+  }
+}

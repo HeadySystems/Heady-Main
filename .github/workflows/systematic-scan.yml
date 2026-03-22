@@ -1,0 +1,127 @@
+# HEADY SYSTEMS :: §7 Systematic Security Scan
+# Multi-layer CI pipeline replacing the broken §7 scan
+# Ref: Deep Research §2.3 — Pipeline Stabilization
+
+name: "§7 Systematic Scan"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 8 * * *"  # Daily at 2AM CST
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  # ── Layer 1: Dependency Audit ──
+  dependency-scan:
+    name: "Dependency Audit"
+    runs-on: ubuntu-latest
+    continue-on-error: true  # Soft-fail — new CVEs appear daily
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm ci --ignore-scripts
+      - run: npm audit --audit-level=high --json > npm-audit.json || true
+      - name: Trivy filesystem scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-fs.sarif
+          severity: CRITICAL,HIGH
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-fs.sarif
+          category: dependency-scan
+
+  # ── Layer 2: SAST (Static Analysis) ──
+  sast-scan:
+    name: "Static Analysis"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+      - uses: github/codeql-action/analyze@v3
+        with:
+          category: sast-scan
+
+  # ── Layer 3: Secret Detection (ALWAYS BLOCKS — no soft-fail) ──
+  secret-scan:
+    name: "Secret Detection"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ── Layer 4: Container Image Scan ──
+  container-scan:
+    name: "Container Image Scan"
+    runs-on: ubuntu-latest
+    if: ${{ hashFiles('Dockerfile*') != '' }}
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t heady-scan:latest -f Dockerfile . || docker build -t heady-scan:latest -f Dockerfile.universal . || true
+      - name: Trivy image scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: heady-scan:latest
+          format: sarif
+          output: trivy-image.sarif
+          severity: CRITICAL,HIGH
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-image.sarif
+          category: container-scan
+
+  # ── Layer 5: Node.js Tests ──
+  test:
+    name: "Unit Tests"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm ci --ignore-scripts
+      - run: npm test -- --ci --passWithNoTests
+
+  # ── Layer 6: Security Summary Gate ──
+  security-summary:
+    name: "Security Gate"
+    needs: [dependency-scan, sast-scan, secret-scan, test]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Check secret scan result
+        if: ${{ needs.secret-scan.result == 'failure' }}
+        run: |
+          echo "🔴 BLOCKED: Secret detection found leaked credentials."
+          echo "Secrets must NEVER be committed. Fix before merging."
+          exit 1
+      - name: Check SAST result
+        if: ${{ needs.sast-scan.result == 'failure' }}
+        run: |
+          echo "🟡 WARNING: SAST found potential vulnerabilities."
+          echo "Review CodeQL findings in the Security tab."
+          exit 1
+      - name: All clear
+        if: ${{ needs.secret-scan.result != 'failure' && needs.sast-scan.result != 'failure' }}
+        run: echo "✅ §7 Systematic Scan passed. All security gates clear."

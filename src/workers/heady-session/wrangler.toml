@@ -1,0 +1,17 @@
+name = "heady-session"
+main = "index.js"
+compatibility_date = "2024-12-01"
+
+[[durable_objects.bindings]]
+name = "HEADY_SESSION"
+class_name = "HeadySession"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["HeadySession"]
+
+[vars]
+ENVIRONMENT = "production"
+
+# Secrets (set via `wrangler secret put`):
+# SENTRY_DSN
