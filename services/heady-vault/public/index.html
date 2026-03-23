@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HeadyVault — Secret Store</title>
+  <meta name="description" content="HeadyVault — encrypted secret store for the Heady ecosystem">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #07080f;
+      --bg-surface: #0d1017;
+      --bg-card: rgba(16, 20, 32, 0.85);
+      --gold: #d4a853;
+      --gold-glow: rgba(212, 168, 83, 0.2);
+      --purple: #8b5cf6;
+      --green: #22c55e;
+      --red: #ef4444;
+      --cyan: #22d3ee;
+      --text-primary: #eef1f8;
+      --text-secondary: #8b92a8;
+      --text-muted: #5a6178;
+      --border: rgba(139, 92, 246, 0.15);
+      --border-hover: rgba(212, 168, 83, 0.3);
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-display: 'Outfit', sans-serif;
+      --radius: 13px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+    body { font-family: var(--font-body); background: var(--bg-deep); color: var(--text-primary); min-height: 100vh; padding: 34px; }
+
+    .vault-header { text-align: center; margin-bottom: 34px; }
+    .vault-logo { font-family: var(--font-display); font-size: 32px; font-weight: 800; }
+    .vault-logo span { background: linear-gradient(135deg, var(--gold), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .vault-sub { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
+
+    .vault-grid { max-width: 960px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 21px; }
+    @media (max-width: 700px) { .vault-grid { grid-template-columns: 1fr; } }
+
+    .vault-card { background: var(--bg-card); backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: var(--radius); padding: 21px; position: relative; overflow: hidden; }
+    .vault-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), var(--purple), transparent); opacity: 0.5; }
+    .vault-card.full { grid-column: 1 / -1; }
+
+    .card-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; margin-bottom: 13px; display: flex; align-items: center; gap: 8px; }
+    .card-title .icon { font-size: 20px; }
+
+    label { display: block; font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    input, textarea, select { width: 100%; padding: 10px 13px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-family: var(--font-mono); font-size: 13px; outline: none; transition: border-color 0.2s; }
+    input:focus, textarea:focus { border-color: rgba(212,168,83,0.5); box-shadow: 0 0 0 3px var(--gold-glow); }
+    textarea { resize: vertical; min-height: 80px; }
+
+    .form-row { margin-bottom: 13px; }
+    .form-actions { display: flex; gap: 8px; margin-top: 13px; }
+
+    .btn { padding: 10px 21px; border: none; border-radius: 8px; font-family: var(--font-body); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-gold { background: linear-gradient(135deg, var(--gold), #c49038); color: var(--bg-deep); }
+    .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 4px 16px var(--gold-glow); }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-secondary); }
+    .btn-outline:hover { border-color: var(--border-hover); color: var(--text-primary); }
+    .btn-red { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
+
+    .result-box { margin-top: 13px; padding: 13px; background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 12px; max-height: 200px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
+    .result-box.success { border-color: rgba(34,197,94,0.3); }
+    .result-box.error { border-color: rgba(239,68,68,0.3); color: #fca5a5; }
+
+    .keys-list { list-style: none; }
+    .keys-list li { padding: 8px 13px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 13px; cursor: pointer; transition: background 0.2s; }
+    .keys-list li:hover { background: rgba(255,255,255,0.03); }
+    .keys-list li:last-child { border-bottom: none; }
+    .key-version { font-size: 11px; color: var(--text-muted); }
+
+    .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .status-badge.ok { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+    .status-badge.degraded { background: rgba(212,168,83,0.15); color: var(--gold); border: 1px solid rgba(212,168,83,0.3); }
+    .status-badge.error { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+
+    .status-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .status-row:last-child { border-bottom: none; }
+    .status-label { color: var(--text-muted); }
+
+    .toast { position: fixed; bottom: 21px; right: 21px; padding: 13px 21px; border-radius: 8px; font-size: 13px; font-weight: 500; z-index: 100; animation: slideIn 0.3s ease; }
+    .toast.success { background: rgba(34,197,94,0.9); color: white; }
+    .toast.error { background: rgba(239,68,68,0.9); color: white; }
+    @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  </style>
+</head>
+<body>
+  <div class="vault-header">
+    <div class="vault-logo">Heady<span>Vault</span></div>
+    <div class="vault-sub">AES-256-GCM Encrypted Secret Store · φ Architecture</div>
+  </div>
+
+  <div class="vault-grid">
+    <!-- Status Card -->
+    <div class="vault-card" id="statusCard">
+      <div class="card-title"><span class="icon">🔒</span> Service Status</div>
+      <div id="statusContent">Loading...</div>
+    </div>
+
+    <!-- Keys List Card -->
+    <div class="vault-card" id="keysCard">
+      <div class="card-title"><span class="icon">🗝</span> Stored Secrets</div>
+      <ul class="keys-list" id="keysList"><li style="color:var(--text-muted)">Loading...</li></ul>
+    </div>
+
+    <!-- Store Secret Card -->
+    <div class="vault-card">
+      <div class="card-title"><span class="icon">➕</span> Store Secret</div>
+      <div class="form-row"><label>Key</label><input type="text" id="storeKey" placeholder="api-keys/openai"></div>
+      <div class="form-row"><label>Value (encrypted at rest)</label><textarea id="storeValue" placeholder="sk-proj-abc123..."></textarea></div>
+      <div class="form-row"><label>Namespace</label><input type="text" id="storeNs" placeholder="global" value="global"></div>
+      <div class="form-actions">
+        <button class="btn btn-gold" onclick="storeSecret()">🔐 Encrypt & Store</button>
+      </div>
+      <div class="result-box" id="storeResult" style="display:none"></div>
+    </div>
+
+    <!-- Retrieve Secret Card -->
+    <div class="vault-card">
+      <div class="card-title"><span class="icon">🔓</span> Retrieve Secret</div>
+      <div class="form-row"><label>Key</label><input type="text" id="retrieveKey" placeholder="api-keys/openai"></div>
+      <div class="form-row"><label>Namespace</label><input type="text" id="retrieveNs" placeholder="global" value="global"></div>
+      <div class="form-actions">
+        <button class="btn btn-gold" onclick="retrieveSecret()">🔑 Decrypt & Retrieve</button>
+        <button class="btn btn-red" onclick="revokeSecret()">🗑 Revoke</button>
+      </div>
+      <div class="result-box" id="retrieveResult" style="display:none"></div>
+    </div>
+
+    <!-- Audit Log Card -->
+    <div class="vault-card full">
+      <div class="card-title"><span class="icon">📋</span> Audit Log</div>
+      <div class="result-box" id="auditLog" style="display:block; max-height:250px;">Loading...</div>
+    </div>
+  </div>
+
+  <script>
+    const BASE = '';
+    const headers = { 'Content-Type': 'application/json' };
+
+    function toast(msg, type = 'success') {
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.textContent = msg;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 3000);
+    }
+
+    async function api(method, path, body, ns) {
+      const h = { ...headers };
+      if (ns) h['X-Vault-Namespace'] = ns;
+      const opts = { method, headers: h, credentials: 'include' };
+      if (body) opts.body = JSON.stringify(body);
+      const res = await fetch(BASE + path, opts);
+      return res.json();
+    }
+
+    async function loadStatus() {
+      try {
+        const data = await api('GET', '/vault/status');
+        const el = document.getElementById('statusContent');
+        el.innerHTML = `
+          <div class="status-row"><span class="status-label">Status</span><span class="status-badge ${data.ok ? 'ok' : 'error'}">${data.ok ? '● Online' : '● Offline'}</span></div>
+          <div class="status-row"><span class="status-label">Encryption</span><span>${data.encryption}</span></div>
+          <div class="status-row"><span class="status-label">Storage</span><span>${data.storage}</span></div>
+          <div class="status-row"><span class="status-label">Version</span><span>${data.version}</span></div>
+        `;
+      } catch (err) {
+        document.getElementById('statusContent').innerHTML = '<span class="status-badge error">● Unreachable</span>';
+      }
+    }
+
+    async function loadKeys() {
+      try {
+        const ns = document.getElementById('storeNs').value || 'global';
+        const data = await api('GET', '/vault/keys', null, ns);
+        const el = document.getElementById('keysList');
+        if (data.keys?.length > 0) {
+          el.innerHTML = data.keys.map(k => `<li onclick="document.getElementById('retrieveKey').value='${k.key || k}'; document.getElementById('retrieveNs').value='${ns}'"><span>${k.key || k}</span><span class="key-version">v${k.version || 1}</span></li>`).join('');
+        } else {
+          el.innerHTML = '<li style="color:var(--text-muted)">No secrets stored yet</li>';
+        }
+      } catch { document.getElementById('keysList').innerHTML = '<li style="color:var(--text-muted)">Failed to load</li>'; }
+    }
+
+    async function loadAudit() {
+      try {
+        const data = await api('GET', '/vault/audit');
+        const el = document.getElementById('auditLog');
+        if (data.audit?.length > 0) {
+          el.textContent = data.audit.map(a => `[${new Date(a.created_at).toLocaleString()}] ${a.action} ${a.key || ''} — ${a.actor} (${a.ip_address})`).join('\n');
+        } else {
+          el.textContent = 'No audit entries yet';
+        }
+      } catch { document.getElementById('auditLog').textContent = 'Audit log unavailable'; }
+    }
+
+    async function storeSecret() {
+      const key = document.getElementById('storeKey').value.trim();
+      const value = document.getElementById('storeValue').value;
+      const ns = document.getElementById('storeNs').value || 'global';
+      if (!key || !value) return toast('Key and value required', 'error');
+
+      const el = document.getElementById('storeResult');
+      try {
+        const data = await api('POST', '/vault/store', { id: key, value }, ns);
+        el.style.display = 'block';
+        el.className = 'result-box success';
+        el.textContent = JSON.stringify(data, null, 2);
+        toast(`Secret "${key}" stored (v${data.version})`);
+        loadKeys();
+        loadAudit();
+      } catch (err) {
+        el.style.display = 'block';
+        el.className = 'result-box error';
+        el.textContent = err.message;
+      }
+    }
+
+    async function retrieveSecret() {
+      const key = document.getElementById('retrieveKey').value.trim();
+      const ns = document.getElementById('retrieveNs').value || 'global';
+      if (!key) return toast('Key required', 'error');
+
+      const el = document.getElementById('retrieveResult');
+      try {
+        const data = await api('GET', `/vault/retrieve/${encodeURIComponent(key)}`, null, ns);
+        el.style.display = 'block';
+        el.className = 'result-box success';
+        el.textContent = JSON.stringify(data, null, 2);
+        loadAudit();
+      } catch (err) {
+        el.style.display = 'block';
+        el.className = 'result-box error';
+        el.textContent = err.message;
+      }
+    }
+
+    async function revokeSecret() {
+      const key = document.getElementById('retrieveKey').value.trim();
+      const ns = document.getElementById('retrieveNs').value || 'global';
+      if (!key) return toast('Key required', 'error');
+      if (!confirm(`Revoke secret "${key}"?`)) return;
+
+      try {
+        const data = await api('DELETE', `/vault/revoke/${encodeURIComponent(key)}`, null, ns);
+        toast(`Secret "${key}" revoked`);
+        document.getElementById('retrieveResult').style.display = 'none';
+        loadKeys();
+        loadAudit();
+      } catch (err) { toast(err.message, 'error'); }
+    }
+
+    // Init
+    loadStatus();
+    loadKeys();
+    loadAudit();
+  </script>
+</body>
+</html>

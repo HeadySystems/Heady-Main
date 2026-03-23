@@ -2,6 +2,9 @@
   "name": "heady-systems-core",
   "version": "1.0.0",
   "main": "backend/index.js",
+  "bin": {
+    "heady": "./heady-cli.js"
+  },
   "engines": {
     "node": ">=22"
   },
@@ -11,18 +14,25 @@
     "frontend": "npm start --prefix frontend",
     "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
     "test": "jest --passWithNoTests",
+    "lint": "eslint . --ext .js --ignore-path .gitignore --max-warnings 0",
+    "lint:fix": "eslint . --ext .js --ignore-path .gitignore --fix",
+    "cli": "node heady-cli.js",
+    "heady": "node heady-cli.js",
     "brand:check": "node scripts/brand_headers.js --check",
     "brand:fix": "node scripts/brand_headers.js --fix",
     "hooks:install": "node scripts/install_git_hooks.js"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.1",
     "better-sqlite3": "^12.8.0",
     "cors": "^2.8.5",
     "dockerode": "^4.0.2",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "js-yaml": "^4.1.0"
   }
 }

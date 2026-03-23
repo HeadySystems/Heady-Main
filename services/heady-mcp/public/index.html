@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HeadyMCP — Universal MCP Proxy</title>
+  <meta name="description" content="HeadyMCP — universal MCP proxy, tool registry, and developer platform for the Heady AI ecosystem. 14 tools, φ-scaled billing, 5-stage onboarding.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #07080f; --bg-surface: #0d1017; --bg-card: rgba(16,20,32,0.85);
+      --gold: #d4a853; --gold-glow: rgba(212,168,83,0.2); --gold-light: #f0d590;
+      --purple: #8b5cf6; --purple-glow: rgba(139,92,246,0.15);
+      --green: #22c55e; --red: #ef4444; --cyan: #22d3ee; --amber: #f59e0b;
+      --text-primary: #eef1f8; --text-secondary: #8b92a8; --text-muted: #5a6178;
+      --border: rgba(139,92,246,0.15); --border-hover: rgba(212,168,83,0.3);
+      --font-body: 'Inter', sans-serif; --font-mono: 'JetBrains Mono', monospace;
+      --font-display: 'Outfit', sans-serif; --radius: 13px;
+      --ease: cubic-bezier(0.16,1,0.3,1);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+    body { font-family: var(--font-body); background: var(--bg-deep); color: var(--text-primary); min-height: 100vh; }
+
+    /* Hero */
+    .hero { text-align: center; padding: 55px 21px 34px; position: relative; }
+    .hero-logo { font-family: var(--font-display); font-size: 48px; font-weight: 800; letter-spacing: -1px; }
+    .hero-logo span { background: linear-gradient(135deg, var(--gold), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero-sub { color: var(--text-secondary); font-size: 16px; margin-top: 8px; max-width: 520px; margin-inline: auto; line-height: 1.5; }
+    .hero-badges { display: flex; justify-content: center; gap: 8px; margin-top: 21px; flex-wrap: wrap; }
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 13px; border-radius: 20px; font-size: 11px; font-weight: 600; border: 1px solid; }
+    .badge.green { color: var(--green); border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.08); }
+    .badge.purple { color: var(--purple); border-color: rgba(139,92,246,0.3); background: rgba(139,92,246,0.08); }
+    .badge.gold { color: var(--gold); border-color: rgba(212,168,83,0.3); background: rgba(212,168,83,0.08); }
+    .badge.cyan { color: var(--cyan); border-color: rgba(34,211,238,0.3); background: rgba(34,211,238,0.08); }
+
+    /* Layout */
+    .main { max-width: 1000px; margin: 0 auto; padding: 0 21px 55px; display: grid; grid-template-columns: 1fr 1fr; gap: 21px; }
+    @media (max-width: 700px) { .main { grid-template-columns: 1fr; } }
+
+    /* Cards */
+    .card { background: var(--bg-card); backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: var(--radius); padding: 21px; position: relative; overflow: hidden; transition: border-color 0.3s var(--ease); }
+    .card:hover { border-color: var(--border-hover); }
+    .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), var(--purple), transparent); opacity: 0.5; }
+    .card.full { grid-column: 1 / -1; }
+    .card-title { font-family: var(--font-display); font-size: 15px; font-weight: 700; margin-bottom: 13px; display: flex; align-items: center; gap: 8px; }
+
+    /* Endpoints */
+    .ep-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 13px; }
+    .ep-row:last-child { border-bottom: none; }
+    .ep-label { color: var(--text-muted); }
+    .ep-value { font-family: var(--font-mono); font-size: 11px; color: var(--cyan); }
+
+    /* Tools */
+    .tool-list { list-style: none; max-height: 300px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+    .tool-item { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .tool-item:last-child { border-bottom: none; }
+    .tool-name { font-family: var(--font-mono); font-size: 12px; font-weight: 600; color: var(--gold); }
+    .tool-desc { font-size: 11px; color: var(--text-muted); text-align: right; max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tool-cat { font-size: 9px; color: var(--purple); background: var(--purple-glow); padding: 2px 6px; border-radius: 6px; }
+    .tool-cost { font-size: 10px; color: var(--green); font-family: var(--font-mono); }
+
+    /* Pricing Table */
+    .price-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .price-table th { text-align: left; color: var(--text-muted); font-weight: 500; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+    .price-table td { padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    .price-table .cost { font-family: var(--font-mono); color: var(--green); }
+    .price-table .phi { font-family: var(--font-mono); color: var(--amber); font-size: 11px; }
+
+    /* Tier Cards */
+    .tier-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    @media (max-width: 700px) { .tier-grid { grid-template-columns: repeat(2, 1fr); } }
+    .tier-card { border: 1px solid var(--border); border-radius: 8px; padding: 13px 10px; text-align: center; transition: all 0.3s var(--ease); }
+    .tier-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+    .tier-name { font-family: var(--font-display); font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .tier-rpm { font-family: var(--font-mono); font-size: 20px; font-weight: 700; color: var(--gold); }
+    .tier-rpm small { font-size: 11px; color: var(--text-muted); font-weight: 400; }
+    .tier-prefix { font-family: var(--font-mono); font-size: 10px; color: var(--cyan); margin-top: 4px; }
+    .tier-thoughts { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+
+    /* Onboarding */
+    .onboard-steps { display: flex; gap: 4px; }
+    .onboard-step { flex: 1; text-align: center; padding: 10px 4px; border-radius: 8px; border: 1px solid var(--border); font-size: 11px; }
+    .onboard-step .step-num { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--gold); }
+    .onboard-step .step-name { font-weight: 600; margin-top: 2px; }
+    .onboard-step .step-desc { color: var(--text-muted); font-size: 10px; margin-top: 4px; }
+
+    /* Code Block */
+    .code-block { background: rgba(0,0,0,0.4); border-radius: 8px; padding: 13px; font-family: var(--font-mono); font-size: 11px; line-height: 1.6; overflow-x: auto; border: 1px solid var(--border); color: var(--text-secondary); white-space: pre; }
+    .code-block .key { color: var(--gold); }
+    .code-block .str { color: var(--green); }
+
+    /* Buttons */
+    .btn { padding: 7px 16px; border: none; border-radius: 8px; font-family: var(--font-body); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s var(--ease); }
+    .btn-gold { background: linear-gradient(135deg, var(--gold), #c49038); color: var(--bg-deep); }
+    .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 4px 16px var(--gold-glow); }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-secondary); }
+    .btn-outline:hover { border-color: var(--gold); color: var(--text-primary); }
+    .btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .result { margin-top: 13px; }
+    .result-box { max-height: 180px; overflow-y: auto; display: none; }
+
+    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
+    .status-dot.on { background: var(--green); }
+    .status-dot.off { background: var(--red); }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+    .footer { text-align: center; padding: 21px; font-size: 11px; color: var(--text-muted); }
+    .footer a { color: var(--gold); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <div class="hero-logo">Heady<span>MCP</span></div>
+    <div class="hero-sub">Universal MCP Proxy & Developer Platform — 14 tools, φ-scaled billing, 5-stage onboarding. JSON-RPC 2.0 over HTTP + SSE.</div>
+    <div class="hero-badges">
+      <span class="badge green"><span class="status-dot on"></span> <span id="statusText">Checking…</span></span>
+      <span class="badge purple" id="toolCount">…</span>
+      <span class="badge gold">MCP 2025-03-26</span>
+      <span class="badge cyan">φ-Billing</span>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- Endpoints -->
+    <div class="card">
+      <div class="card-title">🔌 Endpoints</div>
+      <div class="ep-row"><span class="ep-label">Streamable HTTP</span><span class="ep-value">POST /mcp</span></div>
+      <div class="ep-row"><span class="ep-label">SSE (legacy)</span><span class="ep-value">GET /mcp/sse</span></div>
+      <div class="ep-row"><span class="ep-label">Discovery</span><span class="ep-value">GET /.well-known/mcp.json</span></div>
+      <div class="ep-row"><span class="ep-label">Tool Registry</span><span class="ep-value">GET /api/tools</span></div>
+      <div class="ep-row"><span class="ep-label">Config</span><span class="ep-value">GET /api/config</span></div>
+      <div class="ep-row"><span class="ep-label">Onboarding</span><span class="ep-value">POST /api/onboarding/start</span></div>
+      <div class="ep-row"><span class="ep-label">Pricing</span><span class="ep-value">GET /api/billing/pricing</span></div>
+      <div class="ep-row"><span class="ep-label">Usage</span><span class="ep-value">GET /api/billing/usage</span></div>
+    </div>
+
+    <!-- Quick Start -->
+    <div class="card">
+      <div class="card-title">⚡ Quick Start</div>
+      <div class="code-block">{
+  <span class="key">"mcpServers"</span>: {
+    <span class="key">"heady"</span>: {
+      <span class="key">"url"</span>: <span class="str">"https://headymcp.com/mcp"</span>,
+      <span class="key">"headers"</span>: {
+        <span class="key">"X-Heady-Api-Key"</span>: <span class="str">"hdy_plt_YOUR_KEY"</span>
+      }
+    }
+  }
+}</div>
+      <div style="margin-top:10px;font-size:11px;color:var(--text-muted)">Add to Claude Desktop, VS Code, or any MCP client</div>
+    </div>
+
+    <!-- API Key Tiers -->
+    <div class="card full">
+      <div class="card-title">🔑 API Key Tiers (Fibonacci-Scaled)</div>
+      <div class="tier-grid" id="tierGrid"></div>
+    </div>
+
+    <!-- Onboarding -->
+    <div class="card full">
+      <div class="card-title">🚀 5-Stage Developer Onboarding</div>
+      <div class="onboard-steps" id="onboardSteps"></div>
+      <div style="margin-top:13px;" class="btn-group">
+        <button class="btn btn-gold" onclick="startOnboarding()">Start Onboarding</button>
+      </div>
+      <div class="result"><div class="code-block result-box" id="onboardResult"></div></div>
+    </div>
+
+    <!-- Per-Thought Pricing -->
+    <div class="card">
+      <div class="card-title">💰 Per-Thought Pricing</div>
+      <table class="price-table" id="priceTable">
+        <thead><tr><th>Type</th><th>φ×</th><th>Cost</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- Tool Registry -->
+    <div class="card">
+      <div class="card-title">🛠 Tool Registry</div>
+      <ul class="tool-list" id="toolList"><li class="tool-item" style="color:var(--text-muted)">Loading…</li></ul>
+    </div>
+
+    <!-- Try It -->
+    <div class="card full">
+      <div class="card-title">🧪 Try It — Live JSON-RPC 2.0</div>
+      <div class="btn-group">
+        <button class="btn btn-gold" onclick="tryRpc('initialize',{protocolVersion:'2025-03-26',clientInfo:{name:'web',version:'1.0'}})">Initialize</button>
+        <button class="btn btn-outline" onclick="tryRpc('tools/list',{})">List Tools</button>
+        <button class="btn btn-outline" onclick="tryRpc('tools/call',{name:'heady_health',arguments:{}})">Health Check</button>
+        <button class="btn btn-outline" onclick="tryRpc('ping',{})">Ping</button>
+        <button class="btn btn-outline" onclick="tryApi('GET','/api/billing/pricing')">Pricing</button>
+        <button class="btn btn-outline" onclick="tryApi('GET','/.well-known/mcp.json')">Discovery</button>
+      </div>
+      <div class="result"><div class="code-block result-box" id="tryResult"></div></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    © 2026 <a href="https://headysystems.com">HeadySystems Inc.</a> · ∞ Sacred Geometry ∞ · φ = 1.618 · 60+ Patents Pending
+  </div>
+
+  <script>
+    const $=s=>document.querySelector(s);
+    async function api(m,p,b){const o={method:m,headers:{'Content-Type':'application/json'}};if(b)o.body=JSON.stringify(b);const r=await fetch(p,o);return r.json();}
+    function show(id,d){const e=$(id);e.style.display='block';e.textContent=JSON.stringify(d,null,2);}
+
+    // Load status
+    api('GET','/mcp/status').then(d=>{
+      $('#statusText').textContent=d.ok?'Online':'Degraded';
+      $('#toolCount').textContent=`${d.tools} tools`;
+    }).catch(()=>{$('#statusText').textContent='Offline';});
+
+    // Load tools
+    api('GET','/api/tools').then(d=>{
+      $('#toolList').innerHTML=d.tools.map(t=>
+        `<li class="tool-item"><div><span class="tool-name">${t.name}</span> <span class="tool-cat">${t.category}</span></div><span class="tool-desc">${t.description.slice(0,60)}…</span></li>`
+      ).join('');
+    }).catch(()=>{});
+
+    // Load pricing
+    api('GET','/api/billing/pricing').then(d=>{
+      $('#priceTable tbody').innerHTML=d.pricing.map(p=>
+        `<tr><td>${p.type}</td><td class="phi">φ^${Math.round(Math.log(p.phiMultiplier)/Math.log(1.618))}</td><td class="cost">$${p.cost.toFixed(6)}</td></tr>`
+      ).join('');
+      // Tiers
+      $('#tierGrid').innerHTML=d.tiers.map(t=>
+        `<div class="tier-card"><div class="tier-name">${t.name.charAt(0).toUpperCase()+t.name.slice(1)}</div><div class="tier-rpm">${t.rpm}<small> RPM</small></div><div class="tier-prefix">${t.prefix}</div><div class="tier-thoughts">${t.thoughtsPerMonth===null?'∞':t.thoughtsPerMonth>99999?'∞':t.thoughtsPerMonth.toLocaleString()} thoughts/mo</div></div>`
+      ).join('');
+    }).catch(()=>{});
+
+    // Onboarding stages
+    api('GET','/api/onboarding/stages').then(d=>{
+      $('#onboardSteps').innerHTML=d.stages.map((s,i)=>
+        `<div class="onboard-step"><div class="step-num">${i+1}</div><div class="step-name">${s.name}</div><div class="step-desc">${s.description.slice(0,40)}</div></div>`
+      ).join('');
+    }).catch(()=>{});
+
+    async function tryRpc(method,params){
+      const d=await api('POST','/mcp',{jsonrpc:'2.0',method,params,id:Date.now()});
+      show('#tryResult',d);
+    }
+    async function tryApi(m,p){const d=await api(m,p);show('#tryResult',d);}
+
+    async function startOnboarding(){
+      const email=prompt('Enter your email to start onboarding:');
+      if(!email)return;
+      const d=await api('POST','/api/onboarding/start',{email,name:email.split('@')[0]});
+      show('#onboardResult',d);
+    }
+  </script>
+</body>
+</html>

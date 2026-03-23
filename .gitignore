@@ -22,6 +22,10 @@ __pycache__/
 # === Build Output ===
 dist/
 build/
+**/build/
+**/out/
+*.js.map
+*.css.map
 
 # === Secrets & Credentials (CRITICAL — never commit) ===
 .env

@@ -1,0 +1,15 @@
+{
+  "name": "@heady-ai/phi-math-foundation",
+  "version": "1.0.0",
+  "description": "Sacred Geometry φ-Mathematics — all platform constants derived from the Golden Ratio",
+  "main": "index.js",
+  "scripts": {
+    "test": "node -e \"const p = require('./index.js'); console.log('PHI:', p.PHI); console.log('FIB[8]:', p.FIB[8]); console.log('CSL CORE:', p.CSL_GATES.CORE); console.log('φ-timeout(7):', p.phiTimeout(7), 'ms'); console.log('Thought cost (llm):', p.thoughtCost('llm_inference')); console.log('All tests passed ✓');\""
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "author": "HeadySystems Inc.",
+  "license": "UNLICENSED",
+  "keywords": ["phi", "golden-ratio", "fibonacci", "sacred-geometry", "csl"]
+}

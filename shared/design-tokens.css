@@ -1,0 +1,185 @@
+/* ================================================================
+   HEADY SYSTEMS :: SACRED GEOMETRY DESIGN TOKENS
+   ================================================================
+   All values derived from φ = 1.618033988749895
+   Fibonacci spacing: 4, 6.5, 10.5, 17, 27.5, 44.5, 72px
+   Typography scale: base × φ^n
+   Layout splits: 61.8% / 38.2% (golden ratio)
+   
+   Ref: Web Strategy Research — Sacred Geometry Design System
+   ================================================================ */
+
+:root {
+  /* ── φ Constants ── */
+  --phi: 1.618033988749895;
+  --psi: 0.618033988749895;  /* 1/φ */
+
+  /* ── Fibonacci Spacing Scale (px) ── */
+  --space-1: 4px;      /* fib base */
+  --space-2: 6.5px;    /* 4 × φ ≈ 6.47 */
+  --space-3: 10.5px;   /* 6.5 × φ ≈ 10.51 */
+  --space-4: 17px;     /* 10.5 × φ ≈ 16.99 */
+  --space-5: 27.5px;   /* 17 × φ ≈ 27.51 */
+  --space-6: 44.5px;   /* 27.5 × φ ≈ 44.50 */
+  --space-7: 72px;     /* 44.5 × φ ≈ 71.97 */
+  --space-8: 116.5px;  /* 72 × φ ≈ 116.50 */
+  --space-9: 188.5px;  /* 116.5 × φ ≈ 188.50 */
+
+  /* ── Typography Scale (φ-ratio from 16px base) ── */
+  --text-xs: 10px;       /* 16 / φ² */
+  --text-sm: 13px;       /* 16 / φ */
+  --text-base: 16px;     /* base */
+  --text-lg: 25.9px;     /* 16 × φ */
+  --text-xl: 41.9px;     /* 16 × φ² */
+  --text-2xl: 67.8px;    /* 16 × φ³ */
+  --text-3xl: 109.6px;   /* 16 × φ⁴ */
+  --text-hero: 177.3px;  /* 16 × φ⁵ */
+
+  /* ── Line Height (φ-derived) ── */
+  --leading-tight: 1.272;   /* √φ */
+  --leading-normal: 1.618;  /* φ */
+  --leading-relaxed: 2.058; /* φ × √φ */
+
+  /* ── Layout Ratios ── */
+  --ratio-major: 61.8%;   /* φ / (1 + φ) × 100 */
+  --ratio-minor: 38.2%;   /* 1 / (1 + φ) × 100 */
+  --ratio-golden: 1.618;
+
+  /* ── Border Radius (φ progression) ── */
+  --radius-sm: 4px;
+  --radius-md: 6.5px;
+  --radius-lg: 10.5px;
+  --radius-xl: 17px;
+  --radius-2xl: 27.5px;
+  --radius-full: 9999px;
+
+  /* ── Sacred Geometry Color Palette (OKLCH) ── */
+  /* Void backgrounds */
+  --void-deepest: oklch(0.08 0.02 280);
+  --void-deep: oklch(0.12 0.025 280);
+  --void-base: oklch(0.16 0.03 275);
+  --void-surface: oklch(0.20 0.035 270);
+  --void-elevated: oklch(0.24 0.04 268);
+
+  /* Gold accents (φ-derived hue rotation) */
+  --gold-50: oklch(0.97 0.03 85);
+  --gold-100: oklch(0.93 0.06 82);
+  --gold-200: oklch(0.87 0.10 78);
+  --gold-300: oklch(0.80 0.14 75);
+  --gold-400: oklch(0.72 0.16 72);
+  --gold-500: oklch(0.65 0.17 68);   /* Primary gold */
+  --gold-600: oklch(0.55 0.15 65);
+  --gold-700: oklch(0.45 0.13 62);
+  --gold-800: oklch(0.35 0.10 60);
+  --gold-900: oklch(0.25 0.08 58);
+
+  /* Sacred purple / teal accents */
+  --sacred-purple: oklch(0.55 0.20 300);
+  --sacred-teal: oklch(0.65 0.15 185);
+  --sacred-emerald: oklch(0.60 0.18 155);
+
+  /* CSL threshold colors */
+  --csl-critical: oklch(0.70 0.20 300);   /* 0.927+ */
+  --csl-high: oklch(0.65 0.15 185);       /* 0.882+ */
+  --csl-medium: oklch(0.65 0.18 155);     /* 0.809+ */
+  --csl-low: oklch(0.70 0.15 85);         /* 0.691+ */
+  --csl-minimum: oklch(0.70 0.18 30);     /* 0.618+ */
+  --csl-alert: oklch(0.65 0.22 25);       /* < 0.618 */
+
+  /* Text colors */
+  --text-primary: oklch(0.95 0.01 270);
+  --text-secondary: oklch(0.75 0.02 270);
+  --text-muted: oklch(0.55 0.02 270);
+  --text-accent: var(--gold-400);
+
+  /* ── Glassmorphism Tokens ── */
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-bg-hover: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-hover: rgba(255, 255, 255, 0.15);
+  --glass-blur: 20px;
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --glass-shadow-elevated: 0 16px 48px rgba(0, 0, 0, 0.5);
+
+  /* ── Animation Timing (φ-derived) ── */
+  --duration-instant: 100ms;
+  --duration-fast: 162ms;     /* 100 × φ */
+  --duration-normal: 262ms;   /* 162 × φ */
+  --duration-slow: 424ms;     /* 262 × φ */
+  --duration-slower: 686ms;   /* 424 × φ */
+  --ease-phi: cubic-bezier(0.618, 0, 0.382, 1);
+  --ease-sacred: cubic-bezier(0.382, 0, 0.618, 1);
+
+  /* ── Z-Index Scale (Fibonacci) ── */
+  --z-base: 1;
+  --z-dropdown: 2;
+  --z-sticky: 3;
+  --z-overlay: 5;
+  --z-modal: 8;
+  --z-toast: 13;
+  --z-tooltip: 21;
+  --z-max: 34;
+
+  /* ── Grid ── */
+  --grid-columns: 13;        /* Fibonacci */
+  --grid-gap: var(--space-4);
+  --container-max: 1280px;
+  --content-max: 768px;
+}
+
+/* ── Glassmorphism Panel Component ── */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow);
+  transition: all var(--duration-normal) var(--ease-phi);
+}
+.glass-panel:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--glass-shadow-elevated);
+}
+
+/* ── Golden Layout ── */
+.golden-split {
+  display: grid;
+  grid-template-columns: var(--ratio-major) var(--ratio-minor);
+  gap: var(--grid-gap);
+}
+.golden-split-reverse {
+  display: grid;
+  grid-template-columns: var(--ratio-minor) var(--ratio-major);
+  gap: var(--grid-gap);
+}
+
+/* ── Sacred Typography ── */
+.text-hero { font-size: var(--text-hero); line-height: var(--leading-tight); }
+.text-display { font-size: var(--text-3xl); line-height: var(--leading-tight); }
+.text-h1 { font-size: var(--text-2xl); line-height: var(--leading-tight); }
+.text-h2 { font-size: var(--text-xl); line-height: var(--leading-tight); }
+.text-h3 { font-size: var(--text-lg); line-height: var(--leading-normal); }
+.text-body { font-size: var(--text-base); line-height: var(--leading-normal); }
+.text-small { font-size: var(--text-sm); line-height: var(--leading-normal); }
+.text-micro { font-size: var(--text-xs); line-height: var(--leading-normal); }
+
+/* ── φ-Animated Glow ── */
+@keyframes sacred-glow {
+  0%, 100% { box-shadow: 0 0 20px oklch(0.55 0.15 300 / 0.2); }
+  38.2%    { box-shadow: 0 0 40px oklch(0.55 0.15 300 / 0.4); }
+  61.8%    { box-shadow: 0 0 30px oklch(0.65 0.15 185 / 0.3); }
+}
+.sacred-glow {
+  animation: sacred-glow calc(var(--duration-slower) * 5) var(--ease-sacred) infinite;
+}
+
+/* ── Dark Mode Default (70% of AI sites) ── */
+body {
+  background-color: var(--void-deepest);
+  color: var(--text-primary);
+  font-family: 'Inter', 'SF Pro', system-ui, sans-serif;
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+}

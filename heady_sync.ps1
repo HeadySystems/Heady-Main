@@ -35,11 +35,11 @@ param(
 $ErrorActionPreference = "Stop"
 
 # Colors for output
-function Write-HeadyInfo { param($msg) Write-Host "∞ $msg" -ForegroundColor Cyan }
-function Write-HeadySuccess { param($msg) Write-Host "✓ $msg" -ForegroundColor Green }
-function Write-HeadyWarning { param($msg) Write-Host "⚠ $msg" -ForegroundColor Yellow }
-function Write-HeadyError { param($msg) Write-Host "✗ $msg" -ForegroundColor Red }
-function Write-HeadyStep { param($msg) Write-Host "`n[$msg]" -ForegroundColor Magenta }
+function Write-HeadyInfo { param($msg); Write-Host "∞ $msg" -ForegroundColor Cyan }
+function Write-HeadySuccess { param($msg); Write-Host "✓ $msg" -ForegroundColor Green }
+function Write-HeadyWarning { param($msg); Write-Host "⚠ $msg" -ForegroundColor Yellow }
+function Write-HeadyError { param($msg); Write-Host "✗ $msg" -ForegroundColor Red }
+function Write-HeadyStep { param($msg); Write-Host "`n[$msg]" -ForegroundColor Magenta }
 
 # Notify HeadyConductor
 function Notify-HeadyConductor {

@@ -1,0 +1,1178 @@
+# HEADY SYSTEMS :: Command Shortcut Reference v1.0.0
+# Full 89-command registry with φ-scaled timeouts
+# Convention: heady <category>:<action> [args]
+# φ-count: 89 = fib(11) — matching MAX_BEE_TYPES
+
+# ═══════════════════════════════════════════════════
+# φ-Scaled Timeout Tiers (milliseconds)
+# ═══════════════════════════════════════════════════
+timeouts:
+  sos: 4236        # φ² × 1000 — emergency
+  memory: 11090    # φ⁵ × 1000 — single operation
+  system: 29034    # φ⁷ × 1000 — system status
+  pipeline: 76013  # φ⁹ × 1000 — full pipeline
+  workflow: 199005 # φ¹¹ × 1000 — composite workflow
+  deployment: 521002 # φ¹³ × 1000 — fleet deployment
+
+# ═══════════════════════════════════════════════════
+# SYSTEM OPERATIONS (13 commands)
+# ═══════════════════════════════════════════════════
+commands:
+  # ── System ──
+  sys:status:
+    name: "System Status"
+    category: system
+    description: "Full system status across all services, pipeline, and telemetry"
+    steps:
+      - tool: system_status
+      - tool: hcfp_status
+      - tool: telemetry
+    timeout_ms: 29034
+    csl_confidence: 0.718
+    tags: [system, health, monitoring]
+
+  sys:health:
+    name: "Domain Health Check"
+    category: system
+    description: "Hit all 11 domain /health endpoints, return composite pass/fail"
+    steps:
+      - tool: health
+        params:
+          domains: [headyme.com, headysystems.com, heady-ai.com, headyconnection.org, headymcp.com, headyio.com, headybuddy.org, headybot.com, headyapi.com, headybuddy.com, headylens.com]
+    timeout_ms: 29034
+    csl_confidence: 0.718
+    tags: [system, health, domains]
+
+  sys:heal:
+    name: "Self-Healing Cycle"
+    category: system
+    description: "Trigger self-healing with autonomy swarm"
+    steps:
+      - tool: system_heal
+      - swarm: autonomy-ops
+    timeout_ms: 76013
+    csl_confidence: 0.809
+    tags: [system, healing, autonomy]
+
+  sys:pulse:
+    name: "Quick Pulse Check"
+    category: system
+    description: "Redis alive, Sentry alive, at least one LLM provider responding"
+    steps:
+      - tool: health
+        params: { check: [redis, sentry, llm] }
+    timeout_ms: 11090
+    csl_confidence: 0.618
+    tags: [system, health, quick]
+
+  sys:boot:
+    name: "Cold Boot"
+    category: system
+    description: "10-phase heady-manager.js bootstrap sequence"
+    steps:
+      - tool: system_boot
+        params: { phases: 10 }
+    timeout_ms: 76013
+    csl_confidence: 0.927
+    tags: [system, boot, startup]
+
+  sys:shutdown:
+    name: "Graceful Shutdown"
+    category: system
+    description: "φ-scaled graceful shutdown (drain → flush → close)"
+    steps:
+      - tool: system_shutdown
+        params: { drain_timeout_ms: 4236 }
+    timeout_ms: 11090
+    csl_confidence: 0.927
+    tags: [system, shutdown]
+
+  sys:budget:
+    name: "Budget Report"
+    category: system
+    description: "Current month spend vs $750 target, per-service breakdown"
+    steps:
+      - tool: budget_report
+    timeout_ms: 11090
+    csl_confidence: 0.618
+    tags: [system, budget, cost]
+
+  sys:audit:
+    name: "Security Audit"
+    category: system
+    description: "Combined security audit + audit log extraction"
+    steps:
+      - script: scripts/security-checklist.sh
+      - tool: admin_audit
+    timeout_ms: 29034
+    csl_confidence: 0.882
+    tags: [system, security, audit]
+
+  sys:inventory:
+    name: "Asset Inventory"
+    category: system
+    description: "Count services, bees, swarms, tools, skills, domains"
+    steps:
+      - tool: system_inventory
+    timeout_ms: 11090
+    csl_confidence: 0.618
+    tags: [system, inventory]
+
+  sys:env:
+    name: "Env Validation"
+    category: system
+    description: "Validate all env vars against Zod schema"
+    steps:
+      - tool: validate_env
+    timeout_ms: 4236
+    csl_confidence: 0.927
+    tags: [system, env, validation]
+
+  sys:bench:
+    name: "Load Benchmark"
+    category: system
+    description: "k6 load test against all Cloud Run services"
+    steps:
+      - tool: benchmark
+        params: { output: .benchmarks/ }
+    timeout_ms: 199005
+    csl_confidence: 0.618
+    tags: [system, benchmark, performance]
+
+  sys:drift:
+    name: "Config Drift Detection"
+    category: system
+    description: "Compare running config vs git HEAD"
+    steps:
+      - tool: drift_detect
+    timeout_ms: 29034
+    csl_confidence: 0.809
+    tags: [system, drift, config]
+
+  sys:versions:
+    name: "Version Matrix"
+    category: system
+    description: "All service + dependency versions"
+    steps:
+      - tool: version_matrix
+    timeout_ms: 11090
+    csl_confidence: 0.618
+    tags: [system, versions]
+
+  # ── Memory ──
+  mem:search:
+    name: "Memory Search"
+    category: memory
+    description: "Semantic search with φ-defaults"
+    steps:
+      - tool: heady_memory_search
+        params:
+          topK: 21
+          minScore: 0.618
+    timeout_ms: 11090
+    csl_confidence: 0.618
+    tags: [memory, search, vector]
+
+  mem:store:
+    name: "Memory Store"
+    category: memory
+    description: "Store + embed in single call"
+    steps:
+      - tool: heady_embed
+      - tool: heady_memory_store
+    timeout_ms: 11090
+    csl_confidence: 0.618
+    tags: [memory, store, vector]
+
+  mem:recall:
+    name: "Three-Tier Recall"
+    category: memory
+    description: "T0 → T1 → T2 cascade recall"
+    steps:
+      - tool: memory_recall
+        params: { cascade: true, tiers: [T0, T1, T2] }
+    timeout_ms: 11090
+    csl_confidence: 0.718
+    tags: [memory, recall, cascade]
+
+  mem:compact:
+    name: "Memory Compaction"
+    category: memory
+    description: "Compact vector memory, merge near-duplicates (cosine > 0.95)"
+    steps:
+      - swarm: vector-memory-ops
+        params: { action: compact, threshold: 0.95 }
+    timeout_ms: 76013
+    csl_confidence: 0.809
+    tags: [memory, compact, maintenance]
+
+  mem:stats:
+    name: "Memory Stats"
+    category: memory
+    description: "Usage across all three tiers"
+    steps:
+      - tool: vector_stats
+      - tool: memory_tier_stats
+    timeout_ms: 11090
+    csl_confidence: 0.618
+    tags: [memory, stats]
+
+  mem:bootstrap:
+    name: "Memory Bootstrap"
+    category: memory
+    description: "Load T1 memories into T0 for current session"
+    steps:
+      - tool: memory_bootstrap
+    timeout_ms: 11090
+    csl_confidence: 0.718
+    tags: [memory, bootstrap, session]
+
+  mem:flush:
+    name: "Memory Flush"
+    category: memory
+    description: "Clean stale working memory"
+    steps:
+      - tool: memory_flush
+        params: { tiers: [T0, T1] }
+    timeout_ms: 11090
+    csl_confidence: 0.809
+    tags: [memory, flush, cleanup]
+
+  mem:migrate:
+    name: "Memory Tier Migration"
+    category: memory
+    description: "Promote hot → warm, warm → cold"
+    steps:
+      - tool: memory_migrate
+        params: { promote: [T0_to_T1, T1_to_T2] }
+    timeout_ms: 29034
+    csl_confidence: 0.809
+    tags: [memory, migrate, lifecycle]
+
+  # ── Pipeline ──
+  pipe:run:
+    name: "Full Pipeline"
+    category: pipeline
+    description: "Full 22-stage pipeline execution"
+    steps:
+      - tool: heady_pipeline_enqueue
+        params: { variant: FULL }
+    timeout_ms: 76013
+    csl_confidence: 0.809
+    tags: [pipeline, full, execution]
+
+  pipe:fast:
+    name: "Fast Pipeline"
+    category: pipeline
+    description: "Quick pipeline — stages 1,2,3,10,11,12,21,22"
+    steps:
+      - tool: heady_pipeline_enqueue
+        params: { variant: FAST, stages: [1,2,3,10,11,12,21,22] }
+    timeout_ms: 29034
+    csl_confidence: 0.618
+    tags: [pipeline, fast]
+
+  pipe:standard:
+    name: "Standard Pipeline"
+    category: pipeline
+    description: "Standard — skip metacognition supercluster"
+    steps:
+      - tool: heady_pipeline_enqueue
+        params: { variant: STANDARD }
+    timeout_ms: 76013
+    csl_confidence: 0.718
+    tags: [pipeline, standard]
+
+  pipe:status:
+    name: "Pipeline Status"
+    category: pipeline
+    description: "Current pipeline state"
+    steps:
+      - tool: hcfp_status
+    timeout_ms: 4236
+    csl_confidence: 0.618
+    tags: [pipeline, status]
+
+  pipe:replay:
+    name: "Pipeline Replay"
+    category: pipeline
+    description: "Re-execute completed pipeline task"
+    steps:
+      - tool: pipeline_replay
+    timeout_ms: 76013
+    csl_confidence: 0.809
+    tags: [pipeline, replay, debug]
+
+  pipe:stage:
+    name: "Single Stage"
+    category: pipeline
+    description: "Run one specific stage in isolation"
+    steps:
+      - tool: pipeline_stage_run
+    timeout_ms: 29034
+    csl_confidence: 0.718
+    tags: [pipeline, stage, isolated]
+
+  pipe:metacog:
+    name: "Metacognition Only"
+    category: pipeline
+    description: "Run only stages 12–18 (metacognition supercluster)"
+    steps:
+      - tool: heady_pipeline_enqueue
+        params: { variant: METACOG, stages: [12,13,14,15,16,17,18] }
+    timeout_ms: 76013
+    csl_confidence: 0.882
+    tags: [pipeline, metacognition]
+
+  pipe:distill:
+    name: "Session Distill"
+    category: pipeline
+    description: "Stage 22 — compress session → memory vectors"
+    steps:
+      - tool: heady_pipeline_enqueue
+        params: { variant: DISTILL, stages: [22] }
+    timeout_ms: 29034
+    csl_confidence: 0.618
+    tags: [pipeline, distill, memory]
+
+  # ── Deploy ──
+  deploy:canary:
+    name: "Canary Deployment"
+    category: deploy
+    description: "φ-stepped 5%→25%→50%→100% rollout"
+    steps:
+      - tool: service_deploy
+        params: { strategy: canary, steps: [5, 25, 50, 100] }
+    timeout_ms: 521002
+    csl_confidence: 0.927
+    tags: [deploy, canary, production]
+
+  deploy:site:
+    name: "Deploy Single Site"
+    category: deploy
+    description: "Full site build-deploy-verify cycle"
+    steps:
+      - tool: site_generate
+      - tool: site_deploy
+      - tool: site_status
+    timeout_ms: 199005
+    csl_confidence: 0.809
+    tags: [deploy, site, cloudflare]
+
+  deploy:all:
+    name: "Fleet Deployment"
+    category: deploy
+    description: "Deploy all 21 services"
+    steps:
+      - swarm: deployment-pipeline
+    timeout_ms: 521002
+    csl_confidence: 0.927
+    tags: [deploy, fleet, all]
+
+  deploy:rollback:
+    name: "Emergency Rollback"
+    category: deploy
+    description: "Instant rollback to previous Cloud Run revision"
+    steps:
+      - tool: service_rollback
+    timeout_ms: 4236
+    csl_confidence: 0.927
+    tags: [deploy, rollback, emergency]
+
+  deploy:preview:
+    name: "Staging Preview"
+    category: deploy
+    description: "Deploy to staging with preview URL"
+    steps:
+      - tool: service_deploy
+        params: { environment: staging }
+    timeout_ms: 199005
+    csl_confidence: 0.718
+    tags: [deploy, staging, preview]
+
+  deploy:edge:
+    name: "Edge Worker Deploy"
+    category: deploy
+    description: "wrangler deploy for Cloudflare Worker"
+    steps:
+      - tool: deploy
+        params: { target: cloudflare_worker }
+    timeout_ms: 199005
+    csl_confidence: 0.809
+    tags: [deploy, edge, cloudflare]
+
+  deploy:sites:
+    name: "Batch Site Deploy"
+    category: deploy
+    description: "Deploy all 11 domain sites to Cloudflare Pages"
+    steps:
+      - tool: site_deploy
+        params: { all: true }
+    timeout_ms: 521002
+    csl_confidence: 0.809
+    tags: [deploy, sites, batch]
+
+  deploy:verify:
+    name: "Post-Deploy Verify"
+    category: deploy
+    description: "Health check all endpoints post-deploy"
+    steps:
+      - tool: health
+        params: { all_endpoints: true }
+    timeout_ms: 29034
+    csl_confidence: 0.809
+    tags: [deploy, verify, health]
+
+  # ── Security ──
+  sec:scan:
+    name: "Security Scan"
+    category: security
+    description: "Full security scan across codebase"
+    steps:
+      - swarm: security-audit
+    timeout_ms: 76013
+    csl_confidence: 0.882
+    tags: [security, scan, audit]
+
+  sec:rotate:
+    name: "Secret Rotation"
+    category: security
+    description: "Rotate all API keys and secrets"
+    steps:
+      - script: scripts/rotate-and-verify-secrets.sh
+    timeout_ms: 76013
+    csl_confidence: 0.927
+    tags: [security, secrets, rotation]
+
+  sec:secrets:
+    name: "Secret Scan"
+    category: security
+    description: "Scan for exposed credentials in git history"
+    steps:
+      - tool: secret_scan
+        params: { method: bfg }
+    timeout_ms: 76013
+    csl_confidence: 0.927
+    tags: [security, secrets, git]
+
+  sec:headers:
+    name: "Security Headers Check"
+    category: security
+    description: "CSP, HSTS, X-Frame-Options check on all domains"
+    steps:
+      - tool: security_headers_check
+    timeout_ms: 29034
+    csl_confidence: 0.809
+    tags: [security, headers, csp]
+
+  sec:deps:
+    name: "Dependency Scan"
+    category: security
+    description: "npm audit + Dependabot + Snyk"
+    steps:
+      - tool: dependency_audit
+    timeout_ms: 29034
+    csl_confidence: 0.809
+    tags: [security, dependencies, cve]
+
+  sec:pqc:
+    name: "PQC Key Rotation"
+    category: security
+    description: "Post-quantum cryptography key refresh (ML-DSA-65)"
+    steps:
+      - tool: pqc_key_rotate
+    timeout_ms: 29034
+    csl_confidence: 0.927
+    tags: [security, pqc, quantum]
+
+  sec:waf:
+    name: "WAF Validation"
+    category: security
+    description: "Verify Cloudflare WAF rules are active"
+    steps:
+      - tool: waf_validate
+    timeout_ms: 11090
+    csl_confidence: 0.809
+    tags: [security, waf, cloudflare]
+
+  sec:mcp:
+    name: "MCP Permission Audit"
+    category: security
+    description: "Audit all 47 tools for confused-deputy risk"
+    steps:
+      - tool: mcp_audit
+    timeout_ms: 29034
+    csl_confidence: 0.882
+    tags: [security, mcp, permissions]
+
+  # ── Intelligence ──
+  ai:chat:
+    name: "Quick LLM Chat"
+    category: intelligence
+    description: "Route to best-fit LLM"
+    steps:
+      - tool: heady_chat
+    timeout_ms: 29034
+    csl_confidence: 0.618
+    tags: [ai, chat, llm]
+
+  ai:battle:
+    name: "Multi-Model Battle"
+    category: intelligence
+    description: "Battle arena across all providers"
+    steps:
+      - tool: heady_battle
+    timeout_ms: 76013
+    csl_confidence: 0.718
+    tags: [ai, battle, comparison]
+
+  ai:analyze:
+    name: "Deep Analysis"
+    category: intelligence
+    description: "Multi-dimensional analysis with pattern recognition"
+    steps:
+      - tool: heady_analyze
+      - tool: heady_patterns
+    timeout_ms: 76013
+    csl_confidence: 0.809
+    tags: [ai, analysis, patterns]
+
+  ai:code:
+    name: "Code Generation"
+    category: intelligence
+    description: "Code generation with quality enforcement"
+    steps:
+      - tool: heady_coder
+      - tool: quality_gate
+        params: { threshold: 0.618 }
+    timeout_ms: 76013
+    csl_confidence: 0.809
+    tags: [ai, code, generation]
+
+  ai:research:
+    name: "Triple-Source Research"
+    category: intelligence
+    description: "Web + docs + patents search sweep"
+    steps:
+      - tool: web_search
+      - tool: doc_search
+      - tool: patent_search
+    timeout_ms: 76013
+    csl_confidence: 0.718
+    tags: [ai, research, search]
+
+  ai:eval:
+    name: "Output Evaluation"
+    category: intelligence
+    description: "5-dimension quality rubric"
+    steps:
+      - tool: ai_evaluate
+    timeout_ms: 29034
+    csl_confidence: 0.718
+    tags: [ai, evaluation, quality]
+
+  ai:route:
+    name: "LLM Route Status"
+    category: intelligence
+    description: "Show current routing: Gemini→GPT→Workers AI→Colab"
+    steps:
+      - tool: llm_route_status
+    timeout_ms: 4236
+    csl_confidence: 0.618
+    tags: [ai, routing, status]
+
+  ai:cost:
+    name: "LLM Cost Report"
+    category: intelligence
+    description: "Cost breakdown by LLM provider"
+    steps:
+      - tool: llm_cost_report
+    timeout_ms: 11090
+    csl_confidence: 0.618
+    tags: [ai, cost, budget]
+
+  # ── Bee & Swarm ──
+  bee:invoke:
+    name: "Invoke Bee"
+    category: bee
+    description: "Invoke single bee agent"
+    steps:
+      - tool: heady_bee_invoke
+    timeout_ms: 76013
+    csl_confidence: 0.718
+    tags: [bee, invoke, agent]
+
+  bee:list:
+    name: "List Bee Domains"
+    category: bee
+    description: "List all 24 domains + status"
+    steps:
+      - tool: heady_bee_list
+    timeout_ms: 4236
+    csl_confidence: 0.618
+    tags: [bee, list, status]
+
+  bee:spawn:
+    name: "Spawn Swarm"
+    category: bee
+    description: "Spawn ephemeral bee swarm (max 34)"
+    steps:
+      - tool: swarm_spawn
+        params: { max: 34 }
+    timeout_ms: 76013
+    csl_confidence: 0.809
+    tags: [bee, swarm, spawn]
+
+  swarm:launch:
+    name: "Launch Template Swarm"
+    category: swarm
+    description: "Launch named swarm template"
+    steps:
+      - tool: swarm_template_launch
+    timeout_ms: 199005
+    csl_confidence: 0.809
+    tags: [swarm, template, launch]
+
+  swarm:status:
+    name: "Swarm Status"
+    category: swarm
+    description: "Check swarm execution state"
+    steps:
+      - tool: swarm_status
+    timeout_ms: 4236
+    csl_confidence: 0.618
+    tags: [swarm, status]
+
+  swarm:heal:
+    name: "Self-Healing Swarm"
+    category: swarm
+    description: "Launch autonomy-ops swarm"
+    steps:
+      - swarm: autonomy-ops
+    timeout_ms: 76013
+    csl_confidence: 0.809
+    tags: [swarm, healing, autonomy]
+
+  swarm:optimize:
+    name: "Optimize LLM Routing"
+    category: swarm
+    description: "Launch llm-routing-optimizer swarm"
+    steps:
+      - swarm: llm-routing-optimizer
+    timeout_ms: 76013
+    csl_confidence: 0.809
+    tags: [swarm, optimize, routing]
+
+  swarm:memory:
+    name: "Memory Maintenance Swarm"
+    category: swarm
+    description: "Launch vector-memory-ops swarm"
+    steps:
+      - swarm: vector-memory-ops
+    timeout_ms: 76013
+    csl_confidence: 0.809
+    tags: [swarm, memory, maintenance]
+
+  # ── Development ──
+  dev:start:
+    name: "Start Dev Environment"
+    category: dev
+    description: "Start full dev environment"
+    steps:
+      - script: npm start
+      - script: npm run frontend
+    timeout_ms: 29034
+    csl_confidence: 0.618
+    tags: [dev, start, local]
+
+  dev:test:
+    name: "Test + Lint"
+    category: dev
+    description: "Full test + lint suite"
+    steps:
+      - script: npm test
+      - script: npm run lint
+    timeout_ms: 76013
+    csl_confidence: 0.809
+    tags: [dev, test, lint]
+
+  dev:fix:
+    name: "Auto-Fix"
+    category: dev
+    description: "Auto-fix linting + branding"
+    steps:
+      - script: npm run lint:fix
+      - script: npm run brand:fix
+    timeout_ms: 29034
+    csl_confidence: 0.718
+    tags: [dev, fix, lint]
+
+  dev:build:
+    name: "Clean Build"
+    category: dev
+    description: "Full clean build with archival"
+    steps:
+      - skill: hcfp_clean_build
+    timeout_ms: 199005
+    csl_confidence: 0.809
+    tags: [dev, build, clean]
+
+  dev:sync:
+    name: "Multi-Remote Sync"
+    category: dev
+    description: "Multi-remote git synchronization + checkpoint"
+    steps:
+      - skill: heady_sync
+      - skill: checkpoint_sync
+    timeout_ms: 76013
+    csl_confidence: 0.809
+    tags: [dev, sync, git]
+
+  dev:train:
+    name: "AI Training"
+    category: dev
+    description: "Train AI model / optimize patterns"
+    steps:
+      - script: node scripts/hc.js train
+    timeout_ms: 199005
+    csl_confidence: 0.718
+    tags: [dev, train, ai]
+
+  dev:quality:
+    name: "PDCA Quality Cycle"
+    category: dev
+    description: "Toyota-style Plan-Do-Check-Act"
+    steps:
+      - skill: hcfp_pdca_implementation
+    timeout_ms: 199005
+    csl_confidence: 0.882
+    tags: [dev, quality, pdca]
+
+  dev:scaffold:
+    name: "Scaffold Service"
+    category: dev
+    description: "Generate new service/bee/tool scaffold with HEADY_BRAND"
+    steps:
+      - tool: scaffold_generate
+    timeout_ms: 29034
+    csl_confidence: 0.718
+    tags: [dev, scaffold, generator]
+
+  dev:repl:
+    name: "Dev REPL"
+    category: dev
+    description: "Interactive REPL with φ-constants + CSL loaded"
+    steps:
+      - tool: dev_repl
+    timeout_ms: 199005
+    csl_confidence: 0.618
+    tags: [dev, repl, interactive]
+
+  dev:docs:
+    name: "Auto-Documentation"
+    category: dev
+    description: "Auto-generate documentation via swarm"
+    steps:
+      - swarm: documentation
+    timeout_ms: 199005
+    csl_confidence: 0.718
+    tags: [dev, docs, generation]
+
+  dev:bench:
+    name: "Unit Benchmarks"
+    category: dev
+    description: "Performance benchmarks with φ-scaled thresholds"
+    steps:
+      - tool: benchmark
+        params: { scope: unit }
+    timeout_ms: 76013
+    csl_confidence: 0.618
+    tags: [dev, benchmark, performance]
+
+  dev:profile:
+    name: "CPU/Memory Profile"
+    category: dev
+    description: "Sentry continuous profiling snapshot"
+    steps:
+      - tool: sentry_profile
+    timeout_ms: 29034
+    csl_confidence: 0.618
+    tags: [dev, profile, sentry]
+
+  dev:graph:
+    name: "Dependency Graph"
+    category: dev
+    description: "Visualize monorepo dependencies"
+    steps:
+      - tool: dependency_graph
+    timeout_ms: 29034
+    csl_confidence: 0.618
+    tags: [dev, graph, visualization]
+
+  # ── Domain & Site ──
+  site:status:
+    name: "Domain Status Matrix"
+    category: site
+    description: "All 11 domains health + SSL + DNS"
+    steps:
+      - tool: site_status
+        params: { all: true, checks: [health, ssl, dns] }
+    timeout_ms: 29034
+    csl_confidence: 0.718
+    tags: [site, status, domains]
+
+  site:build:
+    name: "Build Single Site"
+    category: site
+    description: "Generate site from config + Sacred Geometry theme"
+    steps:
+      - tool: site_generate
+    timeout_ms: 76013
+    csl_confidence: 0.718
+    tags: [site, build, generate]
+
+  site:deploy:
+    name: "Deploy Single Site"
+    category: site
+    description: "Build + deploy to Cloudflare Pages"
+    steps:
+      - tool: site_generate
+      - tool: site_deploy
+    timeout_ms: 199005
+    csl_confidence: 0.809
+    tags: [site, deploy, cloudflare]
+
+  site:all:
+    name: "Deploy All Sites"
+    category: site
+    description: "Batch deploy all 11 domain sites"
+    steps:
+      - tool: site_deploy
+        params: { all: true }
+    timeout_ms: 521002
+    csl_confidence: 0.809
+    tags: [site, deploy, batch]
+
+  site:ssl:
+    name: "SSL Check"
+    category: site
+    description: "Certificate expiry check for all domains"
+    steps:
+      - tool: ssl_check
+    timeout_ms: 11090
+    csl_confidence: 0.718
+    tags: [site, ssl, certificates]
+
+  site:dns:
+    name: "DNS Validation"
+    category: site
+    description: "Verify DNS records for all domains"
+    steps:
+      - tool: dns_validate
+    timeout_ms: 11090
+    csl_confidence: 0.718
+    tags: [site, dns, records]
+
+  site:brand:
+    name: "Brand Consistency Check"
+    category: site
+    description: "Verify Sacred Geometry + glassmorphism across all sites"
+    steps:
+      - tool: brand_check
+    timeout_ms: 29034
+    csl_confidence: 0.809
+    tags: [site, brand, consistency]
+
+  site:analytics:
+    name: "Site Analytics"
+    category: site
+    description: "Traffic + error rates per domain"
+    steps:
+      - tool: site_analytics
+    timeout_ms: 11090
+    csl_confidence: 0.618
+    tags: [site, analytics, traffic]
+
+  # ── Git ──
+  git:sync:
+    name: "Multi-Remote Push"
+    category: git
+    description: "Push to all 4 remotes"
+    steps:
+      - tool: git_push_all
+        params: { remotes: [origin, staging, production] }
+    timeout_ms: 76013
+    csl_confidence: 0.809
+    tags: [git, sync, push]
+
+  git:clean:
+    name: "Git Hygiene"
+    category: git
+    description: "Delete stale branches + gc --aggressive"
+    steps:
+      - tool: git_clean
+        params: { aggressive: true }
+    timeout_ms: 199005
+    csl_confidence: 0.718
+    tags: [git, clean, branches]
+
+  git:status:
+    name: "Multi-Repo Status"
+    category: git
+    description: "Status across all 78 repos"
+    steps:
+      - tool: git_multi_status
+    timeout_ms: 29034
+    csl_confidence: 0.618
+    tags: [git, status, repos]
+
+  git:label:
+    name: "Repo Labeling"
+    category: git
+    description: "Apply status banners (CANONICAL/MIRROR/STAGING/EXPERIMENTAL/ARCHIVED)"
+    steps:
+      - tool: git_label_repos
+    timeout_ms: 29034
+    csl_confidence: 0.718
+    tags: [git, labels, repos]
+
+  git:protect:
+    name: "Branch Protection"
+    category: git
+    description: "Set branch protection on main across all orgs"
+    steps:
+      - tool: git_protect_branches
+    timeout_ms: 29034
+    csl_confidence: 0.927
+    tags: [git, protection, branches]
+
+  # ── Patent & IP ──
+  ip:scan:
+    name: "Prior Art Search"
+    category: ip
+    description: "Patent research swarm for prior art"
+    steps:
+      - swarm: patent-research
+    timeout_ms: 199005
+    csl_confidence: 0.718
+    tags: [ip, patents, research]
+
+  ip:calendar:
+    name: "Patent Calendar"
+    category: ip
+    description: "Provisional → non-provisional deadlines"
+    steps:
+      - tool: patent_calendar
+    timeout_ms: 11090
+    csl_confidence: 0.882
+    tags: [ip, patents, deadlines]
+
+  ip:map:
+    name: "Patent-Code Map"
+    category: ip
+    description: "Which patents protect which code"
+    steps:
+      - tool: patent_code_map
+    timeout_ms: 29034
+    csl_confidence: 0.718
+    tags: [ip, patents, mapping]
+
+  ip:novel:
+    name: "Novelty Assessment"
+    category: ip
+    description: "Score novelty against existing portfolio"
+    steps:
+      - tool: novelty_assess
+    timeout_ms: 76013
+    csl_confidence: 0.809
+    tags: [ip, novelty, assessment]
+
+  ip:file:
+    name: "Draft Patent"
+    category: ip
+    description: "Generate provisional patent draft"
+    steps:
+      - tool: patent_draft
+    timeout_ms: 199005
+    csl_confidence: 0.882
+    tags: [ip, patent, filing]
+
+  # ── Observability ──
+  obs:traces:
+    name: "OTel Traces"
+    category: observability
+    description: "Recent trace analysis"
+    steps:
+      - tool: trace_summary
+    timeout_ms: 11090
+    csl_confidence: 0.618
+    tags: [observability, traces, otel]
+
+  obs:errors:
+    name: "Sentry Error Digest"
+    category: observability
+    description: "Top errors by frequency"
+    steps:
+      - tool: sentry_errors
+    timeout_ms: 11090
+    csl_confidence: 0.718
+    tags: [observability, errors, sentry]
+
+  obs:logs:
+    name: "Log Tail"
+    category: observability
+    description: "Structured JSON log streaming"
+    steps:
+      - tool: service_logs
+    timeout_ms: 29034
+    csl_confidence: 0.618
+    tags: [observability, logs, streaming]
+
+  obs:metrics:
+    name: "Auto-Success Metrics"
+    category: observability
+    description: "135 tasks × 9 categories dashboard"
+    steps:
+      - tool: auto_success_metrics
+    timeout_ms: 11090
+    csl_confidence: 0.718
+    tags: [observability, metrics, dashboard]
+
+  obs:dashboard:
+    name: "Sacred Geometry Dashboard"
+    category: observability
+    description: "Launch full observability UI"
+    steps:
+      - tool: launch_dashboard
+    timeout_ms: 11090
+    csl_confidence: 0.618
+    tags: [observability, dashboard, ui]
+
+  # ── CSL & φ ──
+  phi:calc:
+    name: "Phi Calculator"
+    category: phi
+    description: "Calculate φ^power × base"
+    steps:
+      - tool: phi_scale
+    timeout_ms: 4236
+    csl_confidence: 0.618
+    tags: [phi, math, calculation]
+
+  csl:eval:
+    name: "CSL Evaluate"
+    category: csl
+    description: "Evaluate CSL gate expression"
+    steps:
+      - tool: csl_evaluate
+    timeout_ms: 4236
+    csl_confidence: 0.618
+    tags: [csl, evaluate, gate]
+
+# ═══════════════════════════════════════════════════
+# SOS: EMERGENCY RUNBOOKS (8 commands)
+# ═══════════════════════════════════════════════════
+  sos:down:
+    name: "System Down"
+    category: sos
+    description: "Full system recovery"
+    steps:
+      - command: sys:boot
+      - command: sys:health
+      - command: obs:errors
+    timeout_ms: 76013
+    csl_confidence: 0.927
+    priority: critical
+    tags: [sos, emergency, down]
+
+  sos:provider:
+    name: "Provider Outage"
+    category: sos
+    description: "LLM provider auto-failover"
+    steps:
+      - command: ai:route
+      - tool: llm_failover
+      - command: obs:traces
+    timeout_ms: 4236
+    csl_confidence: 0.927
+    priority: critical
+    tags: [sos, emergency, provider]
+
+  sos:memory:
+    name: "Memory Corruption"
+    category: sos
+    description: "Flush and rebuild working memory"
+    steps:
+      - command: mem:flush
+      - command: mem:bootstrap
+      - command: mem:stats
+    timeout_ms: 29034
+    csl_confidence: 0.927
+    priority: critical
+    tags: [sos, emergency, memory]
+
+  sos:deploy:
+    name: "Bad Deployment"
+    category: sos
+    description: "Emergency rollback"
+    steps:
+      - command: deploy:rollback
+      - command: sys:health
+      - command: obs:errors
+    timeout_ms: 11090
+    csl_confidence: 0.927
+    priority: critical
+    tags: [sos, emergency, deploy]
+
+  sos:security:
+    name: "Security Breach"
+    category: sos
+    description: "Rotate secrets + block + scan"
+    steps:
+      - command: sec:rotate
+      - command: sec:waf
+      - command: sec:scan
+      - swarm: incident-response
+    timeout_ms: 76013
+    csl_confidence: 0.927
+    priority: critical
+    tags: [sos, emergency, security]
+
+  sos:budget:
+    name: "Budget Alert"
+    category: sos
+    description: "Auto-downscale non-essential services"
+    steps:
+      - command: sys:budget
+      - tool: auto_downscale
+      - command: ai:cost
+    timeout_ms: 29034
+    csl_confidence: 0.809
+    priority: high
+    tags: [sos, emergency, budget]
+
+  sos:pipeline:
+    name: "Pipeline Stuck"
+    category: sos
+    description: "Force-complete stuck stages + replay"
+    steps:
+      - command: pipe:status
+      - tool: pipeline_force_complete
+      - command: pipe:replay
+    timeout_ms: 29034
+    csl_confidence: 0.809
+    priority: high
+    tags: [sos, emergency, pipeline]
+
+  sos:dns:
+    name: "DNS Failure"
+    category: sos
+    description: "Cloudflare DNS API repair"
+    steps:
+      - command: site:dns
+      - tool: dns_repair
+      - command: site:status
+    timeout_ms: 29034
+    csl_confidence: 0.809
+    priority: high
+    tags: [sos, emergency, dns]

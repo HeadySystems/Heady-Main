@@ -1,0 +1,10 @@
+{
+  "name": "heady-bridge-n4m",
+  "version": "1.0.0",
+  "description": "Node for Max bridge for HeadyMusic — runs inside Ableton Live 12",
+  "main": "heady-bridge.js",
+  "dependencies": {
+    "ws": "^8.16.0",
+    "max-api": "^1.0.3"
+  }
+}

@@ -72,10 +72,10 @@ class HeadyAuth {
     // 4. Request auth state from relay
     this.#requestAuthState();
 
-    // 5. Wait for first auth response (max 3s timeout)
+    // 5. Wait for first auth response (FIB[4] * 1000 = 3000ms timeout)
     await Promise.race([
       this.#readyPromise,
-      new Promise(r => setTimeout(r, 3000)),
+      new Promise(r => setTimeout(r, FIB[4] * 1000)),
     ]);
 
     // 6. Start heartbeat
@@ -258,7 +258,8 @@ class HeadyAuth {
   /** Request cross-domain SSO transfer token */
   requestTransfer(targetOrigin) {
     return new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => reject(new Error('Transfer timeout')), 10000);
+      // FIB[7] * 1000 = 13000ms timeout
+      const timeout = setTimeout(() => reject(new Error('Transfer timeout')), FIB[7] * 1000);
 
       this.once('auth:transfer', (data) => {
         clearTimeout(timeout);

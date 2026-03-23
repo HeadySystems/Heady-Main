@@ -1,0 +1,25 @@
+{
+  "name": "heady-music",
+  "version": "1.0.0",
+  "description": "Heady × Ableton Live 12 — Sacred Geometry Music Integration",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node test.js"
+  },
+  "dependencies": {
+    "ws": "^8.16.0",
+    "easymidi": "^3.1.0",
+    "osc": "^2.4.4"
+  },
+  "keywords": [
+    "heady",
+    "ableton",
+    "sacred-geometry",
+    "midi",
+    "music",
+    "ai"
+  ],
+  "author": "HeadySystems Inc.",
+  "license": "MIT"
+}

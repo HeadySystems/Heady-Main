@@ -1,0 +1,23 @@
+{
+  "name": "heady-auth-service",
+  "version": "2.0.0",
+  "description": "HeadyAuth — Cloud Run authentication service for the Heady ecosystem",
+  "type": "module",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "NODE_ENV=development node server.mjs"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "express": "^4.21.0",
+    "firebase-admin": "^12.6.0",
+    "pg": "^8.13.0",
+    "zod": "^3.23.8"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "author": "HeadySystems Inc. — Eric Haywood, Founder",
+  "license": "UNLICENSED"
+}

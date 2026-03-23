@@ -210,8 +210,9 @@ class HeadyCoderNode extends AINode {
   async executeTask(payload) {
     this.invocations++; this.lastInvoked = new Date().toISOString();
     // Simulate async code generation/improvement based on target scope
-    const target = payload?.target || "general_system";
-    await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
+    // Deterministic φ-backoff — eliminates uncontrolled entropy (Math.random)
+    const phiJitterMs = 1618; 
+    await new Promise(resolve => setTimeout(resolve, phiJitterMs));
     return { 
       status: "completed", 
       node: this.name, 

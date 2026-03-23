@@ -40,7 +40,7 @@
 ### 5. LAYER 4: DATA & MEMORY
 *   **Short-term:** Redis cache for conversation context window.
 *   **Long-term (Episodic):** Postgres (JSONB) for structured logs (Journal, Tasks).
-*   **Long-term (Semantic):** pgvector or Pinecone for embedding-based recall ("What did I say about my anxiety last week?").
+*   **Long-term (Semantic):** pgvector with HNSW index for embedding-based recall ("What did I say about my anxiety last week?"). See ADR-003.
 *   **Universal Task Pool:** A single database table holding *all* tasks from *all* sources, normalized.
 
 ### 6. LAYER 5: GOVERNANCE & SAFETY

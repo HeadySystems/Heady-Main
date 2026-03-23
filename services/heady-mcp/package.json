@@ -1,0 +1,21 @@
+{
+  "name": "heady-mcp-proxy",
+  "version": "1.0.0",
+  "description": "HeadyMCP — Universal MCP Proxy Service for headymcp.com",
+  "type": "module",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "NODE_ENV=development node server.mjs"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "cookie-parser": "^1.4.6",
+    "uuid": "^11.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "author": "HeadySystems Inc.",
+  "license": "UNLICENSED"
+}

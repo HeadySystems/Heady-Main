@@ -1,0 +1,21 @@
+{
+  "name": "@heady-ai/mcp-server",
+  "version": "5.1.0",
+  "description": "HeadyMCP Server — JSON-RPC 2.0 over stdio for IDE integration",
+  "main": "index.js",
+  "bin": {
+    "heady-mcp": "./src/server.js"
+  },
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "author": "HeadySystems Inc.",
+  "license": "UNLICENSED",
+  "keywords": ["mcp", "heady", "ai", "sacred-geometry"]
+}
