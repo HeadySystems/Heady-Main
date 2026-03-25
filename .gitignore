@@ -174,4 +174,3 @@ configs/secrets/
 secrets_registry.json
 
 # ── Loose credential files ─────────────────────────────
-!package-lock.json
