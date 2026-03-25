@@ -7,7 +7,7 @@
  * @author Eric Haywood — HeadySystems Inc.
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
+// vitest globals: describe, it, expect, beforeEach are provided by vitest config
 
 // Inline test implementations (no external deps required)
 const PHI = 1.618033988749895;

@@ -14,7 +14,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@heady/phi-math": "workspace:*",
+    "@heady-ai/phi-math": "workspace:*",
     "@heady-ai/csl-router": "workspace:*",
     "@heady-ai/agent-identity": "workspace:*",
     "@heady-ai/memory-stream": "workspace:*",

@@ -14,7 +14,7 @@
         "@heady-ai/service-runtime": "workspace:*",
         "@heady-ai/contract-types": "workspace:*",
         "@heady-ai/observability-client": "workspace:*",
-        "@heady/phi-math-foundation": "workspace:*",
+        "@heady-ai/phi-math-foundation": "workspace:*",
         "@heady-ai/csl-gate": "workspace:*"
     }
 }

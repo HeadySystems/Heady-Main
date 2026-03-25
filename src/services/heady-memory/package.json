@@ -1,5 +1,5 @@
 {
-  "name": "@heady-ai/heady-memory",
+  "name": "@heady-ai/memory",
   "version": "4.0.0",
   "description": "3D vector space memory with pgvector HNSW indexing and hybrid search",
   "main": "index.js",

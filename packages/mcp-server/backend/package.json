@@ -12,10 +12,10 @@
   "dependencies": {
     "@heady-ai/core": "workspace:*",
     "@heady-ai/vector-memory": "workspace:*",
-    "@heady/phi-math": "workspace:*",
+    "@heady-ai/phi-math": "workspace:*",
     "@heady-ai/csl-engine": "workspace:*",
     "@heady-ai/orchestrator": "workspace:*",
-    "@heady-ai/heady-memory": "workspace:*",
+    "@heady-ai/memory": "workspace:*",
     "@heady-ai/heady-conductor": "workspace:*",
     "@heady-ai/heady-guard": "workspace:*"
   },

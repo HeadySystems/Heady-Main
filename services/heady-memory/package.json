@@ -1,5 +1,5 @@
 {
-  "name": "@heady-ai/heady-memory",
+  "name": "@heady-ai/memory",
   "version": "0.1.0",
   "private": true,
   "type": "module",

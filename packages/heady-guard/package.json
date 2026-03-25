@@ -1,5 +1,5 @@
 {
-  "name": "@heady/guard",
+  "name": "@heady-ai/heady-guard",
   "version": "1.0.0",
   "description": "HeadyGuard — enterprise governance, kill-switch, audit trail, and hallucination detection",
   "main": "src/index.js",

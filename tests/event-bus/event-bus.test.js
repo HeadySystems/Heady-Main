@@ -4,7 +4,7 @@
  * Validates pub-sub, topic matching, queue groups, dead letters, and backpressure.
  */
 
-import { describe, it, expect } from '@jest/globals';
+// vitest globals: describe, it, expect, beforeEach are provided by vitest config
 
 const PHI = 1.618033988749895;
 const PSI = 1 / PHI;
