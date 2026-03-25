@@ -31,6 +31,8 @@ const DOMAINS = {
         'headycloud.com': { name: 'HeadyCloud', tagline: 'Cloud Infrastructure Portal', icon: '☁️', color: '#74B9FF', geo: 'Dodecahedron', dir: 'headycloud' },
         'headystore.com': { name: 'HeadyStore', tagline: 'AI Marketplace & Store', icon: '🏪', color: '#FF7675', geo: 'Golden Spiral', dir: 'headystore' },
         'headyex.com': { name: 'HeadyEx', tagline: 'Data Exchange Platform', icon: '📊', color: '#00B894', geo: 'Fibonacci Spiral', dir: 'headyex' },
+        'headykey.com': { name: 'HeadyKey', tagline: 'Sovereign Identity & Access for the AI Era', icon: '🔑', color: '#8b5cf6', geo: 'Flower of Life', dir: 'headykey' },
+        'headyvault.com': { name: 'HeadyVault', tagline: 'Your Sovereign AI Data Vault', icon: '🔐', color: '#8b5cf6', geo: 'Metatrons Cube', dir: 'headyvault' },
     },
 
     // ── INTERNAL TOOL UIs (functional dashboards) ─────────────────────
@@ -42,11 +44,9 @@ const DOMAINS = {
         'headysense.com': { name: 'HeadySense', tagline: 'Monitoring & Observability', icon: '📡', color: '#00CEC9' },
         'headydb.com': { name: 'HeadyDB', tagline: 'Database Admin Console', icon: '🗄️', color: '#636E72' },
         'headysecure.com': { name: 'HeadySecure', tagline: 'Security Dashboard', icon: '🔒', color: '#2D3436' },
-        'headyvault.com': { name: 'HeadyVault', tagline: 'Secrets & Key Management', icon: '🔐', color: '#2D3436' },
         'headycore.com': { name: 'HeadyCore', tagline: 'Core Services Dashboard', icon: '⚙️', color: '#636E72' },
         'headycheck.com': { name: 'HeadyCheck', tagline: 'Health Monitor', icon: '✅', color: '#00B894' },
         'headysafe.com': { name: 'HeadySafe', tagline: 'Safety & Compliance', icon: '🛡️', color: '#0984E3' },
-        'headykey.com': { name: 'HeadyKey', tagline: 'Key & Identity Manager', icon: '🔑', color: '#FDCB6E' },
         'headyu.com': { name: 'HeadyU', tagline: 'Learning & Education', icon: '🎓', color: '#6C5CE7' },
         'headymx.com': { name: 'HeadyMX', tagline: 'Email & Messaging', icon: '📧', color: '#00CEC9' },
         'headytxt.com': { name: 'HeadyTxt', tagline: 'Text & Document Service', icon: '📝', color: '#636E72' },

@@ -25,6 +25,8 @@ declare -A SITES=(
   [headylens]="heady-web-lens:headylens.com"
   [headyapi]="heady-web-api:headyapi.com"
   [headyio]="heady-web-io:headyio.com"
+  [headykey]="heady-web-key:headykey.com"
+  [headyvault]="heady-web-vault:headyvault.com"
   [admin-portal]="heady-web-admin:admin.headyme.com"
 )
 

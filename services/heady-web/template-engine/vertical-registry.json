@@ -118,6 +118,48 @@
     },
 
     {
+      "vertical_id":   "headykey",
+      "domain":        "headykey.com",
+      "aliases":       ["www.headykey.com", "auth.headysystems.com"],
+      "config_path":   "headykey/config.json",
+      "status":        "active",
+      "deployed_at":   "2026-03-25T00:00:00Z",
+      "description":   "Sovereign identity & access — login, SSO, API keys, RBAC, zero-trust auditability",
+      "category":      "auth",
+      "design": {
+        "accent_variant": "violet",
+        "data_vertical":  "headykey"
+      },
+      "infrastructure": {
+        "cdn":       "cloudflare",
+        "r2_bucket": "heady-headykey-prod",
+        "kv_prefix": "vertical:headykey",
+        "analytics": null
+      }
+    },
+
+    {
+      "vertical_id":   "headyvault",
+      "domain":        "headyvault.com",
+      "aliases":       ["www.headyvault.com"],
+      "config_path":   "headyvault/config.json",
+      "status":        "planned",
+      "deployed_at":   null,
+      "description":   "Sovereign AI data vault — secure storage, selective disclosure, encrypted sharing, audit trail",
+      "category":      "data",
+      "design": {
+        "accent_variant": "violet",
+        "data_vertical":  "headyvault"
+      },
+      "infrastructure": {
+        "cdn":       "cloudflare",
+        "r2_bucket": "heady-headyvault-prod",
+        "kv_prefix": "vertical:headyvault",
+        "analytics": null
+      }
+    },
+
+    {
       "vertical_id":   "exchange",
       "domain":        "headyex.com",
       "aliases":       ["www.headyex.com", "exchange.headyme.com"],

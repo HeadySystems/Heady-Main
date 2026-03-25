@@ -1,20 +1,20 @@
 {
   "stats": [
     {
-      "value": "60+",
-      "label": "Connected Domains"
+      "value": "E2E",
+      "label": "Encrypted Sharing"
     },
     {
-      "value": "17",
-      "label": "AI Swarms"
+      "value": "ZK",
+      "label": "Selective Disclosure"
     },
     {
-      "value": "<100ms",
-      "label": "Edge Latency"
+      "value": "Full",
+      "label": "Audit Trail"
     },
     {
-      "value": "φ",
-      "label": "Sacred Geometry"
+      "value": "You",
+      "label": "Data Custody"
     }
   ]
 }
