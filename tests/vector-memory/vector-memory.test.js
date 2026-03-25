@@ -12,16 +12,16 @@ const FIB = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987];
 
 describe('VectorMemoryStore', () => {
   describe('HNSW Configuration', () => {
-    it('m parameter is FIB[8] = 21', () => {
-      expect(FIB[8]).toBe(21);
+    it('m parameter is FIB[7] = 21', () => {
+      expect(FIB[7]).toBe(21);
     });
 
-    it('ef_construction is FIB[12] = 144', () => {
-      expect(FIB[12]).toBe(144);
+    it('ef_construction is FIB[11] = 144', () => {
+      expect(FIB[11]).toBe(144);
     });
 
-    it('ef_search is FIB[11] = 89', () => {
-      expect(FIB[11]).toBe(89);
+    it('ef_search is FIB[10] = 89', () => {
+      expect(FIB[10]).toBe(89);
     });
   });
 
@@ -83,8 +83,8 @@ describe('VectorMemoryStore', () => {
   });
 
   describe('Search Defaults', () => {
-    it('default topK is FIB[8] = 21', () => {
-      expect(FIB[8]).toBe(21);
+    it('default topK is FIB[7] = 21', () => {
+      expect(FIB[7]).toBe(21);
     });
 
     it('default threshold is ψ ≈ 0.618', () => {
@@ -111,12 +111,12 @@ describe('VectorMemoryStore', () => {
   });
 
   describe('Batch Sizes', () => {
-    it('batch upsert is FIB[12] = 144', () => {
-      expect(FIB[12]).toBe(144);
+    it('batch upsert is FIB[11] = 144', () => {
+      expect(FIB[11]).toBe(144);
     });
 
-    it('batch delete is FIB[10] = 55', () => {
-      expect(FIB[10]).toBe(55);
+    it('batch delete is FIB[9] = 55', () => {
+      expect(FIB[9]).toBe(55);
     });
   });
 });

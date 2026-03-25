@@ -11,4 +11,4 @@ jobs:
       - name: Setup Heady
         uses: ./.github/actions/setup-heady
       - run: pnpm install --no-frozen-lockfile
-      - run: pnpm run build --filter="./packages/**"
+      - run: pnpm -r --filter "./packages/**" run build

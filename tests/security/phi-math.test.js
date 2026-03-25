@@ -4,8 +4,6 @@
  * Validates core constants, thresholds, gates, and utility functions.
  */
 
-'use strict';
-
 const {
   PHI, PSI, PHI_SQ, PHI_CB, PHI_TEMPERATURE,
   fib, phiThreshold, CSL_THRESHOLDS, DEDUP_THRESHOLD,
@@ -13,7 +11,7 @@ const {
   cslGate, cslBlend, sigmoid,
   phiBackoff, phiFusionWeights, cosineSimilarity,
   phiPriorityScore, phiTokenBudgets,
-} = require('../../shared/phi-math');
+} = await import('../../shared/phi-math.js');
 
 describe('Core Constants', () => {
   test('PHI ≈ 1.618', () => {

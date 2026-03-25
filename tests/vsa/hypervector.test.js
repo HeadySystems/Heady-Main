@@ -2,7 +2,7 @@
  * @fileoverview Hypervector tests
  */
 
-const { Hypervector, DEFAULT_DIMENSIONALITY } = await import('../src/vsa/hypervector.js');
+const { Hypervector, DEFAULT_DIMENSIONALITY } = await import('../../src/vsa/hypervector.js');
 
 describe('Hypervector', () => {
   test('creates random hypervector with correct dimensionality', () => {

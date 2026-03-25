@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-const ToolRegistry = require('../../src/mcp/tool-registry.js');
+// vitest globals: describe, it, expect, beforeAll are provided by vitest config
+const { default: ToolRegistry } = await import('../../src/mcp/tool-registry.js');
 const toolRegistry = new ToolRegistry();
 
 describe('MCP Tool Registry', () => {

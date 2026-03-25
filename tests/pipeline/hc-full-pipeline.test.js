@@ -175,13 +175,13 @@ describe('Stage Retry and Timeout', () => {
 });
 
 describe('Pipeline Run Tracking', () => {
-  it('should limit run history to FIB[10] entries', () => {
-    const maxHistory = FIB[10]; // 55
+  it('should limit run history to FIB[9] entries', () => {
+    const maxHistory = FIB[9]; // 55
     expect(maxHistory).toBe(55);
   });
 
-  it('should limit concurrent pipeline runs to FIB[5]', () => {
-    const maxConcurrent = FIB[5]; // 5
+  it('should limit concurrent pipeline runs to FIB[4]', () => {
+    const maxConcurrent = FIB[4]; // 5
     expect(maxConcurrent).toBe(5);
   });
 });
