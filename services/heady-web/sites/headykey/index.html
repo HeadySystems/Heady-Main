@@ -3,21 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HeadyKey™ — Identity & Access</title>
-  <meta name="description" content="HeadyKey™ - Identity & Access. Part of the Heady™ intelligent platform by HeadySystems Inc.">
+  <title>HeadyKey™ — Sovereign Identity & Access for the AI Era</title>
+  <meta name="description" content="HeadyKey™ — Login, SSO, API keys, RBAC, and zero-trust auditability. The public auth product of the Heady™ platform, powered by HeadyAuth v5.0.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://headykey.com/">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%238b5cf6'/%3E%3Ctext x='16' y='22' text-anchor='middle' fill='%230a0e17' font-family='system-ui' font-weight='800' font-size='18'%3E◆%3C/text%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%238b5cf6'/%3E%3Ctext x='16' y='22' text-anchor='middle' fill='%230a0e17' font-family='system-ui' font-weight='800' font-size='18'%3E🔑%3C/text%3E%3C/svg%3E">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://headykey.com/">
-  <meta property="og:title" content="HeadyKey™ — Identity & Access">
-  <meta property="og:description" content="HeadyKey™ - Identity & Access. Part of the Heady™ intelligent platform by HeadySystems Inc.">
+  <meta property="og:title" content="HeadyKey™ — Sovereign Identity & Access for the AI Era">
+  <meta property="og:description" content="Login, SSO, API keys, RBAC, and zero-trust auditability. The public auth product of the Heady™ platform.">
   <meta property="og:site_name" content="HeadyKey™">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="HeadyKey™ — Identity & Access">
-  <meta name="twitter:description" content="HeadyKey™ - Identity & Access. Part of the Heady™ intelligent platform by HeadySystems Inc.">
+  <meta name="twitter:title" content="HeadyKey™ — Sovereign Identity & Access for the AI Era">
+  <meta name="twitter:description" content="Login, SSO, API keys, RBAC, and zero-trust auditability. The public auth product of the Heady™ platform.">
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"WebSite","name":"HeadyKey™","url":"https://headykey.com","description":"HeadyKey™ - Identity & Access. Part of the Heady™ intelligent platform by HeadySystems Inc.","publisher":{"@type":"Organization","name":"HeadySystems Inc.","url":"https://headysystems.com","founder":{"@type":"Person","name":"Eric Haywood"}}}
+  {"@context":"https://schema.org","@type":"WebSite","name":"HeadyKey™","url":"https://headykey.com","description":"HeadyKey™ — Sovereign Identity & Access for the AI Era. Login, SSO, API keys, RBAC, and zero-trust auditability.","publisher":{"@type":"Organization","name":"HeadySystems Inc.","url":"https://headysystems.com","founder":{"@type":"Person","name":"Eric Haywood"}}}
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,10 +28,15 @@
     body{background:var(--bg);color:var(--text);font-family:var(--body);line-height:1.618;overflow-x:hidden;-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34px}
     .logo{font-family:var(--font);font-size:clamp(2rem,6vw,3.75rem);font-weight:800;margin-bottom:13px;letter-spacing:-0.03em}
     .logo .a{color:var(--accent)}
-    .tagline{font-size:clamp(1rem,2.5vw,1.5rem);color:var(--text2);margin-bottom:34px;max-width:500px}
+    .tagline{font-size:clamp(1rem,2.5vw,1.5rem);color:var(--text2);margin-bottom:34px;max-width:600px}
     .badge{display:inline-flex;align-items:center;gap:8px;padding:8px 21px;border:1px solid #8b5cf640;border-radius:100px;background:#8b5cf615;font-size:0.875rem;color:var(--accent);margin-bottom:55px}
     .badge-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:p 2s infinite}
     @keyframes p{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+    .features{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:13px;max-width:960px;width:100%;margin-bottom:55px}
+    .feat{background:rgba(13,18,33,0.7);border:1px solid var(--border);border-radius:13px;padding:21px;backdrop-filter:blur(16px);text-align:left;transition:all .3s}
+    .feat:hover{border-color:#8b5cf640;transform:translateY(-3px)}
+    .feat h4{font-family:var(--font);font-size:.9rem;font-weight:600;margin-bottom:5px}
+    .feat p{font-size:.8rem;color:var(--text3);line-height:1.5}
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:13px;max-width:900px;width:100%;margin-bottom:55px}
     .card{background:rgba(13,18,33,0.7);border:1px solid var(--border);border-radius:13px;padding:21px;backdrop-filter:blur(16px);transition:all .3s;text-decoration:none;color:var(--text)}
     .card:hover{border-color:#8b5cf640;transform:translateY(-3px)}
@@ -43,6 +48,7 @@
     .btn-p:hover{transform:translateY(-1px);box-shadow:0 8px 24px #8b5cf640}
     .btn-g{background:transparent;color:var(--text2);border:1px solid var(--border)}
     .btn-g:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
+    .section-label{font-family:var(--font);font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:8px}
     .footer{position:absolute;bottom:21px;font-size:.75rem;color:var(--text3)}
     .footer a{color:var(--text3);margin:0 8px;text-decoration:none;transition:color .2s}
     .footer a:hover{color:var(--accent)}
@@ -51,26 +57,36 @@
 </head>
 <body>
   <canvas id="sacred-geo-canvas" aria-hidden="true"></canvas>
-  <div class="badge"><span class="badge-dot"></span>HeadySystems Inc. — 60+ Patents</div>
+  <div class="badge"><span class="badge-dot"></span>HeadySystems Inc.</div>
   <h1 class="logo"><span class="a">HeadyKey</span>™</h1>
-  <p class="tagline">Identity & Access. Part of the Heady™ intelligent platform — Sacred Geometry powered AI infrastructure.</p>
+  <p class="tagline">Sovereign Identity & Access for the AI Era. Login, SSO, API keys, RBAC, and zero-trust auditability — powered by HeadyAuth v5.0.</p>
+
+  <p class="section-label">Capabilities</p>
+  <div class="features">
+    <div class="feat"><h4>Login & SSO</h4><p>Email/password, OAuth providers, and cross-domain single sign-on across 60+ Heady domains.</p></div>
+    <div class="feat"><h4>API Key Management</h4><p>Issue, list, and revoke API keys (hdy_ prefix, SHA-256 hashed). Service-to-service verification.</p></div>
+    <div class="feat"><h4>RBAC & Zero-Trust</h4><p>Role-based access (guest, user, operator, admin). Explicit CORS, no wildcards, mTLS between services.</p></div>
+    <div class="feat"><h4>Audit & Compliance</h4><p>Every auth event logged with SHA-256 hashes. Ed25519 Merkle audit trail. SOC 2 gap remediation in progress.</p></div>
+  </div>
+
+  <p class="section-label">Heady™ Ecosystem</p>
   <div class="grid">
     <a class="card" href="https://headyme.com"><h4>HeadyMe</h4><p>AI Operating System</p></a>
     <a class="card" href="https://headysystems.com"><h4>HeadySystems</h4><p>Infrastructure</p></a>
+    <a class="card" href="https://headyvault.com"><h4>HeadyVault</h4><p>Sovereign Data Vault</p></a>
     <a class="card" href="https://headyio.com"><h4>Heady I/O</h4><p>Developer SDK</p></a>
     <a class="card" href="https://headyapi.com"><h4>HeadyAPI</h4><p>AI Gateway</p></a>
     <a class="card" href="https://headymcp.com"><h4>HeadyMCP</h4><p>MCP Tools</p></a>
     <a class="card" href="https://headybuddy.org"><h4>HeadyBuddy</h4><p>AI Companion</p></a>
     <a class="card" href="https://headyos.com"><h4>HeadyOS</h4><p>Latent OS</p></a>
-    <a class="card" href="https://heady-ai.com"><h4>Heady AI</h4><p>Intelligence Hub</p></a>
   </div>
   <div class="cta-row">
-    <a href="https://headyme.com" class="btn btn-p">Get Started →</a>
+    <a href="https://headyme.com" class="btn btn-p">Get Started</a>
     <a href="https://headyio.com" class="btn btn-g">Documentation</a>
   </div>
   <div class="footer">
-    <p>© 2024-2026 HeadySystems Inc. — Sacred Geometry · Continuous Semantic Logic · 60+ Patents</p>
-    <p><a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="mailto:eric@headysystems.com">Contact</a></p>
+    <p>&copy; 2024-2026 HeadySystems Inc. — Sacred Geometry &middot; Continuous Semantic Logic</p>
+    <p><a href="/privacy">Privacy</a> &middot; <a href="/terms">Terms</a> &middot; <a href="mailto:eric@headysystems.com">Contact</a></p>
   </div>
   <script>var ACCENT='#8b5cf6';
 (function(){
@@ -83,7 +99,6 @@
     x.clearRect(0,0,w,h);
     x.globalAlpha=0.06;
     const cx=w/2,cy=h/2,r=Math.min(w,h)*0.35;
-    // Flower of Life pattern
     for(let i=0;i<6;i++){
       const a=(Math.PI/3)*i+t*0.1;
       const px=cx+Math.cos(a)*r*PSI;
@@ -91,10 +106,8 @@
       x.beginPath();x.arc(px,py,r*PSI,0,Math.PI*2);
       x.strokeStyle=ACCENT;x.lineWidth=0.8;x.stroke();
     }
-    // Center circle
     x.beginPath();x.arc(cx,cy,r*PSI,0,Math.PI*2);
     x.strokeStyle=ACCENT;x.lineWidth=1;x.stroke();
-    // Rotating outer ring
     for(let i=0;i<12;i++){
       const a=(Math.PI/6)*i+t*0.05;
       const px=cx+Math.cos(a)*r;
@@ -102,7 +115,6 @@
       x.beginPath();x.arc(px,py,4,0,Math.PI*2);
       x.fillStyle=ACCENT;x.globalAlpha=0.12;x.fill();
     }
-    // Connecting lines
     x.globalAlpha=0.03;
     for(let i=0;i<6;i++){
       const a1=(Math.PI/3)*i+t*0.08;

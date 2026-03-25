@@ -416,14 +416,44 @@ pipeline_services:
     criticality: high
     owner: system
 
+  # ─── HEADYKEY — Public Auth Product ────────────────────────────────────────
+  # HeadyKey is the public-facing auth product (headykey.com).
+  # Backed by two internal services:
+  #   1. auth-service (HeadyAuth v5.0) — JWT, API keys, RBAC, email/password
+  #      Repo: HeadyMe/heady-production  Port: 3309  DNS: auth.headysystems.com
+  #   2. auth-session-server — Firebase cross-domain SSO relay
+  #      Repo: HeadySystems/Heady-Main   Port: 3310
+  # Internal service names (auth-service, auth-session-server) are stable and unchanged.
+  - name: heady-key
+    role: "HeadyKey — Sovereign Identity & Access (public auth product)"
+    type: feature
+    skills: [login, sso, api-keys, rbac, zero-trust, auditability]
+    endpoint: https://auth.headysystems.com
+    healthCheck: https://auth.headysystems.com/health/ready
+    criticality: critical
+    owner: system
+    publicDomain: headykey.com
+    internalServices:
+      - name: auth-service
+        version: "5.0.0"
+        repo: HeadyMe/heady-production
+        port: 3309
+        platform: GCP Cloud Run
+      - name: auth-session-server
+        repo: HeadySystems/Heady-Main
+        port: 3310
+        platform: GCP Cloud Run
+
   - name: heady-vault
-    role: Personal Sovereign Data Store
+    role: "HeadyVault — Personal Sovereign Data Store (coming soon)"
     type: feature
     skills: [data-sovereignty, selective-disclosure, zk-proofs]
     endpoint: /api/features/vault
     healthCheck: /api/features/vault
     criticality: high
     owner: system
+    publicDomain: headyvault.com
+    status: coming-soon
 
   - name: heady-marketplace
     role: Agent Skill Store

@@ -2,9 +2,9 @@
   "siteId": "headykey",
   "domain": "headykey.com",
   "brand": "HeadyKey",
-  "tagline": "Sovereign Identity & Access Management",
-  "purpose": "Sovereign Identity & Access Management",
-  "audience": "Developers, enterprises, and AI-forward organizations",
+  "tagline": "Sovereign Identity & Access for the AI Era",
+  "purpose": "Public auth product — login, SSO, API keys, RBAC, and zero-trust auditability. Powered by HeadyAuth v5.0 and auth-session-server.",
+  "audience": "End users, developers, and enterprise buyers",
   "tone": "professional, innovative, approachable",
   "theme": {
     "accent": "violet",

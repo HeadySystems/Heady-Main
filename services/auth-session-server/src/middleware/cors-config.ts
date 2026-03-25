@@ -19,6 +19,11 @@ const HEADY_DOMAIN_PATTERNS = [
   /^https?:\/\/(?:.*\.)?headyex\.com$/i,
   /^https?:\/\/(?:.*\.)?headyfinance\.com$/i,
 
+  // Public auth & vault products
+  /^https?:\/\/(?:.*\.)?headykey\.com$/i,
+  /^https?:\/\/(?:.*\.)?headyvault\.com$/i,
+  /^https?:\/\/(?:.*\.)?headysecure\.com$/i,
+
   // Product-specific domains
   /^https?:\/\/(?:.*\.)?headyanalytics\.com$/i,
   /^https?:\/\/(?:.*\.)?headycloud\.com$/i,

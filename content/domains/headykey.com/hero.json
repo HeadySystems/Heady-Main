@@ -1,7 +1,7 @@
 {
   "eyebrow": "HeadyKey — Heady™ Ecosystem",
-  "headline": "Sovereign Identity & Access Management",
-  "subheadline": "HeadyKey is part of the Heady™ sovereign AI platform. Built on sacred geometry, powered by 17 AI swarms, and deployed across 60+ connected domains.",
+  "headline": "Sovereign Identity & Access for the AI Era",
+  "subheadline": "Login, SSO, API keys, RBAC, and zero-trust auditability. HeadyKey is the public auth product of the Heady™ platform — powered by HeadyAuth v5.0 and cross-domain session relay across 60+ domains.",
   "primaryCta": {
     "label": "Get Started",
     "href": "#cta"
@@ -11,12 +11,12 @@
     "href": "#features"
   },
   "badge": {
-    "text": "Infrastructure",
-    "icon": "⚡"
+    "text": "Auth & Identity",
+    "icon": "🔑"
   },
   "trustSignals": [
     "Part of Heady™",
-    "Sacred Geometry",
+    "Zero-Trust Architecture",
     "60+ Domains",
     "Enterprise Ready"
   ]

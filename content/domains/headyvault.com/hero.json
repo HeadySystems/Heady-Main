@@ -1,23 +1,23 @@
 {
   "eyebrow": "HeadyVault — Heady™ Ecosystem",
   "headline": "Your Sovereign AI Data Vault",
-  "subheadline": "HeadyVault is part of the Heady™ sovereign AI platform. Built on sacred geometry, powered by 17 AI swarms, and deployed across 60+ connected domains.",
+  "subheadline": "Secure storage, selective disclosure, encrypted sharing, and full audit trail. Custody stays with you. Backend in development — sign up to get notified.",
   "primaryCta": {
-    "label": "Get Started",
-    "href": "#cta"
+    "label": "Explore Heady™",
+    "href": "https://headyme.com"
   },
   "secondaryCta": {
-    "label": "Explore Features",
-    "href": "#features"
+    "label": "Get Notified",
+    "href": "mailto:eric@headysystems.com"
   },
   "badge": {
-    "text": "Infrastructure",
-    "icon": "⚡"
+    "text": "Coming Soon",
+    "icon": "🔒"
   },
   "trustSignals": [
     "Part of Heady™",
-    "Sacred Geometry",
-    "60+ Domains",
+    "Data Sovereignty",
+    "Zero-Knowledge Proofs",
     "Enterprise Ready"
   ]
 }

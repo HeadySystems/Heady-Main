@@ -1,26 +1,26 @@
 {
   "sectionTitle": "Features",
-  "sectionDescription": "Sovereign Identity & Access Management",
+  "sectionDescription": "Sovereign Identity & Access for the AI Era",
   "features": [
     {
-      "icon": "📡",
-      "title": "Edge-First Architecture",
-      "description": "Deployed to 300+ Cloudflare edge locations for global sub-100ms latency."
+      "icon": "🔐",
+      "title": "Login & SSO",
+      "description": "Email/password, OAuth providers, and cross-domain single sign-on across 60+ Heady domains via relay iframe."
+    },
+    {
+      "icon": "🔑",
+      "title": "API Key Management",
+      "description": "Issue, list, and revoke API keys (hdy_ prefix, SHA-256 hashed). Supports service-to-service verification."
     },
     {
       "icon": "🛡️",
-      "title": "Zero-Trust Security",
-      "description": "Every request authenticated, every connection encrypted, every action audited."
+      "title": "RBAC & Zero-Trust",
+      "description": "Role-based access control (guest, user, operator, admin) with explicit CORS, no wildcards, and mTLS between services."
     },
     {
-      "icon": "⚡",
-      "title": "Auto-Scaling",
-      "description": "φ-scaled resource allocation that grows and shrinks with demand."
-    },
-    {
-      "icon": "🔗",
-      "title": "API-First Design",
-      "description": "RESTful and GraphQL APIs with comprehensive SDKs and documentation."
+      "icon": "📋",
+      "title": "Audit & Compliance",
+      "description": "Every auth event logged with SHA-256 action hashes. SOC 2 gap remediation in progress. Ed25519 Merkle audit trail via HeadyGuard."
     }
   ]
 }
