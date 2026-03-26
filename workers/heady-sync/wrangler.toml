@@ -1,0 +1,22 @@
+name = "heady-sync"
+main = "src/index.js"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+[env.staging]
+name = "heady-sync-staging"
+workers_dev = true
+
+[env.production]
+name = "heady-sync"
+workers_dev = false
+routes = [
+  { pattern = "sync.headysystems.com/*", zone_name = "headysystems.com" }
+]
+
+# Secrets managed via `wrangler secret put`:
+# LINEAR_API_KEY, LINEAR_WEBHOOK_SECRET, LINEAR_TEAM_ID
+# SLACK_BOT_TOKEN, SLACK_SIGNING_SECRET
+# DATABASE_URL, UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN
+# DEFAULT_SLACK_CHANNEL
