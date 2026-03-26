@@ -1,0 +1,21 @@
+name = "headysystems-com"
+main = "src/index.js"
+compatibility_date = "2024-12-01"
+workers_dev = true
+
+[[routes]]
+pattern = "headysystems.com/*"
+zone_name = "headysystems.com"
+
+[vars]
+BACKEND_URL = "https://drupal-cms.run.app"
+ENVIRONMENT = "production"
+SITE_NAME = "HeadySystems"
+
+[env.staging]
+name = "headysystems-com-staging"
+workers_dev = true
+[env.staging.vars]
+BACKEND_URL = "https://drupal-cms-staging.run.app"
+ENVIRONMENT = "staging"
+SITE_NAME = "HeadySystems (Staging)"

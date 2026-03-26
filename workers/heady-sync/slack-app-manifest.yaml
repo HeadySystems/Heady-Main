@@ -1,0 +1,50 @@
+_metadata:
+  major_version: 2
+  minor_version: 1
+display_information:
+  name: HeadySync
+  description: Bi-directional Linear ↔ Slack sync for HeadySystems
+  background_color: "#5E6AD2"
+  long_description: >
+    HeadySync bridges Linear issue tracking with Slack communication for 
+    HeadySystems' 60+ microservice ecosystem. Create issues from Slack, 
+    sync comments bidirectionally, and manage statuses via emoji reactions.
+features:
+  bot_user:
+    display_name: HeadySync
+    always_online: true
+  slash_commands:
+    - command: /linear-create
+      description: Create a Linear issue from Slack
+      usage_hint: "[title of the issue]"
+      url: https://heady-sync.workers.dev/webhooks/slack/commands
+      should_escape: false
+    - command: /linear-status
+      description: Check the status of a Linear issue
+      usage_hint: "[HEA-123]"
+      url: https://heady-sync.workers.dev/webhooks/slack/commands
+      should_escape: false
+settings:
+  event_subscriptions:
+    request_url: https://heady-sync.workers.dev/webhooks/slack/events
+    bot_events:
+      - app_mention
+      - message.channels
+      - reaction_added
+  interactivity:
+    is_enabled: true
+    request_url: https://heady-sync.workers.dev/webhooks/slack/interactions
+  org_deploy_enabled: false
+  socket_mode_enabled: false
+  token_rotation_enabled: false
+oauth_config:
+  scopes:
+    bot:
+      - chat:write
+      - chat:write.public
+      - commands
+      - app_mentions:read
+      - reactions:read
+      - channels:read
+      - groups:read
+      - channels:history

@@ -1,0 +1,11 @@
+name = "headyme-com"
+main = "src/index.js"
+compatibility_date = "2024-12-01"
+workers_dev = true
+[[routes]]
+pattern = "headyme.com/*"
+zone_name = "headyme.com"
+[vars]
+BACKEND_URL = "https://drupal-cms.run.app"
+ENVIRONMENT = "production"
+SITE_NAME = "HeadyMe"

@@ -1,0 +1,103 @@
+# Deploy all Cloudflare Workers via path-based monorepo change detection
+# Only deploys workers whose files actually changed.
+
+name: Deploy Workers
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'workers/**'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '22'
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      workers: ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            heady-sync:
+              - 'workers/heady-sync/**'
+            headysystems-com:
+              - 'workers/headysystems-com/**'
+              - 'workers/shared/**'
+            headyme-com:
+              - 'workers/headyme-com/**'
+              - 'workers/shared/**'
+            headyconnection-org:
+              - 'workers/headyconnection-org/**'
+              - 'workers/shared/**'
+            headybuddy-org:
+              - 'workers/headybuddy-org/**'
+              - 'workers/shared/**'
+            headymcp-com:
+              - 'workers/headymcp-com/**'
+              - 'workers/shared/**'
+            headyapi-com:
+              - 'workers/headyapi-com/**'
+              - 'workers/shared/**'
+            headyio-com:
+              - 'workers/headyio-com/**'
+              - 'workers/shared/**'
+            headyos-com:
+              - 'workers/headyos-com/**'
+              - 'workers/shared/**'
+
+  deploy:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.workers != '[]' }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        worker: ${{ fromJson(needs.detect-changes.outputs.workers) }}
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Install dependencies
+        working-directory: workers/${{ matrix.worker }}
+        run: npm ci --ignore-scripts 2>/dev/null || true
+
+      - name: Deploy to Cloudflare
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: workers/${{ matrix.worker }}
+          command: deploy --env production
+
+      - name: Health check
+        if: success()
+        run: |
+          WORKER_NAME="${{ matrix.worker }}"
+          URL="https://${WORKER_NAME}.workers.dev/health"
+          for i in {1..5}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL" 2>/dev/null)
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ $WORKER_NAME health check passed"
+              exit 0
+            fi
+            echo "⏳ Attempt $i: got $STATUS, retrying in 5s..."
+            sleep 5
+          done
+          echo "❌ $WORKER_NAME health check failed after 5 attempts"
+          exit 1
+
+  notify-failure:
+    needs: deploy
+    if: failure()
+    uses: ./.github/workflows/linear-ci-failure.yml
+    secrets:
+      LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}

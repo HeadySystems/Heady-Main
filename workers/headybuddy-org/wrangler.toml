@@ -1,0 +1,11 @@
+name = "headybuddy-org"
+main = "src/index.js"
+compatibility_date = "2024-12-01"
+workers_dev = true
+[[routes]]
+pattern = "headybuddy.org/*"
+zone_name = "headybuddy.org"
+[vars]
+BACKEND_URL = "https://drupal-cms.run.app"
+ENVIRONMENT = "production"
+SITE_NAME = "HeadyBuddy"
