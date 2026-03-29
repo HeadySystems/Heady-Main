@@ -68,7 +68,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: workers/${{ matrix.worker }}
-        run: npm ci --ignore-scripts 2>/dev/null || true
+        run: pnpm install --ignore-scripts 2>/dev/null || true
 
       - name: Deploy to Cloudflare
         uses: cloudflare/wrangler-action@v3
