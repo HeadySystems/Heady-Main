@@ -130,7 +130,7 @@ async function main() {
       if (step.tool) {
         console.log(`  [${stepNum}/${command.steps.length}] 🔧 Tool: ${step.tool}`);
         if (step.params) console.log(`      Params: ${JSON.stringify(step.params)}`);
-        // In production: await SkillExecutor.executeTool(step.tool, { ...step.params, ...parseArgs(args) });
+        // In production: await SkillExecutor.executeTool(step.tool, { ...step.params });
         console.log(`      ✓ Complete`);
       } else if (step.swarm) {
         console.log(`  [${stepNum}/${command.steps.length}] 🐝 Swarm: ${step.swarm}`);
