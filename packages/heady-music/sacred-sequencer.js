@@ -110,7 +110,6 @@ class SacredSequencer {
     const scale = SCALES[scaleName] || SCALES.minor;
     const melody = [];
 
-    let position = 0; // Current position in the scale
     const scaleLen = scale.length;
 
     for (let i = 0; i < length; i++) {
@@ -368,6 +367,7 @@ class SacredSequencer {
     remainders.push(pulses);
     let level = 0;
 
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       counts.push(Math.floor(divisor / remainders[level]));
       remainders.push(divisor % remainders[level]);

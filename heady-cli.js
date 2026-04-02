@@ -22,7 +22,6 @@
  */
 
 const { CommandRegistry } = require('./src/command-registry');
-const path = require('path');
 
 const PHI = 1.618033988749895;
 
@@ -112,7 +111,6 @@ async function main() {
 
   // ── Execute shortcut command ──
   const shortcut = args[0];
-  const cmdArgs = args.slice(1);
 
   try {
     const command = registry.resolveShortcut(shortcut);

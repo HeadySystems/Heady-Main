@@ -12,7 +12,7 @@
 //    Sacred Geometry :: Organic Systems :: Breathing Interfaces
 // HEADY_BRAND:END
 
-const { app, BrowserWindow, ipcMain, screen, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, screen } = require('electron');
 const path = require('path');
 const axios = require('axios'); // For MCP communication
 
@@ -45,7 +45,7 @@ function createBrowserWindow() {
 }
 
 function createBuddyOverlay() {
-  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  const { width } = screen.getPrimaryDisplay().workAreaSize;
   
   buddyOverlay = new BrowserWindow({
     width: 350,

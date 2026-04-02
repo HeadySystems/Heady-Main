@@ -18,7 +18,6 @@ const { spawn } = require("child_process");
 const { 
   HF_TOKEN, 
   DEFAULT_HF_TEXT_MODEL, 
-  DEFAULT_HF_EMBED_MODEL, 
   HF_MAX_CONCURRENCY,
   HEADY_PY_MAX_CONCURRENCY,
   HEADY_PYTHON_BIN,
@@ -27,8 +26,6 @@ const {
   HEADY_QA_MODEL
 } = require("./config");
 const { sleep } = require("./helpers");
-
-const fsp = fs.promises;
 
 // Use relative path from src/utils/ai.js to backend/python_worker/process_data.py
 const PY_WORKER_SCRIPT = path.join(__dirname, "../../python_worker/process_data.py");
@@ -204,7 +201,7 @@ async function runPythonQa({ question, context, model, parameters, requestId }) 
           settled = true;
           try {
             child.kill("SIGKILL");
-          } catch {}
+          } catch (_err) { /* ignored */ }
           const err = new Error("Python worker timed out");
           err.code = "PY_WORKER_TIMEOUT";
           reject(err);
@@ -333,7 +330,7 @@ async function runPatternScan(filePath, content) {
     const timer = setTimeout(() => {
       if (settled) return;
       settled = true;
-      try { child.kill("SIGKILL"); } catch {}
+      try { child.kill("SIGKILL"); } catch (_err) { /* ignored */ }
       reject(new Error("Pattern scan timed out"));
     }, 30000);
 

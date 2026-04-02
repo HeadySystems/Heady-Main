@@ -3,8 +3,6 @@
    ∞ Heady × Ableton Live 12 ∞
    ═══════════════════════════════════════════════════════════════ */
 
-const SacredSequencer = require('./sacred-sequencer');
-
 /**
  * Parse natural language commands into structured Ableton actions
  */
