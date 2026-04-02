@@ -24,8 +24,6 @@
  */
 
 const crypto = require('crypto');
-const fs = require('fs');
-const path = require('path');
 
 class NexusProtocol {
     constructor(config = {}) {
@@ -76,8 +74,11 @@ class NexusProtocol {
 
     verifySignature(payload, signature) {
         if (!this.signatureKey) {
-            console.warn('⚠️ HEADY_SIGNATURE_KEY not set. Falling back to local verification.');
-            return true; 
+            if (process.env.NODE_ENV === 'production') {
+                throw new Error('HEADY_SIGNATURE_KEY not set — signature verification cannot proceed in production.');
+            }
+            console.warn('⚠️ HEADY_SIGNATURE_KEY not set. Signature verification skipped in development.');
+            return true;
         }
         const hmac = crypto.createHmac('sha256', this.signatureKey);
         hmac.update(JSON.stringify(payload));
@@ -89,15 +90,8 @@ class NexusProtocol {
     }
 
     logRouting(traceId, source, target) {
-        const logEntry = {
-            traceId,
-            source,
-            target,
-            timestamp: new Date().toISOString(),
-            protocol: 'Nexus/1.0'
-        };
         // In production, this writes to the Heady Audit Log
-        console.log(`[NEXUS ROUTE] ${traceId}: ${source} -> ${target}`);
+        console.log(`[NEXUS ROUTE] ${traceId}: ${source} -> ${target} @ ${new Date().toISOString()}`);
     }
 }
 

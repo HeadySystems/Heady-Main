@@ -79,11 +79,12 @@ class HCSupervisor extends EventEmitter {
     const dispatchId = `dispatch_${Date.now()}`;
     this.activeDispatches.set(dispatchId, { task, nodeIds: match.nodeIds, startedAt: Date.now() });
 
-    const results = [];
-    for (const nodeId of match.nodeIds) {
-      const result = await this._executeOnNode(nodeId, task.payload || task);
-      results.push({ nodeId, ...result });
-    }
+    const results = await Promise.all(
+      match.nodeIds.map(async (nodeId) => {
+        const result = await this._executeOnNode(nodeId, task.payload || task);
+        return { nodeId, ...result };
+      })
+    );
 
     this.activeDispatches.delete(dispatchId);
     this.emit("task:routed", { dispatchId, trigger: match.trigger, nodeIds: match.nodeIds, resultCount: results.length });

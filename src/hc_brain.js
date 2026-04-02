@@ -80,6 +80,7 @@ class HCBrain extends EventEmitter {
   _callPython(request) {
     return new Promise((resolve, reject) => {
       const data = JSON.stringify({ request, action: "process" });
+      // eslint-disable-next-line no-restricted-syntax
       const req = http.request({ hostname: "127.0.0.1", port: this.pythonPort, path: "/api/brain/process", method: "POST", headers: { "Content-Type": "application/json", "Content-Length": data.length }, timeout: 3000 }, (res) => {
         let body = "";
         res.on("data", c => body += c);
@@ -98,7 +99,7 @@ class HCBrain extends EventEmitter {
     awareness.components.patternEngine = !!this.patternEngine;
     awareness.components.supervisor = !!this.supervisor;
     awareness.components.selfCritique = !!this.selfCritique;
-    if (this.resourceManager) try { awareness.resourceSnapshot = this.resourceManager.getSnapshot(); } catch (_) {}
+    if (this.resourceManager) try { awareness.resourceSnapshot = this.resourceManager.getSnapshot(); } catch (_err) { /* snapshot unavailable */ }
     return awareness;
   }
 

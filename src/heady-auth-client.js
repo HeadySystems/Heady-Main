@@ -22,7 +22,6 @@
  */
 
 const PHI = 1.618033988749895;
-const PHI_INV = 0.618033988749895;
 const FIB = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377];
 
 const AUTH_ORIGIN = 'https://auth.headysystems.com';
@@ -59,7 +58,7 @@ class HeadyAuth {
     return auth;
   }
 
-  async #boot(options) {
+  async #boot(_options) {
     // 1. Inject relay iframe (if not already present)
     this.#injectRelay();
 
@@ -134,7 +133,7 @@ class HeadyAuth {
         }
         break;
 
-      case 'heady:auth:signout':
+      case 'heady:auth:signout': {
         const wasUser = this.#user;
         this.#user = null;
         this.#emit('auth:change', { user: null, authenticated: false });
@@ -144,6 +143,7 @@ class HeadyAuth {
           this.#readyResolve?.();
         }
         break;
+      }
 
       case 'heady:auth:error':
         this.#emit('auth:error', { error: msg.error });

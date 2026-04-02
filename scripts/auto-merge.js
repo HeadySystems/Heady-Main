@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 // HEADY_BRAND:BEGIN
 // HEADY SYSTEMS :: SACRED GEOMETRY
 // FILE: scripts/auto-merge.js
@@ -12,7 +13,6 @@
 //    Sacred Geometry :: Organic Systems :: Breathing Interfaces
 // HEADY_BRAND:END
 
-#!/usr/bin/env node
 /**
  * Auto Merge Script
  * Wraps validation and synchronization logic into a single automated flow.

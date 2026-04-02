@@ -1,16 +1,80 @@
 {
   "root": true,
-  "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint"],
-  "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended"
+  "env": {
+    "node": true,
+    "es2022": true
+  },
+  "extends": ["eslint:recommended"],
+  "parserOptions": {
+    "ecmaVersion": 2022
+  },
+  "ignorePatterns": [
+    "frontend/",
+    "workers/",
+    "desktop-overlay/src/",
+    "notebooks/"
   ],
   "rules": {
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
     "no-restricted-syntax": ["error", {
-      "selector": "Literal[value=/api.headysystems.com|127\.0\.0\.1/]",
+      "selector": "Literal[value=/api.headysystems.com|127\\.0\\.0\\.1/]",
       "message": "Use internal.headyio.com or api.headyio.com instead of api.headysystems.com/api.headysystems.com"
     }]
-  }
+  },
+  "overrides": [
+    {
+      "files": [
+        "backend/**/*.js",
+        "src/heady-auth-service.mjs",
+        "backend/src/**/*.js"
+      ],
+      "parserOptions": {
+        "ecmaVersion": 2022,
+        "sourceType": "module"
+      }
+    },
+    {
+      "files": [
+        "services/heady-auth/public/**/*.js",
+        "packages/widget/**/*.js",
+        "src/heady-auth-client.js"
+      ],
+      "env": {
+        "browser": true,
+        "node": false
+      },
+      "parserOptions": {
+        "ecmaVersion": 2022,
+        "sourceType": "module"
+      },
+      "globals": {
+        "firebase": "readonly",
+        "HeadyAutoContext": "readonly"
+      }
+    },
+    {
+      "files": ["tests/**/*.js", "tests/**/*.test.js", "**/*.test.js"],
+      "env": {
+        "jest": true
+      }
+    },
+    {
+      "files": [
+        "packages/heady-music/max-for-live/**/*.js",
+        "packages/hc-browser/src/preload.js"
+      ],
+      "globals": {
+        "LiveAPI": "readonly",
+        "post": "readonly",
+        "outlet": "readonly",
+        "autowatch": "writable",
+        "inlets": "writable",
+        "outlets": "writable",
+        "window": "readonly"
+      },
+      "rules": {
+        "no-unused-vars": "off"
+      }
+    }
+  ]
 }
-

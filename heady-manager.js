@@ -49,11 +49,16 @@ const PORT = Number(process.env.PORT || 3300);
 const HEADY_ADMIN_SCRIPT = process.env.HEADY_ADMIN_SCRIPT || path.join(__dirname, "src", "heady_project", "heady_conductor.py");
 const HEADY_PYTHON_BIN = process.env.HEADY_PYTHON_BIN || "python";
 
+const CORS_ORIGINS = (process.env.ALLOWED_ORIGINS || process.env.HEADY_CORS_ORIGINS || "")
+  .split(",")
+  .map(s => s.trim())
+  .filter(Boolean);
+
 const app = express();
 app.use(shutdown.middleware());       // 503 during drain
 app.use(logger.requestLogger());      // Structured JSON request logging
 app.use(express.json({ limit: "50mb" }));
-app.use(cors());
+app.use(cors(CORS_ORIGINS.length > 0 ? { origin: CORS_ORIGINS, credentials: true } : undefined));
 
 function readJsonFileSafe(filePath) {
   try {
@@ -184,8 +189,8 @@ app.post("/api/conductor/node", async (req, res) => {
 // Helper function to run Python HeadyConductor
 function runPythonConductor(args) {
   return new Promise((resolve, reject) => {
-    const conductorPath = path.join(__dirname, "HeadyAcademy", "HeadyConductor.py");
-    const pythonBin = process.env.HEADY_PYTHON_BIN || "python";
+    const conductorPath = HEADY_ADMIN_SCRIPT;
+    const pythonBin = HEADY_PYTHON_BIN;
     
     const proc = spawn(pythonBin, [conductorPath, ...args], {
       env: { ...process.env, PYTHONIOENCODING: "utf-8" }

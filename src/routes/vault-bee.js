@@ -49,7 +49,9 @@ function decrypt(data) {
 function loadVault() {
   try {
     if (fs.existsSync(VAULT_FILE)) return JSON.parse(fs.readFileSync(VAULT_FILE, "utf8"));
-  } catch (_) {}
+  } catch (err) {
+    console.error("[VaultBee] Failed to load vault:", err.message);
+  }
   return {};
 }
 
@@ -57,7 +59,9 @@ function saveVault(vault) {
   try {
     fs.mkdirSync(VAULT_DIR, { recursive: true });
     fs.writeFileSync(VAULT_FILE, JSON.stringify(vault, null, 2), "utf8");
-  } catch (_) {}
+  } catch (err) {
+    console.error("[VaultBee] Failed to save vault:", err.message);
+  }
 }
 
 router.get("/status", (req, res) => {
@@ -65,12 +69,27 @@ router.get("/status", (req, res) => {
   res.json({ ok: true, service: "vault-bee", keyCount: Object.keys(vault).length, encrypted: true, algorithm: ALGO, ts: new Date().toISOString() });
 });
 
-router.get("/keys", (req, res) => {
+function requireVaultAuth(req, res, next) {
+  const vaultKey = process.env.HEADY_VAULT_API_KEY;
+  if (!vaultKey) {
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(503).json({ error: "Vault authentication not configured — HEADY_VAULT_API_KEY is required" });
+    }
+    return next(); // Development: allow unauthenticated access
+  }
+  const provided = req.headers['x-vault-key'] || req.headers.authorization?.replace(/^Bearer\s+/i, '');
+  if (!provided || provided !== vaultKey) {
+    return res.status(401).json({ error: "Vault authentication required" });
+  }
+  next();
+}
+
+router.get("/keys", requireVaultAuth, (req, res) => {
   const vault = loadVault();
   res.json({ ok: true, keys: Object.keys(vault), ts: new Date().toISOString() });
 });
 
-router.post("/store", (req, res) => {
+router.post("/store", requireVaultAuth, (req, res) => {
   const { id, value } = req.body;
   if (!id || !value) return res.status(400).json({ error: "id and value required" });
   const vault = loadVault();
@@ -79,7 +98,7 @@ router.post("/store", (req, res) => {
   res.json({ ok: true, id, stored: true, ts: new Date().toISOString() });
 });
 
-router.get("/retrieve/:id", (req, res) => {
+router.get("/retrieve/:id", requireVaultAuth, (req, res) => {
   const vault = loadVault();
   const entry = vault[req.params.id];
   if (!entry) return res.status(404).json({ error: `Key '${req.params.id}' not found` });
@@ -91,7 +110,7 @@ router.get("/retrieve/:id", (req, res) => {
   }
 });
 
-router.delete("/revoke/:id", (req, res) => {
+router.delete("/revoke/:id", requireVaultAuth, (req, res) => {
   const vault = loadVault();
   if (!vault[req.params.id]) return res.status(404).json({ error: `Key '${req.params.id}' not found` });
   delete vault[req.params.id];

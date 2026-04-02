@@ -16,8 +16,22 @@ const router = express.Router();
 const TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const sessions = new Map();
 
+// Cached signing key — generated once per process to keep tokens valid for the process lifetime
+let _signingKey = null;
+
 function getSigningKey() {
-  return process.env.HEADY_AUTH_SECRET || process.env.HEADY_API_KEY || "heady-dev-secret-key-change-in-production";
+  if (_signingKey) return _signingKey;
+  const key = process.env.HEADY_AUTH_SECRET || process.env.HEADY_API_KEY;
+  if (!key) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('HEADY_AUTH_SECRET or HEADY_API_KEY must be set in production');
+    }
+    console.warn('[AUTH] No signing key configured — using ephemeral key. Tokens will not survive restarts. Set HEADY_AUTH_SECRET.');
+    _signingKey = crypto.randomBytes(32).toString('hex');
+  } else {
+    _signingKey = key;
+  }
+  return _signingKey;
 }
 
 function generateToken(identity) {
@@ -61,7 +75,15 @@ router.get("/status", (req, res) => {
 router.post("/login", (req, res) => {
   const { apiKey, identity } = req.body;
   const expectedKey = process.env.HEADY_API_KEY;
-  if (expectedKey && apiKey !== expectedKey) return res.status(401).json({ error: "Invalid API key" });
+  if (!expectedKey) {
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(503).json({ error: "Auth service not configured — HEADY_API_KEY is required" });
+    }
+    // Development only: allow unauthenticated login with a warning
+    console.warn('[AUTH] HEADY_API_KEY not set — login accepted without API key (development mode only)');
+  } else if (apiKey !== expectedKey) {
+    return res.status(401).json({ error: "Invalid API key" });
+  }
   const token = generateToken(identity || "default");
   res.json({ ok: true, token, expiresIn: `${TOKEN_TTL_MS / 3600000}h`, ts: new Date().toISOString() });
 });
