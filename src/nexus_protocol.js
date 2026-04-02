@@ -75,7 +75,7 @@ class NexusProtocol {
     verifySignature(payload, signature) {
         if (!this.signatureKey) {
             // Reject unverifiable packets when no signing key is configured
-            throw new Error('HEADY_SIGNATURE_KEY not set — cannot verify packet signature. Set this environment variable.');
+            throw new Error('HEADY_SIGNATURE_KEY not set — cannot verify packet signature. Configure this environment variable in your .env or deployment secrets.');
         }
         const hmac = crypto.createHmac('sha256', this.signatureKey);
         hmac.update(JSON.stringify(payload));

@@ -437,7 +437,7 @@ class StoryDriver {
   async listStories(filters = {}) {
     const stories = [];
     
-    for (const [, story] of this.activeStories) {
+    for (const [_id, story] of this.activeStories) {
       if (this.matchesFilters(story, filters)) {
         stories.push(story);
       }

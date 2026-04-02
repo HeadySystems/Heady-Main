@@ -269,10 +269,6 @@ class HeadyRecon {
     predictCheckpoint(tasks) {
         if (tasks.length === 0) return null;
         
-        // Find highest priority task
-        // (highestPriority computed but unused — kept for future use)
-        tasks.reduce((max, task) => task.priority === 'HIGH' ? task : max, tasks[0]);
-        
         // Find matching checkpoint
         for (const checkpoint of this.predictedCheckpoints) {
             if (this.matchesCheckpoint(checkpoint, tasks)) {

@@ -20,7 +20,7 @@ console.log('\n🔨 Heady AutoBuild - Sacred Geometry Build System with Codemap 
 
 const WORKTREE_BASE = (() => {
   const explicit = process.env.WINDSURF_WORKTREES || process.env.HEADY_WORKTREES;
-  if (explicit && typeof explicit === 'string' && explicit.trim()) return explicit.trim();
+  if (explicit?.trim()) return explicit.trim();
 
   const userProfile = process.env.USERPROFILE || process.env.HOME;
   if (!userProfile) return null;

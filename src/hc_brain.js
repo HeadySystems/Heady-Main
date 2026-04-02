@@ -84,7 +84,7 @@ class HCBrain extends EventEmitter {
       const req = http.request({ hostname: pythonHost, port: this.pythonPort, path: "/api/brain/process", method: "POST", headers: { "Content-Type": "application/json", "Content-Length": data.length }, timeout: 3000 }, (res) => {
         let body = "";
         res.on("data", c => body += c);
-        res.on("end", () => { try { resolve(JSON.parse(body)); } catch (e) { reject(new Error("Invalid JSON from Python")); } });
+        res.on("end", () => { try { resolve(JSON.parse(body)); } catch (e) { reject(new Error(`Invalid JSON from Python: ${e.message}`)); } });
       });
       req.on("error", reject);
       req.on("timeout", () => { req.destroy(); reject(new Error("Python HeadyBrain timeout")); });

@@ -71,6 +71,11 @@ function validateVaultId(id) {
   }
 }
 
+// Validate vault ID and send 400 if invalid (reusable helper)
+function checkVaultId(id, res) {
+  try { validateVaultId(id); return true; } catch (err) { res.status(400).json({ error: err.message }); return false; }
+}
+
 // Require admin token for all vault operations
 function requireVaultAuth(req, res, next) {
   const adminToken = process.env.ADMIN_TOKEN || process.env.HEADY_VAULT_ADMIN_TOKEN;
@@ -81,9 +86,10 @@ function requireVaultAuth(req, res, next) {
   if (!provided) {
     return res.status(401).json({ error: "Authentication required (x-admin-token header)" });
   }
-  const bufA = Buffer.from(provided);
-  const bufB = Buffer.from(adminToken);
-  if (bufA.length !== bufB.length || !crypto.timingSafeEqual(bufA, bufB)) {
+  // Use fixed-length HMAC comparison to avoid leaking token length via timing
+  const expected = crypto.createHmac("sha256", "vault-auth").update(adminToken).digest();
+  const actual   = crypto.createHmac("sha256", "vault-auth").update(provided).digest();
+  if (!crypto.timingSafeEqual(expected, actual)) {
     return res.status(401).json({ error: "Invalid admin token" });
   }
   next();
@@ -102,7 +108,7 @@ router.get("/keys", requireVaultAuth, (req, res) => {
 router.post("/store", requireVaultAuth, (req, res) => {
   const { id, value } = req.body;
   if (!id || !value) return res.status(400).json({ error: "id and value required" });
-  try { validateVaultId(id); } catch (err) { return res.status(400).json({ error: err.message }); }
+  if (!checkVaultId(id, res)) return;
   const vault = loadVault();
   vault[id] = { ...encrypt(typeof value === "string" ? value : JSON.stringify(value)), storedAt: new Date().toISOString() };
   saveVault(vault);
@@ -110,7 +116,7 @@ router.post("/store", requireVaultAuth, (req, res) => {
 });
 
 router.get("/retrieve/:id", requireVaultAuth, (req, res) => {
-  try { validateVaultId(req.params.id); } catch (err) { return res.status(400).json({ error: err.message }); }
+  if (!checkVaultId(req.params.id, res)) return;
   const vault = loadVault();
   const entry = vault[req.params.id];
   if (!entry) return res.status(404).json({ error: `Key '${req.params.id}' not found` });
@@ -123,7 +129,7 @@ router.get("/retrieve/:id", requireVaultAuth, (req, res) => {
 });
 
 router.delete("/revoke/:id", requireVaultAuth, (req, res) => {
-  try { validateVaultId(req.params.id); } catch (err) { return res.status(400).json({ error: err.message }); }
+  if (!checkVaultId(req.params.id, res)) return;
   const vault = loadVault();
   if (!vault[req.params.id]) return res.status(404).json({ error: `Key '${req.params.id}' not found` });
   delete vault[req.params.id];

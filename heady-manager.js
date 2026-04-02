@@ -109,12 +109,14 @@ app.get("/api/maid/inventory", (req, res) => {
   res.json(inventory);
 });
 
-// Input validation helper — rejects strings containing shell-special or flag-injection chars
+// Input validation helper — rejects strings with shell-metacharacters or flag-injection patterns
 function validateConductorInput(value, fieldName) {
   if (typeof value !== "string") throw new Error(`${fieldName} must be a string`);
   if (value.length > 1000) throw new Error(`${fieldName} exceeds maximum length of 1000 characters`);
   // Reject values that start with "-" (would be interpreted as CLI flags)
   if (value.startsWith("-")) throw new Error(`${fieldName} must not start with a hyphen`);
+  // Reject shell metacharacters that could be used for injection
+  if (/[;&|`$<>\\]/.test(value)) throw new Error(`${fieldName} contains disallowed characters`);
 }
 
 // HeadyConductor API Endpoints
