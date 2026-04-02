@@ -19,6 +19,7 @@
  *  9. LinkedIn         18. Dropbox         27. Passkey
  */
 
+/* global firebase */
 (function () {
   'use strict';
 
