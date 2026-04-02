@@ -28,7 +28,7 @@ export function createEdgeWorker(siteConfig = {}) {
   } = siteConfig;
 
   return {
-    async fetch(request, env, ctx) {
+    async fetch(request, env, _ctx) {
       const url = new URL(request.url);
 
       // Health check

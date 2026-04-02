@@ -65,7 +65,7 @@ export async function markOrigin(redis, entityId, source) {
 }
 
 // ── φ-Fibonacci backoff retry ───────────────────────────────────────
-const PHI = 1.618033988749895;
+const _PHI = 1.618033988749895; // φ — golden ratio, Fibonacci growth constant
 
 export async function withFibonacciRetry(fn, { maxRetries = 5, baseDelayMs = 1000 } = {}) {
   let prev = 0, curr = baseDelayMs;
