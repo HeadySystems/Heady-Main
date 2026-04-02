@@ -140,7 +140,7 @@ async function handleCommentEvent(action, comment, actor, env, sql, redis) {
 }
 
 // ── Project events ──────────────────────────────────────────────────
-async function handleProjectEvent(action, project, updatedFrom, env, sql) {
+async function handleProjectEvent(action, project, updatedFrom, env, _sql) {
   if (action === 'update' && updatedFrom?.state) {
     await postToSlack(env.SLACK_BOT_TOKEN, {
       channel: env.DEFAULT_SLACK_CHANNEL,
@@ -150,7 +150,7 @@ async function handleProjectEvent(action, project, updatedFrom, env, sql) {
 }
 
 // ── Cycle events ────────────────────────────────────────────────────
-async function handleCycleEvent(action, cycle, env, sql) {
+async function handleCycleEvent(action, cycle, env, _sql) {
   if (action === 'update' && cycle.completedAt) {
     await postToSlack(env.SLACK_BOT_TOKEN, {
       channel: env.DEFAULT_SLACK_CHANNEL,

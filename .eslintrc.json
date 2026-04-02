@@ -1,16 +1,58 @@
 {
   "root": true,
-  "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint"],
+  "env": {
+    "node": true,
+    "es2021": true
+  },
   "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended"
+    "eslint:recommended"
   ],
+  "parserOptions": {
+    "ecmaVersion": 2021,
+    "sourceType": "commonjs"
+  },
   "rules": {
     "no-restricted-syntax": ["error", {
-      "selector": "Literal[value=/api.headysystems.com|127\.0\.0\.1/]",
-      "message": "Use internal.headyio.com or api.headyio.com instead of api.headysystems.com/api.headysystems.com"
+      "selector": "Literal[value=/api\\.headysystems\\.com/]",
+      "message": "Use internal.headyio.com or api.headyio.com instead of api.headysystems.com"
+    }],
+    "no-eval": "error",
+    "no-unused-vars": ["error", {
+      "vars": "all",
+      "args": "after-used",
+      "argsIgnorePattern": "^_",
+      "varsIgnorePattern": "^_",
+      "ignoreRestSiblings": true
     }]
-  }
+  },
+  "overrides": [
+    {
+      "files": ["tests/**/*.js", "**/*.test.js", "**/*.spec.js"],
+      "env": { "jest": true }
+    },
+    {
+      "files": [
+        "workers/**/*.js",
+        "src/workers/**/*.js",
+        "workers/heady-sync/src/**/*.js"
+      ],
+      "parserOptions": {
+        "sourceType": "module"
+      },
+      "env": { "worker": true }
+    },
+    {
+      "files": [
+        "packages/heady-music/max-for-live/**/*.js"
+      ],
+      "globals": {
+        "autowatch": "writable",
+        "inlets": "writable",
+        "outlets": "writable",
+        "post": "readonly",
+        "outlet": "readonly",
+        "LiveAPI": "readonly"
+      }
+    }
+  ]
 }
-

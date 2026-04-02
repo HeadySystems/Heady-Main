@@ -25,7 +25,7 @@ class AINode {
     this.invocations = 0;
     this.lastInvoked = null;
   }
-  async executeTask(payload) { throw new Error("Not implemented"); }
+  async executeTask(_payload) { throw new Error("Not implemented"); }
 }
 
 class JulesNode extends AINode {
@@ -68,7 +68,7 @@ class JulesNode extends AINode {
 
 class ObserverNode extends AINode {
   constructor() { super("observer", "OBSERVER", "The Natural Observer", ["workspaceAnalysis", "fileSystemMonitoring", "performanceMetrics"]); }
-  async executeTask(payload) {
+  async executeTask(_payload) {
     this.invocations++; this.lastInvoked = new Date().toISOString();
     const mem = process.memoryUsage();
     const cpus = os.cpus();
@@ -209,6 +209,7 @@ class HeadyCoderNode extends AINode {
   constructor(suffix = "") { super(`headycoder${suffix}`, `HEADYCODER${suffix}`, "The Master Architect", ["codeGeneration", "refactoring", "systemOptimization"]); }
   async executeTask(payload) {
     this.invocations++; this.lastInvoked = new Date().toISOString();
+    const target = payload?.target || payload?.file || payload?.path || 'unknown';
     // Simulate async code generation/improvement based on target scope
     // Deterministic φ-backoff — eliminates uncontrolled entropy (Math.random)
     const phiJitterMs = 1618; 

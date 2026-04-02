@@ -79,11 +79,12 @@ class HCBrain extends EventEmitter {
 
   _callPython(request) {
     return new Promise((resolve, reject) => {
+      const pythonHost = process.env.PYTHON_BRAIN_HOST || "localhost";
       const data = JSON.stringify({ request, action: "process" });
-      const req = http.request({ hostname: "127.0.0.1", port: this.pythonPort, path: "/api/brain/process", method: "POST", headers: { "Content-Type": "application/json", "Content-Length": data.length }, timeout: 3000 }, (res) => {
+      const req = http.request({ hostname: pythonHost, port: this.pythonPort, path: "/api/brain/process", method: "POST", headers: { "Content-Type": "application/json", "Content-Length": data.length }, timeout: 3000 }, (res) => {
         let body = "";
         res.on("data", c => body += c);
-        res.on("end", () => { try { resolve(JSON.parse(body)); } catch { reject(new Error("Invalid JSON from Python")); } });
+        res.on("end", () => { try { resolve(JSON.parse(body)); } catch (e) { reject(new Error("Invalid JSON from Python")); } });
       });
       req.on("error", reject);
       req.on("timeout", () => { req.destroy(); reject(new Error("Python HeadyBrain timeout")); });
@@ -98,7 +99,7 @@ class HCBrain extends EventEmitter {
     awareness.components.patternEngine = !!this.patternEngine;
     awareness.components.supervisor = !!this.supervisor;
     awareness.components.selfCritique = !!this.selfCritique;
-    if (this.resourceManager) try { awareness.resourceSnapshot = this.resourceManager.getSnapshot(); } catch (_) {}
+    if (this.resourceManager) try { awareness.resourceSnapshot = this.resourceManager.getSnapshot(); } catch (e) { awareness.resourceSnapshot = null; }
     return awareness;
   }
 

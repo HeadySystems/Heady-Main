@@ -50,7 +50,7 @@ function walk(dir, maxDepth = 5, depth = 0) {
         results.push(fullPath);
       }
     }
-  } catch (_) {}
+  } catch (_e) { /* skip inaccessible */ }
   return results;
 }
 
@@ -81,7 +81,7 @@ function audit() {
             reason: `Large binary (${(stat.size / 1024 / 1024).toFixed(1)}MB) — use GitHub Releases`
           });
         }
-      } catch (_) {}
+      } catch (_e) { /* skip inaccessible */ }
     }
   }
 

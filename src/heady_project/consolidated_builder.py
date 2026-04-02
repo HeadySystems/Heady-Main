@@ -32,8 +32,12 @@ def log_error(msg):
 def run_command(cmd, cwd=None, timeout=300):
     """Execute command with timeout and error handling"""
     try:
+        # Use a list to avoid shell=True and prevent shell injection
+        if isinstance(cmd, str):
+            import shlex
+            cmd = shlex.split(cmd)
         result = subprocess.run(
-            cmd, shell=True, cwd=cwd, timeout=timeout,
+            cmd, shell=False, cwd=cwd, timeout=timeout,
             capture_output=True, text=True, check=True
         )
         return result.stdout.strip(), result.stderr.strip()

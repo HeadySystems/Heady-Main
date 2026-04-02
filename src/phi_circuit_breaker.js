@@ -149,15 +149,15 @@ class PhiCircuitBreaker {
 
     if (newState === STATE.OPEN) {
       this.stats.trips++;
-      console.warn(`[CircuitBreaker:${this.name}] ${from} → OPEN (failures: ${this.failureCount})`);
+      process.stderr.write(JSON.stringify({ severity: 'WARNING', message: `[CircuitBreaker:${this.name}] ${from} → OPEN (failures: ${this.failureCount})` }) + '\n');
     } else if (newState === STATE.HALF_OPEN) {
       this.halfOpenCalls = 0;
       this.successCount = 0;
-      console.log(`[CircuitBreaker:${this.name}] ${from} → HALF_OPEN (probing with ${this.config.halfOpenMaxCalls} calls)`);
+      process.stdout.write(JSON.stringify({ severity: 'INFO', message: `[CircuitBreaker:${this.name}] ${from} → HALF_OPEN (probing with ${this.config.halfOpenMaxCalls} calls)` }) + '\n');
     } else if (newState === STATE.CLOSED) {
       this.failureCount = 0;
       this.successCount = 0;
-      console.log(`[CircuitBreaker:${this.name}] ${from} → CLOSED (recovered)`);
+      process.stdout.write(JSON.stringify({ severity: 'INFO', message: `[CircuitBreaker:${this.name}] ${from} → CLOSED (recovered)` }) + '\n');
     }
   }
 

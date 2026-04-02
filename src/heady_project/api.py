@@ -30,15 +30,14 @@ logger = get_logger(__name__)
 app = FastAPI(title="Heady Conductor")
 
 # Security
-ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "default_insecure_token")
+ADMIN_TOKEN = os.getenv("ADMIN_TOKEN")
 
 async def verify_token(x_admin_token: str = Header(None)):
     token = x_admin_token
     if not token:
-        # For dev convenience, allow if env var not set strictly? No, stick to secure default.
-        if ADMIN_TOKEN == "default_insecure_token":
-             return "default_insecure_token"
         raise HTTPException(status_code=401, detail="Missing Admin Token")
+    if not ADMIN_TOKEN:
+        raise HTTPException(status_code=503, detail="Admin authentication not configured")
     if not secrets.compare_digest(token, ADMIN_TOKEN):
         raise HTTPException(status_code=401, detail="Invalid Admin Token")
     return token
