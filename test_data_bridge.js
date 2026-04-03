@@ -1,4 +1,4 @@
-const path = require('path');
+
 const HeadyMemoryBridge = require('./src/hc_memory_bridge');
 const { extractPatterns } = require('./src/hc_semantic_hasher');
 const { AINodeManager } = require('./src/hc_ai_nodes');

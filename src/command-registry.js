@@ -19,8 +19,6 @@ const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');  // or inline parser below
 
-const PHI = 1.618033988749895;
-
 class CommandRegistry {
   constructor(configPath) {
     this.configPath = configPath || path.resolve(__dirname, '..', 'configs', 'command-registry.yaml');

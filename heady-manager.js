@@ -46,7 +46,9 @@ const { logger } = require(path.join(__dirname, "src", "structured_logger"));
 const shutdown = new GracefulShutdownManager({ timeout: 34000 });
 
 const PORT = Number(process.env.PORT || 3300);
+// eslint-disable-next-line no-unused-vars
 const HEADY_ADMIN_SCRIPT = process.env.HEADY_ADMIN_SCRIPT || path.join(__dirname, "src", "heady_project", "heady_conductor.py");
+// eslint-disable-next-line no-unused-vars
 const HEADY_PYTHON_BIN = process.env.HEADY_PYTHON_BIN || "python";
 
 const app = express();

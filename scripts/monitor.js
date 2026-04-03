@@ -21,7 +21,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { exec } = require('child_process');
+
 const HeadyRecon = require('./recon.js');
 
 const recon = new HeadyRecon();
