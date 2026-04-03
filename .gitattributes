@@ -1,24 +1,12 @@
-<<<<<<< HEAD
 # HEADY_BRAND:BEGIN
 # HEADY SYSTEMS :: SACRED GEOMETRY
 # FILE: .gitattributes
 # LAYER: root
-# 
-#         _   _  _____    _    ____   __   __
-#        | | | || ____|  / \  |  _ \ \ \ / /
-#        | |_| ||  _|   / _ \ | | | | \ V / 
-#        |  _  || |___ / ___ \| |_| |  | |  
-#        |_| |_||_____/_/   \_\____/   |_|  
-# 
-#    Sacred Geometry :: Organic Systems :: Breathing Interfaces
 # HEADY_BRAND:END
 
-# Auto detect text files and perform LF normalization
-* text=auto
-=======
-# Heady .gitattributes - prevent large binaries from bloating the repo
 # Auto-detect text files and normalize line endings
 * text=auto
+
 # Force LF line endings for scripts and configs
 *.ps1 text eol=lf
 *.sh text eol=lf
@@ -27,6 +15,7 @@
 *.yaml text eol=lf
 *.yml text eol=lf
 *.md text eol=lf
+
 # Mark binary files to prevent diff/merge issues
 *.exe filter=lfs diff=lfs merge=lfs -text
 *.dll filter=lfs diff=lfs merge=lfs -text
@@ -45,10 +34,10 @@
 *.pem filter=lfs diff=lfs merge=lfs -text
 *.crt filter=lfs diff=lfs merge=lfs -text
 *.key binary
+
 # Exclude large files from archive/export
 AndroidSDK/ export-ignore
 ventoy/ export-ignore
 *.img export-ignore
 deploy-package-*/ export-ignore
 offline-packages/ export-ignore
->>>>>>> origin/main
