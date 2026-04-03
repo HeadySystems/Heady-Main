@@ -146,22 +146,22 @@ describe("heady-manager.js", () => {
   });
 
   describe("input validation", () => {
-    it("rejects non-string input", async () => {
+    it("rejects non-string input with 400", async () => {
       const res = await request("POST", "/api/conductor/orchestrate", { request: 12345 });
-      expect(res.status).toBe(500);
+      expect(res.status).toBe(400);
       expect(res.body.error).toMatch(/must be a string/i);
     });
 
-    it("rejects oversized input", async () => {
+    it("rejects oversized input with 400", async () => {
       const longInput = "a".repeat(10001);
       const res = await request("POST", "/api/conductor/orchestrate", { request: longInput });
-      expect(res.status).toBe(500);
+      expect(res.status).toBe(400);
       expect(res.body.error).toMatch(/exceeds maximum length/i);
     });
 
-    it("rejects input with null bytes", async () => {
+    it("rejects input with null bytes with 400", async () => {
       const res = await request("POST", "/api/conductor/orchestrate", { request: "test\x00inject" });
-      expect(res.status).toBe(500);
+      expect(res.status).toBe(400);
       expect(res.body.error).toMatch(/control characters/i);
     });
   });

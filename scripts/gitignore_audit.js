@@ -51,6 +51,7 @@ function walk(dir, maxDepth = 5, depth = 0) {
       }
     }
   } catch (_) { /* skip inaccessible directories */ }
+  return results;
 }
 
 function audit() {

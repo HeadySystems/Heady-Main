@@ -85,10 +85,8 @@ notebooks/personal/*
 !notebooks/personal/.gitkeep
 
 # === Database & Secrets ===
-.heady/memory.db
-.heady/*.db
+.heady/
 *.db
-.heady/.heady/
 *.pid
 *.bak
 

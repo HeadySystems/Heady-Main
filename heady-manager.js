@@ -137,7 +137,9 @@ app.post("/api/conductor/orchestrate", async (req, res) => {
     if (!request) {
       return res.status(400).json({ error: "Request parameter required" });
     }
-    validateConductorInput(request, "request");
+    try { validateConductorInput(request, "request"); } catch (e) {
+      return res.status(400).json({ error: e.message });
+    }
 
     const result = await runPythonConductor(["--request", request]);
     res.json(result);
@@ -170,7 +172,9 @@ app.get("/api/conductor/query", async (req, res) => {
     if (!q) {
       return res.status(400).json({ error: "Query parameter 'q' required" });
     }
-    validateConductorInput(q, "q");
+    try { validateConductorInput(q, "q"); } catch (e) {
+      return res.status(400).json({ error: e.message });
+    }
 
     const result = await runPythonConductor(["--query", q]);
     res.json(result);
@@ -185,7 +189,9 @@ app.post("/api/conductor/workflow", async (req, res) => {
     if (!workflow) {
       return res.status(400).json({ error: "Workflow parameter required" });
     }
-    validateConductorInput(workflow, "workflow");
+    try { validateConductorInput(workflow, "workflow"); } catch (e) {
+      return res.status(400).json({ error: e.message });
+    }
 
     const result = await runPythonConductor(["--workflow", workflow]);
     res.json(result);
@@ -200,7 +206,9 @@ app.post("/api/conductor/node", async (req, res) => {
     if (!node) {
       return res.status(400).json({ error: "Node parameter required" });
     }
-    validateConductorInput(node, "node");
+    try { validateConductorInput(node, "node"); } catch (e) {
+      return res.status(400).json({ error: e.message });
+    }
 
     const result = await runPythonConductor(["--node", node]);
     res.json(result);
@@ -228,7 +236,7 @@ function runPythonConductor(args) {
       killed = true;
       proc.kill("SIGTERM");
       setTimeout(() => {
-        try { proc.kill("SIGKILL"); } catch (_e) { /* already exited */ }
+        try { proc.kill("SIGKILL"); } catch (_e) { /* ESRCH: process already exited after SIGTERM */ }
       }, 2000);
     }, CONDUCTOR_TIMEOUT_MS);
 
