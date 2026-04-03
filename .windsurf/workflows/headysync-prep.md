@@ -1,5 +1,4 @@
 <!-- HEADY_BRAND:BEGIN -->
-<<<<<<< HEAD
 <!-- HEADY SYSTEMS :: SACRED GEOMETRY -->
 <!-- FILE: .windsurf/workflows/headysync-prep.md -->
 <!-- LAYER: root -->
@@ -11,21 +10,6 @@
 <!--        |_| |_||_____/_/   \_\____/   |_|   -->
 <!--  -->
 <!--    Sacred Geometry :: Organic Systems :: Breathing Interfaces -->
-=======
-<!-- ╔══════════════════════════════════════════════════════════════════╗ -->
-<!-- ║  █╗  █╗███████╗ █████╗ ██████╗ █╗   █╗                     ║ -->
-<!-- ║  █║  █║█╔════╝█╔══█╗█╔══█╗╚█╗ █╔╝                     ║ -->
-<!-- ║  ███████║█████╗  ███████║█║  █║ ╚████╔╝                      ║ -->
-<!-- ║  █╔══█║█╔══╝  █╔══█║█║  █║  ╚█╔╝                       ║ -->
-<!-- ║  █║  █║███████╗█║  █║██████╔╝   █║                        ║ -->
-<!-- ║  ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝    ╚═╝                        ║ -->
-<!-- ║                                                                  ║ -->
-<!-- ║  ∞ SACRED GEOMETRY ∞  Organic Systems · Breathing Interfaces    ║ -->
-<!-- ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║ -->
-<!-- ║  FILE: .windsurf/workflows/headysync-prep.md                      ║ -->
-<!-- ║  LAYER: root                                                      ║ -->
-<!-- ╚══════════════════════════════════════════════════════════════════╝ -->
->>>>>>> origin/main
 <!-- HEADY_BRAND:END -->
 
 ---
@@ -63,15 +47,7 @@ HeadySync (hs) is the unified synchronization system that coordinates all Heady 
 Get-Process | Where-Object {$_.ProcessName -like "*heady*"}
 
 # Verify HeadyLens monitoring
-<<<<<<< HEAD
 curl http://localhost:3300/status
-=======
-<<<<<<< HEAD
-curl http://internal.headyio.com:3300/status
-=======
-curl http://localhost:3300/status
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> origin/main
 ```
 
 ### 2. Initialize Core Services
@@ -183,23 +159,11 @@ git submodule sync --recursive
 ### 1. Service Health Check
 ```powershell
 # Verify orchestrator
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-curl http://internal.headyio.com:3300/status
-
-# Check all layers
-curl http://internal.headyio.com:3300/layers/status
-=======
->>>>>>> origin/main
+# Verify orchestrator
 curl http://localhost:3300/status
 
 # Check all layers
 curl http://localhost:3300/layers/status
-<<<<<<< HEAD
-=======
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> origin/main
 ```
 
 ### 2. Repository Sync Status
@@ -212,23 +176,11 @@ git status -uno
 ### 3. Layer Integration Test
 ```powershell
 # Test HeadyBuddy + HeadyLens integration
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-curl http://internal.headyio.com:3300/test/base-layer
-
-# Verify full stack
-curl http://internal.headyio.com:3300/test/full-stack
-=======
->>>>>>> origin/main
+# Test HeadyBuddy + HeadyLens integration
 curl http://localhost:3300/test/base-layer
 
 # Verify full stack
 curl http://localhost:3300/test/full-stack
-<<<<<<< HEAD
-=======
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> origin/main
 ```
 
 ## Success Criteria

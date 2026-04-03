@@ -1,5 +1,4 @@
 <!-- HEADY_BRAND:BEGIN -->
-<<<<<<< HEAD
 <!-- HEADY SYSTEMS :: SACRED GEOMETRY -->
 <!-- FILE: .windsurf/workflows/hcautobuild.md -->
 <!-- LAYER: root -->
@@ -11,21 +10,6 @@
 <!--        |_| |_||_____/_/   \_\____/   |_|   -->
 <!--  -->
 <!--    Sacred Geometry :: Organic Systems :: Breathing Interfaces -->
-=======
-<!-- ╔══════════════════════════════════════════════════════════════════╗ -->
-<!-- ║  █╗  █╗███████╗ █████╗ ██████╗ █╗   █╗                     ║ -->
-<!-- ║  █║  █║█╔════╝█╔══█╗█╔══█╗╚█╗ █╔╝                     ║ -->
-<!-- ║  ███████║█████╗  ███████║█║  █║ ╚████╔╝                      ║ -->
-<!-- ║  █╔══█║█╔══╝  █╔══█║█║  █║  ╚█╔╝                       ║ -->
-<!-- ║  █║  █║███████╗█║  █║██████╔╝   █║                        ║ -->
-<!-- ║  ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝    ╚═╝                        ║ -->
-<!-- ║                                                                  ║ -->
-<!-- ║  ∞ SACRED GEOMETRY ∞  Organic Systems · Breathing Interfaces    ║ -->
-<!-- ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║ -->
-<!-- ║  FILE: .windsurf/workflows/hcautobuild.md                         ║ -->
-<!-- ║  LAYER: root                                                      ║ -->
-<!-- ╚══════════════════════════════════════════════════════════════════╝ -->
->>>>>>> origin/main
 <!-- HEADY_BRAND:END -->
 
 ---
@@ -219,18 +203,8 @@ HCAUTOBUILD_FUNCTIONALITY_THRESHOLD=95
     "pass_rate": 100
   },
   "services": {
-<<<<<<< HEAD
     "api": "http://localhost:3300",
     "frontend": "http://localhost:3000"
-=======
-<<<<<<< HEAD
-    "api": "http://internal.headyio.com:3300",
-    "frontend": "http://internal.headyio.com:3000"
-=======
-    "api": "http://localhost:3300",
-    "frontend": "http://localhost:3000"
->>>>>>> a3d7d06c432bf92df85e53f8d0cf1e6c8622ccea
->>>>>>> origin/main
   }
 }
 ```
