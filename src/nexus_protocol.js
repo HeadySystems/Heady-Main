@@ -24,8 +24,8 @@
  */
 
 const crypto = require('crypto');
-const fs = require('fs');
 const path = require('path');
+const { logger } = require(path.join(__dirname, 'structured_logger'));
 
 class NexusProtocol {
     constructor(config = {}) {
@@ -76,7 +76,7 @@ class NexusProtocol {
 
     verifySignature(payload, signature) {
         if (!this.signatureKey) {
-            console.warn('⚠️ HEADY_SIGNATURE_KEY not set. Falling back to local verification.');
+            logger.warn('HEADY_SIGNATURE_KEY not set. Falling back to local verification.');
             return true; 
         }
         const hmac = crypto.createHmac('sha256', this.signatureKey);
@@ -89,15 +89,8 @@ class NexusProtocol {
     }
 
     logRouting(traceId, source, target) {
-        const logEntry = {
-            traceId,
-            source,
-            target,
-            timestamp: new Date().toISOString(),
-            protocol: 'Nexus/1.0'
-        };
-        // In production, this writes to the Heady Audit Log
-        console.log(`[NEXUS ROUTE] ${traceId}: ${source} -> ${target}`);
+        // Write to the Heady Audit Log via structured logger
+        logger.info('Nexus route', { traceId, source, target, protocol: 'Nexus/1.0' });
     }
 }
 

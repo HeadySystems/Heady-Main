@@ -27,7 +27,7 @@ class ChatService {
     this.memory = null; // Placeholder for Vector Store
   }
 
-  async processMessage({ userId, message, context = {} }) {
+  async processMessage({ _userId, message, context = {} }) {
     // 1. Detect Overwhelm Trigger
     const isOverwhelmed = this.detectOverwhelm(message, context.taskCount);
     

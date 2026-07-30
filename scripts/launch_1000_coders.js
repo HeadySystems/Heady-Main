@@ -36,7 +36,7 @@ async function launch1000Coders() {
   const startTime = Date.now();
   
   // Create mapping array
-  const tasks = vectors.map(async (vec, idx) => {
+  const tasks = vectors.map(async (vec, _idx) => {
     // Execute the HeadyCoder node targeting the specific file chunk
     const result = await nodeMgr.executeOnNode("headycoder", { target: vec.targetFile, vector: vec.vectorId });
     return { 

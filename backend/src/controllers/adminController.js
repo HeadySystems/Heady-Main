@@ -26,7 +26,7 @@ const {
   HEADY_QA_MODEL,
   HEADY_QA_MAX_NEW_TOKENS
 } = require("../utils/config");
-const { createHttpError, toPosixPath, toRelativePath } = require("../utils/helpers");
+const { createHttpError } = require("../utils/helpers");
 const { runPythonQa, runPatternScan } = require("../utils/ai");
 
 // Admin Root Management
@@ -229,7 +229,7 @@ async function inferGpu(req, res) {
   if (!HEADY_ADMIN_ENABLE_GPU) {
     throw createHttpError(503, "GPU features are disabled");
   }
-  const { inputs, model, parameters } = req.body || {};
+  const { inputs, model, _parameters } = req.body || {};
   if (!inputs) throw createHttpError(400, "inputs is required");
   // Stub: echo back with GPU flag; real integration would call remote GPU worker
   res.json({

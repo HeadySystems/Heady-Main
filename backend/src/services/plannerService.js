@@ -39,7 +39,7 @@ class PlannerService {
     };
   }
 
-  simulate(tasks, iterations) {
+  simulate(tasks, _iterations) {
     // 1. Simple heuristic for the stub
     // Real impl would use random sampling from distribution [min, max]
     

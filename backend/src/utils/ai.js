@@ -18,7 +18,6 @@ const { spawn } = require("child_process");
 const { 
   HF_TOKEN, 
   DEFAULT_HF_TEXT_MODEL, 
-  DEFAULT_HF_EMBED_MODEL, 
   HF_MAX_CONCURRENCY,
   HEADY_PY_MAX_CONCURRENCY,
   HEADY_PYTHON_BIN,
@@ -27,8 +26,6 @@ const {
   HEADY_QA_MODEL
 } = require("./config");
 const { sleep } = require("./helpers");
-
-const fsp = fs.promises;
 
 // Use relative path from src/utils/ai.js to backend/python_worker/process_data.py
 const PY_WORKER_SCRIPT = path.join(__dirname, "../../python_worker/process_data.py");

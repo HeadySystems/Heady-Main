@@ -1,16 +1,63 @@
 {
   "root": true,
-  "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint"],
+  "env": {
+    "node": true,
+    "es2022": true
+  },
   "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended"
+    "eslint:recommended"
   ],
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module"
+  },
+  "ignorePatterns": ["frontend/", "node_modules/", "desktop-overlay/src/"],
   "rules": {
+    "no-empty": ["error", { "allowEmptyCatch": true }],
+    "no-unused-vars": ["error", {
+      "argsIgnorePattern": "^_",
+      "varsIgnorePattern": "^_",
+      "caughtErrorsIgnorePattern": "^_"
+    }],
     "no-restricted-syntax": ["error", {
-      "selector": "Literal[value=/api.headysystems.com|127\.0\.0\.1/]",
-      "message": "Use internal.headyio.com or api.headyio.com instead of api.headysystems.com/api.headysystems.com"
+      "selector": "Literal[value=/api\\.headysystems\\.com|127\\.0\\.0\\.1/]",
+      "message": "Use internal.headyio.com or api.headyio.com instead of api.headysystems.com"
     }]
-  }
+  },
+  "overrides": [
+    {
+      "files": [
+        "tests/**/*.js",
+        "**/*.test.js",
+        "**/*.spec.js"
+      ],
+      "env": {
+        "jest": true,
+        "node": true
+      }
+    },
+    {
+      "files": [
+        "**/public/**/*.js",
+        "packages/widget/**/*.js",
+        "notebooks/**/*.js",
+        "packages/hc-browser/src/preload.js",
+        "src/heady-auth-client.js"
+      ],
+      "env": {
+        "browser": true,
+        "es2022": true
+      }
+    },
+    {
+      "files": [
+        "packages/heady-music/max-for-live/**/*.js"
+      ],
+      "rules": {
+        "no-undef": "off",
+        "no-unused-vars": "off"
+      }
+    }
+  ]
 }
 

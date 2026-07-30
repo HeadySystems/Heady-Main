@@ -16,10 +16,10 @@ const SECURITY_HEADERS = {
 };
 
 // CSP is report-only initially per the playbook
-const CSP_HEADER = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.headysystems.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'";
+const CSP_HEADER = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.headyio.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'";
 
 export default {
-  async fetch(request, env, ctx) {
+  async fetch(request, env, _ctx) {
     const url = new URL(request.url);
 
     // ── Health check ────────────────────────────────────────────

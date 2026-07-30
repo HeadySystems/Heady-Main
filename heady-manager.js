@@ -46,14 +46,32 @@ const { logger } = require(path.join(__dirname, "src", "structured_logger"));
 const shutdown = new GracefulShutdownManager({ timeout: 34000 });
 
 const PORT = Number(process.env.PORT || 3300);
-const HEADY_ADMIN_SCRIPT = process.env.HEADY_ADMIN_SCRIPT || path.join(__dirname, "src", "heady_project", "heady_conductor.py");
-const HEADY_PYTHON_BIN = process.env.HEADY_PYTHON_BIN || "python";
+const HEADY_CORS_ORIGINS = (process.env.HEADY_CORS_ORIGINS || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
 
 const app = express();
 app.use(shutdown.middleware());       // 503 during drain
 app.use(logger.requestLogger());      // Structured JSON request logging
 app.use(express.json({ limit: "50mb" }));
-app.use(cors());
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow server-to-server requests with no Origin header
+    if (!origin) return callback(null, true);
+    if (HEADY_CORS_ORIGINS.includes("*")) return callback(null, true);
+    if (HEADY_CORS_ORIGINS.length === 0) {
+      // No allowlist configured: permit in dev, deny in production
+      if (process.env.NODE_ENV !== "production") return callback(null, true);
+      return callback(null, false);
+    }
+    if (HEADY_CORS_ORIGINS.includes(origin)) return callback(null, true);
+    return callback(null, false);
+  },
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Heady-Api-Key"],
+  maxAge: 600,
+}));
 
 function readJsonFileSafe(filePath) {
   try {

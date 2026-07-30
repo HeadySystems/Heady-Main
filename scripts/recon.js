@@ -246,7 +246,7 @@ class HeadyRecon {
     /**
      * Get task type from pattern
      */
-    getTaskType(pattern, description) {
+    getTaskType(pattern, _description) {
         return this.taskTypes[pattern] || 'Task';
     }
 
@@ -270,7 +270,7 @@ class HeadyRecon {
         if (tasks.length === 0) return null;
         
         // Find highest priority task
-        const highestPriority = tasks.reduce((max, task) => 
+        const _highestPriority = tasks.reduce((max, task) => 
             task.priority === 'HIGH' ? task : max, tasks[0]
         );
         
