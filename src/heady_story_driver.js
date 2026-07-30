@@ -20,7 +20,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
+
 
 const STORY_PATH = '.heady-memory/story';
 const DECISION_LOG_PATH = '.heady-memory/decisions';
@@ -332,31 +332,31 @@ class StoryDriver {
 
   async applyRule(rule, options) {
     const ruleHandlers = {
-      safety_first: async (opts) => ({
+      safety_first: async (_opts) => ({
         success: true,
         action: 'safe_proceed',
         reason: 'Safety check passed',
         confidence: 0.95,
       }),
-      compliance_check: async (opts) => ({
+      compliance_check: async (_opts) => ({
         success: true,
         action: 'compliant_proceed',
         reason: 'Compliance verified',
         confidence: 0.9,
       }),
-      performance_optimize: async (opts) => ({
+      performance_optimize: async (_opts) => ({
         success: true,
         action: 'optimize_performance',
         reason: 'Performance path selected',
         confidence: 0.85,
       }),
-      usability_ensure: async (opts) => ({
+      usability_ensure: async (_opts) => ({
         success: true,
         action: 'user_friendly',
         reason: 'Usability considered',
         confidence: 0.85,
       }),
-      default_continue: async (opts) => ({
+      default_continue: async (_opts) => ({
         success: true,
         action: 'continue',
         reason: 'Default action',
@@ -438,7 +438,7 @@ class StoryDriver {
   async listStories(filters = {}) {
     const stories = [];
     
-    for (const [id, story] of this.activeStories) {
+    for (const story of this.activeStories.values()) {
       if (this.matchesFilters(story, filters)) {
         stories.push(story);
       }

@@ -18,42 +18,9 @@ const fs = require('fs');
 
 console.log('\n🔨 Heady AutoBuild - Sacred Geometry Build System with Codemap Optimization\n');
 
-<<<<<<< C:/Users/erich/Heady/src/hc_autobuild.js
-<<<<<<< C:/Users/erich/Heady/src/hc_autobuild.js
-<<<<<<< C:/Users/erich/Heady/src/hc_autobuild.js
-<<<<<<< C:/Users/erich/Heady/src/hc_autobuild.js
-<<<<<<< C:/Users/erich/Heady/src/hc_autobuild.js
-<<<<<<< C:/Users/erich/Heady/src/hc_autobuild.js
-<<<<<<< C:/Users/erich/Heady/src/hc_autobuild.js
-<<<<<<< C:/Users/erich/Heady/src/hc_autobuild.js
-<<<<<<< C:/Users/erich/Heady/src/hc_autobuild.js
-<<<<<<< C:/Users/erich/Heady/src/hc_autobuild.js
-<<<<<<< C:/Users/erich/Heady/src/hc_autobuild.js
-<<<<<<< C:/Users/erich/Heady/src/hc_autobuild.js
-<<<<<<< C:/Users/erich/Heady/src/hc_autobuild.js
-<<<<<<< C:/Users/erich/Heady/src/hc_autobuild.js
-<<<<<<< C:/Users/erich/Heady/src/hc_autobuild.js
-<<<<<<< C:/Users/erich/Heady/src/hc_autobuild.js
-<<<<<<< C:/Users/erich/Heady/src/hc_autobuild.js
-=======
->>>>>>> C:/Users/erich/Heady/src/hc_autobuild.js.undo_before
-// Worktree base path (Windsurf worktree mode)
-const WORKTREE_BASE = 'C:\\Users\\erich\\.windsurf\\worktrees';
-=======
 const WORKTREE_BASE = (() => {
   const explicit = process.env.WINDSURF_WORKTREES || process.env.HEADY_WORKTREES;
   if (explicit && typeof explicit === 'string' && explicit.trim()) return explicit.trim();
->>>>>>> C:/Users/erich/.windsurf/worktrees/Heady/Heady-316a4fbf/src/hc_autobuild.js
-=======
-const WORKTREE_BASE = (() => {
-  const explicit = process.env.WINDSURF_WORKTREES || process.env.HEADY_WORKTREES;
-  if (explicit && typeof explicit === 'string' && explicit.trim()) return explicit.trim();
->>>>>>> C:/Users/erich/.windsurf/worktrees/Heady/Heady-316a4fbf/src/hc_autobuild.js
-=======
-const WORKTREE_BASE = (() => {
-  const explicit = process.env.WINDSURF_WORKTREES || process.env.HEADY_WORKTREES;
-  if (explicit && typeof explicit === 'string' && explicit.trim()) return explicit.trim();
->>>>>>> C:/Users/erich/.windsurf/worktrees/Heady/Heady-316a4fbf/src/hc_autobuild.js
 
   const userProfile = process.env.USERPROFILE || process.env.HOME;
   if (!userProfile) return null;

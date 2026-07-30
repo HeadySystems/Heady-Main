@@ -1,5 +1,4 @@
 <!-- HEADY_BRAND:BEGIN -->
-<<<<<<< HEAD
 <!-- HEADY SYSTEMS :: SACRED GEOMETRY -->
 <!-- FILE: .windsurf/workflows/branding-protocol.md -->
 <!-- LAYER: root -->
@@ -11,63 +10,6 @@
 <!--        |_| |_||_____/_/   \_\____/   |_|   -->
 <!--  -->
 <!--    Sacred Geometry :: Organic Systems :: Breathing Interfaces -->
-<!-- HEADY_BRAND:END -->
-
----
-description: Heady ASCII Branding Protocol (retrofit + enforce)
----
-
-# Heady ASCII Branding Protocol
-
-## Goal
-Ensure eligible source files are branded with a consistent, visually exciting ASCII header.
-
-## What gets branded
-- JavaScript/TypeScript: `.js`, `.jsx`, `.ts`, `.tsx`, `.cjs`, `.mjs`
-- Python: `.py`
-- PowerShell: `.ps1`
-- Shell: `.sh`
-- Markdown: `.md`
-- YAML: `.yml`, `.yaml`
-- Config (hash-comment style): `Dockerfile`, `.env*`, `.gitignore`, `.gitattributes`, `requirements.txt`, `docker-compose*.yml/.yaml`, `render.yml/.yaml`
-
-## What is skipped
-- Files that cannot safely contain comments: `.json`, `.lock`, `.ipynb`
-- Generated/minified: `*.min.js`, `*.map`
-- Large files (> 1MB)
-- Ignored/build/vendor dirs: `.git/`, `node_modules/`, `dist/`, `build/`, `venv/`, `.venv/`, `__pycache__/`, `.pytest_cache/`
-
-## One-time retrofit
-1. Run:
-   - `npm run brand:fix`
-
-## Enforce going forward
-1. Install Git hooks path (local repo setting):
-   - `npm run hooks:install`
-2. Ensure CI passes (GitHub Action):
-   - Workflow: `.github/workflows/brand-headers.yml`
-
-## Developer usage
-- Check (no writes): `npm run brand:check`
-- Fix in-place: `npm run brand:fix`
-
-## Notes
-- Branding is idempotent: existing branded blocks are updated/replaced, not duplicated.
-- Python shebang/encoding lines are preserved above the branding block.
-=======
-<!-- ╔══════════════════════════════════════════════════════════════════╗ -->
-<!-- ║  █╗  █╗███████╗ █████╗ ██████╗ █╗   █╗                     ║ -->
-<!-- ║  █║  █║█╔════╝█╔══█╗█╔══█╗╚█╗ █╔╝                     ║ -->
-<!-- ║  ███████║█████╗  ███████║█║  █║ ╚████╔╝                      ║ -->
-<!-- ║  █╔══█║█╔══╝  █╔══█║█║  █║  ╚█╔╝                       ║ -->
-<!-- ║  █║  █║███████╗█║  █║██████╔╝   █║                        ║ -->
-<!-- ║  ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝    ╚═╝                        ║ -->
-<!-- ║                                                                  ║ -->
-<!-- ║  ∞ SACRED GEOMETRY ∞  Organic Systems · Breathing Interfaces    ║ -->
-<!-- ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║ -->
-<!-- ║  FILE: .windsurf/workflows/branding-protocol.md                   ║ -->
-<!-- ║  LAYER: root                                                      ║ -->
-<!-- ╚══════════════════════════════════════════════════════════════════╝ -->
 <!-- HEADY_BRAND:END -->
 
 ---
@@ -167,4 +109,3 @@ Runs `npm run brand:check` on every push/PR to `main`.
 - The branding script (`scripts/brand_headers.js`) outputs a colorful ANSI report with the HEADY banner.
 - The `heady-manager.js` server prints a branded startup banner on boot.
 - Standards reference: `.heady/branding.md`
->>>>>>> origin/main

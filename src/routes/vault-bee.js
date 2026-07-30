@@ -49,7 +49,7 @@ function decrypt(data) {
 function loadVault() {
   try {
     if (fs.existsSync(VAULT_FILE)) return JSON.parse(fs.readFileSync(VAULT_FILE, "utf8"));
-  } catch (_) {}
+  } catch (_) { /* ignore missing vault file */ }
   return {};
 }
 
@@ -57,7 +57,7 @@ function saveVault(vault) {
   try {
     fs.mkdirSync(VAULT_DIR, { recursive: true });
     fs.writeFileSync(VAULT_FILE, JSON.stringify(vault, null, 2), "utf8");
-  } catch (_) {}
+  } catch (_) { /* ignore vault write errors */ }
 }
 
 router.get("/status", (req, res) => {

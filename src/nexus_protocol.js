@@ -24,8 +24,7 @@
  */
 
 const crypto = require('crypto');
-const fs = require('fs');
-const path = require('path');
+
 
 class NexusProtocol {
     constructor(config = {}) {
@@ -89,13 +88,6 @@ class NexusProtocol {
     }
 
     logRouting(traceId, source, target) {
-        const logEntry = {
-            traceId,
-            source,
-            target,
-            timestamp: new Date().toISOString(),
-            protocol: 'Nexus/1.0'
-        };
         // In production, this writes to the Heady Audit Log
         console.log(`[NEXUS ROUTE] ${traceId}: ${source} -> ${target}`);
     }

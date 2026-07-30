@@ -98,7 +98,7 @@ class HCBrain extends EventEmitter {
     awareness.components.patternEngine = !!this.patternEngine;
     awareness.components.supervisor = !!this.supervisor;
     awareness.components.selfCritique = !!this.selfCritique;
-    if (this.resourceManager) try { awareness.resourceSnapshot = this.resourceManager.getSnapshot(); } catch (_) {}
+    if (this.resourceManager) try { awareness.resourceSnapshot = this.resourceManager.getSnapshot(); } catch (_) { /* ignore snapshot errors */ }
     return awareness;
   }
 

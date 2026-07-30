@@ -1,0 +1,14 @@
+frontend/
+backend/
+desktop-overlay/
+packages/
+services/heady-auth/public/
+notebooks/
+src/heady-auth-client.js
+src/heady-auth-service.mjs
+node_modules/
+dist/
+build/
+coverage/
+workers/
+HeadyAcademy/

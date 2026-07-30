@@ -46,7 +46,9 @@ const { logger } = require(path.join(__dirname, "src", "structured_logger"));
 const shutdown = new GracefulShutdownManager({ timeout: 34000 });
 
 const PORT = Number(process.env.PORT || 3300);
+// eslint-disable-next-line no-unused-vars
 const HEADY_ADMIN_SCRIPT = process.env.HEADY_ADMIN_SCRIPT || path.join(__dirname, "src", "heady_project", "heady_conductor.py");
+// eslint-disable-next-line no-unused-vars
 const HEADY_PYTHON_BIN = process.env.HEADY_PYTHON_BIN || "python";
 
 const app = express();
@@ -59,7 +61,8 @@ function readJsonFileSafe(filePath) {
   try {
     const raw = fs.readFileSync(filePath, "utf8");
     return JSON.parse(raw);
-  } catch {
+  } catch (err) {
+    logger.warn("Failed to read JSON file", { filePath, error: err.message });
     return null;
   }
 }
@@ -97,6 +100,27 @@ app.get("/api/maid/inventory", (req, res) => {
   res.json(inventory);
 });
 
+const CONDUCTOR_TIMEOUT_MS = 30000; // 30s subprocess timeout
+const MAX_INPUT_LENGTH = 10000; // Max length for user-supplied string parameters
+
+/**
+ * Validate user-supplied string input for conductor arguments.
+ * Rejects null bytes, control characters, and excessively long strings.
+ */
+function validateConductorInput(value, fieldName) {
+  if (typeof value !== "string") {
+    throw new Error(`${fieldName} must be a string`);
+  }
+  if (value.length > MAX_INPUT_LENGTH) {
+    throw new Error(`${fieldName} exceeds maximum length of ${MAX_INPUT_LENGTH} characters`);
+  }
+  // eslint-disable-next-line no-control-regex
+  if (/[\x00-\x08\x0e-\x1f]/.test(value)) {
+    throw new Error(`${fieldName} contains invalid control characters`);
+  }
+  return value;
+}
+
 // HeadyConductor API Endpoints
 app.post("/api/nexus/route", async (req, res) => {
   try {
@@ -112,6 +136,9 @@ app.post("/api/conductor/orchestrate", async (req, res) => {
     const { request } = req.body;
     if (!request) {
       return res.status(400).json({ error: "Request parameter required" });
+    }
+    try { validateConductorInput(request, "request"); } catch (e) {
+      return res.status(400).json({ error: e.message });
     }
 
     const result = await runPythonConductor(["--request", request]);
@@ -145,6 +172,9 @@ app.get("/api/conductor/query", async (req, res) => {
     if (!q) {
       return res.status(400).json({ error: "Query parameter 'q' required" });
     }
+    try { validateConductorInput(q, "q"); } catch (e) {
+      return res.status(400).json({ error: e.message });
+    }
 
     const result = await runPythonConductor(["--query", q]);
     res.json(result);
@@ -158,6 +188,9 @@ app.post("/api/conductor/workflow", async (req, res) => {
     const { workflow } = req.body;
     if (!workflow) {
       return res.status(400).json({ error: "Workflow parameter required" });
+    }
+    try { validateConductorInput(workflow, "workflow"); } catch (e) {
+      return res.status(400).json({ error: e.message });
     }
 
     const result = await runPythonConductor(["--workflow", workflow]);
@@ -173,6 +206,9 @@ app.post("/api/conductor/node", async (req, res) => {
     if (!node) {
       return res.status(400).json({ error: "Node parameter required" });
     }
+    try { validateConductorInput(node, "node"); } catch (e) {
+      return res.status(400).json({ error: e.message });
+    }
 
     const result = await runPythonConductor(["--node", node]);
     res.json(result);
@@ -181,42 +217,69 @@ app.post("/api/conductor/node", async (req, res) => {
   }
 });
 
-// Helper function to run Python HeadyConductor
+// Helper function to run Python HeadyConductor with timeout and safety limits
 function runPythonConductor(args) {
   return new Promise((resolve, reject) => {
     const conductorPath = path.join(__dirname, "HeadyAcademy", "HeadyConductor.py");
     const pythonBin = process.env.HEADY_PYTHON_BIN || "python";
+    const maxOutputBytes = 5 * 1024 * 1024; // 5MB output limit
     
     const proc = spawn(pythonBin, [conductorPath, ...args], {
       env: { ...process.env, PYTHONIOENCODING: "utf-8" }
     });
     let stdout = "";
     let stderr = "";
+    let killed = false;
+
+    // Enforce subprocess timeout
+    const timer = setTimeout(() => {
+      killed = true;
+      proc.kill("SIGTERM");
+      setTimeout(() => {
+        try { proc.kill("SIGKILL"); } catch (_e) { /* ESRCH: process already exited after SIGTERM */ }
+      }, 2000);
+    }, CONDUCTOR_TIMEOUT_MS);
 
     proc.stdout.on("data", (data) => {
       stdout += data.toString();
+      if (stdout.length > maxOutputBytes) {
+        killed = true;
+        proc.kill("SIGTERM");
+      }
     });
 
     proc.stderr.on("data", (data) => {
       stderr += data.toString();
+      if (stderr.length > maxOutputBytes) {
+        killed = true;
+        proc.kill("SIGTERM");
+      }
     });
 
     proc.on("close", (code) => {
-      if (code !== 0) {
+      clearTimeout(timer);
+      if (killed) {
+        reject(new Error("HeadyConductor timed out or exceeded output limits"));
+      } else if (code !== 0) {
         reject(new Error(`HeadyConductor exited with code ${code}: ${stderr}`));
       } else {
         try {
-          // Extract JSON from output (last JSON object)
+          // Extract the last top-level JSON object from stdout
           const jsonMatch = stdout.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
             resolve(JSON.parse(jsonMatch[0]));
           } else {
             resolve({ output: stdout, stderr });
           }
-        } catch (e) {
+        } catch (_e) {
           resolve({ output: stdout, stderr });
         }
       }
+    });
+
+    proc.on("error", (err) => {
+      clearTimeout(timer);
+      reject(new Error(`Failed to start HeadyConductor: ${err.message}`));
     });
   });
 }

@@ -246,7 +246,7 @@ class HeadyRecon {
     /**
      * Get task type from pattern
      */
-    getTaskType(pattern, description) {
+    getTaskType(pattern, _description) {
         return this.taskTypes[pattern] || 'Task';
     }
 
@@ -268,11 +268,6 @@ class HeadyRecon {
      */
     predictCheckpoint(tasks) {
         if (tasks.length === 0) return null;
-        
-        // Find highest priority task
-        const highestPriority = tasks.reduce((max, task) => 
-            task.priority === 'HIGH' ? task : max, tasks[0]
-        );
         
         // Find matching checkpoint
         for (const checkpoint of this.predictedCheckpoints) {
