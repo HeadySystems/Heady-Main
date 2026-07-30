@@ -65,8 +65,6 @@ export async function markOrigin(redis, entityId, source) {
 }
 
 // ── φ-Fibonacci backoff retry ───────────────────────────────────────
-const PHI = 1.618033988749895;
-
 export async function withFibonacciRetry(fn, { maxRetries = 5, baseDelayMs = 1000 } = {}) {
   let prev = 0, curr = baseDelayMs;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {

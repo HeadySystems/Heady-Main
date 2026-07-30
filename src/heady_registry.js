@@ -19,7 +19,6 @@
  */
 
 const fs = require('fs');
-const path = require('path');
 
 const REGISTRY_PATH = 'heady-registry.json';
 

@@ -22,10 +22,6 @@ const { runAgentUpstreamScan } = require('./agent_scanner');
 // Normally we'd fetch this via API, but we'll instantiate it for pre-commit context
 const nodeManager = new AINodeManager();
 
-// Color codes
-const C_GREEN = "\x1b[32m";
-const C_RESET = "\x1b[0m";
-
 async function runAgentScan() {
   console.log('\n--- 0. UPSTREAM AGENT SCAN ---');
   const result = runAgentUpstreamScan();

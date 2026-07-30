@@ -74,11 +74,11 @@ class GracefulShutdownManager {
     if (this.isShuttingDown) return;
     this.isShuttingDown = true;
 
-    console.log(`[SHUTDOWN] ${signal} received. Starting graceful shutdown (${this.shutdownTimeout}ms timeout)...`);
+    process.stdout.write(JSON.stringify({ severity: 'INFO', message: `[SHUTDOWN] ${signal} received. Starting graceful shutdown (${this.shutdownTimeout}ms timeout)...` }) + '\n');
 
     // Hard deadline — force exit after timeout
     const forceTimer = setTimeout(() => {
-      console.error('[SHUTDOWN] Timeout exceeded — forcing exit.');
+      process.stderr.write(JSON.stringify({ severity: 'CRITICAL', message: '[SHUTDOWN] Timeout exceeded — forcing exit.' }) + '\n');
       process.exit(1);
     }, this.shutdownTimeout);
     forceTimer.unref();
@@ -87,29 +87,29 @@ class GracefulShutdownManager {
       // Step 1: Stop accepting new connections
       if (this._server) {
         await new Promise((resolve) => this._server.close(resolve));
-        console.log('[SHUTDOWN] Server closed to new connections.');
+        process.stdout.write(JSON.stringify({ severity: 'INFO', message: '[SHUTDOWN] Server closed to new connections.' }) + '\n');
       }
 
       // Step 2: Destroy lingering keep-alive connections
       for (const conn of this.connections) {
         conn.destroy();
       }
-      console.log(`[SHUTDOWN] ${this.connections.size} lingering connections closed.`);
+      process.stdout.write(JSON.stringify({ severity: 'INFO', message: `[SHUTDOWN] ${this.connections.size} lingering connections closed.` }) + '\n');
 
       // Step 3: Run cleanup handlers in reverse registration order
       for (const { name, handler } of [...this.cleanupHandlers].reverse()) {
         try {
           await handler();
-          console.log(`[SHUTDOWN] ✓ ${name} cleaned up.`);
+          process.stdout.write(JSON.stringify({ severity: 'INFO', message: `[SHUTDOWN] ✓ ${name} cleaned up.` }) + '\n');
         } catch (err) {
-          console.error(`[SHUTDOWN] ✗ ${name} cleanup failed:`, err.message);
+          process.stderr.write(JSON.stringify({ severity: 'ERROR', message: `[SHUTDOWN] ✗ ${name} cleanup failed: ${err.message}` }) + '\n');
         }
       }
 
-      console.log('[SHUTDOWN] Graceful shutdown complete.');
+      process.stdout.write(JSON.stringify({ severity: 'INFO', message: '[SHUTDOWN] Graceful shutdown complete.' }) + '\n');
       process.exit(0);
     } catch (err) {
-      console.error('[SHUTDOWN] Error during shutdown:', err.message);
+      process.stderr.write(JSON.stringify({ severity: 'ERROR', message: `[SHUTDOWN] Error during shutdown: ${err.message}` }) + '\n');
       process.exit(1);
     }
   }

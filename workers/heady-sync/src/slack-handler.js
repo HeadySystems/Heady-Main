@@ -19,7 +19,7 @@ export async function handleSlashCommand(request, env, ctx) {
   const text = params.get('text')?.trim() ?? '';
   const responseUrl = params.get('response_url');
   const channelId = params.get('channel_id');
-  const userId = params.get('user_id');
+  // user_id available as params.get("user_id") if needed for future use
 
   if (command === '/linear-create') {
     if (!text) {

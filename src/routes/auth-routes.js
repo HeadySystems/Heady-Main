@@ -61,7 +61,13 @@ router.get("/status", (req, res) => {
 router.post("/login", (req, res) => {
   const { apiKey, identity } = req.body;
   const expectedKey = process.env.HEADY_API_KEY;
-  if (expectedKey && apiKey !== expectedKey) return res.status(401).json({ error: "Invalid API key" });
+  if (expectedKey) {
+    // Use timing-safe comparison to prevent timing-based key enumeration
+    const bufA = Buffer.from(String(apiKey || ""));
+    const bufB = Buffer.from(expectedKey);
+    const match = bufA.length === bufB.length && crypto.timingSafeEqual(bufA, bufB);
+    if (!match) return res.status(401).json({ error: "Invalid API key" });
+  }
   const token = generateToken(identity || "default");
   res.json({ ok: true, token, expiresIn: `${TOKEN_TTL_MS / 3600000}h`, ts: new Date().toISOString() });
 });

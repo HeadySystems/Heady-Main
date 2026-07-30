@@ -46,14 +46,26 @@ const { logger } = require(path.join(__dirname, "src", "structured_logger"));
 const shutdown = new GracefulShutdownManager({ timeout: 34000 });
 
 const PORT = Number(process.env.PORT || 3300);
-const HEADY_ADMIN_SCRIPT = process.env.HEADY_ADMIN_SCRIPT || path.join(__dirname, "src", "heady_project", "heady_conductor.py");
-const HEADY_PYTHON_BIN = process.env.HEADY_PYTHON_BIN || "python";
 
 const app = express();
 app.use(shutdown.middleware());       // 503 during drain
 app.use(logger.requestLogger());      // Structured JSON request logging
-app.use(express.json({ limit: "50mb" }));
-app.use(cors());
+app.use(express.json({ limit: "10mb" }));
+
+// Restrict CORS to known origins; fall back to same-origin in production
+const ALLOWED_ORIGINS = process.env.CORS_ALLOWED_ORIGINS
+  ? process.env.CORS_ALLOWED_ORIGINS.split(",").map(o => o.trim())
+  : ["http://localhost:3000", "http://localhost:3300"];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g., curl, server-to-server)
+    if (!origin) return callback(null, true);
+    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS policy: origin '${origin}' not allowed`));
+  },
+  credentials: true,
+}));
 
 function readJsonFileSafe(filePath) {
   try {
@@ -97,6 +109,16 @@ app.get("/api/maid/inventory", (req, res) => {
   res.json(inventory);
 });
 
+// Input validation helper — rejects strings with shell-metacharacters or flag-injection patterns
+function validateConductorInput(value, fieldName) {
+  if (typeof value !== "string") throw new Error(`${fieldName} must be a string`);
+  if (value.length > 1000) throw new Error(`${fieldName} exceeds maximum length of 1000 characters`);
+  // Reject values that start with "-" (would be interpreted as CLI flags)
+  if (value.startsWith("-")) throw new Error(`${fieldName} must not start with a hyphen`);
+  // Reject shell metacharacters that could be used for injection
+  if (/[;&|`$<>\\]/.test(value)) throw new Error(`${fieldName} contains disallowed characters`);
+}
+
 // HeadyConductor API Endpoints
 app.post("/api/nexus/route", async (req, res) => {
   try {
@@ -113,7 +135,7 @@ app.post("/api/conductor/orchestrate", async (req, res) => {
     if (!request) {
       return res.status(400).json({ error: "Request parameter required" });
     }
-
+    validateConductorInput(request, "request");
     const result = await runPythonConductor(["--request", request]);
     res.json(result);
   } catch (error) {
@@ -145,7 +167,7 @@ app.get("/api/conductor/query", async (req, res) => {
     if (!q) {
       return res.status(400).json({ error: "Query parameter 'q' required" });
     }
-
+    validateConductorInput(q, "q");
     const result = await runPythonConductor(["--query", q]);
     res.json(result);
   } catch (error) {
@@ -159,7 +181,7 @@ app.post("/api/conductor/workflow", async (req, res) => {
     if (!workflow) {
       return res.status(400).json({ error: "Workflow parameter required" });
     }
-
+    validateConductorInput(workflow, "workflow");
     const result = await runPythonConductor(["--workflow", workflow]);
     res.json(result);
   } catch (error) {
@@ -173,7 +195,7 @@ app.post("/api/conductor/node", async (req, res) => {
     if (!node) {
       return res.status(400).json({ error: "Node parameter required" });
     }
-
+    validateConductorInput(node, "node");
     const result = await runPythonConductor(["--node", node]);
     res.json(result);
   } catch (error) {

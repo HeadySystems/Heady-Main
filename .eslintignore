@@ -1,0 +1,18 @@
+node_modules/
+frontend/
+backend/
+dist/
+build/
+**/build/
+coverage/
+# Desktop overlay has its own build/lint setup
+desktop-overlay/
+# Browser/ESM-only packages with their own tooling
+packages/
+# Service-specific public assets (browser JS, not Node)
+services/heady-auth/public/
+# Notebooks (prototype/experimental)
+notebooks/
+# ESM client libraries (browser-targeted, not Node.js modules)
+src/heady-auth-client.js
+src/heady-auth-service.mjs

@@ -35,7 +35,7 @@ function runAgentUpstreamScan() {
         const cleanBranch = branch.replace('* ', '');
         try {
           // If git merge-base is the branch itself, it means it's fully merged, otherwise it's unmerged
-          const isMerged = execSync(`git branch --merged HEAD | grep -q "${cleanBranch.split('/').pop()}"`, { stdio: 'pipe' });
+          execSync(`git branch --merged HEAD | grep -q "${cleanBranch.split('/').pop()}"`, { stdio: 'pipe' });
         } catch (e) {
           // grep returns 1 if not found -> unmerged
           findings.push(`  -> Unmerged Agent Branch: ${cleanBranch}`);

@@ -34,12 +34,12 @@ services:
       - key: ADMIN_TOKEN
         fromSecret: ADMIN_TOKEN
       - key: REMOTE_GPU_HOST
-        value: "${REMOTE_GPU_HOST}"
+        fromSecret: REMOTE_GPU_HOST
       - key: REMOTE_GPU_PORT
-        value: "${REMOTE_GPU_PORT}"
+        fromSecret: REMOTE_GPU_PORT
       - key: GPU_MEMORY_LIMIT
-        value: "${GPU_MEMORY_LIMIT}"
+        fromSecret: GPU_MEMORY_LIMIT
       - key: ENABLE_GPUDIRECT
-        value: "${ENABLE_GPUDIRECT}"
+        fromSecret: ENABLE_GPUDIRECT
       - key: HF_TOKEN
-        value: "${HF_TOKEN}"
+        fromSecret: HF_TOKEN
